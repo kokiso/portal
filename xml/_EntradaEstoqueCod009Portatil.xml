@@ -1,0 +1,391 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Orlando Polonio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-12-11T17:54:55Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="35" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="85.5"/>
+   <Column ss:Width="63"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:Width="52.5"/>
+   <Column ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:Width="57"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">151818647</Data></Cell>
+    <Cell><Data ss:Type="Number">268135758</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">116317111</Data></Cell>
+    <Cell><Data ss:Type="Number">265328547</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">149011436</Data></Cell>
+    <Cell><Data ss:Type="Number">288070466</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">139059030</Data></Cell>
+    <Cell><Data ss:Type="Number">246457999</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">107398969</Data></Cell>
+    <Cell><Data ss:Type="Number">258333522</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">150934553</Data></Cell>
+    <Cell><Data ss:Type="Number">304465179</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">153530626</Data></Cell>
+    <Cell><Data ss:Type="Number">241013208</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">87482582</Data></Cell>
+    <Cell><Data ss:Type="Number">235696487</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">148213905</Data></Cell>
+    <Cell><Data ss:Type="Number">253575720</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">105361815</Data></Cell>
+    <Cell><Data ss:Type="Number">285742544</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">180380729</Data></Cell>
+    <Cell><Data ss:Type="Number">244988292</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">64607563</Data></Cell>
+    <Cell><Data ss:Type="Number">220345595</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">155738032</Data></Cell>
+    <Cell><Data ss:Type="Number">279867908</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">124129876</Data></Cell>
+    <Cell><Data ss:Type="Number">258061020</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">133931144</Data></Cell>
+    <Cell><Data ss:Type="Number">211301476</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">77370332</Data></Cell>
+    <Cell><Data ss:Type="Number">167750684</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">90380352</Data></Cell>
+    <Cell><Data ss:Type="Number">260200340</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">169819988</Data></Cell>
+    <Cell><Data ss:Type="Number">440204211</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">270384223</Data></Cell>
+    <Cell><Data ss:Type="Number">537236446</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">266852223</Data></Cell>
+    <Cell><Data ss:Type="Number">527656456</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">260804233</Data></Cell>
+    <Cell><Data ss:Type="Number">487206502</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">226402269</Data></Cell>
+    <Cell><Data ss:Type="Number">470527908</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">244125639</Data></Cell>
+    <Cell><Data ss:Type="Number">518511621</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">274385982</Data></Cell>
+    <Cell><Data ss:Type="Number">507320487</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">232934505</Data></Cell>
+    <Cell><Data ss:Type="Number">459200197</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">226265692</Data></Cell>
+    <Cell><Data ss:Type="Number">476761093</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">250495401</Data></Cell>
+    <Cell><Data ss:Type="Number">515505053</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">265009652</Data></Cell>
+    <Cell><Data ss:Type="Number">511305292</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">246295640</Data></Cell>
+    <Cell><Data ss:Type="Number">480392652</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">234097012</Data></Cell>
+    <Cell><Data ss:Type="Number">483595180</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">249498168</Data></Cell>
+    <Cell><Data ss:Type="Number">487410382</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">237912214</Data></Cell>
+    <Cell><Data ss:Type="Number">461513860</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">223601646</Data></Cell>
+    <Cell><Data ss:Type="Number">426828310</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="Number">203226664</Data></Cell>
+    <Cell><Data ss:Type="Number">203226664</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveCol>7</ActiveCol>
+     <RangeSelection>C8</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

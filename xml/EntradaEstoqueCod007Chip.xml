@@ -1,0 +1,3688 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Orlando Polonio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-11-25T12:10:42Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Alignment ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+   </Borders>
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="9" ss:Color="#808080"/>
+   <Interior ss:Color="#7FFFD4" ss:Pattern="Solid"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="400" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="75.75"/>
+   <Column ss:Width="63"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:Width="46.5"/>
+   <Column ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:Width="57"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53578088</Data></Cell>
+    <Cell><Data ss:Type="Number">54451509</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">134182</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">17888935</Data></Cell>
+    <Cell><Data ss:Type="Number">18762356</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">135370</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">39204142</Data></Cell>
+    <Cell><Data ss:Type="Number">40077563</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">136558</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">16234787</Data></Cell>
+    <Cell><Data ss:Type="Number">17108208</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">137746</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50659977</Data></Cell>
+    <Cell><Data ss:Type="Number">51533398</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">138934</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21605721</Data></Cell>
+    <Cell><Data ss:Type="Number">22479142</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">140122</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51938187</Data></Cell>
+    <Cell><Data ss:Type="Number">52811608</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">141310</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28122465</Data></Cell>
+    <Cell><Data ss:Type="Number">28995886</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">168632</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">36535360</Data></Cell>
+    <Cell><Data ss:Type="Number">37408781</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">251091</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43023869</Data></Cell>
+    <Cell><Data ss:Type="Number">43897290</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">267634</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46949277</Data></Cell>
+    <Cell><Data ss:Type="Number">47822698</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">188046</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30852829</Data></Cell>
+    <Cell><Data ss:Type="Number">31726250</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">233779</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20779320</Data></Cell>
+    <Cell><Data ss:Type="Number">21652741</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">369857</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">27574117</Data></Cell>
+    <Cell><Data ss:Type="Number">28447538</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">458704</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33558251</Data></Cell>
+    <Cell><Data ss:Type="Number">34431672</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">401424</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35415424</Data></Cell>
+    <Cell><Data ss:Type="Number">36288845</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">3665771</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32845841</Data></Cell>
+    <Cell><Data ss:Type="Number">33719262</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">13235804</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25024190</Data></Cell>
+    <Cell><Data ss:Type="Number">25897611</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">13036840</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">19471220</Data></Cell>
+    <Cell><Data ss:Type="Number">20344641</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58222606</Data></Cell>
+    <Cell><Data ss:Type="Number">59096027</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34473411</Data></Cell>
+    <Cell><Data ss:Type="Number">35346832</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37961095</Data></Cell>
+    <Cell><Data ss:Type="Number">38834516</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">61401552</Data></Cell>
+    <Cell><Data ss:Type="Number">62274973</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23159805</Data></Cell>
+    <Cell><Data ss:Type="Number">24033226</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60109865</Data></Cell>
+    <Cell><Data ss:Type="Number">60983286</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53323169</Data></Cell>
+    <Cell><Data ss:Type="Number">54196590</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30802753</Data></Cell>
+    <Cell><Data ss:Type="Number">31676174</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44729642</Data></Cell>
+    <Cell><Data ss:Type="Number">45603063</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24851072</Data></Cell>
+    <Cell><Data ss:Type="Number">25724493</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29197982</Data></Cell>
+    <Cell><Data ss:Type="Number">30071403</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">39325227</Data></Cell>
+    <Cell><Data ss:Type="Number">40198648</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50804653</Data></Cell>
+    <Cell><Data ss:Type="Number">51678074</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26899075</Data></Cell>
+    <Cell><Data ss:Type="Number">27772496</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29023073</Data></Cell>
+    <Cell><Data ss:Type="Number">29896494</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35061174</Data></Cell>
+    <Cell><Data ss:Type="Number">35934595</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31986601</Data></Cell>
+    <Cell><Data ss:Type="Number">32860022</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54689011</Data></Cell>
+    <Cell><Data ss:Type="Number">55562432</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28161686</Data></Cell>
+    <Cell><Data ss:Type="Number">29035107</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33035062</Data></Cell>
+    <Cell><Data ss:Type="Number">33908483</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55260117</Data></Cell>
+    <Cell><Data ss:Type="Number">56133538</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38556549</Data></Cell>
+    <Cell><Data ss:Type="Number">39429970</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28859630</Data></Cell>
+    <Cell><Data ss:Type="Number">29733051</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42332667</Data></Cell>
+    <Cell><Data ss:Type="Number">43206088</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48157621</Data></Cell>
+    <Cell><Data ss:Type="Number">49031042</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25058426</Data></Cell>
+    <Cell><Data ss:Type="Number">25931847</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">22140614</Data></Cell>
+    <Cell><Data ss:Type="Number">23014035</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48731606</Data></Cell>
+    <Cell><Data ss:Type="Number">49605027</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60670244</Data></Cell>
+    <Cell><Data ss:Type="Number">61543665</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33036728</Data></Cell>
+    <Cell><Data ss:Type="Number">33910149</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35470143</Data></Cell>
+    <Cell><Data ss:Type="Number">36343564</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52307740</Data></Cell>
+    <Cell><Data ss:Type="Number">53181161</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38732927</Data></Cell>
+    <Cell><Data ss:Type="Number">39606348</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">22845992</Data></Cell>
+    <Cell><Data ss:Type="Number">23719413</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18293889</Data></Cell>
+    <Cell><Data ss:Type="Number">19167310</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57153158</Data></Cell>
+    <Cell><Data ss:Type="Number">58026579</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60452730</Data></Cell>
+    <Cell><Data ss:Type="Number">61326151</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">41401738</Data></Cell>
+    <Cell><Data ss:Type="Number">42275159</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">17222481</Data></Cell>
+    <Cell><Data ss:Type="Number">18095902</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18746179</Data></Cell>
+    <Cell><Data ss:Type="Number">19619600</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">19315518</Data></Cell>
+    <Cell><Data ss:Type="Number">20188939</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31201606</Data></Cell>
+    <Cell><Data ss:Type="Number">32075027</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23233771</Data></Cell>
+    <Cell><Data ss:Type="Number">24107192</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">40781592</Data></Cell>
+    <Cell><Data ss:Type="Number">41655013</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35682575</Data></Cell>
+    <Cell><Data ss:Type="Number">36555996</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">61239155</Data></Cell>
+    <Cell><Data ss:Type="Number">62112576</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58621734</Data></Cell>
+    <Cell><Data ss:Type="Number">59495155</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51256690</Data></Cell>
+    <Cell><Data ss:Type="Number">52130111</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30740893</Data></Cell>
+    <Cell><Data ss:Type="Number">31614314</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32026006</Data></Cell>
+    <Cell><Data ss:Type="Number">32899427</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">22966305</Data></Cell>
+    <Cell><Data ss:Type="Number">23839726</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">16382725</Data></Cell>
+    <Cell><Data ss:Type="Number">17256146</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33411582</Data></Cell>
+    <Cell><Data ss:Type="Number">34285003</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59146317</Data></Cell>
+    <Cell><Data ss:Type="Number">60019738</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21011786</Data></Cell>
+    <Cell><Data ss:Type="Number">21885207</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49608682</Data></Cell>
+    <Cell><Data ss:Type="Number">50482103</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25668709</Data></Cell>
+    <Cell><Data ss:Type="Number">26542130</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26619863</Data></Cell>
+    <Cell><Data ss:Type="Number">27493284</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42008430</Data></Cell>
+    <Cell><Data ss:Type="Number">42881851</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">19695060</Data></Cell>
+    <Cell><Data ss:Type="Number">20568481</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43002521</Data></Cell>
+    <Cell><Data ss:Type="Number">43875942</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28155113</Data></Cell>
+    <Cell><Data ss:Type="Number">29028534</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30706788</Data></Cell>
+    <Cell><Data ss:Type="Number">31580209</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">27129263</Data></Cell>
+    <Cell><Data ss:Type="Number">28002684</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59019168</Data></Cell>
+    <Cell><Data ss:Type="Number">59892589</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45433867</Data></Cell>
+    <Cell><Data ss:Type="Number">46307288</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42496789</Data></Cell>
+    <Cell><Data ss:Type="Number">43370210</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52261014</Data></Cell>
+    <Cell><Data ss:Type="Number">53134435</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57524246</Data></Cell>
+    <Cell><Data ss:Type="Number">58397667</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49676949</Data></Cell>
+    <Cell><Data ss:Type="Number">50550370</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44919404</Data></Cell>
+    <Cell><Data ss:Type="Number">45792825</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46528483</Data></Cell>
+    <Cell><Data ss:Type="Number">47401904</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49429654</Data></Cell>
+    <Cell><Data ss:Type="Number">50303075</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29029402</Data></Cell>
+    <Cell><Data ss:Type="Number">29902823</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20606263</Data></Cell>
+    <Cell><Data ss:Type="Number">21479684</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59316500</Data></Cell>
+    <Cell><Data ss:Type="Number">60189921</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35396805</Data></Cell>
+    <Cell><Data ss:Type="Number">36270226</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">41532574</Data></Cell>
+    <Cell><Data ss:Type="Number">42405995</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">40146813</Data></Cell>
+    <Cell><Data ss:Type="Number">41020234</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54651657</Data></Cell>
+    <Cell><Data ss:Type="Number">55525078</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20201492</Data></Cell>
+    <Cell><Data ss:Type="Number">21074913</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18910306</Data></Cell>
+    <Cell><Data ss:Type="Number">19783727</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55817267</Data></Cell>
+    <Cell><Data ss:Type="Number">56690688</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37461244</Data></Cell>
+    <Cell><Data ss:Type="Number">38334665</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38239244</Data></Cell>
+    <Cell><Data ss:Type="Number">39112665</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48420483</Data></Cell>
+    <Cell><Data ss:Type="Number">49293904</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38403170</Data></Cell>
+    <Cell><Data ss:Type="Number">39276591</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">27212962</Data></Cell>
+    <Cell><Data ss:Type="Number">28086383</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25039745</Data></Cell>
+    <Cell><Data ss:Type="Number">25913166</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44032946</Data></Cell>
+    <Cell><Data ss:Type="Number">44906367</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38006657</Data></Cell>
+    <Cell><Data ss:Type="Number">38880078</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44130109</Data></Cell>
+    <Cell><Data ss:Type="Number">45003530</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60818011</Data></Cell>
+    <Cell><Data ss:Type="Number">61691432</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24899430</Data></Cell>
+    <Cell><Data ss:Type="Number">25772851</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28829940</Data></Cell>
+    <Cell><Data ss:Type="Number">29703361</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60025122</Data></Cell>
+    <Cell><Data ss:Type="Number">60898543</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29420190</Data></Cell>
+    <Cell><Data ss:Type="Number">30293611</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48656298</Data></Cell>
+    <Cell><Data ss:Type="Number">49529719</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32970832</Data></Cell>
+    <Cell><Data ss:Type="Number">33844253</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50489560</Data></Cell>
+    <Cell><Data ss:Type="Number">51362981</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51958107</Data></Cell>
+    <Cell><Data ss:Type="Number">52831528</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59557422</Data></Cell>
+    <Cell><Data ss:Type="Number">60430843</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48522575</Data></Cell>
+    <Cell><Data ss:Type="Number">49395996</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">47230022</Data></Cell>
+    <Cell><Data ss:Type="Number">48103443</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26170820</Data></Cell>
+    <Cell><Data ss:Type="Number">27044241</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34080416</Data></Cell>
+    <Cell><Data ss:Type="Number">34953837</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53285024</Data></Cell>
+    <Cell><Data ss:Type="Number">54158445</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34032779</Data></Cell>
+    <Cell><Data ss:Type="Number">34906200</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49588432</Data></Cell>
+    <Cell><Data ss:Type="Number">50461853</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">17752177</Data></Cell>
+    <Cell><Data ss:Type="Number">18625598</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34145585</Data></Cell>
+    <Cell><Data ss:Type="Number">35019006</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55516592</Data></Cell>
+    <Cell><Data ss:Type="Number">56390013</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52327689</Data></Cell>
+    <Cell><Data ss:Type="Number">53201110</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25205438</Data></Cell>
+    <Cell><Data ss:Type="Number">26078859</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29915837</Data></Cell>
+    <Cell><Data ss:Type="Number">30789258</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42761964</Data></Cell>
+    <Cell><Data ss:Type="Number">43635385</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60033461</Data></Cell>
+    <Cell><Data ss:Type="Number">60906882</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55946970</Data></Cell>
+    <Cell><Data ss:Type="Number">56820391</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25542679</Data></Cell>
+    <Cell><Data ss:Type="Number">26416100</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58301668</Data></Cell>
+    <Cell><Data ss:Type="Number">59175089</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60778411</Data></Cell>
+    <Cell><Data ss:Type="Number">61651832</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33980955</Data></Cell>
+    <Cell><Data ss:Type="Number">34854376</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57111583</Data></Cell>
+    <Cell><Data ss:Type="Number">57985004</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53037659</Data></Cell>
+    <Cell><Data ss:Type="Number">53911080</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53056393</Data></Cell>
+    <Cell><Data ss:Type="Number">53929814</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24644673</Data></Cell>
+    <Cell><Data ss:Type="Number">25518094</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32663951</Data></Cell>
+    <Cell><Data ss:Type="Number">33537372</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29889174</Data></Cell>
+    <Cell><Data ss:Type="Number">30762595</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52099702</Data></Cell>
+    <Cell><Data ss:Type="Number">52973123</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34739384</Data></Cell>
+    <Cell><Data ss:Type="Number">35612805</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">39017651</Data></Cell>
+    <Cell><Data ss:Type="Number">39891072</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50672580</Data></Cell>
+    <Cell><Data ss:Type="Number">51546001</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43424094</Data></Cell>
+    <Cell><Data ss:Type="Number">44297515</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">40679359</Data></Cell>
+    <Cell><Data ss:Type="Number">41552780</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35417105</Data></Cell>
+    <Cell><Data ss:Type="Number">36290526</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29711555</Data></Cell>
+    <Cell><Data ss:Type="Number">30584976</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32393309</Data></Cell>
+    <Cell><Data ss:Type="Number">33266730</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53979196</Data></Cell>
+    <Cell><Data ss:Type="Number">54852617</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59927691</Data></Cell>
+    <Cell><Data ss:Type="Number">60801112</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42822314</Data></Cell>
+    <Cell><Data ss:Type="Number">43695735</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21335433</Data></Cell>
+    <Cell><Data ss:Type="Number">22208854</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59925288</Data></Cell>
+    <Cell><Data ss:Type="Number">60798709</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20453725</Data></Cell>
+    <Cell><Data ss:Type="Number">21327146</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52935499</Data></Cell>
+    <Cell><Data ss:Type="Number">53808920</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33335879</Data></Cell>
+    <Cell><Data ss:Type="Number">34209300</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42363275</Data></Cell>
+    <Cell><Data ss:Type="Number">43236696</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51647051</Data></Cell>
+    <Cell><Data ss:Type="Number">52520472</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58767517</Data></Cell>
+    <Cell><Data ss:Type="Number">59640938</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26114870</Data></Cell>
+    <Cell><Data ss:Type="Number">26988291</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">39016596</Data></Cell>
+    <Cell><Data ss:Type="Number">39890017</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51307624</Data></Cell>
+    <Cell><Data ss:Type="Number">52181045</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46874642</Data></Cell>
+    <Cell><Data ss:Type="Number">47748063</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">16518242</Data></Cell>
+    <Cell><Data ss:Type="Number">17391663</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53202717</Data></Cell>
+    <Cell><Data ss:Type="Number">54076138</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44452913</Data></Cell>
+    <Cell><Data ss:Type="Number">45326334</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37892252</Data></Cell>
+    <Cell><Data ss:Type="Number">38765673</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31672648</Data></Cell>
+    <Cell><Data ss:Type="Number">32546069</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52932822</Data></Cell>
+    <Cell><Data ss:Type="Number">53806243</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">27137580</Data></Cell>
+    <Cell><Data ss:Type="Number">28011001</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59168493</Data></Cell>
+    <Cell><Data ss:Type="Number">60041914</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50380755</Data></Cell>
+    <Cell><Data ss:Type="Number">51254176</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46710596</Data></Cell>
+    <Cell><Data ss:Type="Number">47584017</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59423487</Data></Cell>
+    <Cell><Data ss:Type="Number">60296908</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50352229</Data></Cell>
+    <Cell><Data ss:Type="Number">51225650</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46357914</Data></Cell>
+    <Cell><Data ss:Type="Number">47231335</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18710526</Data></Cell>
+    <Cell><Data ss:Type="Number">19583947</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20219948</Data></Cell>
+    <Cell><Data ss:Type="Number">21093369</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21704132</Data></Cell>
+    <Cell><Data ss:Type="Number">22577553</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59857120</Data></Cell>
+    <Cell><Data ss:Type="Number">60730541</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38831348</Data></Cell>
+    <Cell><Data ss:Type="Number">39704769</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">27436370</Data></Cell>
+    <Cell><Data ss:Type="Number">28309791</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32022121</Data></Cell>
+    <Cell><Data ss:Type="Number">32895542</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">16506312</Data></Cell>
+    <Cell><Data ss:Type="Number">17379733</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52243373</Data></Cell>
+    <Cell><Data ss:Type="Number">53116794</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">56140121</Data></Cell>
+    <Cell><Data ss:Type="Number">57013542</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60940426</Data></Cell>
+    <Cell><Data ss:Type="Number">61813847</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57623190</Data></Cell>
+    <Cell><Data ss:Type="Number">58496611</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37384816</Data></Cell>
+    <Cell><Data ss:Type="Number">38258237</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33405403</Data></Cell>
+    <Cell><Data ss:Type="Number">34278824</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55506393</Data></Cell>
+    <Cell><Data ss:Type="Number">56379814</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26529029</Data></Cell>
+    <Cell><Data ss:Type="Number">27402450</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26968044</Data></Cell>
+    <Cell><Data ss:Type="Number">27841465</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24008294</Data></Cell>
+    <Cell><Data ss:Type="Number">24881715</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44598182</Data></Cell>
+    <Cell><Data ss:Type="Number">45471603</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46455219</Data></Cell>
+    <Cell><Data ss:Type="Number">47328640</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20502148</Data></Cell>
+    <Cell><Data ss:Type="Number">21375569</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">47167998</Data></Cell>
+    <Cell><Data ss:Type="Number">48041419</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54585550</Data></Cell>
+    <Cell><Data ss:Type="Number">55458971</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48739748</Data></Cell>
+    <Cell><Data ss:Type="Number">49613169</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20275030</Data></Cell>
+    <Cell><Data ss:Type="Number">21148451</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57800170</Data></Cell>
+    <Cell><Data ss:Type="Number">58673591</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44667200</Data></Cell>
+    <Cell><Data ss:Type="Number">45540621</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45891210</Data></Cell>
+    <Cell><Data ss:Type="Number">46764631</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26839403</Data></Cell>
+    <Cell><Data ss:Type="Number">27712824</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35043614</Data></Cell>
+    <Cell><Data ss:Type="Number">35917035</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">16475453</Data></Cell>
+    <Cell><Data ss:Type="Number">17348874</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30692215</Data></Cell>
+    <Cell><Data ss:Type="Number">31565636</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44775697</Data></Cell>
+    <Cell><Data ss:Type="Number">45649118</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">19683334</Data></Cell>
+    <Cell><Data ss:Type="Number">20556755</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51821411</Data></Cell>
+    <Cell><Data ss:Type="Number">52694832</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">56809642</Data></Cell>
+    <Cell><Data ss:Type="Number">57683063</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24909549</Data></Cell>
+    <Cell><Data ss:Type="Number">25782970</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31228403</Data></Cell>
+    <Cell><Data ss:Type="Number">32101824</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">19058076</Data></Cell>
+    <Cell><Data ss:Type="Number">19931497</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50236610</Data></Cell>
+    <Cell><Data ss:Type="Number">51110031</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55727807</Data></Cell>
+    <Cell><Data ss:Type="Number">56601228</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50809096</Data></Cell>
+    <Cell><Data ss:Type="Number">51682517</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">40978810</Data></Cell>
+    <Cell><Data ss:Type="Number">41852231</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54227102</Data></Cell>
+    <Cell><Data ss:Type="Number">55100523</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49696266</Data></Cell>
+    <Cell><Data ss:Type="Number">50569687</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53580045</Data></Cell>
+    <Cell><Data ss:Type="Number">54453466</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34415541</Data></Cell>
+    <Cell><Data ss:Type="Number">35288962</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42969187</Data></Cell>
+    <Cell><Data ss:Type="Number">43842608</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26080379</Data></Cell>
+    <Cell><Data ss:Type="Number">26953800</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51491692</Data></Cell>
+    <Cell><Data ss:Type="Number">52365113</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42223029</Data></Cell>
+    <Cell><Data ss:Type="Number">43096450</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">41907154</Data></Cell>
+    <Cell><Data ss:Type="Number">42780575</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46316262</Data></Cell>
+    <Cell><Data ss:Type="Number">47189683</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">19263629</Data></Cell>
+    <Cell><Data ss:Type="Number">20137050</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43258410</Data></Cell>
+    <Cell><Data ss:Type="Number">44131831</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49645955</Data></Cell>
+    <Cell><Data ss:Type="Number">50519376</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37062299</Data></Cell>
+    <Cell><Data ss:Type="Number">37935720</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18434547</Data></Cell>
+    <Cell><Data ss:Type="Number">19307968</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33449995</Data></Cell>
+    <Cell><Data ss:Type="Number">34323416</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55278735</Data></Cell>
+    <Cell><Data ss:Type="Number">56152156</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24358722</Data></Cell>
+    <Cell><Data ss:Type="Number">25232143</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30448443</Data></Cell>
+    <Cell><Data ss:Type="Number">31321864</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18040259</Data></Cell>
+    <Cell><Data ss:Type="Number">18913680</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32063898</Data></Cell>
+    <Cell><Data ss:Type="Number">32937319</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59472835</Data></Cell>
+    <Cell><Data ss:Type="Number">60346256</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59254724</Data></Cell>
+    <Cell><Data ss:Type="Number">60128145</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25057857</Data></Cell>
+    <Cell><Data ss:Type="Number">25931278</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46325997</Data></Cell>
+    <Cell><Data ss:Type="Number">47199418</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28582266</Data></Cell>
+    <Cell><Data ss:Type="Number">29455687</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18621049</Data></Cell>
+    <Cell><Data ss:Type="Number">19494470</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24844317</Data></Cell>
+    <Cell><Data ss:Type="Number">25717738</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25836621</Data></Cell>
+    <Cell><Data ss:Type="Number">26710042</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18066873</Data></Cell>
+    <Cell><Data ss:Type="Number">18940294</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18404725</Data></Cell>
+    <Cell><Data ss:Type="Number">19278146</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44753947</Data></Cell>
+    <Cell><Data ss:Type="Number">45627368</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">36378668</Data></Cell>
+    <Cell><Data ss:Type="Number">37252089</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45034886</Data></Cell>
+    <Cell><Data ss:Type="Number">45908307</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25452126</Data></Cell>
+    <Cell><Data ss:Type="Number">26325547</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44203651</Data></Cell>
+    <Cell><Data ss:Type="Number">45077072</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35867439</Data></Cell>
+    <Cell><Data ss:Type="Number">36740860</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48247890</Data></Cell>
+    <Cell><Data ss:Type="Number">49121311</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54007410</Data></Cell>
+    <Cell><Data ss:Type="Number">54880831</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20045754</Data></Cell>
+    <Cell><Data ss:Type="Number">20919175</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">36024729</Data></Cell>
+    <Cell><Data ss:Type="Number">36898150</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23018485</Data></Cell>
+    <Cell><Data ss:Type="Number">23891906</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35606692</Data></Cell>
+    <Cell><Data ss:Type="Number">36480113</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">46871502</Data></Cell>
+    <Cell><Data ss:Type="Number">47744923</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30239537</Data></Cell>
+    <Cell><Data ss:Type="Number">31112958</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43034759</Data></Cell>
+    <Cell><Data ss:Type="Number">43908180</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30113969</Data></Cell>
+    <Cell><Data ss:Type="Number">30987390</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44365857</Data></Cell>
+    <Cell><Data ss:Type="Number">45239278</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">20465403</Data></Cell>
+    <Cell><Data ss:Type="Number">21338824</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31065357</Data></Cell>
+    <Cell><Data ss:Type="Number">31938778</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24769615</Data></Cell>
+    <Cell><Data ss:Type="Number">25643036</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35415545</Data></Cell>
+    <Cell><Data ss:Type="Number">36288966</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53045518</Data></Cell>
+    <Cell><Data ss:Type="Number">53918939</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54363098</Data></Cell>
+    <Cell><Data ss:Type="Number">55236519</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45428711</Data></Cell>
+    <Cell><Data ss:Type="Number">46302132</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57235570</Data></Cell>
+    <Cell><Data ss:Type="Number">58108991</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26025584</Data></Cell>
+    <Cell><Data ss:Type="Number">26899005</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26745114</Data></Cell>
+    <Cell><Data ss:Type="Number">27618535</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54956614</Data></Cell>
+    <Cell><Data ss:Type="Number">55830035</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21070550</Data></Cell>
+    <Cell><Data ss:Type="Number">21943971</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37408384</Data></Cell>
+    <Cell><Data ss:Type="Number">38281805</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">36855301</Data></Cell>
+    <Cell><Data ss:Type="Number">37728722</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">55419752</Data></Cell>
+    <Cell><Data ss:Type="Number">56293173</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34499516</Data></Cell>
+    <Cell><Data ss:Type="Number">35372937</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57149554</Data></Cell>
+    <Cell><Data ss:Type="Number">58022975</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29090597</Data></Cell>
+    <Cell><Data ss:Type="Number">29964018</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26602201</Data></Cell>
+    <Cell><Data ss:Type="Number">27475622</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58908260</Data></Cell>
+    <Cell><Data ss:Type="Number">59781681</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45085399</Data></Cell>
+    <Cell><Data ss:Type="Number">45958820</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57035328</Data></Cell>
+    <Cell><Data ss:Type="Number">57908749</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">61350128</Data></Cell>
+    <Cell><Data ss:Type="Number">62223549</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">41912517</Data></Cell>
+    <Cell><Data ss:Type="Number">42785938</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58923773</Data></Cell>
+    <Cell><Data ss:Type="Number">59797194</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23923294</Data></Cell>
+    <Cell><Data ss:Type="Number">24796715</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30890662</Data></Cell>
+    <Cell><Data ss:Type="Number">31764083</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21828254</Data></Cell>
+    <Cell><Data ss:Type="Number">22701675</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60990213</Data></Cell>
+    <Cell><Data ss:Type="Number">61863634</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">39439752</Data></Cell>
+    <Cell><Data ss:Type="Number">40313173</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49477369</Data></Cell>
+    <Cell><Data ss:Type="Number">50350790</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32561380</Data></Cell>
+    <Cell><Data ss:Type="Number">33434801</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30919158</Data></Cell>
+    <Cell><Data ss:Type="Number">31792579</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">41394220</Data></Cell>
+    <Cell><Data ss:Type="Number">42267641</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35523440</Data></Cell>
+    <Cell><Data ss:Type="Number">36396861</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38011800</Data></Cell>
+    <Cell><Data ss:Type="Number">38885221</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">28045165</Data></Cell>
+    <Cell><Data ss:Type="Number">28918586</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43711812</Data></Cell>
+    <Cell><Data ss:Type="Number">44585233</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45372282</Data></Cell>
+    <Cell><Data ss:Type="Number">46245703</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">56976387</Data></Cell>
+    <Cell><Data ss:Type="Number">57849808</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18675428</Data></Cell>
+    <Cell><Data ss:Type="Number">19548849</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37408644</Data></Cell>
+    <Cell><Data ss:Type="Number">38282065</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">41385527</Data></Cell>
+    <Cell><Data ss:Type="Number">42258948</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59972677</Data></Cell>
+    <Cell><Data ss:Type="Number">60846098</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">39337648</Data></Cell>
+    <Cell><Data ss:Type="Number">40211069</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50438808</Data></Cell>
+    <Cell><Data ss:Type="Number">51312229</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57664587</Data></Cell>
+    <Cell><Data ss:Type="Number">58538008</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50925087</Data></Cell>
+    <Cell><Data ss:Type="Number">51798508</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23492072</Data></Cell>
+    <Cell><Data ss:Type="Number">24365493</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25415013</Data></Cell>
+    <Cell><Data ss:Type="Number">26288434</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">47328807</Data></Cell>
+    <Cell><Data ss:Type="Number">48202228</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59510545</Data></Cell>
+    <Cell><Data ss:Type="Number">60383966</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">61264669</Data></Cell>
+    <Cell><Data ss:Type="Number">62138090</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60245935</Data></Cell>
+    <Cell><Data ss:Type="Number">61119356</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31676812</Data></Cell>
+    <Cell><Data ss:Type="Number">32550233</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">36478202</Data></Cell>
+    <Cell><Data ss:Type="Number">37351623</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">40266554</Data></Cell>
+    <Cell><Data ss:Type="Number">41139975</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48548966</Data></Cell>
+    <Cell><Data ss:Type="Number">49422387</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29096758</Data></Cell>
+    <Cell><Data ss:Type="Number">29970179</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60291306</Data></Cell>
+    <Cell><Data ss:Type="Number">61164727</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24798264</Data></Cell>
+    <Cell><Data ss:Type="Number">25671685</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31865012</Data></Cell>
+    <Cell><Data ss:Type="Number">32738433</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54536923</Data></Cell>
+    <Cell><Data ss:Type="Number">55410344</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">22952357</Data></Cell>
+    <Cell><Data ss:Type="Number">23825778</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">29681188</Data></Cell>
+    <Cell><Data ss:Type="Number">30554609</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">25271300</Data></Cell>
+    <Cell><Data ss:Type="Number">26144721</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54855098</Data></Cell>
+    <Cell><Data ss:Type="Number">55728519</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42227855</Data></Cell>
+    <Cell><Data ss:Type="Number">43101276</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33613983</Data></Cell>
+    <Cell><Data ss:Type="Number">34487404</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32527116</Data></Cell>
+    <Cell><Data ss:Type="Number">33400537</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43340426</Data></Cell>
+    <Cell><Data ss:Type="Number">44213847</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">30480650</Data></Cell>
+    <Cell><Data ss:Type="Number">31354071</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">22440656</Data></Cell>
+    <Cell><Data ss:Type="Number">23314077</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">42360708</Data></Cell>
+    <Cell><Data ss:Type="Number">43234129</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35416151</Data></Cell>
+    <Cell><Data ss:Type="Number">36289572</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32746167</Data></Cell>
+    <Cell><Data ss:Type="Number">33619588</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">43234854</Data></Cell>
+    <Cell><Data ss:Type="Number">44108275</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31454723</Data></Cell>
+    <Cell><Data ss:Type="Number">32328144</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37245832</Data></Cell>
+    <Cell><Data ss:Type="Number">38119253</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34317426</Data></Cell>
+    <Cell><Data ss:Type="Number">35190847</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">54856221</Data></Cell>
+    <Cell><Data ss:Type="Number">55729642</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31002479</Data></Cell>
+    <Cell><Data ss:Type="Number">31875900</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37273979</Data></Cell>
+    <Cell><Data ss:Type="Number">38147400</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31961502</Data></Cell>
+    <Cell><Data ss:Type="Number">32834923</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">44677721</Data></Cell>
+    <Cell><Data ss:Type="Number">45551142</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53014745</Data></Cell>
+    <Cell><Data ss:Type="Number">53888166</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21406344</Data></Cell>
+    <Cell><Data ss:Type="Number">22279765</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">22479867</Data></Cell>
+    <Cell><Data ss:Type="Number">23353288</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">51123715</Data></Cell>
+    <Cell><Data ss:Type="Number">51997136</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">49692800</Data></Cell>
+    <Cell><Data ss:Type="Number">50566221</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34523379</Data></Cell>
+    <Cell><Data ss:Type="Number">35396800</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38194942</Data></Cell>
+    <Cell><Data ss:Type="Number">39068363</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37115316</Data></Cell>
+    <Cell><Data ss:Type="Number">37988737</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">50900132</Data></Cell>
+    <Cell><Data ss:Type="Number">51773553</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">38095085</Data></Cell>
+    <Cell><Data ss:Type="Number">38968506</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31033120</Data></Cell>
+    <Cell><Data ss:Type="Number">31906541</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">53386020</Data></Cell>
+    <Cell><Data ss:Type="Number">54259441</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23778769</Data></Cell>
+    <Cell><Data ss:Type="Number">24652190</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">24978866</Data></Cell>
+    <Cell><Data ss:Type="Number">25852287</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">23956767</Data></Cell>
+    <Cell><Data ss:Type="Number">24830188</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32039019</Data></Cell>
+    <Cell><Data ss:Type="Number">32912440</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">37929561</Data></Cell>
+    <Cell><Data ss:Type="Number">38802982</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45257277</Data></Cell>
+    <Cell><Data ss:Type="Number">46130698</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">27021157</Data></Cell>
+    <Cell><Data ss:Type="Number">27894578</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">45210787</Data></Cell>
+    <Cell><Data ss:Type="Number">46084208</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58646933</Data></Cell>
+    <Cell><Data ss:Type="Number">59520354</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">48493223</Data></Cell>
+    <Cell><Data ss:Type="Number">49366644</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26190869</Data></Cell>
+    <Cell><Data ss:Type="Number">27064290</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">26849773</Data></Cell>
+    <Cell><Data ss:Type="Number">27723194</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">33195216</Data></Cell>
+    <Cell><Data ss:Type="Number">34068637</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">34389387</Data></Cell>
+    <Cell><Data ss:Type="Number">35262808</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">21217258</Data></Cell>
+    <Cell><Data ss:Type="Number">22090679</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">60046059</Data></Cell>
+    <Cell><Data ss:Type="Number">60919480</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">17672353</Data></Cell>
+    <Cell><Data ss:Type="Number">18545774</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">32755570</Data></Cell>
+    <Cell><Data ss:Type="Number">33628991</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">31306904</Data></Cell>
+    <Cell><Data ss:Type="Number">32180325</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">18376246</Data></Cell>
+    <Cell><Data ss:Type="Number">19249667</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">59509334</Data></Cell>
+    <Cell><Data ss:Type="Number">60382755</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">16206673</Data></Cell>
+    <Cell><Data ss:Type="Number">17080094</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">58268147</Data></Cell>
+    <Cell><Data ss:Type="Number">59141568</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">17288178</Data></Cell>
+    <Cell><Data ss:Type="Number">18161599</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">52626584</Data></Cell>
+    <Cell><Data ss:Type="Number">53500005</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">57824907</Data></Cell>
+    <Cell><Data ss:Type="Number">58698328</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="Number">35289458</Data></Cell>
+    <Cell><Data ss:Type="Number">36162879</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>4</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

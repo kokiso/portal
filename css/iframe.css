@@ -1,0 +1,21 @@
+@charset "UTF8";
+iframe#iframeCorpo {
+		width: 1920px;
+		height: 1080px;		
+		border:none;
+		background-color: #ffffff;
+}
+iframe#iframeCorpo::-webkit-scrollbar {
+	display: none;
+}
+
+iframe#iframeComplementar {
+		width: 1280px;
+		height: 46em;		
+		border:none;
+		background-color: #ffffff;
+}
+iframe#iframeComplementar::-webkit-scrollbar {
+	display: none;
+}
+

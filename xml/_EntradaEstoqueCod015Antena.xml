@@ -1,0 +1,670 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Orlando Polonio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-12-11T17:54:55Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s63">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="66" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="84.75"/>
+   <Column ss:Width="63"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:Width="46.5"/>
+   <Column ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:Width="57"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">53578088</Data></Cell>
+    <Cell><Data ss:Type="Number">54451509</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">134182</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">17888935</Data></Cell>
+    <Cell><Data ss:Type="Number">18762356</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">135370</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">39204142</Data></Cell>
+    <Cell><Data ss:Type="Number">40077563</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">136558</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">16234787</Data></Cell>
+    <Cell><Data ss:Type="Number">17108208</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">137746</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">50659977</Data></Cell>
+    <Cell><Data ss:Type="Number">51533398</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">138934</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">21605721</Data></Cell>
+    <Cell><Data ss:Type="Number">22479142</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">140122</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">51938187</Data></Cell>
+    <Cell><Data ss:Type="Number">52811608</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">141310</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">28122465</Data></Cell>
+    <Cell><Data ss:Type="Number">28995886</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">168632</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">36535360</Data></Cell>
+    <Cell><Data ss:Type="Number">37408781</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">251091</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">43023869</Data></Cell>
+    <Cell><Data ss:Type="Number">43897290</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">267634</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">46949277</Data></Cell>
+    <Cell><Data ss:Type="Number">47822698</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">188046</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">30852829</Data></Cell>
+    <Cell><Data ss:Type="Number">31726250</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">233779</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">20779320</Data></Cell>
+    <Cell><Data ss:Type="Number">21652741</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">369857</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">27574117</Data></Cell>
+    <Cell><Data ss:Type="Number">28447538</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">458704</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">33558251</Data></Cell>
+    <Cell><Data ss:Type="Number">34431672</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">401424</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">35415424</Data></Cell>
+    <Cell><Data ss:Type="Number">36288845</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">3665771</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">32845841</Data></Cell>
+    <Cell><Data ss:Type="Number">33719262</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">13235804</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">25024190</Data></Cell>
+    <Cell><Data ss:Type="Number">25897611</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">13036840</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">19471220</Data></Cell>
+    <Cell><Data ss:Type="Number">20344641</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">58222606</Data></Cell>
+    <Cell><Data ss:Type="Number">59096027</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">34473411</Data></Cell>
+    <Cell><Data ss:Type="Number">35346832</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">37961095</Data></Cell>
+    <Cell><Data ss:Type="Number">38834516</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">61401552</Data></Cell>
+    <Cell><Data ss:Type="Number">62274973</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">23159805</Data></Cell>
+    <Cell><Data ss:Type="Number">24033226</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">60109865</Data></Cell>
+    <Cell><Data ss:Type="Number">60983286</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">53323169</Data></Cell>
+    <Cell><Data ss:Type="Number">54196590</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">30802753</Data></Cell>
+    <Cell><Data ss:Type="Number">31676174</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">44729642</Data></Cell>
+    <Cell><Data ss:Type="Number">45603063</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">24851072</Data></Cell>
+    <Cell><Data ss:Type="Number">25724493</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">29197982</Data></Cell>
+    <Cell><Data ss:Type="Number">30071403</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">39325227</Data></Cell>
+    <Cell><Data ss:Type="Number">40198648</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">50804653</Data></Cell>
+    <Cell><Data ss:Type="Number">51678074</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">26899075</Data></Cell>
+    <Cell><Data ss:Type="Number">27772496</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">29023073</Data></Cell>
+    <Cell><Data ss:Type="Number">29896494</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">35061174</Data></Cell>
+    <Cell><Data ss:Type="Number">35934595</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">31986601</Data></Cell>
+    <Cell><Data ss:Type="Number">32860022</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">54689011</Data></Cell>
+    <Cell><Data ss:Type="Number">55562432</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">28161686</Data></Cell>
+    <Cell><Data ss:Type="Number">29035107</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">33035062</Data></Cell>
+    <Cell><Data ss:Type="Number">33908483</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">55260117</Data></Cell>
+    <Cell><Data ss:Type="Number">56133538</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">38556549</Data></Cell>
+    <Cell><Data ss:Type="Number">39429970</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">28859630</Data></Cell>
+    <Cell><Data ss:Type="Number">29733051</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">42332667</Data></Cell>
+    <Cell><Data ss:Type="Number">43206088</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">48157621</Data></Cell>
+    <Cell><Data ss:Type="Number">49031042</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">25058426</Data></Cell>
+    <Cell><Data ss:Type="Number">25931847</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">22140614</Data></Cell>
+    <Cell><Data ss:Type="Number">23014035</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">48731606</Data></Cell>
+    <Cell><Data ss:Type="Number">49605027</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">60670244</Data></Cell>
+    <Cell><Data ss:Type="Number">61543665</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">33036728</Data></Cell>
+    <Cell><Data ss:Type="Number">33910149</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">35470143</Data></Cell>
+    <Cell><Data ss:Type="Number">36343564</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">52307740</Data></Cell>
+    <Cell><Data ss:Type="Number">53181161</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">38732927</Data></Cell>
+    <Cell><Data ss:Type="Number">39606348</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">22845992</Data></Cell>
+    <Cell><Data ss:Type="Number">23719413</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">18293889</Data></Cell>
+    <Cell><Data ss:Type="Number">19167310</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">57153158</Data></Cell>
+    <Cell><Data ss:Type="Number">58026579</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">60452730</Data></Cell>
+    <Cell><Data ss:Type="Number">61326151</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">41401738</Data></Cell>
+    <Cell><Data ss:Type="Number">42275159</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">17222481</Data></Cell>
+    <Cell><Data ss:Type="Number">18095902</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">18746179</Data></Cell>
+    <Cell><Data ss:Type="Number">19619600</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">19315518</Data></Cell>
+    <Cell><Data ss:Type="Number">20188939</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">31201606</Data></Cell>
+    <Cell><Data ss:Type="Number">32075027</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">23233771</Data></Cell>
+    <Cell><Data ss:Type="Number">24107192</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">40781592</Data></Cell>
+    <Cell><Data ss:Type="Number">41655013</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">35682575</Data></Cell>
+    <Cell><Data ss:Type="Number">36555996</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="Number">61239155</Data></Cell>
+    <Cell><Data ss:Type="Number">62112576</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">79397</Data></Cell>
+    <Cell><Data ss:Type="Number">200200</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <RangeSelection>R2C1:R66C1</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

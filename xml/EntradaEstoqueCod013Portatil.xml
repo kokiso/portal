@@ -1,0 +1,3676 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Orlando Polonio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-11-25T12:10:42Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s63">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="400" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="75.75"/>
+   <Column ss:Width="63"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:Width="46.5"/>
+   <Column ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:Width="57"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">154723274</Data></Cell>
+    <Cell><Data ss:Type="Number">686481</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205872903</Data></Cell>
+    <Cell><Data ss:Type="Number">699885</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">245895212</Data></Cell>
+    <Cell><Data ss:Type="Number">722484</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">216314260</Data></Cell>
+    <Cell><Data ss:Type="Number">677732</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">302534026</Data></Cell>
+    <Cell><Data ss:Type="Number">764154</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">232431713</Data></Cell>
+    <Cell><Data ss:Type="Number">701284</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">240273836</Data></Cell>
+    <Cell><Data ss:Type="Number">746009</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">131991933</Data></Cell>
+    <Cell><Data ss:Type="Number">725222</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">198129137</Data></Cell>
+    <Cell><Data ss:Type="Number">727159</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">217978324</Data></Cell>
+    <Cell><Data ss:Type="Number">747889</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">153255033</Data></Cell>
+    <Cell><Data ss:Type="Number">765208</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">272313020</Data></Cell>
+    <Cell><Data ss:Type="Number">715721</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">204222721</Data></Cell>
+    <Cell><Data ss:Type="Number">749931</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">279334301</Data></Cell>
+    <Cell><Data ss:Type="Number">743132</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">284219307</Data></Cell>
+    <Cell><Data ss:Type="Number">753183</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">147082055</Data></Cell>
+    <Cell><Data ss:Type="Number">723214</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">220084465</Data></Cell>
+    <Cell><Data ss:Type="Number">711872</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">263909545</Data></Cell>
+    <Cell><Data ss:Type="Number">737861</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">260074467</Data></Cell>
+    <Cell><Data ss:Type="Number">753907</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">265558273</Data></Cell>
+    <Cell><Data ss:Type="Number">762239</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">242061307</Data></Cell>
+    <Cell><Data ss:Type="Number">716132</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">158024952</Data></Cell>
+    <Cell><Data ss:Type="Number">679006</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">197525717</Data></Cell>
+    <Cell><Data ss:Type="Number">761695</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">167642928</Data></Cell>
+    <Cell><Data ss:Type="Number">752717</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205520952</Data></Cell>
+    <Cell><Data ss:Type="Number">683423</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">235206460</Data></Cell>
+    <Cell><Data ss:Type="Number">685807</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">172434063</Data></Cell>
+    <Cell><Data ss:Type="Number">761368</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">249816099</Data></Cell>
+    <Cell><Data ss:Type="Number">678081</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">309769328</Data></Cell>
+    <Cell><Data ss:Type="Number">702883</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">182398703</Data></Cell>
+    <Cell><Data ss:Type="Number">695990</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">226308791</Data></Cell>
+    <Cell><Data ss:Type="Number">752254</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">265749645</Data></Cell>
+    <Cell><Data ss:Type="Number">691776</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">153135915</Data></Cell>
+    <Cell><Data ss:Type="Number">759128</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">310915588</Data></Cell>
+    <Cell><Data ss:Type="Number">728546</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">296625039</Data></Cell>
+    <Cell><Data ss:Type="Number">744334</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">241443649</Data></Cell>
+    <Cell><Data ss:Type="Number">714751</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">247831577</Data></Cell>
+    <Cell><Data ss:Type="Number">685422</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">264833306</Data></Cell>
+    <Cell><Data ss:Type="Number">727932</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">300542448</Data></Cell>
+    <Cell><Data ss:Type="Number">723022</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">155059897</Data></Cell>
+    <Cell><Data ss:Type="Number">714852</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">212528344</Data></Cell>
+    <Cell><Data ss:Type="Number">698954</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237068168</Data></Cell>
+    <Cell><Data ss:Type="Number">709934</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">139551692</Data></Cell>
+    <Cell><Data ss:Type="Number">765586</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205504250</Data></Cell>
+    <Cell><Data ss:Type="Number">719844</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">174561024</Data></Cell>
+    <Cell><Data ss:Type="Number">683258</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">223682396</Data></Cell>
+    <Cell><Data ss:Type="Number">682833</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">184466300</Data></Cell>
+    <Cell><Data ss:Type="Number">687918</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">254776771</Data></Cell>
+    <Cell><Data ss:Type="Number">724197</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">209390765</Data></Cell>
+    <Cell><Data ss:Type="Number">710395</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">204604661</Data></Cell>
+    <Cell><Data ss:Type="Number">742635</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">186263083</Data></Cell>
+    <Cell><Data ss:Type="Number">742025</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">210201375</Data></Cell>
+    <Cell><Data ss:Type="Number">726835</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">221516448</Data></Cell>
+    <Cell><Data ss:Type="Number">760985</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">260685948</Data></Cell>
+    <Cell><Data ss:Type="Number">696428</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">210286724</Data></Cell>
+    <Cell><Data ss:Type="Number">764210</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">178383901</Data></Cell>
+    <Cell><Data ss:Type="Number">708912</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">140223048</Data></Cell>
+    <Cell><Data ss:Type="Number">686026</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">247011043</Data></Cell>
+    <Cell><Data ss:Type="Number">743513</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">262716399</Data></Cell>
+    <Cell><Data ss:Type="Number">762244</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">206503184</Data></Cell>
+    <Cell><Data ss:Type="Number">702978</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">268057251</Data></Cell>
+    <Cell><Data ss:Type="Number">694853</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">201942045</Data></Cell>
+    <Cell><Data ss:Type="Number">704738</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">270094430</Data></Cell>
+    <Cell><Data ss:Type="Number">678122</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">299198744</Data></Cell>
+    <Cell><Data ss:Type="Number">730327</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">180133568</Data></Cell>
+    <Cell><Data ss:Type="Number">722679</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">294094722</Data></Cell>
+    <Cell><Data ss:Type="Number">684077</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">147473354</Data></Cell>
+    <Cell><Data ss:Type="Number">751940</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">137319418</Data></Cell>
+    <Cell><Data ss:Type="Number">709641</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">171270533</Data></Cell>
+    <Cell><Data ss:Type="Number">681441</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">247233951</Data></Cell>
+    <Cell><Data ss:Type="Number">715748</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">177759963</Data></Cell>
+    <Cell><Data ss:Type="Number">679302</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">270908678</Data></Cell>
+    <Cell><Data ss:Type="Number">744752</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">190947144</Data></Cell>
+    <Cell><Data ss:Type="Number">705862</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">296143128</Data></Cell>
+    <Cell><Data ss:Type="Number">686421</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">193981703</Data></Cell>
+    <Cell><Data ss:Type="Number">722236</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">260263371</Data></Cell>
+    <Cell><Data ss:Type="Number">723139</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">197221545</Data></Cell>
+    <Cell><Data ss:Type="Number">716259</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">168258356</Data></Cell>
+    <Cell><Data ss:Type="Number">748960</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">194665444</Data></Cell>
+    <Cell><Data ss:Type="Number">690441</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205578231</Data></Cell>
+    <Cell><Data ss:Type="Number">752676</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">215696834</Data></Cell>
+    <Cell><Data ss:Type="Number">708589</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">164539410</Data></Cell>
+    <Cell><Data ss:Type="Number">734314</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">132216732</Data></Cell>
+    <Cell><Data ss:Type="Number">733430</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">238449342</Data></Cell>
+    <Cell><Data ss:Type="Number">686978</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">151886718</Data></Cell>
+    <Cell><Data ss:Type="Number">693364</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">193060380</Data></Cell>
+    <Cell><Data ss:Type="Number">686802</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">268973471</Data></Cell>
+    <Cell><Data ss:Type="Number">726541</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">245973946</Data></Cell>
+    <Cell><Data ss:Type="Number">721978</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">263728714</Data></Cell>
+    <Cell><Data ss:Type="Number">745767</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">252257334</Data></Cell>
+    <Cell><Data ss:Type="Number">737458</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">308607677</Data></Cell>
+    <Cell><Data ss:Type="Number">747581</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">264111484</Data></Cell>
+    <Cell><Data ss:Type="Number">704913</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">216749860</Data></Cell>
+    <Cell><Data ss:Type="Number">765811</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">199512630</Data></Cell>
+    <Cell><Data ss:Type="Number">699387</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">246582881</Data></Cell>
+    <Cell><Data ss:Type="Number">756549</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">263337651</Data></Cell>
+    <Cell><Data ss:Type="Number">740710</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">141114088</Data></Cell>
+    <Cell><Data ss:Type="Number">766386</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">285446618</Data></Cell>
+    <Cell><Data ss:Type="Number">736348</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237881417</Data></Cell>
+    <Cell><Data ss:Type="Number">682879</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">163365358</Data></Cell>
+    <Cell><Data ss:Type="Number">743976</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">252101341</Data></Cell>
+    <Cell><Data ss:Type="Number">716806</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">311998025</Data></Cell>
+    <Cell><Data ss:Type="Number">719145</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200307389</Data></Cell>
+    <Cell><Data ss:Type="Number">752689</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">184856367</Data></Cell>
+    <Cell><Data ss:Type="Number">739502</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">224691244</Data></Cell>
+    <Cell><Data ss:Type="Number">685908</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">250966817</Data></Cell>
+    <Cell><Data ss:Type="Number">678387</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">228119828</Data></Cell>
+    <Cell><Data ss:Type="Number">683938</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">160137878</Data></Cell>
+    <Cell><Data ss:Type="Number">754542</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">135824889</Data></Cell>
+    <Cell><Data ss:Type="Number">701026</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">176478772</Data></Cell>
+    <Cell><Data ss:Type="Number">756867</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">136842462</Data></Cell>
+    <Cell><Data ss:Type="Number">701629</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">188146493</Data></Cell>
+    <Cell><Data ss:Type="Number">701027</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">294295956</Data></Cell>
+    <Cell><Data ss:Type="Number">703472</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">212391888</Data></Cell>
+    <Cell><Data ss:Type="Number">686597</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">305793684</Data></Cell>
+    <Cell><Data ss:Type="Number">700931</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">135523031</Data></Cell>
+    <Cell><Data ss:Type="Number">743123</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">188428234</Data></Cell>
+    <Cell><Data ss:Type="Number">681480</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">311561560</Data></Cell>
+    <Cell><Data ss:Type="Number">742609</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">201270466</Data></Cell>
+    <Cell><Data ss:Type="Number">734649</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">273403323</Data></Cell>
+    <Cell><Data ss:Type="Number">743526</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">250460458</Data></Cell>
+    <Cell><Data ss:Type="Number">708658</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">131473105</Data></Cell>
+    <Cell><Data ss:Type="Number">728942</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">281547071</Data></Cell>
+    <Cell><Data ss:Type="Number">698689</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">239315030</Data></Cell>
+    <Cell><Data ss:Type="Number">731306</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">142475195</Data></Cell>
+    <Cell><Data ss:Type="Number">685977</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">158607669</Data></Cell>
+    <Cell><Data ss:Type="Number">721420</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">156326001</Data></Cell>
+    <Cell><Data ss:Type="Number">744916</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">176131543</Data></Cell>
+    <Cell><Data ss:Type="Number">725335</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">172701680</Data></Cell>
+    <Cell><Data ss:Type="Number">747134</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">265327808</Data></Cell>
+    <Cell><Data ss:Type="Number">765848</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">134262420</Data></Cell>
+    <Cell><Data ss:Type="Number">757213</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205187185</Data></Cell>
+    <Cell><Data ss:Type="Number">694348</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">268224040</Data></Cell>
+    <Cell><Data ss:Type="Number">756141</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200786205</Data></Cell>
+    <Cell><Data ss:Type="Number">749141</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">161157619</Data></Cell>
+    <Cell><Data ss:Type="Number">703975</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">301831039</Data></Cell>
+    <Cell><Data ss:Type="Number">688769</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">231470545</Data></Cell>
+    <Cell><Data ss:Type="Number">754633</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">177488565</Data></Cell>
+    <Cell><Data ss:Type="Number">717516</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">208986951</Data></Cell>
+    <Cell><Data ss:Type="Number">727590</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">296116779</Data></Cell>
+    <Cell><Data ss:Type="Number">745780</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">203940998</Data></Cell>
+    <Cell><Data ss:Type="Number">687465</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">294081669</Data></Cell>
+    <Cell><Data ss:Type="Number">714095</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200626413</Data></Cell>
+    <Cell><Data ss:Type="Number">739104</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">226185452</Data></Cell>
+    <Cell><Data ss:Type="Number">705541</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">302669907</Data></Cell>
+    <Cell><Data ss:Type="Number">695818</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">306553728</Data></Cell>
+    <Cell><Data ss:Type="Number">736310</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">304312605</Data></Cell>
+    <Cell><Data ss:Type="Number">708681</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">235181553</Data></Cell>
+    <Cell><Data ss:Type="Number">739301</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">256198066</Data></Cell>
+    <Cell><Data ss:Type="Number">680377</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">252611321</Data></Cell>
+    <Cell><Data ss:Type="Number">764192</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">160148081</Data></Cell>
+    <Cell><Data ss:Type="Number">731223</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">212294394</Data></Cell>
+    <Cell><Data ss:Type="Number">688737</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">183669238</Data></Cell>
+    <Cell><Data ss:Type="Number">761490</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">145089271</Data></Cell>
+    <Cell><Data ss:Type="Number">732716</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">255464339</Data></Cell>
+    <Cell><Data ss:Type="Number">736135</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">260010860</Data></Cell>
+    <Cell><Data ss:Type="Number">750332</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">221532787</Data></Cell>
+    <Cell><Data ss:Type="Number">726366</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">285561889</Data></Cell>
+    <Cell><Data ss:Type="Number">719316</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">249451904</Data></Cell>
+    <Cell><Data ss:Type="Number">761148</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237813571</Data></Cell>
+    <Cell><Data ss:Type="Number">703825</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">193255819</Data></Cell>
+    <Cell><Data ss:Type="Number">686436</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">199833212</Data></Cell>
+    <Cell><Data ss:Type="Number">694194</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">152949826</Data></Cell>
+    <Cell><Data ss:Type="Number">698851</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">263806747</Data></Cell>
+    <Cell><Data ss:Type="Number">718701</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">191574995</Data></Cell>
+    <Cell><Data ss:Type="Number">688538</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">282787124</Data></Cell>
+    <Cell><Data ss:Type="Number">727646</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">292310876</Data></Cell>
+    <Cell><Data ss:Type="Number">695015</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">310119665</Data></Cell>
+    <Cell><Data ss:Type="Number">729598</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">215979030</Data></Cell>
+    <Cell><Data ss:Type="Number">741750</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">225017534</Data></Cell>
+    <Cell><Data ss:Type="Number">717304</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">292186903</Data></Cell>
+    <Cell><Data ss:Type="Number">699310</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">306162005</Data></Cell>
+    <Cell><Data ss:Type="Number">754141</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">277842381</Data></Cell>
+    <Cell><Data ss:Type="Number">763798</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">136294308</Data></Cell>
+    <Cell><Data ss:Type="Number">762428</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">229410548</Data></Cell>
+    <Cell><Data ss:Type="Number">695327</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">226038554</Data></Cell>
+    <Cell><Data ss:Type="Number">748399</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">208955499</Data></Cell>
+    <Cell><Data ss:Type="Number">713533</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">275945770</Data></Cell>
+    <Cell><Data ss:Type="Number">693567</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">157299337</Data></Cell>
+    <Cell><Data ss:Type="Number">681892</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">280566416</Data></Cell>
+    <Cell><Data ss:Type="Number">744208</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">298384248</Data></Cell>
+    <Cell><Data ss:Type="Number">762569</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">298575222</Data></Cell>
+    <Cell><Data ss:Type="Number">695907</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">172359017</Data></Cell>
+    <Cell><Data ss:Type="Number">733441</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">254193418</Data></Cell>
+    <Cell><Data ss:Type="Number">741428</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">250270914</Data></Cell>
+    <Cell><Data ss:Type="Number">735869</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">188068230</Data></Cell>
+    <Cell><Data ss:Type="Number">749154</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">143418745</Data></Cell>
+    <Cell><Data ss:Type="Number">719993</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">303708723</Data></Cell>
+    <Cell><Data ss:Type="Number">690893</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">236229656</Data></Cell>
+    <Cell><Data ss:Type="Number">677205</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">302784290</Data></Cell>
+    <Cell><Data ss:Type="Number">756744</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">235553739</Data></Cell>
+    <Cell><Data ss:Type="Number">690324</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">281706634</Data></Cell>
+    <Cell><Data ss:Type="Number">742474</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">133390895</Data></Cell>
+    <Cell><Data ss:Type="Number">708426</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">169004094</Data></Cell>
+    <Cell><Data ss:Type="Number">720751</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">168462984</Data></Cell>
+    <Cell><Data ss:Type="Number">691739</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">222564329</Data></Cell>
+    <Cell><Data ss:Type="Number">764589</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">243559085</Data></Cell>
+    <Cell><Data ss:Type="Number">697047</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">161014602</Data></Cell>
+    <Cell><Data ss:Type="Number">763921</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">300216843</Data></Cell>
+    <Cell><Data ss:Type="Number">718437</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">142606631</Data></Cell>
+    <Cell><Data ss:Type="Number">701037</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">278528253</Data></Cell>
+    <Cell><Data ss:Type="Number">750178</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">166264787</Data></Cell>
+    <Cell><Data ss:Type="Number">694991</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">289939719</Data></Cell>
+    <Cell><Data ss:Type="Number">742045</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">167135582</Data></Cell>
+    <Cell><Data ss:Type="Number">738832</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">262625310</Data></Cell>
+    <Cell><Data ss:Type="Number">751072</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">298768407</Data></Cell>
+    <Cell><Data ss:Type="Number">682738</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">174595231</Data></Cell>
+    <Cell><Data ss:Type="Number">713878</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">236982319</Data></Cell>
+    <Cell><Data ss:Type="Number">714198</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205873915</Data></Cell>
+    <Cell><Data ss:Type="Number">754919</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237454206</Data></Cell>
+    <Cell><Data ss:Type="Number">698035</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">159586995</Data></Cell>
+    <Cell><Data ss:Type="Number">682344</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">300236500</Data></Cell>
+    <Cell><Data ss:Type="Number">761394</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">224233587</Data></Cell>
+    <Cell><Data ss:Type="Number">703691</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">213906452</Data></Cell>
+    <Cell><Data ss:Type="Number">737085</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">195292321</Data></Cell>
+    <Cell><Data ss:Type="Number">708795</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">282648224</Data></Cell>
+    <Cell><Data ss:Type="Number">687971</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">136891468</Data></Cell>
+    <Cell><Data ss:Type="Number">738561</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">136017564</Data></Cell>
+    <Cell><Data ss:Type="Number">763711</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">143442327</Data></Cell>
+    <Cell><Data ss:Type="Number">732157</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">193224520</Data></Cell>
+    <Cell><Data ss:Type="Number">761061</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">141773446</Data></Cell>
+    <Cell><Data ss:Type="Number">765656</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">172006736</Data></Cell>
+    <Cell><Data ss:Type="Number">757670</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">163992674</Data></Cell>
+    <Cell><Data ss:Type="Number">688014</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">244955728</Data></Cell>
+    <Cell><Data ss:Type="Number">678901</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">181183713</Data></Cell>
+    <Cell><Data ss:Type="Number">689881</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">161750361</Data></Cell>
+    <Cell><Data ss:Type="Number">685575</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">166483478</Data></Cell>
+    <Cell><Data ss:Type="Number">749721</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">296787560</Data></Cell>
+    <Cell><Data ss:Type="Number">728429</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">148681468</Data></Cell>
+    <Cell><Data ss:Type="Number">748166</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">281541667</Data></Cell>
+    <Cell><Data ss:Type="Number">747578</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">195138198</Data></Cell>
+    <Cell><Data ss:Type="Number">747270</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">135125055</Data></Cell>
+    <Cell><Data ss:Type="Number">687910</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237603150</Data></Cell>
+    <Cell><Data ss:Type="Number">720045</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">258998153</Data></Cell>
+    <Cell><Data ss:Type="Number">723555</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">168493332</Data></Cell>
+    <Cell><Data ss:Type="Number">689722</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">262591593</Data></Cell>
+    <Cell><Data ss:Type="Number">695271</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">169942875</Data></Cell>
+    <Cell><Data ss:Type="Number">744690</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">251709156</Data></Cell>
+    <Cell><Data ss:Type="Number">700760</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">157330196</Data></Cell>
+    <Cell><Data ss:Type="Number">754392</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">272147129</Data></Cell>
+    <Cell><Data ss:Type="Number">740610</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">147197016</Data></Cell>
+    <Cell><Data ss:Type="Number">725604</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">267706969</Data></Cell>
+    <Cell><Data ss:Type="Number">713246</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">156918522</Data></Cell>
+    <Cell><Data ss:Type="Number">692077</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">201951070</Data></Cell>
+    <Cell><Data ss:Type="Number">702498</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">178484144</Data></Cell>
+    <Cell><Data ss:Type="Number">744186</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">190078262</Data></Cell>
+    <Cell><Data ss:Type="Number">679801</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">286528909</Data></Cell>
+    <Cell><Data ss:Type="Number">682881</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">132265538</Data></Cell>
+    <Cell><Data ss:Type="Number">709607</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">265658293</Data></Cell>
+    <Cell><Data ss:Type="Number">699309</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">275770519</Data></Cell>
+    <Cell><Data ss:Type="Number">743892</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">245102934</Data></Cell>
+    <Cell><Data ss:Type="Number">750916</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">158255362</Data></Cell>
+    <Cell><Data ss:Type="Number">693499</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205243315</Data></Cell>
+    <Cell><Data ss:Type="Number">694934</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">297796047</Data></Cell>
+    <Cell><Data ss:Type="Number">703723</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">166168532</Data></Cell>
+    <Cell><Data ss:Type="Number">745102</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">204193722</Data></Cell>
+    <Cell><Data ss:Type="Number">700348</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">155233583</Data></Cell>
+    <Cell><Data ss:Type="Number">686615</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">149859811</Data></Cell>
+    <Cell><Data ss:Type="Number">687738</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">303973833</Data></Cell>
+    <Cell><Data ss:Type="Number">701238</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">155924095</Data></Cell>
+    <Cell><Data ss:Type="Number">717007</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">246261028</Data></Cell>
+    <Cell><Data ss:Type="Number">683216</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">131742044</Data></Cell>
+    <Cell><Data ss:Type="Number">714288</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">311688237</Data></Cell>
+    <Cell><Data ss:Type="Number">715257</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">209604153</Data></Cell>
+    <Cell><Data ss:Type="Number">746771</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">197039272</Data></Cell>
+    <Cell><Data ss:Type="Number">755192</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">275680925</Data></Cell>
+    <Cell><Data ss:Type="Number">763983</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">205100684</Data></Cell>
+    <Cell><Data ss:Type="Number">745158</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">187793450</Data></Cell>
+    <Cell><Data ss:Type="Number">756416</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">184635531</Data></Cell>
+    <Cell><Data ss:Type="Number">725366</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">223501220</Data></Cell>
+    <Cell><Data ss:Type="Number">738367</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">265346340</Data></Cell>
+    <Cell><Data ss:Type="Number">764543</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">202692039</Data></Cell>
+    <Cell><Data ss:Type="Number">753317</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">204418765</Data></Cell>
+    <Cell><Data ss:Type="Number">691213</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">135493364</Data></Cell>
+    <Cell><Data ss:Type="Number">719380</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">184653039</Data></Cell>
+    <Cell><Data ss:Type="Number">694864</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">218276090</Data></Cell>
+    <Cell><Data ss:Type="Number">680691</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200781327</Data></Cell>
+    <Cell><Data ss:Type="Number">698227</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">187198476</Data></Cell>
+    <Cell><Data ss:Type="Number">680078</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">182046478</Data></Cell>
+    <Cell><Data ss:Type="Number">718806</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">265835618</Data></Cell>
+    <Cell><Data ss:Type="Number">731939</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">300395416</Data></Cell>
+    <Cell><Data ss:Type="Number">680361</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">302279556</Data></Cell>
+    <Cell><Data ss:Type="Number">692782</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">151089568</Data></Cell>
+    <Cell><Data ss:Type="Number">735690</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">175913832</Data></Cell>
+    <Cell><Data ss:Type="Number">739850</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">306066930</Data></Cell>
+    <Cell><Data ss:Type="Number">746364</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">222341072</Data></Cell>
+    <Cell><Data ss:Type="Number">685421</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">158601763</Data></Cell>
+    <Cell><Data ss:Type="Number">709892</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">203422174</Data></Cell>
+    <Cell><Data ss:Type="Number">747002</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">289764192</Data></Cell>
+    <Cell><Data ss:Type="Number">712344</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">198849134</Data></Cell>
+    <Cell><Data ss:Type="Number">707290</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">193631847</Data></Cell>
+    <Cell><Data ss:Type="Number">742652</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">300271767</Data></Cell>
+    <Cell><Data ss:Type="Number">745151</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">195785424</Data></Cell>
+    <Cell><Data ss:Type="Number">763414</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">157592405</Data></Cell>
+    <Cell><Data ss:Type="Number">701476</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">275584111</Data></Cell>
+    <Cell><Data ss:Type="Number">711413</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237629015</Data></Cell>
+    <Cell><Data ss:Type="Number">767458</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">250583926</Data></Cell>
+    <Cell><Data ss:Type="Number">709764</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">147906361</Data></Cell>
+    <Cell><Data ss:Type="Number">749668</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">144229744</Data></Cell>
+    <Cell><Data ss:Type="Number">754756</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">262755060</Data></Cell>
+    <Cell><Data ss:Type="Number">743003</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">285952940</Data></Cell>
+    <Cell><Data ss:Type="Number">751504</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">184277667</Data></Cell>
+    <Cell><Data ss:Type="Number">712193</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">292183394</Data></Cell>
+    <Cell><Data ss:Type="Number">742725</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">301603604</Data></Cell>
+    <Cell><Data ss:Type="Number">685374</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">242821876</Data></Cell>
+    <Cell><Data ss:Type="Number">739540</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">274550458</Data></Cell>
+    <Cell><Data ss:Type="Number">693747</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">206606249</Data></Cell>
+    <Cell><Data ss:Type="Number">708633</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">240693969</Data></Cell>
+    <Cell><Data ss:Type="Number">762747</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">175227905</Data></Cell>
+    <Cell><Data ss:Type="Number">711437</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">155624072</Data></Cell>
+    <Cell><Data ss:Type="Number">749017</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">175800097</Data></Cell>
+    <Cell><Data ss:Type="Number">712843</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">198400060</Data></Cell>
+    <Cell><Data ss:Type="Number">729054</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">202600762</Data></Cell>
+    <Cell><Data ss:Type="Number">742628</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">288494725</Data></Cell>
+    <Cell><Data ss:Type="Number">702798</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237042600</Data></Cell>
+    <Cell><Data ss:Type="Number">693504</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">310478380</Data></Cell>
+    <Cell><Data ss:Type="Number">756882</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">301364579</Data></Cell>
+    <Cell><Data ss:Type="Number">761074</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">206324668</Data></Cell>
+    <Cell><Data ss:Type="Number">746545</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">197682586</Data></Cell>
+    <Cell><Data ss:Type="Number">727563</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">232847094</Data></Cell>
+    <Cell><Data ss:Type="Number">720175</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">263962315</Data></Cell>
+    <Cell><Data ss:Type="Number">758845</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">210066865</Data></Cell>
+    <Cell><Data ss:Type="Number">690702</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">165029768</Data></Cell>
+    <Cell><Data ss:Type="Number">677208</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">253724706</Data></Cell>
+    <Cell><Data ss:Type="Number">734191</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">276644518</Data></Cell>
+    <Cell><Data ss:Type="Number">690666</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">307085056</Data></Cell>
+    <Cell><Data ss:Type="Number">700830</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">218804498</Data></Cell>
+    <Cell><Data ss:Type="Number">696355</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">216925644</Data></Cell>
+    <Cell><Data ss:Type="Number">703183</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">190745490</Data></Cell>
+    <Cell><Data ss:Type="Number">718351</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">257245106</Data></Cell>
+    <Cell><Data ss:Type="Number">718786</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">240360949</Data></Cell>
+    <Cell><Data ss:Type="Number">731097</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">144527213</Data></Cell>
+    <Cell><Data ss:Type="Number">694502</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">244617795</Data></Cell>
+    <Cell><Data ss:Type="Number">682452</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">240466884</Data></Cell>
+    <Cell><Data ss:Type="Number">700449</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">206889181</Data></Cell>
+    <Cell><Data ss:Type="Number">764434</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200677161</Data></Cell>
+    <Cell><Data ss:Type="Number">695207</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">267489537</Data></Cell>
+    <Cell><Data ss:Type="Number">703411</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">259157098</Data></Cell>
+    <Cell><Data ss:Type="Number">730029</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">280227383</Data></Cell>
+    <Cell><Data ss:Type="Number">735705</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">228469246</Data></Cell>
+    <Cell><Data ss:Type="Number">679782</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">299922399</Data></Cell>
+    <Cell><Data ss:Type="Number">751164</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">192063774</Data></Cell>
+    <Cell><Data ss:Type="Number">692168</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200177888</Data></Cell>
+    <Cell><Data ss:Type="Number">739853</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">200525995</Data></Cell>
+    <Cell><Data ss:Type="Number">708064</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">202466012</Data></Cell>
+    <Cell><Data ss:Type="Number">746369</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">259260217</Data></Cell>
+    <Cell><Data ss:Type="Number">759010</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">151447382</Data></Cell>
+    <Cell><Data ss:Type="Number">733536</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">146979043</Data></Cell>
+    <Cell><Data ss:Type="Number">735697</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">225105812</Data></Cell>
+    <Cell><Data ss:Type="Number">755363</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">139938530</Data></Cell>
+    <Cell><Data ss:Type="Number">744737</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">146984411</Data></Cell>
+    <Cell><Data ss:Type="Number">747898</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">238520469</Data></Cell>
+    <Cell><Data ss:Type="Number">731822</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">199575546</Data></Cell>
+    <Cell><Data ss:Type="Number">738657</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">134200551</Data></Cell>
+    <Cell><Data ss:Type="Number">695075</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">227213372</Data></Cell>
+    <Cell><Data ss:Type="Number">681033</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">301536209</Data></Cell>
+    <Cell><Data ss:Type="Number">687673</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">230071419</Data></Cell>
+    <Cell><Data ss:Type="Number">717594</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">151516215</Data></Cell>
+    <Cell><Data ss:Type="Number">756902</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">194882070</Data></Cell>
+    <Cell><Data ss:Type="Number">715205</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">165751389</Data></Cell>
+    <Cell><Data ss:Type="Number">702022</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">170958884</Data></Cell>
+    <Cell><Data ss:Type="Number">732489</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">210357191</Data></Cell>
+    <Cell><Data ss:Type="Number">695973</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">310696511</Data></Cell>
+    <Cell><Data ss:Type="Number">737026</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">275699507</Data></Cell>
+    <Cell><Data ss:Type="Number">735590</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">303019667</Data></Cell>
+    <Cell><Data ss:Type="Number">766013</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">194521243</Data></Cell>
+    <Cell><Data ss:Type="Number">677144</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">277210863</Data></Cell>
+    <Cell><Data ss:Type="Number">715992</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">254436818</Data></Cell>
+    <Cell><Data ss:Type="Number">736286</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">173893730</Data></Cell>
+    <Cell><Data ss:Type="Number">746242</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">146274683</Data></Cell>
+    <Cell><Data ss:Type="Number">700050</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">196478530</Data></Cell>
+    <Cell><Data ss:Type="Number">694364</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">217946718</Data></Cell>
+    <Cell><Data ss:Type="Number">721971</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">158657215</Data></Cell>
+    <Cell><Data ss:Type="Number">733919</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">306910467</Data></Cell>
+    <Cell><Data ss:Type="Number">755394</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">206456040</Data></Cell>
+    <Cell><Data ss:Type="Number">744170</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">231055414</Data></Cell>
+    <Cell><Data ss:Type="Number">728913</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">250665062</Data></Cell>
+    <Cell><Data ss:Type="Number">756698</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">213062327</Data></Cell>
+    <Cell><Data ss:Type="Number">689390</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">207199383</Data></Cell>
+    <Cell><Data ss:Type="Number">738962</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">216589549</Data></Cell>
+    <Cell><Data ss:Type="Number">722094</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">182578356</Data></Cell>
+    <Cell><Data ss:Type="Number">725227</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">274616627</Data></Cell>
+    <Cell><Data ss:Type="Number">762294</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">259209464</Data></Cell>
+    <Cell><Data ss:Type="Number">708920</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">159524507</Data></Cell>
+    <Cell><Data ss:Type="Number">719691</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">237842341</Data></Cell>
+    <Cell><Data ss:Type="Number">732696</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">192407136</Data></Cell>
+    <Cell><Data ss:Type="Number">696138</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">297403130</Data></Cell>
+    <Cell><Data ss:Type="Number">738565</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">191320649</Data></Cell>
+    <Cell><Data ss:Type="Number">693127</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">268560608</Data></Cell>
+    <Cell><Data ss:Type="Number">695803</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">226903892</Data></Cell>
+    <Cell><Data ss:Type="Number">696873</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">251366014</Data></Cell>
+    <Cell><Data ss:Type="Number">733761</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">264305030</Data></Cell>
+    <Cell><Data ss:Type="Number">755083</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">250998507</Data></Cell>
+    <Cell><Data ss:Type="Number">698827</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">268574086</Data></Cell>
+    <Cell><Data ss:Type="Number">756355</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">171400033</Data></Cell>
+    <Cell><Data ss:Type="Number">684426</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">253930418</Data></Cell>
+    <Cell><Data ss:Type="Number">721477</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">219321778</Data></Cell>
+    <Cell><Data ss:Type="Number">689221</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">157876250</Data></Cell>
+    <Cell><Data ss:Type="Number">690958</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">VTEXSTORE</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="Number">213891217</Data></Cell>
+    <Cell><Data ss:Type="Number">682435</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>8</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

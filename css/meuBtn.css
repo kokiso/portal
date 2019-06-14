@@ -1,0 +1,30 @@
+.botaoImagemSup-icon-big {
+  color: #696969;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  padding: 10px 3px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-line-pack: center;
+  align-content: center;
+  white-space: initial; 
+  box-shadow: inset 2px 2px 0px rgba(0,0,0,0.125);
+  border: 1px solid #B0C4DE;
+  border-radius: 6px 6px 6px 6px;
+  text-align: center;
+  font-size: 12px;
+}
+.botaoImagemSup-icon-big > i {
+  width: 100%;
+  display: block;
+  font-size: 1.8em;
+}
+
+.botaoImagemSup-icon-big:hover{
+  border: 1px solid #aaa; 
+  background-color: #BEBEBE;
+  color: black;
+  box-shadow: inset 0px 0px 0px rgba(0,0,0,0.125);
+}

@@ -1,0 +1,17 @@
+SELECT O.OPT_CODIGO
+                       ,O.OPT_CLIENTE
+                       ,O.OPT_CODVND
+                       ,FV.FVR_NOME
+                       ,CONVERT(VARCHAR(10),O.OPT_DTINICIO,127) AS OPT_DTINICIO
+                       ,O.OPT_PORCENTAGEM
+                       ,O.OPT_CODMSG
+                       ,M.MSG_NOME
+                       ,CASE WHEN O.OPT_REG='P' THEN 'PUB' WHEN O.OPT_REG='S' THEN 'SIS' ELSE 'ADM' END AS OPT_REG
+                       ,CASE WHEN O.OPT_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS OPT_ATIVO          
+                       ,O.OPT_CODUSR
+                  FROM OPORTUNIDADE O
+                  LEFT OUTER JOIN MENSAGEM M ON O.OPT_CODMSG = M.MSG_CODIGO
+                  LEFT OUTER JOIN USUARIOSISTEMA U ON O.OPT_CODUSR = U.US_CODIGO
+                  LEFT OUTER JOIN VENDEDOR V ON O.OPT_CODVND = V.VND_CODFVR
+                  LEFT OUTER JOIN FAVORECIDO FV ON FV.FVR_CODIGO = V.VND_CODFVR 
+                 WHERE (O.OPT_ATIVO='S') OR ('*'='S')

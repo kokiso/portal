@@ -1,0 +1,432 @@
+Examples:
+
+ST300EMG;907036181;04;1069;20190307;19:29:58;20461;-21.131321;-047.783671;000.146;000.00;12;1;67083260;0.00;000000;3;082752;4.0;0;0;00000000000000;0
+
+ST300STT;907036181;04;1069;20190221;17:55:57;26805;-21.140285;-047.989671;000.007;000.00;9;1;67015129;13.10;000000;1;0874;082395;4.1;0;0;00000000000000;0
+
+Suntech mapeamento de comandos do ST 3XX:
+
+Model Identification Table Model ID
+ST300RI         01
+ST340           02
+ST340LC(4pin)   03
+ST300H          04
+ST350           05
+ST340RB         17
+
+String base para envio de comandos comuns:
+
+HDR :'ST300CMD'
+DEV_ID:  ID do Rastreador (string de 9 caracteres)
+VER : '02'
+CMD_ID : 'nome do comando'
+
+CMD_ID: StatusReq;
+		Reset;
+		Preset;
+		PresetA;
+		AckEmerg;
+		Enable1;
+		Disable1;
+		Enable2;
+		Disable2;
+		$SHTDN<enter>; -> 'how to shutdown back-up battery'
+		$SHTRST<enter>; -> 'how to stop shutdown back-up battery'
+		ReqIMSI;
+		ReqICCID;
+		ReqVer;
+		SttReq;
+		ATCMD;
+		StartCountOdo;
+		StopCountOdo;
+		ReqRPMU;
+		ReqOdoU;
+		ReqDriverID;
+		ReleaseDIDOutControl;
+		ReqTeleParam;
+		ReqDPAParam;
+		ImproveBatteryLife;
+		ReqBattLife;
+
+	String base para envio de comandos NÃO comuns:
+
+	HDR :'ST300CMD'
+	DEV_ID:  ID do Rastreador (string de 9 caracteres)
+	VER : '01'
+	CMD_ID : 'nome do comando'
+
+		CMD_ID: EraseAll;
+				SetOdometer=NUMBER;
+				InitMsgNo;
+				SetHMeter=NUMBER;
+				ReqCircleGeo;
+				ReqOwnNo;
+				SetOwnNo;
+				ReqVol;
+				SetVol;
+				Reboot;
+				RestartAntiTheft2;
+				SetSMSNoOfPanic;
+				ReqSMSNoOfPanic;
+				SetGoogleMap;
+				ReqGoogleMap;
+				ReqShortTest;
+				ReqTest;
+				EnablePINLock; (ST350 only)
+				DisablePINLock; (ST350 only)
+				GpsOn;
+				GpsOff;
+				StartDPACAL;
+				StopDPACAL;
+
+Suntech mapeamento de respostas do ST 3XX:
+
+	Tipos:
+		STT: Status;
+		EMG: Emergencia;
+		EVT: Eventos;
+		ALT: Alertas;
+		HTE: Evento de viagem;
+		ALV: GSM/GPRS Service;
+		UEX: Report de dados RS232;
+		DEX: Dados de transferência RS232;
+
+
+Suntech envio e respostas de configuração ST 3XX:
+
+	Tipos:
+
+		NTW: Configurações de internet;
+		RPT: Configuração de reports;
+		EVT: Configuração de Evento;
+		GSM: Parâmetros para mensagem GSM e ligação de telefone;
+		SVC: Configuração de Features;
+		MBV: Parâmetros de voltagem;
+		MSR: Parâmetros de movimento;
+		CGF: Configuração circular geo-fencing;
+		ADP: Parâmetros adicionais (TCP/UDP);
+		NPT: Novos parâmetros;
+		HTP: Configuração de Telemetria;
+		Drivers:
+			HAD: Adicionar;
+			HRD: Remover;
+			HGD: Pegar id do driver;
+		DPA: Análise de drive pattern;
+
+Variaveis de retorno:
+
+		STT: 
+			Header of Status report;
+	 		Device ID;
+	 		Device Model;  - @MSAS_TECNOLOGIA
+	 		Number of the released Software Version;
+	 		GPS Date (yyyymmdd);  - @MSAS_DATAGPS
+	 		GPS Time (hh:mm:ss);  - @MSAS_PERIODO (calcular periodo manha/tarde/noite pela hora)
+	 		Location code id(3 digits hex) + Serving Cel BSIC(2 digits decimal);
+	 		Latitude - @MSAS_LATITUDE;
+	 		Longitude - @MSAS_LONGITUDE;
+	 		Speed in km/k (0 if over than 200,000km); - @MSAS_VELOCIDADE
+	 		Course on the ground in degree - @MSAS_DIRECAO;
+	 		Number Satellites; @MSAS_SATELITE
+	 		GPS is fixed (1/0); @MSAS_GPS
+	 		Traveled distance in meter; @MSAS_ODOMETRO
+	 		Voltage value of main power; @MSAS_TENSAO
+	 		Current I/O Status input and output [
+	 			Ignition + Input1 + Input 2 + Input 3 + Out1 + Out2
+				Ignition : ‘1’ (ON), ‘0’ (OFF)
+				Input1 ~ Input3 : ‘1’ (Ground, Shorted), ‘0’ (Opened)
+				Out1 ~ Out2 : ‘1’ (Active), ‘0’ (Inactive))];  	- @MSAS_IGNICAO  
+																- @MSAS_ENTRADA1
+																- @MSAS_ENTRADA2
+																- @MSAS_ENTRADA3
+																- @MSAS_SAIDA1
+																- @MSAS_SAIDA2
+			Mode(1 idle(parking),2 active(driving)); @MSAS_EVENTO
+			Msg number (after 9999 is reported, message number returns to 0000);
+			Driving hour-meter. max 999999; @MSAS_HORIMETRO
+			Voltage value of backup battery
+			Message type; reports is real time(1) or report is storage (0);
+			Current RPM (only for ST300H); @MSAS_RPM
+			Driver Id (Only for st300h); @MSAS_IDMOTORISTA
+			State if DiD´s registration (only st300h, 0/1);
+			Information of mobile country code;
+			Information of mobile network code;
+			information of signal Strength;
+			information of location area code;
+			Information of timing advance;
+			GPS on or off flag;
+
+		EMG:
+			Header of Status report;
+	 		Device ID; 
+	 		Device Model; MSAS_TECNOLOGIA
+	 		Number of the released Software Version;
+	 		GPS Date (yyyymmdd); MSAS_DATAGPS
+	 		GPS Time (hh:mm:ss); @MSAS_PERIODO (calcular periodo manha/tarde/noite pela hora)
+	 		Location code id(3 digits hex) + Serving Cel BSIC(2 digits decimal);
+	 		Latitude;  @MSAS_LATITUDE
+	 		Longitude; @MSAS_LONGITUDE
+	 		Speed in km/k (0 if over than 200,000km); @MSAS_VELOCIDADE
+	 		Course on the ground in degree; @MSAS_DIRECAO;
+	 		Number Satellites; @MSAS_SATELITE
+	 		GPS is fixed (1/0); @MSAS_GPS
+	 		Traveled distance in meter; @MSAS_ODOMETRO
+	 		Voltage value of main power; @MSAS_TENSAO
+	 		Current I/O Status input and output [
+	 			Ignition + Input1 + Input 2 + Input 3 + Out1 + Out2
+				Ignition : ‘1’ (ON), ‘0’ (OFF)
+				Input1 ~ Input3 : ‘1’ (Ground, Shorted), ‘0’ (Opened)
+				Out1 ~ Out2 : ‘1’ (Active), ‘0’ (Inactive))]; 	- @MSAS_IGNICAO  
+																- @MSAS_ENTRADA1
+																- @MSAS_ENTRADA2
+																- @MSAS_ENTRADA3
+																- @MSAS_SAIDA1
+																- @MSAS_SAIDA2
+			Emergency type[
+				‘1’ = emergency by panic button
+				‘2’ = emergency by parking lock
+				‘3’ = emergency by removing main power.
+				It’s only available in model that has a backup battery.
+				‘5’ = emergency by anti-theft
+				‘6’ = emergency by anti-theft door
+				‘7’ = emergency by motion
+				‘8’ = emergency by anti-theft shock
+			]; 	 @MSAS_EVENTO
+			Driving hour-meter. max 999999; @MSAS_HORIMETRO
+			Voltage value of backup battery
+			Message type; reports is real time(1) or report is storage (0);
+			Current RPM (only for ST300H); @MSAS_RPM
+			Driver Id (Only for st300h);  @MSAS_IDMOTORISTA
+			State if DiD´s registration (only st300h, 0/1);
+			Information of Cell ID
+			Cell ID(4 digits hex) + Location Code ID(4 digits Hex) + 
+			Serving Cell DSIC(2 digits decimal)
+			Information of mobile country code;
+			Information of mobile network code;
+			information of signal Strength;
+			information of location area code;
+			Information of timing advance;
+			GPS on or off flag;
+
+		EVT:
+			Header of Status report;
+	 		Device ID;
+	 		Device Model;  MSAS_TECNOLOGIA
+	 		Number of the released Software Version;
+	 		GPS Date (yyyymmdd);  @MSAS_DATAGPS
+	 		GPS Time (hh:mm:ss);  @MSAS_PERIODO
+	 		Location code id(3 digits hex) + Serving Cel BSIC(2 digits decimal);
+	 		Latitude;   @MSAS_LATITUDE;
+	 		Longitude;  @MSAS_LONGITUDE;
+	 		Speed in km/k (0 if over than 200,000km);  @MSAS_VELOCIDADE
+	 		Course on the ground in degree;  @MSAS_DIRECAO;
+	 		Number Satellites; @MSAS_SATELITE
+	 		GPS is fixed (1/0); @MSAS_GPS
+	 		Traveled distance in meter; @MSAS_ODOMETRO
+	 		Voltage value of main power;  @MSAS_TENSAO
+	 		Current I/O Status input and output [
+	 			Ignition + Input1 + Input 2 + Input 3 + Out1 + Out2
+				Ignition : ‘1’ (ON), ‘0’ (OFF)
+				Input1 ~ Input3 : ‘1’ (Ground, Shorted), ‘0’ (Opened)
+				Out1 ~ Out2 : ‘1’ (Active), ‘0’ (Inactive))];  	- @MSAS_IGNICAO  
+																- @MSAS_ENTRADA1
+																- @MSAS_ENTRADA2
+																- @MSAS_ENTRADA3
+																- @MSAS_SAIDA1
+																- @MSAS_SAIDA2
+			Event type[
+				1 = Input1 goes to ground state.
+				2 = Input1 goes to open state.
+				3 = Input2 goes to ground state.
+				4 = Input2 goes to open state.
+				5 = Input3 goes to ground state.
+				6 = Input3 goes to open state.];	  @MSAS_EVENTO			
+			Driving hour-meter. max 999999; @MSAS_HORIMETRO
+			Voltage value of backup battery
+			Message type; reports is real time(1) or report is storage (0);
+			Current RPM (only for ST300H); @MSAS_RPM
+			Driver Id (Only for st300h); @MSAS_IDMOTORISTA
+			State if DiD´s registration (only st300h, 0/1);
+			Information of Cell ID
+			Cell ID(4 digits hex) + Location Code ID(4 digits Hex) + 
+			Serving Cell DSIC(2 digits decimal)
+			Information of mobile country code;
+			Information of mobile network code;
+			information of signal Strength;
+			information of location area code;
+			Information of timing advance;
+			GPS on or off flag;
+
+		ALT:
+			Header of Status report;
+	 		Device ID;
+	 		Device Model; @MSAS_TECNOLOGIA
+	 		Number of the released Software Version;
+	 		GPS Date (yyyymmdd);  @MSAS_DATAGPS
+	 		GPS Time (hh:mm:ss);  @MSAS_PERIODO
+	 		Location code id(3 digits hex) + Serving Cel BSIC(2 digits decimal);
+	 		Latitude;    @MSAS_LATITUDE
+	 		Longitude;   @MSAS_LONGITUDE
+	 		Speed in km/k (0 if over than 200,000km);  @MSAS_VELOCIDADE
+	 		Course on the ground in degree;  @MSAS_DIRECAO
+	 		Number Satellites;  @MSAS_SATELITE
+	 		GPS is fixed (1/0);  @MSAS_GPS
+	 		Traveled distance in meter; @MSAS_ODOMETRO
+	 		Voltage value of main power; @MSAS_TENSAO
+	 		Current I/O Status input and output [
+	 			Ignition + Input1 + Input 2 + Input 3 + Out1 + Out2
+				Ignition : ‘1’ (ON), ‘0’ (OFF)
+				Input1 ~ Input3 : ‘1’ (Ground, Shorted), ‘0’ (Opened)
+				Out1 ~ Out2 : ‘1’ (Active), ‘0’ (Inactive))];;  - @MSAS_IGNICAO  
+																- @MSAS_ENTRADA1
+																- @MSAS_ENTRADA2
+																- @MSAS_ENTRADA3
+																- @MSAS_SAIDA1
+																- @MSAS_SAIDA2
+			Alert type[
+				1 = Start driving faster than SPEED_LIMIT.
+				2 = Ended over-speed condition
+				3 = Disconnected GPS antenna
+				4 = Reconnected GPS antenna after disconnected
+				5 = The vehicle exited the geo-fenced area that has the following ID.
+				(5001 ~ 5200)
+				6 = The vehicle entered the geo- fenced area that has the following ID.
+				(6001 ~ 6200)
+				8 = Shorted GPS antenna.
+				This alert may not support depending on GPS chipset model.
+				9 = Enter the Deep Sleep Mode
+				10 = Exit from the Deep Sleep Mode
+				13 = Backup battery error
+				14 = Vehicle battery goes down to a very low level. Refer to“7.6.Protection of Vehicle Battery”
+				15 = shocked
+				16 = Collision has occurred to the vehicle.
+				*40=Connected with the Main Power source
+				*41=Disconnected with the Main Power source
+				*44=Connected with the Back-up Battery
+				*45=Disconnected with the Back-up Battery
+				46 = Alert of fast acceleration from Driver Pattern Analysis
+				47 = Alert of harsh brake from Driver Pattern Analysis
+				48 = Alert of sharp turn from Driver Pattern Analysis
+				50 = Jamming detected
+				59 = Inserted I-Button
+				60 = Removed I-Button
+				61 = The vehicle turns on (ignition ON) but doesn’t drive during MAX_REST_TIME.
+				62 = Stopped more than predefined time.
+				63 = Dead center
+				64 = Over RPM
+				65 = Completed automatic RPM calibration
+				66 = Completed automatic odometer calibration
+				(by ignition or by command)
+				67 = Completed automatic odometer calibration as another type in dual
+				gear system
+				68 = Completed automatic Driver Pattern calibration.
+				70 = Alert when the vehicle runs faster than ‘SPEED_LIMIT_UNDER_RAIN’ during ‘DELAY_FOR_RAIN_OVSPD_RPT’ under rain.
+				71 = Alert when the vehicle’s speed becomes less than ‘SPEED_LIMIT_UNDER_RAIN’ under rain after alerting ‘70’. ‘
+				72 = Alert when the vehicle’s speed becomes less than ‘SPEED_LIMIT_UNDER_RAIN’ after alerting ‘70’ and stopping rain.
+				73 = Alert when the vehicle is inside a circle geo-fence and it’s speed exceeds ‘GEO_SPD_LIMIT’ during ‘GEO_SPD_LIMIT_DEBOUNCE’.
+				74 = Alert when the vehicle’s speed returns less ‘GEO_SPD_LIMIT; during ‘GEO_SPD_LIMIT_DEBOUNCE’ after alert ‘73’.
+				]
+				"Please refer below note for report format of alert 70, 71, 72, 73 and 74."	; @MSAS_EVENTO
+			Driving hour-meter. max 999999; @MSAS_HORIMETRO
+			Voltage value of backup battery
+			Message type; reports is real time(1) or report is storage (0);
+			Current RPM (only for ST300H);
+			Driver Id (Only for st300h);  @MSAS_IDMOTORISTA
+			State if DiD´s registration (only st300h, 0/1);
+			Information of Cell ID
+			Cell ID(4 digits hex) + Location Code ID(4 digits Hex) + 
+			Serving Cell DSIC(2 digits decimal)
+			Information of mobile country code;
+			Information of mobile network code;
+			information of signal Strength;
+			information of location area code;
+			Information of timing advance;
+			GPS on or off flag;
+			Value of force when DPA alert, This value is only for aler 46,47 and 48;
+			Max speed (km/h) for alert 70,71,72,73 and 74;
+			Set speed (km/h) for alert 70,71,72,73 and 74, value of 	
+				SPD_LIMIT_UNDER_RAIND OR GEO_SPD_LIMIT;
+			Geo id (001 up to 200) for alert 73 and 74;	
+
+		HTE:
+			Header of Status report;
+	 		Device ID;
+	 		Device Model;  @MSAS_TECNOLOGIA
+	 		Number of the released Software Version;
+	 		GPS Date (yyyymmdd);   @MSAS_DATAGPS
+	 		GPS Time (hh:mm:ss);   @MSAS_PERIODO
+	 		Traveled distance in meter; @MSAS_ODOMETRO
+	 		Voltage value of main power; @MSAS_TENSAO
+	 		Driving hour meter; @MSAS_HORIMETRO
+	 		Voltage value of backup battery;
+	 		Message report real time (1) or storage (0);
+	 		Traveleld distance during travel(in minute);
+	 		Time of this travel;
+	 		[
+	 		Duration of stop in this travel;
+	 		Latitude of start position of this travel;
+	 		Longitude of start position of this travel;
+	 		Latitude of end position of this travel;
+	 		Longitude of end position of this travel;
+	 		Average speed in this travel;
+	 		Maximum speed in this travel;
+	 		Accumulated time that car exceed over-speed in travel;
+	 		Accumulated time that rpm was above the economic range in this travel;
+	 		Accumulated time that rpm was below the economic range in this travel;
+	 		Accumulated time that RPM was within economic range in this travel;
+	 		Accumulated time than rpm exceeded maximum rpm in this travel
+	 		Accumulated time that the vehicle has driven;
+	 		Accumulated time that the vehicle was driven putting the gear in dead center in this travel;]  @MSAS_EVENTO ???
+	 		Inserted driver id;
+
+		ALV:
+			Header of Status report;
+	 		Device ID;
+
+		UEX:
+			Header of Status report;
+	 		Device ID;
+	 		Device Model;  @MSAS_TECNOLOGIA
+	 		Number of the released Software Version;
+	 		GPS Date (yyyymmdd);  @MSAS_DATAGPS
+	 		GPS Time (hh:mm:ss);  @MSAS_PERIODO
+	 		Location Code ID(3 digits hex) + Serving Cell BSIC(2 digits decimal);
+	 		Latitude;  @MSAS_LATITUDE
+	 		Longitude; @MSAS_LONGITUDE
+	 		Speed in km/k (0 if over than 200,000km); @MSAS_VELOCIDADE
+	 		Course on the ground in degree;  @MSAS_DIRECAO;
+	 		Number Satellites; @MSAS_SATELITE
+	 		GPS is fixed (1/0); @MSAS_DATAGPS
+	 		Traveled distance in meter; @MSAS_ODOMETRO
+	 		Voltage value of main power; @MSAS_TENSAO
+	 		Current I/O Status input and output [
+	 			Ignition + Input1 + Input 2 + Input 3 + Out1 + Out2
+				Ignition : ‘1’ (ON), ‘0’ (OFF)
+				Input1 ~ Input3 : ‘1’ (Ground, Shorted), ‘0’ (Opened)
+				Out1 ~ Out2 : ‘1’ (Active), ‘0’ (Inactive))];	- @MSAS_IGNICAO  
+																- @MSAS_ENTRADA1
+																- @MSAS_ENTRADA2
+																- @MSAS_ENTRADA3
+																- @MSAS_SAIDA1
+																- @MSAS_SAIDA2
+			Length of data;
+			Data from external RS232 Device, up to 500 bytes;
+			Driving hour-meter;
+			Voltage value of backup battery;
+			Report is real time(1) or storage(0);
+			8 bit Checksum; 
+
+		DEX:
+			Command type;
+			Device Id;
+			Protocol Version;
+			Length of data;
+			Up to 500bytes;
+			8bit Checksum
+
+			**  CHK_SUM is string converted from lower 8 bit of the summation of 	
+				DATA field.
+				In case of above example.
+				Value of ‘0’ character in DATA field is equal to 0x30 in hex system, and ‘1’ is equal to 0x31 in hex system.
+				In this case, summation of DATA will be 0x12F (0x30+0x31+0x32+0x33+0x34+0x35), and CHK_SUM string will be “2F’.
+				And, whole string from server will be “ST300DEX;100850000;02;6;012345;2F”.

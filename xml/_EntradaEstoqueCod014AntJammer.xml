@@ -1,0 +1,341 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Orlando Polonio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-12-11T17:54:55Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Hiperlink">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0066CC"
+    ss:Underline="Single"/>
+  </Style>
+  <Style ss:ID="s65" ss:Parent="s62">
+   <Alignment ss:Vertical="Center"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="20" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="85.5"/>
+   <Column ss:Width="63"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:Width="46.5"/>
+   <Column ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:Width="57"/>
+   <Column ss:Width="52.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">48640173</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">28399582</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">29273003</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">34682843</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">63287356</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">47644149</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">48517570</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">38019777</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">77517675</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">25835098</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">26708519</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">30139973</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">74410267</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">27937586</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">28811007</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">59335837</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">28099683</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">20201397</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">21074818</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">24893594</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">40511295</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">41730757</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">42604178</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">58755100</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">51996542</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">28817564</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">29690985</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">61484295</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">62436353</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">59094584</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">59968005</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">46643509</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">63525566</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">41451471</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">42324892</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">51405591</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">72278133</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">52574687</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">53448108</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">32394578</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">21684102</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">28611302</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">29484723</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">43589838</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">38522692</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">47079174</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">47952595</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">18686847</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">31945110</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">49291837</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">50165258</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">59773237</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">37076134</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">35934476</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">36807897</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">43403396</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">22356753</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">30524984</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">31398405</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">48953229</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">51679328</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">57276028</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">58149449</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">21658882</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">30539854</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">34879503</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">35752924</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">56989116</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">58329593</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">51703167</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">52576588</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">36960316</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="Number">42638019</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RANDBETWEEN(16161616,61616161)"><Data
+      ss:Type="Number">44918478</Data></Cell>
+    <Cell ss:StyleID="s65" ss:Formula="=RC[-1]+873421"><Data ss:Type="Number">45791899</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="Number">35016270</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <TopRowVisible>10</TopRowVisible>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>20</ActiveRow>
+     <RangeSelection>R21:R462</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

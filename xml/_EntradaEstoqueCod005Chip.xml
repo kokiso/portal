@@ -1,0 +1,256 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Orlando Polonio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-12-11T17:54:55Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s66">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="9" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="20" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="85.5"/>
+   <Column ss:Width="63"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Column ss:Width="46.5"/>
+   <Column ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:Width="57"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">58933364</Data></Cell>
+    <Cell><Data ss:Type="Number">33950947</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">46372661</Data></Cell>
+    <Cell><Data ss:Type="Number">23570817</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">57902040</Data></Cell>
+    <Cell><Data ss:Type="Number">33206384</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">40318423</Data></Cell>
+    <Cell><Data ss:Type="Number">58421212</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">23500076</Data></Cell>
+    <Cell><Data ss:Type="Number">60397845</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">58041793</Data></Cell>
+    <Cell><Data ss:Type="Number">34849995</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">53760419</Data></Cell>
+    <Cell><Data ss:Type="Number">46008816</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">16590316</Data></Cell>
+    <Cell><Data ss:Type="Number">54300978</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">47091606</Data></Cell>
+    <Cell><Data ss:Type="Number">54029721</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">40820025</Data></Cell>
+    <Cell><Data ss:Type="Number">23720793</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">61605857</Data></Cell>
+    <Cell><Data ss:Type="Number">57168043</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">22106013</Data></Cell>
+    <Cell><Data ss:Type="Number">20394565</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">49407229</Data></Cell>
+    <Cell><Data ss:Type="Number">56922602</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">37507169</Data></Cell>
+    <Cell><Data ss:Type="Number">49114566</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">37821275</Data></Cell>
+    <Cell><Data ss:Type="Number">58287622</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">23196601</Data></Cell>
+    <Cell><Data ss:Type="Number">30976158</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">17446293</Data></Cell>
+    <Cell><Data ss:Type="Number">55486794</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">55442826</Data></Cell>
+    <Cell><Data ss:Type="Number">60891834</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s66"><Data ss:Type="String">AINTERBA</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="Number">54190926</Data></Cell>
+    <Cell><Data ss:Type="Number">48165874</Data></Cell>
+    <Cell><Data ss:Type="String">VIVO</Data></Cell>
+    <Cell><Data ss:Type="Number">26412020</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>8</ActiveRow>
+     <ActiveCol>5</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

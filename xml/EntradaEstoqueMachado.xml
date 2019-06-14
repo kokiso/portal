@@ -1,0 +1,999 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Orlando Polonio</Author>
+  <LastAuthor>Apoio</LastAuthor>
+  <Created>2018-11-08T10:42:36Z</Created>
+  <LastSaved>2018-12-05T18:05:22Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>7155</WindowHeight>
+  <WindowWidth>20490</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="7" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s63">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"
+     ss:Color="#C0C0C0"/>
+   </Borders>
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Size="7" ss:Color="#808080"/>
+   <Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Plan1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="101" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="72.75"/>
+   <Column ss:Width="45.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="76.5"/>
+   <Column ss:Width="45"/>
+   <Column ss:Width="67.5"/>
+   <Column ss:Width="30"/>
+   <Column ss:Width="55.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">FABRICANTE</Data></Cell>
+    <Cell><Data ss:Type="String">MODELO</Data></Cell>
+    <Cell><Data ss:Type="String">SERIE</Data></Cell>
+    <Cell><Data ss:Type="String">SINCARD</Data></Cell>
+    <Cell><Data ss:Type="String">OPERADORDA</Data></Cell>
+    <Cell><Data ss:Type="String">FONE</Data></Cell>
+    <Cell><Data ss:Type="String">CONTRATO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s62"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1121</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1122</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1123</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1124</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1125</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1126</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1127</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1128</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1129</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1130</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1131</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1132</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1133</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1134</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1135</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1136</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1137</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1138</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1139</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1140</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1141</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1142</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1143</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1144</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1145</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1146</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1147</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1148</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1149</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1150</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1151</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1152</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1153</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1154</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1155</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1156</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1157</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1158</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1159</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1160</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1161</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1162</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1163</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1164</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1165</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1166</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1167</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1168</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1169</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1170</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1171</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1172</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1173</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1174</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1175</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1176</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1177</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1178</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1179</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1180</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1181</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1182</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1183</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1184</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1185</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1186</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1187</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1188</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1189</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1190</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1191</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1192</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1193</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1194</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1195</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1196</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1197</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1198</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1199</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1200</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1201</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1202</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1203</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1204</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1205</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1206</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1207</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1208</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1209</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1210</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1211</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1212</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1213</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1214</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1215</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1216</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1217</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1218</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1219</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">WYLESSTELECOM</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="Number">1220</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+    <Cell><Data ss:Type="String">NSA</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.31496062000000002"/>
+    <Footer x:Margin="0.31496062000000002"/>
+    <PageMargins x:Bottom="0.78740157499999996" x:Left="0.511811024"
+     x:Right="0.511811024" x:Top="0.78740157499999996"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>
