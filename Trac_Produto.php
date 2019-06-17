@@ -363,7 +363,7 @@
                       ,"tamImp"         : "20"                      
                       ,"fieldType"      : "flo2"
                       ,"validar"        : ["F>=0"]
-                      ,"digitosMinMax"  : [1,6]
+                      ,"digitosMinMax"  : [1,10]
                       ,"ajudaCampo"     : [ "Valor de venda"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
@@ -948,8 +948,7 @@
               <div class="campotexto campo15">
                 <input class="campo_input" id="edtCodigo" 
                                            placeholder="##.##.#####"                 
-                                           onkeyup="mascaraNumero('##.##.#####',this,event,'dig')"
-                                           maxlength="12" type="text" disabled />
+                                           maxlength="32" type="text" disabled />
                 <label class="campo_label" for="edtCodigo">CODIGO:</label>
               </div>
               <div class="campotexto campo70">
@@ -957,7 +956,7 @@
                 <label class="campo_label campo_required" for="edtDescricao">DESCRICAO:</label>
               </div>
               <div class="campotexto campo15">
-                <input class="campo_input edtDireita" id="edtVlrVenda" type="text" onBlur="fncCasaDecimal(this,2);" maxlength="10"  />
+                <input class="campo_input edtDireita" id="edtVlrVenda" type="text" onBlur="fncCasaDecimal(this,2);" maxlength="12"  />
                 <label class="campo_label campo_required" for="edtVlrVenda">Valor Venda:</label>
               </div>
               <div class="campotexto campo15">

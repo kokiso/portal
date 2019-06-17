@@ -5247,7 +5247,7 @@ CREATE TABLE PONTOESTOQUEIND(
   PEI_CODFVR INTEGER NOT NULL
   ,PEI_CODPE VARCHAR(3) NOT NULL
   ,PEI_STATUS VARCHAR(3) NOT NULL  
-  ,PEI_CODLGN INTEGER NOT NULL      -- Relacionamento colaborador/login de acesso ao sistema  
+  ,PEI_CODLGN INTEGER NOT NULL      -- Relacionamento colaborador/login de acesso ao sistema
   ,PEI_ATIVO VARCHAR(1) NOT NULL
   ,PEI_REG VARCHAR(1) NOT NULL
   ,PEI_CODUSR INTEGER NOT NULL  
@@ -5278,7 +5278,7 @@ CREATE TABLE dbo.BKPPONTOESTOQUEIND(
 -------------------------------------------------------------------------------------
 GO
 CREATE TABLE PRODUTO(
-  PRD_CODIGO VARCHAR(15) NOT NULL
+  PRD_CODIGO VARCHAR(32) NOT NULL -- Angelo Kokiso , aumento da range para 32 especialmente para os rastreadores quantum
   ,PRD_CODEMP INTEGER NOT NULL
   ,PRD_NOME VARCHAR(60) NOT NULL
   ,PRD_CODNCM VARCHAR(10) NOT NULL
@@ -5336,7 +5336,7 @@ CREATE TABLE dbo.BKPPRODUTO(
   PRD_ID INTEGER IDENTITY PRIMARY KEY NOT NULL 
   ,PRD_ACAO VARCHAR(1) NOT NULL
   ,PRD_DATA DATE DEFAULT GETDATE() NOT NULL
-  ,PRD_CODIGO VARCHAR(15) NOT NULL                                              
+  ,PRD_CODIGO VARCHAR(32) NOT NULL                    -- Angelo Kokiso , aumento da range para 32 especialmente para os rastreadores quantum                          
   ,PRD_CODEMP INTEGER NOT NULL
   ,PRD_NOME VARCHAR(60) NOT NULL
   ,PRD_CODNCM VARCHAR(10) NOT NULL
@@ -19329,6 +19329,8 @@ BEGIN
   DECLARE @fvrBairroNew VARCHAR(50);
   DECLARE @fvrFoneNew VARCHAR(10);
   DECLARE @fvrInsNew VARCHAR(19);
+  DECLARE @fvrGfCpNew INTEGER;
+  DECLARE @fvrGfCrNew INTEGER;
   DECLARE @fvrCtaAtivoNew VARCHAR(15);
   DECLARE @fvrCtaPassivoNew VARCHAR(15);
   DECLARE @fvrCadmunicNew VARCHAR(20);
@@ -19370,6 +19372,8 @@ BEGIN
     ,@fvrInsNew         = COALESCE(dbo.fncTranslate(i.FVR_INS,19),'NSA')
     ,@fvrCadmunicNew    = COALESCE(dbo.fncTranslate(i.FVR_CADMUNIC,20),'NSA')
     ,@fvrEmailNew       = COALESCE(LOWER(dbo.fncTranslate(i.FVR_EMAIL,60)),'NSA')
+    ,@fvrGfCpNew        = i.FVR_GFCP
+    ,@fvrGfCrNew        = i.FVR_GFCR
     ,@fvrCodctgNew      = dbo.fncTranslate(i.FVR_CODCTG,3)
     ,@ctgNomeNew        = COALESCE(CTG.CTG_NOME,'ERRO')
     ,@fvrSenhaNew       = dbo.fncTranslate(i.FVR_SENHA,10)
@@ -19637,8 +19641,8 @@ BEGIN
       ,@fvrSenhaNew             -- FVR_SENHA
       ,@fvrComplementoNew       -- FVR_COMPLEMENTO
       ,@fvrCodlgrNew            -- FVR_CODLGR
-      ,1                        -- FVR_GFCP
-      ,1                        -- FVR_GFCR
+      ,@fvrGfCpNew              -- FVR_GFCP
+      ,@fvrGfCrNew              -- FVR_GFCR
       ,@fvrLatitudeNew          -- FVR_LATITUDE
       ,@fvrLongitudeNew         -- FVR_LONGITUDE
       ,@fvrAtivoNew             -- FVR_ATIVO
@@ -19740,14 +19744,67 @@ BEGIN
       ,@fvrSenhaNew              -- FVR_SENHA
       ,@fvrComplementoNew        -- FVR_COMPLEMENTO
       ,@fvrCodlgrNew             -- FVR_CODLGR
-      ,0                         -- FVR_GFCP
-      ,0                         -- FVR_GFCR
+      ,@fvrGfCPNew               -- FVR_GFCP
+      ,@fvrGfCrNew               -- FVR_GFCR
       ,@fvrLatitudeNew           -- FVR_LATITUDE
       ,@fvrLongitudeNew          -- FVR_LONGITUDE
       ,@fvrAtivoNew              -- FVR_ATIVO
       ,@fvrRegNew                -- FVR_REG
       ,@fvrCodusrNew             -- FVR_CODUSR
     );
+
+     ----------------------------------------------
+    -- Cadastrando o favorecido em PONTOESTOQUEIND
+    ----------------------------------------------
+    IF( @fvrGfCrNew <> 0001) BEGIN
+      INSERT INTO VPONTOESTOQUEIND( 
+        PEI_CODFVR
+        ,PEI_CODPE
+        ,PEI_STATUS
+        ,PEI_CODLGN
+        ,PEI_ATIVO
+        ,PEI_REG
+        ,PEI_CODUSR) VALUES(
+        IDENT_CURRENT('FAVORECIDO')
+        ,CASE WHEN @fvrGfCrNew = 0006 THEN 'CLN' 
+            WHEN @fvrGfCPNew = 0039 THEN 'FOR' 
+            WHEN @fvrGfCrNew = 0040 THEN 'FNC'  
+            WHEN @fvrGfCrNew = 0041 THEN 'CRD'
+            ELSE 'CLN' 
+        END  -- PEI_CODFVR 'CLN'          -- PEI_CODPE
+        ,'NSA'          -- PEI_STATUS
+        ,01             -- PEI_CODLGN
+        ,'S'            -- PEI_ATIVO
+        ,'P'            -- PEI_REG
+        ,1              -- PEI_CODUSR( 1= SISTEMA )
+      );
+      END    
+    ELSE BEGIN
+      IF( @fvrGfCPNew <> 0001) BEGIN
+        INSERT INTO VPONTOESTOQUEIND( 
+          PEI_CODFVR
+          ,PEI_CODPE
+          ,PEI_STATUS
+          ,PEI_CODLGN
+          ,PEI_ATIVO
+          ,PEI_REG
+          ,PEI_CODUSR) VALUES(
+          IDENT_CURRENT('FAVORECIDO')
+          ,CASE WHEN @fvrGfCPNew = 0006 THEN 'CLN' 
+              WHEN @fvrGfCPNew = 0039 THEN 'FOR' 
+              WHEN @fvrGfCPNew = 0040 THEN 'FNC'  
+              WHEN @fvrGfCPNew = 0041 THEN 'CRD'
+              ELSE 'CLN' 
+          END  -- PEI_CODFVR 'CLN'          -- PEI_CODPE
+          ,'NSA'          -- PEI_STATUS
+          ,01             -- PEI_CODLGN
+          ,'S'            -- PEI_ATIVO
+          ,'P'            -- PEI_REG
+          ,1              -- PEI_CODUSR( 1= SISTEMA )
+        ); 
+      END     
+    END 
+    
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -30764,7 +30821,7 @@ BEGIN
   -------------------
   -- Campos da tabela
   -------------------
-  DECLARE @prdCodigoNew VARCHAR(15);          -- PRD_CODIGO
+  DECLARE @prdCodigoNew VARCHAR(32);          -- PRD_CODIGO
   DECLARE @prdCodEmpNew INTEGER;              -- PRD_CODEMP
   DECLARE @empApelidoNew VARCHAR(15);         -- EMP_APELIDO
   DECLARE @prdNomeNew VARCHAR(60);            -- PRD_NOME
@@ -30795,7 +30852,7 @@ BEGIN
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
-  SELECT @prdCodigoNew        = dbo.fncTranslate(i.PRD_CODIGO,15)
+  SELECT @prdCodigoNew        = dbo.fncTranslate(i.PRD_CODIGO,32)
          ,@prdCodEmpNew       = i.PRD_CODEMP
          ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@prdNomeNew         = dbo.fncTranslate(i.PRD_NOME,60)
@@ -30992,7 +31049,7 @@ BEGIN
   -------------------------------------------------------
   -- Buscando os campos NEW para checagem antes do insert
   -------------------------------------------------------
-  SELECT @prdCodigoNew        = dbo.fncTranslate(i.PRD_CODIGO,15)
+  SELECT @prdCodigoNew        = dbo.fncTranslate(i.PRD_CODIGO,32)
          ,@prdCodEmpNew       = i.PRD_CODEMP
          ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@prdNomeNew         = dbo.fncTranslate(i.PRD_NOME,60)
@@ -31056,7 +31113,7 @@ BEGIN
     -- Se checar até aqui verifico os campos que estão no banco de dados antes de gravar  
     -- Campos OLD da tabela
     ------------------------------------------------------------------------------------
-    DECLARE @prdCodigoOld VARCHAR(15);          
+    DECLARE @prdCodigoOld VARCHAR(32);          
     DECLARE @prdCodEmpOld INTEGER;              
     DECLARE @prdNomeOld VARCHAR(60);            
     DECLARE @prdCodNcmOld VARCHAR(10);          
@@ -31200,7 +31257,7 @@ BEGIN
   -------------------
   -- Campos da tabela
   -------------------
-  DECLARE @prdCodigoOld VARCHAR(15);          
+  DECLARE @prdCodigoOld VARCHAR(32);          
   DECLARE @prdCodEmpOld INTEGER;              
   DECLARE @prdNomeOld VARCHAR(60);            
   DECLARE @prdCodNcmOld VARCHAR(10);          
@@ -45456,6 +45513,9 @@ INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) 
 INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('36','VEICULOS'                ,'S'  ,'P'  ,1);
 INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('37','VIAGENS'                 ,'S'  ,'P'  ,1);
 INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('38','ADVOGADOS'               ,'S'  ,'P'  ,1);
+INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('39','FORNECEDOR'               ,'S'  ,'P'  ,1);
+INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('40','FUNCIONARIO'               ,'S'  ,'P'  ,1);
+INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('41','CREDENCIADO'               ,'S'  ,'P'  ,1);
 GO
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.'              ,'ATIVO'                                    ,'**','S','P',1);
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.01.'           ,'CIRCULANTE'                               ,'**','S','P',1);

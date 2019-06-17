@@ -51,6 +51,10 @@
           $sql.="       ,A.FVR_CTAPASSIVO";
           $sql.="       ,A.FVR_CADMUNIC";
           $sql.="       ,A.FVR_EMAIL";
+          $sql.="       ,A.FVR_GFCP";
+          $sql.="       ,GFP.GF_NOME AS GRUPOCP";  // Angelo Kokiso , adição dos parametros de grupo de favorecido
+          $sql.="       ,A.FVR_GFCR";              // Angelo Kokiso , adição dos parametros de grupo de favorecido
+          $sql.="       ,GFR.GF_NOME AS GRUPOCR";  // Angelo Kokiso , adição dos parametros de grupo de favorecido
           $sql.="       ,A.FVR_CODCTG";
           $sql.="       ,G.CTG_NOME";
           $sql.="       ,A.FVR_SENHA";
@@ -66,6 +70,8 @@
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.FVR_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN CIDADE C ON A.FVR_CODCDD=C.CDD_CODIGO";
           $sql.="  LEFT OUTER JOIN CATEGORIA G ON A.FVR_CODCTG=G.CTG_CODIGO";
+          $sql.="  LEFT OUTER JOIN GRUPOFAVORECIDO GFP ON A.FVR_GFCP=GFP.GF_CODIGO";
+          $sql.="  LEFT OUTER JOIN GRUPOFAVORECIDO GFR ON A.FVR_GFCR=GFR.GF_CODIGO";
           $sql.="  LEFT OUTER JOIN LOGRADOURO L ON A.FVR_CODLGR=L.LGR_CODIGO";
           $sql.="  WHERE (FVR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";
           $classe->msgSelect(false);
@@ -445,7 +451,55 @@
                       ,"digitosMinMax"  : [0,60]
                       ,"importaExcel"   : "S"                      
                       ,"padrao":0}
-            ,{"id":22 ,"field"          : "FVR_CODCTG" 
+            ,{"id":22 ,"field"          :"FVR_GFCP" 
+                      ,"labelCol"       : "CODCP"
+                      ,"obj"            : "edtCodCp"
+                      ,"insUpDel"       : ["S","S","N"]
+                      ,"fieldType"      : "int"
+                      ,"formato"        : ["i4"]                      
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "0"
+                      ,"fieldType"      : "int"
+                      ,"align"          : "center"
+                      ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
+                      ,"newRecord"      : ["0000","this","this"]
+                      ,"validar"        : ["notnull"]
+                      ,"digitosMinMax"  : [1,4]
+                      ,"ajudaCampo"     : [ "Código do Favorecido"]
+                      ,"padrao":0}
+            ,{"id":23  ,"field"         : "GF_NOME"   
+                      ,"labelCol"       : "GRUPOCP"
+                      ,"obj"            : "edtDesCp"
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"tamGrd"         : "18em"
+                      ,"tamImp"         : "60"
+                      ,"newRecord"      : ["","this","this"]
+                      ,"padrao":0}
+            ,{"id":24  ,"field"          :"FVR_GFCR" 
+                      ,"labelCol"       : "CODCR"
+                      ,"obj"            : "edtCodCr"
+                      ,"insUpDel"       : ["S","S","N"]
+                      ,"fieldType"      : "int"
+                      ,"formato"        : ["i4"]                      
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "0"
+                      ,"fieldType"      : "int"
+                      ,"align"          : "center"
+                      ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
+                      ,"newRecord"      : ["0000","this","this"]
+                      ,"validar"        : ["notnull"]
+                      ,"digitosMinMax"  : [1,4]
+                      ,"ajudaCampo"     : [ "Código do Favorecido"]
+                      ,"padrao":0}
+            ,{"id":25  ,"field"         : "GF_NOME"   
+                      ,"labelCol"       : "GRUPOCR"
+                      ,"obj"            : "edtDesCr"
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"tamGrd"         : "18em"
+                      ,"tamImp"         : "60"
+                      ,"newRecord"      : ["","this","this"]
+                      ,"padrao":0}
+            ,{"id":26 ,"field"          : "FVR_CODCTG" 
                       ,"labelCol"       : "CODCTG"
                       ,"obj"            : "edtCodCtg"
                       ,"tamGrd"         : "3em"
@@ -457,7 +511,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":23 ,"field"          : "CTG_NOME"   
+            ,{"id":27 ,"field"          : "CTG_NOME"   
                       ,"insUpDel"       : ["N","N","N"]
                       ,"labelCol"       : "NOME"
                       ,"obj"            : "edtDesCtg"
@@ -468,7 +522,7 @@
                       ,"validar"        : ["notnull"]                      
                       ,"ajudaCampo"     : ["Descrição da BancoCodigo para este favorecido."]
                       ,"padrao":0}
-            ,{"id":24 ,"field"          : "FVR_SENHA" 
+            ,{"id":28 ,"field"          : "FVR_SENHA" 
                       ,"labelCol"       : "SENHA"
                       ,"obj"            : "edtSenha"
                       ,"tamGrd"         : "10em"
@@ -479,7 +533,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":25 ,"field"          : "FVR_COMPLEMENTO" 
+            ,{"id":29 ,"field"          : "FVR_COMPLEMENTO" 
                       ,"labelCol"       : "COMPLEMENTO"
                       ,"obj"            : "edtComplemento"
                       ,"tamGrd"         : "40em"
@@ -490,7 +544,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":26 ,"field"          : "FVR_CODLGR" 
+            ,{"id":30 ,"field"          : "FVR_CODLGR" 
                       ,"labelCol"       : "CODLGR"
                       ,"obj"            : "edtCodLgr"
                       ,"tamGrd"         : "5em"
@@ -502,27 +556,27 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":27 ,"field"          : "FVR_ATIVO"  
+            ,{"id":31 ,"field"          : "FVR_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"tamImp"         : "10"                      
                       ,"padrao":2}                                        
-            ,{"id":28 ,"field"          : "FVR_REG"    
+            ,{"id":32 ,"field"          : "FVR_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"tamImp"         : "10"                      
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":29 ,"field"         : "US_APELIDO" 
+            ,{"id":33 ,"field"         : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}                
-            ,{"id":30 ,"field"         : "FVR_CODUSR" 
+            ,{"id":34 ,"field"         : "FVR_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}  
-            ,{"id":31 ,"field"             : "FVR_LATITUDE"
+            ,{"id":35 ,"field"             : "FVR_LATITUDE"
                       ,"labelCol"          : "LATITUDE"
                       ,"fieldType"         : "flo8"
                       ,"formato"           : ["f8"]
@@ -541,7 +595,7 @@
                       ,"inputDisabled"     : true
                       ,"ajudaCampo"        : ["latitude do favorecido."]
                       ,"padrao"            : 0}
-            ,{"id":32 ,"field"             : "FVR_LONGITUDE"
+            ,{"id":36 ,"field"             : "FVR_LONGITUDE"
                       ,"labelCol"          : "LONGITUDE"
                       ,"fieldType"         : "flo8"
                       ,"formato"           : ["f8"]             
@@ -560,7 +614,7 @@
                       ,"inputDisabled"     : true
                       ,"ajudaCampo"        : ["longitude do favorecido."]
                       ,"padrao"            : 0}
-            ,{"id":33 ,"labelCol"       : "PP"      
+            ,{"id":37 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -1008,7 +1062,97 @@
           $doc("edtApelido").value=splt[0];  
           $doc("edtSenha").value=splt[0];  
         }
-      };  
+      };
+
+      ////////////////////////////////////
+      //  AJUDA PARA GRUPO FAVOREICO CP //
+      ////////////////////////////////////
+      function cpFocus(obj){ 
+        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
+      };
+      function cpF10Click(obj){ 
+        fPadraoF10( { opc:0
+                      ,edtCod:obj.id
+                      ,foco:"edtCodCr"
+                      ,topo:100
+                      ,tableBd:"GRUPOFAVORECIDO"
+                      ,fieldCod:"A.GF_CODIGO"
+                      ,fieldDes:"A.GF_NOME"
+                      ,fieldAtv:"A.GF_ATIVO"
+                      ,typeCod :"int" 
+                      ,tbl:"tblCp"}
+        );
+      };
+      function RetF10tblCp(arr){
+        document.getElementById("edtCodCp").value  = arr[0].CODIGO;
+        document.getElementById("edtDesCp").value  = arr[0].DESCRICAO;
+        document.getElementById("edtCodCp").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function CodCpBlur(obj){
+        var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          var ret = fPadraoF10( { opc:1
+                                  ,edtCod:obj.id
+                                  ,foco:"edtCodCr"
+                                  ,topo:100
+                                  ,tableBd:"GRUPOFAVORECIDO"
+                                  ,fieldCod:"A.GP_CODIGO"
+                                  ,fieldDes:"A.GP_NOME"
+                                  ,fieldAtv:"A.GP_ATIVO"
+                                  ,typeCod :"int" 
+                                  ,tbl:"tblCr"}
+          );
+          document.getElementById(obj.id).value       = ( ret.length == 0 ? "0000"  : ret[0].CODIGO             );
+          document.getElementById("edtDesCp").value  = ( ret.length == 0  ? ""      : ret[0].DESCRICAO  );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )  );
+        };
+      };
+      ////////////////////////////////////
+      //  AJUDA PARA GRUPO FAVOREICO CR //
+      ////////////////////////////////////
+      function crFocus(obj){ 
+        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
+      };
+      function crF10Click(obj){ 
+        fPadraoF10( { opc:0
+                      ,edtCod:obj.id
+                      ,foco:"btnConfirmar"
+                      ,topo:100
+                      ,tableBd:"GRUPOFAVORECIDO"
+                      ,fieldCod:"A.GF_CODIGO"
+                      ,fieldDes:"A.GF_NOME"
+                      ,fieldAtv:"A.GF_ATIVO"
+                      ,typeCod :"int" 
+                      ,tbl:"tblCr"}
+        );
+      };
+      function RetF10tblCr(arr){
+        document.getElementById("edtCodCr").value  = arr[0].CODIGO;
+        document.getElementById("edtDesCr").value  = arr[0].DESCRICAO;
+        document.getElementById("edtCodCr").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function CodCrBlur(obj){
+        var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          var ret = fPadraoF10( { opc:1
+                                  ,edtCod:obj.id
+                                  ,foco:"btnConfirmar"
+                                  ,topo:100
+                                  ,tableBd:"GRUPOFAVORECIDO"
+                                  ,fieldCod:"A.GP_CODIGO"
+                                  ,fieldDes:"A.GP_NOME"
+                                  ,fieldAtv:"A.GP_ATIVO"
+                                  ,typeCod :"int" 
+                                  ,tbl:"tblGcr"}
+          );
+          document.getElementById(obj.id).value     = ( ret.length == 0 ? "0000"  : ret[0].CODIGO             );
+          document.getElementById("edtDesCr").value = ( ret.length == 0  ? ""      : ret[0].DESCRICAO  );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )  );
+        };
+      };
+      //  
       
     </script>
   </head>
@@ -1147,7 +1291,36 @@
                 <input class="campo_input" id="edtEmail" type="text" maxlength="60" />
                 <label class="campo_label" for="edtEmail">EMAIL:</label>
               </div>
-        
+              <div class="campotexto campo10">
+                <input class="campo_input inputF10" id="edtCodCp"
+                                                    onBlur="CodCpBlur(this);" 
+                                                    onFocus="cpFocus(this);" 
+                                                    onClick="cpF10Click(this);"
+                                                    data-oldvalue="0000"
+                                                    autocomplete="off"
+                                                    maxlength="4"
+                                                    type="text"/>
+                <label class="campo_label campo_required" for="edtCodCp">CP:</label>
+              </div>
+              <div class="campotexto campo40">
+                <input class="campo_input_titulo input" id="edtDesCp" type="text" disabled />
+                <label class="campo_label campo_required" for="edtDesCp">PAGAR</label>
+              </div>
+              <div class="campotexto campo10">
+                <input class="campo_input inputF10" id="edtCodCr"
+                                                    onBlur="CodCrBlur(this);" 
+                                                    onFocus="crFocus(this);" 
+                                                    onClick="crF10Click(this);"
+                                                    data-oldvalue="0000"
+                                                    autocomplete="off"
+                                                    maxlength="4"
+                                                    type="text"/>
+                <label class="campo_label campo_required" for="edtCodCr">CR:</label>
+              </div>
+              <div class="campotexto campo40">
+                <input class="campo_input_titulo input" id="edtDesCr" type="text" disabled />
+                <label class="campo_label campo_required" for="edtDesCr">RECEBER</label>
+              </div>
               <div class="campotexto campo15">
                 <input class="campo_input inputF10" id="edtCodCtg"
                                                     onBlur="CodCtgBlur(this);" 
