@@ -218,7 +218,7 @@
                       ,"align"          : "center"                                      
                       ,"pk"             : "S"
                       ,"newRecord"      : ["0000","this","this"]
-                      ,"insUpDel"       : ["N","N","N"]
+                      ,"insUpDel"       : ["S","N","N"]
                       ,"formato"        : ["i4"]
                       ,"validar"        : ["intMaiorZero"]
                       ,"autoIncremento" : "S"
@@ -1026,7 +1026,7 @@
             ,{"texto":"Fechar"    ,"name":"excFechar"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-close"        }
           ] 
           ,"registros"      : []                    // Recebe um Json vindo da classe clsBancoDados
-          ,"corLinha"       : "if(ceTr.cells[42].innerHTML !='OK') {ceTr.style.color='yellow';ceTr.style.backgroundColor='red';}"      
+          ,"corLinha"       : "if(ceTr.cells[52].innerHTML !='OK') {ceTr.style.color='yellow';ceTr.style.backgroundColor='red';}"      
           ,"checarTags"     : "N"                   // Somente em tempo de desenvolvimento(olha as pricipais tags)                                
           ,"div"            : "frmExc"              // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaExc"           // Para fechar a div onde estão os fieldset ao cadastrar

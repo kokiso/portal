@@ -51,7 +51,7 @@
           $sql.="       ,A.FVR_CTAPASSIVO";
           $sql.="       ,A.FVR_CADMUNIC";
           $sql.="       ,A.FVR_EMAIL";
-          $sql.="       ,A.FVR_GFCP";
+          $sql.="       ,A.FVR_GFCP";               // Angelo Kokiso , adição dos parametros de grupo de favorecido
           $sql.="       ,GFP.GF_NOME AS GRUPOCP";  // Angelo Kokiso , adição dos parametros de grupo de favorecido
           $sql.="       ,A.FVR_GFCR";              // Angelo Kokiso , adição dos parametros de grupo de favorecido
           $sql.="       ,GFR.GF_NOME AS GRUPOCR";  // Angelo Kokiso , adição dos parametros de grupo de favorecido
@@ -466,6 +466,7 @@
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,4]
                       ,"ajudaCampo"     : [ "Código do Favorecido"]
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
             ,{"id":23  ,"field"         : "GF_NOME"   
                       ,"labelCol"       : "GRUPOCP"
@@ -490,6 +491,7 @@
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,4]
                       ,"ajudaCampo"     : [ "Código do Favorecido"]
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
             ,{"id":25  ,"field"         : "GF_NOME"   
                       ,"labelCol"       : "GRUPOCR"
@@ -723,13 +725,15 @@
             ,{"id":13 ,"field":"INS"          ,"labelCol":"INS"          ,"tamGrd":"10em"      ,"tamImp":"10"}
             ,{"id":14 ,"field":"CADMUNIC"     ,"labelCol":"CADMUNIC"     ,"tamGrd":"10em"      ,"tamImp":"10"}
             ,{"id":15 ,"field":"EMAIL"        ,"labelCol":"EMAIL"        ,"tamGrd":"30em"      ,"tamImp":"10"}
-            ,{"id":16 ,"field":"CODCTG"       ,"labelCol":"CODCTG"       ,"tamGrd":"10em"      ,"tamImp":"10"}
-            ,{"id":17 ,"field":"SENHA"        ,"labelCol":"SENHA"        ,"tamGrd":"10em"      ,"tamImp":"10"}
-            ,{"id":18 ,"field":"COMPLEMENTO"  ,"labelCol":"COMPLEMENTO"  ,"tamGrd":"30em"      ,"tamImp":"10"}
-            ,{"id":19 ,"field":"CODLGR"       ,"labelCol":"CODLGR"       ,"tamGrd":"5em"       ,"tamImp":"10"}
-            ,{"id":20 ,"field":"LATITUDE"     ,"labelCol":"LATITUDE"     ,"tamGrd":"10em"      ,"tamImp":"10"}
-            ,{"id":21 ,"field":"LONGITUDE"    ,"labelCol":"LONGITUDE"    ,"tamGrd":"10em"      ,"tamImp":"10"}
-            ,{"id":22 ,"field":"ERRO"         ,"labelCol":"ERRO"         ,"tamGrd":"45em"      ,"tamImp":"100"}            
+            ,{"id":17 ,"field":"CODCP"        ,"labelCol":"CODCP"        ,"tamGrd":"10em"      ,"tamImp":"10"}
+            ,{"id":18 ,"field":"CODCR"        ,"labelCol":"CODCTR"       ,"tamGrd":"10em"      ,"tamImp":"10"}
+            ,{"id":19 ,"field":"CODCTG"       ,"labelCol":"CODCTG"       ,"tamGrd":"10em"      ,"tamImp":"10"}
+            ,{"id":20 ,"field":"SENHA"        ,"labelCol":"SENHA"        ,"tamGrd":"10em"      ,"tamImp":"10"}
+            ,{"id":21 ,"field":"COMPLEMENTO"  ,"labelCol":"COMPLEMENTO"  ,"tamGrd":"30em"      ,"tamImp":"10"}
+            ,{"id":22 ,"field":"CODLGR"       ,"labelCol":"CODLGR"       ,"tamGrd":"5em"       ,"tamImp":"10"}
+            ,{"id":23 ,"field":"LATITUDE"     ,"labelCol":"LATITUDE"     ,"tamGrd":"10em"      ,"tamImp":"10"}
+            ,{"id":24 ,"field":"LONGITUDE"    ,"labelCol":"LONGITUDE"    ,"tamGrd":"10em"      ,"tamImp":"10"}
+            ,{"id":25 ,"field":"ERRO"         ,"labelCol":"ERRO"         ,"tamGrd":"45em"      ,"tamImp":"100"}            
           ]
           ,"botoesH":[
              {"texto":"Imprimir"  ,"name":"excImprimir"   ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"         }        
@@ -737,7 +741,7 @@
             ,{"texto":"Fechar"    ,"name":"excFechar"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-close"         }
           ] 
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
-          ,"corLinha"       : "if(ceTr.cells[22].innerHTML !='OK') {ceTr.style.color='yellow';ceTr.style.backgroundColor='red';}"      
+          ,"corLinha"       : "if(ceTr.cells[24].innerHTML !='OK') {ceTr.style.color='yellow';ceTr.style.backgroundColor='red';}"      
           ,"checarTags"     : "N"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                                
           ,"div"            : "frmExc"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaExc"               // Para fechar a div onde estão os fieldset ao cadastrar
@@ -747,7 +751,7 @@
           ,"prefixo"        : "exc"                     // Prefixo para elementos do HTML em jsTable2017.js
           ,"tabelaBD"       : "*"                       // Nome da tabela no banco de dados
           ,"max-width"      : "106em"                   // Tamanho máximo da table //Angelo kokiso - mudança no tamanho da tabela
-          ,"width"          : "min-content"                    // Tamanho da table
+          ,"width"          : "min-content"             // Tamanho da table
           ,"height"         : "48em"                    // Altura da table
           ,"tableLeft"      : "sim"                     // Se tiver menu esquerdo
           ,"relTitulo"      : "Importação região"       // Titulo do relatório
