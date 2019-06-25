@@ -1,5 +1,5 @@
 function fncLerExcel(js,rotPhp){
-  debugger;
+  
   
   let arqPhp=window.location.pathname.replace("/portaltracf/","");
   

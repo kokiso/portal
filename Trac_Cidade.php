@@ -552,7 +552,7 @@
         };
       };
       function calcLatLgn(){
-        debugger;
+        
         var ajax = new XMLHttpRequest();
 				var json; 
         var end=jsStr("edtDescricao").lower().ret()+","+jsStr("edtCodEst").lower().ret()+"&format=json";

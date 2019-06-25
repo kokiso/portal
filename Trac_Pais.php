@@ -399,7 +399,7 @@
           // Esta rotina não tem manutenção via classe clsTable2017                       //
           // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
           //////////////////////////////////////////////////////////////////////////////////
-debugger;          
+          
           jsPai.registros=objPai.addIdUnico(retPhp[0]["dados"]);
           objPai.ordenaJSon(jsPai.indiceTable,false);  
           objPai.montarBody2017();

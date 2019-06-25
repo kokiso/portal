@@ -1924,22 +1924,26 @@
       
     </script>
   </head>
-  <body style="background-color: #ecf0f5;">
+  <body style="background-color: #e6e6e6;">
     <div class="divTelaCheia">
       <div id="divTopoInicio" class="divTopoInicio">
-        <div class="divTopoInicio_logo"></div>
-        <div class="teEsquerda"></div>
-        <div style="font-size:12px;width:50%;float:left;"><h2 style="text-align:center;">Pedido</h2></div>
-        <div class="teEsquerda"></div>
-        <div onClick="window.close();"  class="btnImagemEsq bie08 bieRed" style="margin-top:2px;"><i class="fa fa-close"> Fechar</i></div>        
-        <div onClick="fncGravarPedido();"  class="btnImagemEsq bie10 bieAzul" style="margin-top:2px;"><i class="fa fa-check"> Gravar pedido</i></div>        
+        <div class="divTopoInicio_logo">
+          <img src="imagens/logoMaior.png" id = "user-image" class="user-image" alt="Logomarca Totaltrac">
+        </div>
+
+        <div style="font-size:14px;width:65%;float:left;"><h2 style="text-align:center;">Cadastro de Pedido</h2></div>
+
+        <div style="margin-top:-0.3em; margin-right: 10px; font-size: 14px; float: right;">
+          <a onClick="window.close();" href="#"><h2><i class="fa fa-arrow-left"></i> Voltar</h2></a>
+        </div>        
+        <!-- <div onClick="fncGravarPedido();"  class="btnImagemEsq bie10 bieAzul" style="margin-top:2px;"><i class="fa fa-check"> Gravar pedido</i></div>         -->
       </div>
 
       <div id="divCadastro">  
         <form method="post" class="center" id="frmPedidoCad" action="classPhp/imprimirSql.php" target="_newpage" style="margin-top:1em;" >
           <input type="hidden" id="sql" name="sql"/>
           <!-- aqui -->
-          <div class="divAzul" style="width:77%;margin-left:12.5%;height: 640px;padding-top:1em;">
+          <div class="divAzul" style="margin-left:5%;margin-right:5%;padding-top:1em; height: auto;">
           <!-- aqui -->
             <div class="campotexto campo10">
               <input class="campo_input_titulo" id="edtNumPedido" 
@@ -2156,11 +2160,8 @@
             
             <div onClick="fncIncluir();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-plus"> Incluir</i></div>
             <div onClick="fncRecalculo();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-code"> Recalculo</i></div>            
-            <div onClick="fncObsPedido();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-sort-alpha-asc"> Obs</i></div>                        
-            <div id="sctnPed">
-            </div>  
-            <!-- Quem indicou -->
-            <div class="campotexto campo10">
+            <div onClick="fncObsPedido();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-sort-alpha-asc"> Obs</i></div>
+            <div class="campotexto campo10" style="width: 9%">
               <input class="campo_input inputF10" id="edtCodInd"
                                                   OnKeyPress="return mascaraInteiro(event);"
                                                   onBlur="codIndBlur(this);" 
@@ -2171,10 +2172,24 @@
                                                   autocomplete="off"
                                                   type="text" />
               <label class="campo_label" for="edtCodInd">INDICADO POR:</label>
-            </div>
+            </div>                        
+            <div id="sctnPed">
+            </div>  
+            <!-- Quem indicou -->
+<!--             <div class="campotexto campo10">
+              <input class="campo_input inputF10" id="edtCodInd"
+                                                  OnKeyPress="return mascaraInteiro(event);"
+                                                  onBlur="codIndBlur(this);" 
+                                                  onFocus="indFocus(this);" 
+                                                  onClick="indF10Click(this);"
+                                                  data-oldvalue="0000"
+                                                  data-newrecord="0000"                                                  
+                                                  autocomplete="off"
+                                                  type="text" />
+              <label class="campo_label" for="edtCodInd">INDICADO POR:</label>
+            </div> -->
             <div class="campotexto campo50">
-              <input class="campo_input_titulo input" id="edtDesInd" data-newrecord="NAO SE APLICA" type="text" disabled />
-              <label class="campo_label" for="edtDesInd">NOME</label>
+              <input class="campo_input_titulo input" id="edtDesInd" data-newrecord="NAO SE APLICA" type="text" hidden />
             </div>
             <div class="inactive">
               <input id="edtPedID" value="0" type="text" />

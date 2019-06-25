@@ -15,9 +15,7 @@ function fGrupoModeloF10(opc,codGm,foco,topo,objeto){
   let tblGm      = "tblGm";
   let tamColNome  = "30em";
   if( typeof objeto === 'object' ){
-    console.log(objeto);
     for (var key in objeto) {
-      console.log(key);
       switch( key ){
         case "ativo":
           clsStr.concat( " {AND} (A.GM_ATIVO='"+objeto[key]+"')",true);        

@@ -102,7 +102,7 @@
       // ouça o evento de resultados e adicione todos os resultados ao mapa //
       ////////////////////////////////////////////////////////////////////////
       searchControl.on("results", function(data) {
-        debugger;
+        
         results.clearLayers();
         for (var i = data.results.length - 1; i >= 0; i--) {
           popupContent=data.text;
@@ -178,7 +178,7 @@
       }
       //var tem=document.getElementsByClassName("geocoder-control-input");
       //tem.innerHTLM="orlando";
-      //debugger;
+      //
       function hasClass (obj, className) {
         if (typeof obj == 'undefined' || obj==null || !RegExp) { 
           return false; 

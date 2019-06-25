@@ -379,7 +379,7 @@
         clsJs.add("login"       , jsPub[0].usr_login                          );
         clsJs.add("ativo"       , atv                                         );
         clsJs.add("codCor"      , document.getElementById("edtCodigo").value  );   
-debugger;        
+        
         fd = new FormData();
         fd.append("veiculocor" , clsJs.fim());
         msg     = requestPedido("Trac_VeiculoCor.php",fd); 

@@ -68,7 +68,8 @@
           $sql.="       ,A.GM_GPOBRIGATORIO";
           $sql.="       ,A.GM_GMOBRIGATORIO";          
           $sql.="       ,A.GM_GPACEITO";
-          $sql.="       ,A.GM_GMACEITO";          
+          $sql.="       ,A.GM_GMACEITO"; 
+          $sql.="       ,A.GM_CODIGOPAIFILHO";         
           $sql.="       ,A.GM_VALORVISTA";
           $sql.="       ,A.GM_VALORPRAZO";
           $sql.="       ,A.GM_VALORMINIMO";          
@@ -133,6 +134,7 @@
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaGrupoModeloF10.js"></script>   
     <script src="js/jsBiblioteca.js"></script>        
     <script language="javascript" type="text/javascript"></script>
     <script>
@@ -224,7 +226,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [3,40]
+                      ,"digitosMinMax"  : [3,70]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
                       ,"ajudaCampo"     : ["Grupos obrigatorios com até 40 caracteres."]
                       ,"truncate"       : true                          
@@ -236,7 +238,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "25em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [1,40]
+                      ,"digitosMinMax"  : [1,70]
                       ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9|_"
                       ,"ajudaCampo"     : ["Modelos aceitos para grupos com até 70 caracteres."]
                       ,"padrao":0}
@@ -247,7 +249,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [3,40]
+                      ,"digitosMinMax"  : [3,70]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
                       ,"ajudaCampo"     : ["Grupos aceitos com até 20 caracteres."]
                       ,"truncate"       : true                          
@@ -259,11 +261,22 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "25em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [1,40]
+                      ,"digitosMinMax"  : [1,70]
                       ,"digitosValidos" : "N|S|A|0|1|2|3|4|5|6|7|8|9|_"
                       ,"ajudaCampo"     : ["Modelos aceitos para grupos com até 70 caracteres."]
                       ,"padrao":0}
-            ,{"id":10 ,"field"          : "GM_VALORVISTA"  
+           ,{"id":10  ,"field"          : "GM_CODIGOPAIFILHO"   
+                      ,"labelCol"       : "CODPAIFILHO"
+                      ,"obj"            : "edtCodPaiFilho"
+                      ,"newRecord"      : ["0000","this","this"]
+                      ,"insUpDel"       : ["S","S","N"]
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "0"
+                      ,"digitosMinMax"  : [1,4]
+                      ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
+                      ,"ajudaCampo"     : ["Codigo Pai do auto."]
+                      ,"padrao":0}
+            ,{"id":11 ,"field"          : "GM_VALORVISTA"  
                       ,"labelCol"       : "VLRVISTA" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorVista"
@@ -275,7 +288,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":11 ,"field"          : "GM_VALORPRAZO"  
+            ,{"id":12 ,"field"          : "GM_VALORPRAZO"  
                       ,"labelCol"       : "VLRPRAZO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorPrazo"
@@ -287,7 +300,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":12 ,"field"          : "GM_VALORMINIMO"  
+            ,{"id":13 ,"field"          : "GM_VALORMINIMO"  
                       ,"labelCol"       : "VLRMINIMO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorMinimo"
@@ -299,7 +312,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}     
-            ,{"id":13 ,"field"          : "GM_VLRNOSHOW"                        
+            ,{"id":14 ,"field"          : "GM_VLRNOSHOW"                        
                       ,"labelCol"       : "VLRNOSHOW"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrNoShow"
@@ -311,7 +324,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":14 ,"field"          : "GM_VLRIMPRODUTIVEL"
+            ,{"id":15 ,"field"          : "GM_VLRIMPRODUTIVEL"
                       ,"labelCol"       : "VLRIMPROD"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrImprodutivel"
@@ -323,7 +336,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":15 ,"field"          : "GM_VLRINSTALA"
+            ,{"id":16 ,"field"          : "GM_VLRINSTALA"
                       ,"labelCol"       : "VLRINSTALA"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrInstala"
@@ -335,7 +348,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":16 ,"field"          : "GM_VLRDESISTALA"
+            ,{"id":17 ,"field"          : "GM_VLRDESISTALA"
                       ,"labelCol"       : "VLRDESISTALA"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrDesistala"
@@ -347,7 +360,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":17 ,"field"          : "GM_VLRREINSTALA"
+            ,{"id":18 ,"field"          : "GM_VLRREINSTALA"
                       ,"labelCol"       : "VLRREINSTALA"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrReinstala"
@@ -359,7 +372,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":18 ,"field"          : "GM_VLRMANUTENCAO"
+            ,{"id":19 ,"field"          : "GM_VLRMANUTENCAO"
                       ,"labelCol"       : "VLRMANUT"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrManutencao"
@@ -371,7 +384,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":19 ,"field"          : "GM_VLRREVISAO"
+            ,{"id":20 ,"field"          : "GM_VLRREVISAO"
                       ,"labelCol"       : "VLRREVISAO"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrRevisao"
@@ -383,26 +396,26 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":20 ,"field"          : "GM_ATIVO"  
+            ,{"id":21 ,"field"          : "GM_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"padrao":2}                                        
-            ,{"id":21 ,"field"          : "GM_REG"    
+            ,{"id":22 ,"field"          : "GM_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":22 ,"field"          : "US_APELIDO" 
+            ,{"id":23 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"tamImp"         : "0"                                            
                       ,"obj"            : "edtUsuario" 
                       ,"padrao":4}                
-            ,{"id":23 ,"field"          : "GM_CODUSR" 
+            ,{"id":24 ,"field"          : "GM_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":24 ,"field"          : "GM_CODGP"   
+            ,{"id":25 ,"field"          : "GM_CODGP"   
                       ,"labelCol"       : "GP"
                       ,"obj"            : "edtCodGp"
                       ,"newRecord"      : ["AUT","this","this"]
@@ -410,7 +423,7 @@
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
-            ,{"id":25 ,"labelCol"       : "PP"      
+            ,{"id":26 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -511,6 +524,7 @@
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
       var msg;                        // Variavel para guardadar mensagens de retorno/erro 
+      var objGmF10;                   // Obrigatório para instanciar o JS GrupoModeloF10
       var envPhp                      // Para enviar dados para o Php      
       var retPhp                      // Retorno do Php para a rotina chamadora
       var contMsg   = 0;              // contador para mensagens
@@ -936,6 +950,40 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});  
         };
       };
+      ///////////////////////////////
+      //  AJUDA PARA GRUPOMODELO   //
+      ///////////////////////////////
+      function gmFocus(obj){ 
+        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
+      };
+      function gmF10Click(obj){ 
+        let whr;
+        whr = " {WHERE} (A.GM_CODGP='AUT') "
+        whr+= " {AND} (A.GM_CODIGOPAIFILHO=0)"     
+        fGrupoModeloF10(0,obj.id,"edtCodPaiFilho",100
+          ,{tamColNome:"29.5em"
+            ,ativo:"S"
+            ,where:whr 
+           } 
+        ); 
+      };
+      function RetF10tblGm(arr){
+        document.getElementById("edtCodPaiFilho").value  = jsNmrs(arr[0].CODIGO).emZero(4).ret();
+        document.getElementById("edtCodPaiFilho").setAttribute("data-oldvalue",arr[0].CODIGO);
+        
+      };
+      function codGmBlur(obj){
+        var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          var arr = fGrupoModeloF10(1,obj.id,"edtUnidades",100,
+            {codfvr  : elNew
+             ,ativo  : "S"} 
+            ); 
+        document.getElementById(obj.id).value  = ( ret.length == 0 ? "0000"  : jsNmrs(ret[0].CODIGO).emZero(4).ret() );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO ) );
+        };
+      };
     </script>
   </head>
   <body>
@@ -1022,6 +1070,19 @@
                                                             readonly
                                                             maxlength="40" />
                 <label class="campo_label campo_required" for="edtGmAceito">MODELOs-para aceito</label>
+              </div>
+              <!-- -->
+              <div class="campotexto campo10">
+               <input class="campo_input inputF10" id="edtCodPaiFilho"
+                                                    onBlur="codGmBlur(this);" 
+                                                    onFocus="gmFocus(this);" 
+                                                    onClick="gmF10Click(this);"
+                                                    data-oldvalue=""
+                                                    data-newrecord="0000"
+                                                    autocomplete="off"
+                                                    maxlength="6"
+                                                    type="text" />       
+                <label class="campo_label" for="edtCodPaiFilho">Codigo Pai:</label>
               </div>
               <!-- -->
               <div class="campotexto campo15">

@@ -636,7 +636,7 @@
       // BAIXAR ORDEM DE SERVICO
       //////////////////////////
       function baiConfirmarClick(){
-debugger;        
+        
         try{
           let obs         = jsConverte("#edtOsObs").upper();
           let colaborador = jsConverte("#edtOsColaborador").upper();

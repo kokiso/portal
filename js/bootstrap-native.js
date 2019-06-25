@@ -883,7 +883,7 @@
     element = queryElement(element);
     // set options
     options = options || {};
-//debugger;  
+//  
     // event targets and constants
     var accordion = null
         ,collapse = null
@@ -1115,7 +1115,7 @@
   
     // public methods
     this.toggle = function() {
-debugger;      
+      
       if (hasClass(parent,open) && element[open]) { 
         hide(); 
       } else { 
@@ -1391,7 +1391,7 @@ debugger;
     ///////////////////////
     // Iniciando o elemento
     ///////////////////////
-//debugger;    
+//    
     element = queryElement(element);
   
     // set options

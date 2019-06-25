@@ -1396,7 +1396,7 @@
         $doc("ageDesCol").value      = arr[0].COLABORADOR;
         $doc("ageApeCol").value      = arr[0].APELIDO;
         $doc("ageCodCol").setAttribute("data-oldvalue",arr[0].CODIGO);
-        debugger;
+        
         if( pega.qualRotina=="OS" )
           $doc("cbCodMsg").focus();        
       };
@@ -1829,7 +1829,7 @@
               });    
               let tbl=window.opener.document.getElementById("tblCntt");
               tbl.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
-                debugger;
+                
                 if( parseInt(pega.codCntt)==jsNmrs(row.cells[pega.CODIGO].innerHTML).inteiro().ret() ){
                   if( row.cells[pega.INICIO].innerHTML=="" )
                     row.cells[pega.INICIO].innerHTML=$doc("edtDtAtiva").value;
@@ -1848,7 +1848,7 @@
       // Gerar OS
       ///////////  
       function horGerarOsClick(){
-        debugger;
+        
         try{
           ///////////////////////////////////////////////////////////////////////////
           // Classe para montar envio para o Php

@@ -2125,6 +2125,7 @@ CREATE TABLE dbo.GRUPOMODELO(
   ,GM_GMOBRIGATORIO VARCHAR(70) NOT NULL  
   ,GM_GPACEITO VARCHAR(70) NOT NULL  -- angelo kokiso alterado varchar para 70
   ,GM_GMACEITO VARCHAR(70) NOT NULL  
+  ,GM_CODIGOPAIFILHO INTEGER NOT NULL DEFAULT 0
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL  
   ,GM_VALORMINIMO NUMERIC(15,2) NOT NULL  
@@ -2185,6 +2186,7 @@ CREATE VIEW VGRUPOMODELO AS
          ,GM_GMOBRIGATORIO
          ,GM_GPACEITO
          ,GM_GMACEITO
+         ,GM_CODIGOPAIFILHO
          ,GM_VALORVISTA
          ,GM_VALORPRAZO
          ,GM_VALORMINIMO         
@@ -2223,7 +2225,8 @@ CREATE TABLE dbo.BKPGRUPOMODELO(
   ,GM_GPOBRIGATORIO VARCHAR(70) NOT NULL  
   ,GM_GMOBRIGATORIO VARCHAR(70) NOT NULL  
   ,GM_GPACEITO VARCHAR(40) NOT NULL  
-  ,GM_GMACEITO VARCHAR(70) NOT NULL  
+  ,GM_GMACEITO VARCHAR(70) NOT NULL
+  ,GM_CODIGOPAIFILHO  INTEGER NOT NULL
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL 
   ,GM_VALORMINIMO NUMERIC(15,2) NOT NULL   
@@ -22407,7 +22410,8 @@ BEGIN
   DECLARE @gmGpObrigatorioNew VARCHAR(70);
   DECLARE @gmGmObrigatorioNew VARCHAR(70);  
   DECLARE @gmGpAceitoNew VARCHAR(70);
-  DECLARE @gmGmAceitoNew VARCHAR(70);    
+  DECLARE @gmGmAceitoNew VARCHAR(70); 
+  DECLARE @gmCodigoPaiFilhoNew INTEGER;
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);
   DECLARE @gmValorMinimoNew NUMERIC(15,2);  
@@ -22446,6 +22450,7 @@ BEGIN
          ,@gmGmObrigatorioNew   = COALESCE(dbo.fncTranslate(i.GM_GMOBRIGATORIO,70),'NSA')
          ,@gmGpAceitoNew        = COALESCE(dbo.fncTranslate(i.GM_GPACEITO,40),'NSA')
          ,@gmGmAceitoNew        = COALESCE(dbo.fncTranslate(i.GM_GMACEITO,70),'NSA')
+         ,@gmCodigoPaiFilhoNew  = COALESCE(i.GM_CODIGOPAIFILHO,0)
          ,@gmValorVistaNew      = i.GM_VALORVISTA
          ,@gmValorPrazoNew      = i.GM_VALORPRAZO
          ,@gmValorMinimoNew     = i.GM_VALORMINIMO
@@ -22536,7 +22541,8 @@ BEGIN
       ,GM_GPOBRIGATORIO
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
-      ,GM_GMACEITO  
+      ,GM_GMACEITO
+      ,GM_CODIGOPAIFILHO  
       ,GM_VALORVISTA
       ,GM_VALORPRAZO
       ,GM_VALORMINIMO      
@@ -22568,7 +22574,8 @@ BEGIN
       ,@gmGpObrigatorioNew    -- GM_GPOBRIGATORIO
       ,@gmGmObrigatorioNew    -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoNew         -- GM_GPACEITO
-      ,@gmGmAceitoNew         -- GM_GMACEITO      
+      ,@gmGmAceitoNew         -- GM_GMACEITO 
+      ,@gmCodigoPaiFilhoNew     
       ,@gmValorVistaNew       -- GM_VALORVISTA
       ,@gmValorPrazoNew       -- GM_VALORPRAZO
       ,@gmValorMinimoNew      -- GM_VALORMINIMO
@@ -22605,7 +22612,8 @@ BEGIN
       ,GM_GPOBRIGATORIO
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
-      ,GM_GMACEITO      
+      ,GM_GMACEITO
+      ,GM_CODIGOPAIFILHO      
       ,GM_VALORVISTA
       ,GM_VALORPRAZO
       ,GM_VALORMINIMO      
@@ -22640,7 +22648,8 @@ BEGIN
       ,@gmGpObrigatorioNew          -- GM_GPOBRIGATORIO
       ,@gmGmObrigatorioNew          -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoNew               -- GM_GPACEITO
-      ,@gmGmAceitoNew               -- GM_GMACEITO      
+      ,@gmGmAceitoNew               -- GM_GMACEITO
+      ,@gmCodigoPaiFilhoNew      
       ,@gmValorVistaNew             -- GM_VALORVISTA
       ,@gmValorPrazoNew             -- GM_VALORPRAZO
       ,@gmValorMinimoNew            -- GM_VALORMINIMO      
@@ -22696,7 +22705,8 @@ BEGIN
   DECLARE @gmGpObrigatorioNew VARCHAR(70);
   DECLARE @gmGmObrigatorioNew VARCHAR(70);  
   DECLARE @gmGpAceitoNew VARCHAR(70);
-  DECLARE @gmGmAceitoNew VARCHAR(70);  
+  DECLARE @gmGmAceitoNew VARCHAR(70);
+  DECLARE @gmCodigoPaiFilhoNew INTEGER;  
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);        
   DECLARE @gmValorMinimoNew NUMERIC(15,2); 
@@ -22739,6 +22749,7 @@ BEGIN
          ,@gmGmObrigatorioNew   = dbo.fncTranslate(i.GM_GMOBRIGATORIO,70)
          ,@gmGpAceitoNew        = dbo.fncTranslate(i.GM_GPACEITO,40)
          ,@gmGmAceitoNew        = dbo.fncTranslate(i.GM_GMACEITO,70)
+         ,@gmCodigoPaiFilhoNew  = i.GM_CODIGOPAIFILHO
          ,@gmValorVistaNew      = i.GM_VALORVISTA
          ,@gmValorPrazoNew      = i.GM_VALORPRAZO
          ,@gmValorMinimoNew     = i.GM_VALORMINIMO         
@@ -22801,7 +22812,8 @@ BEGIN
     DECLARE @gmGpObrigatorioOld VARCHAR(40);
     DECLARE @gmGmObrigatorioOld VARCHAR(70);  
     DECLARE @gmGpAceitoOld VARCHAR(40);
-    DECLARE @gmGmAceitoOld VARCHAR(70);  
+    DECLARE @gmGmAceitoOld VARCHAR(70); 
+    DECLARE @gmCodigoPaiFilhoOld INTEGER; 
     DECLARE @gmValorVistaOld NUMERIC(15,2);      
     DECLARE @gmValorPrazoOld NUMERIC(15,2);        
     DECLARE @gmValorMinimoOld NUMERIC(15,2);        
@@ -22835,6 +22847,7 @@ BEGIN
            ,@gmGmObrigatorioOld   = d.GM_GMOBRIGATORIO
            ,@gmGpAceitoOld        = d.GM_GPACEITO
            ,@gmGmAceitoOld        = d.GM_GMACEITO
+           ,@gmCodigoPaiFilhoOld  = d.GM_CODIGOPAIFILHO
            ,@gmValorVistaOld      = d.GM_VALORVISTA
            ,@gmValorPrazoOld      = d.GM_VALORPRAZO
            ,@gmValorMinimoOld     = d.GM_VALORMINIMO
@@ -22893,6 +22906,7 @@ BEGIN
           ,GM_GMOBRIGATORIO   = @gmGmObrigatorioNew
           ,GM_GPACEITO        = @gmGpAceitoNew
           ,GM_GMACEITO        = @gmGmAceitoNew
+          ,GM_CODIGOPAIFILHO  = @gmCodigoPaiFilhoNew
           ,GM_VALORVISTA      = @gmValorVistaNew          
           ,GM_VALORPRAZO      = @gmValorPrazoNew                    
           ,GM_VALORMINIMO     = @gmValorMinimoNew                    
@@ -22911,8 +22925,8 @@ BEGIN
     IF( (@gmNomeOld<>@gmNomeNew) OR (@gmCodGpOld<>@gmCodGpNew) OR (@gmEstoqueOld<>@gmEstoqueNew) OR (@gmEstoqueMinimoOld<>@gmEstoqueMinimoNew) 
      OR (@gmNumSerieOld<>@gmNumSerieNew) OR (@gmSinCardOld<>@gmSinCardNew) OR (@gmOperadoraOld<>@gmOperadoraNew) 
      OR (@gmFoneOld<>@gmFoneNew) OR (@gmVendaOld<>@gmVendaNew) OR (@gmEstoqueSucataOld<>@gmEstoqueSucataNew) OR (@gmEstoqueAutoOld<>@gmEstoqueAutoNew)
-     OR (@gmGpObrigatorioOld<>@gmGpObrigatorioNew) OR (@gmGmObrigatorioOld<>@gmGmObrigatorioNew) OR (@gmGpAceitoOld<>@gmGpAceitoNew) OR (@gmGmAceitoOld<>@gmGmAceitoNew)
-     OR (@gmValorVistaOld<>@gmValorVistaNew) OR (@gmValorPrazoOld<>@gmValorPrazoNew) OR (@gmValorMinimoOld<>@gmValorMinimoNew)
+     OR (@gmGpObrigatorioOld<>@gmGpObrigatorioNew) OR (@gmGmObrigatorioOld<>@gmGmObrigatorioNew) OR (@gmGpAceitoOld<>@gmGpAceitoNew) OR (@gmGmAceitoOld<>@gmGmAceitoNew) 
+     OR (@gmCodigoPaiFilhoOld<>@gmCodigoPaiFilhoNew) OR (@gmValorVistaOld<>@gmValorVistaNew) OR (@gmValorPrazoOld<>@gmValorPrazoNew) OR (@gmValorMinimoOld<>@gmValorMinimoNew)
      OR (@gmVlrNoShowOld<>@gmVlrNoShowNew) OR (@gmVlrImprodutivelOld<>@gmVlrImprodutivelNew) OR (@gmVlrInstalaOld<>@gmVlrInstalaNew) 
      OR (@gmVlrDesistalaOld<>@gmVlrDesistalaNew) OR (@gmVlrReinstalaOld<>@gmVlrReinstalaNew)  OR (@gmVlrManutencaoOld<>@gmVlrManutencaoNew) OR (@gmVlrRevisaoOld<>@gmVlrRevisaoNew)
      OR (@gmLocacaoOld<>@gmLocacaoNew) OR (@gmFirmWareOld<>@gmFirmWareNew) OR (@gmAtivoOld<>@gmAtivoNew) OR (@gmRegOld<>@gmRegNew) ) BEGIN
@@ -22936,7 +22950,8 @@ BEGIN
         ,GM_GPOBRIGATORIO
         ,GM_GMOBRIGATORIO      
         ,GM_GPACEITO
-        ,GM_GMACEITO      
+        ,GM_GMACEITO
+        ,GM_CODIGOPAIFILHO      
         ,GM_VALORVISTA
         ,GM_VALORPRAZO
         ,GM_VALORMINIMO        
@@ -22970,7 +22985,8 @@ BEGIN
         ,@gmGpObrigatorioNew    -- GM_GPOBRIGATORIO
         ,@gmGmObrigatorioNew    -- GM_GMOBRIGATORIO      
         ,@gmGpAceitoNew         -- GM_GPACEITO
-        ,@gmGmAceitoNew         -- GM_GMACEITO      
+        ,@gmGmAceitoNew         -- GM_GMACEITO
+        ,@gmCodigoPaiFilhoNew      
         ,@gmValorVistaNew       -- GM_VALORVISTA
         ,@gmValorPrazoNew       -- GM_VALORPRAZO
         ,@gmValorMinimoNew      -- GM_VALORMINIMO
@@ -23027,7 +23043,8 @@ BEGIN
   DECLARE @gmGpObrigatorioOld VARCHAR(40);
   DECLARE @gmGmObrigatorioOld VARCHAR(70);  
   DECLARE @gmGpAceitoOld VARCHAR(40);
-  DECLARE @gmGmAceitoOld VARCHAR(70);  
+  DECLARE @gmGmAceitoOld VARCHAR(70);
+  DECLARE @gmCodigoPaiFilhoOld INTEGER;  
   DECLARE @gmValorVistaOld NUMERIC(15,2);      
   DECLARE @gmValorPrazoOld NUMERIC(15,2);        
   DECLARE @gmValorMinimoOld NUMERIC(15,2);        
@@ -23067,6 +23084,7 @@ BEGIN
          ,@gmGmObrigatorioOld   = d.GM_GMOBRIGATORIO
          ,@gmGpAceitoOld        = d.GM_GPACEITO
          ,@gmGmAceitoOld        = d.GM_GMACEITO
+         ,@gmCodigoPaiFilhoOld  = d.GM_CODIGOPAIFILHO
          ,@gmValorVistaOld      = d.GM_VALORVISTA
          ,@gmValorPrazoOld      = d.GM_VALORPRAZO
          ,@gmValorMinimoOld     = d.GM_VALORMINIMO
@@ -23138,7 +23156,8 @@ BEGIN
       ,GM_GPOBRIGATORIO
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
-      ,GM_GMACEITO      
+      ,GM_GMACEITO
+      ,GM_CODIGOPAIFILHO      
       ,GM_VALORVISTA
       ,GM_VALORPRAZO
       ,GM_VALORMINIMO
@@ -23172,7 +23191,8 @@ BEGIN
       ,@gmGpObrigatorioOld    -- GM_GPOBRIGATORIO
       ,@gmGmObrigatorioOld    -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoOld         -- GM_GPACEITO
-      ,@gmGmAceitoOld         -- GM_GMACEITO      
+      ,@gmGmAceitoOld         -- GM_GMACEITO 
+      ,@gmCodigoPaiFilhoOld   -- GM_CODIGOPAIFILHO  
       ,@gmValorVistaOld       -- GM_VALORVISTA
       ,@gmValorPrazoOld       -- GM_VALORPRAZO
       ,@gmValorMinimoOld      -- GM_VALORMINIMO

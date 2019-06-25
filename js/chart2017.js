@@ -1364,7 +1364,7 @@
 			ctx.font = this.font;
       //akiii desenha a legenda;
 			helpers.each(this.labels,function(label,index){
-        //debugger;
+        //
 				ctx.fillStyle = this.textColor;
 				ctx.fillText(label,this.x + this.xPadding + this.fontSize + 3, this.getLineHeight(index + 1));
 

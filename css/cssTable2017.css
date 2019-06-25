@@ -20,7 +20,8 @@
   float:right;
   text-align:left;
   font-size:16px; 
-  font-weight: bold;  
+  font-weight: bold;
+  width: auto;   
 }  
 .tableDivProcurarLabel{
   float:left;
@@ -28,7 +29,8 @@
   padding-top:0.7em;
   font-size:1.6em; 
   font-weight: bold; 
-  padding-right:1em;  
+  padding-right:1em;
+  width: auto;  
 } 
 .tableDivProcurarInput{
   padding-top:0.2em;

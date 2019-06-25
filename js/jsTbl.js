@@ -1,6 +1,6 @@
 var clsTabela = function(obj){
   var tbl=obj;
-  debugger;
+  
   return {
     regs : function(){
       return tbl.rows.length;

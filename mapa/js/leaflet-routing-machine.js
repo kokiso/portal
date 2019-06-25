@@ -10576,7 +10576,7 @@ module.exports={
 		},
 
 		_routeSelected: function(e) {
-debugger;      
+      
 			var route = this._selectedRoute = e.route,
 				alternatives = this.options.showAlternatives && e.alternatives,
 				fitMode = this.options.fitSelectedRoutes,

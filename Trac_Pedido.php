@@ -164,7 +164,12 @@
                 $sql.=")";
                 array_push($arrUpdt,$sql);            
               };
-            };  
+            };
+            //Angelo kokiso - Altera ativação do pedido para 'NAO' para criar efeito de DELETE ao gerar um contrato
+            $sql="UPDATE PEDIDO SET PDD_CODUSR=".$_SESSION["usr_codigo"]." WHERE PDD_CODIGO=".$lote[0]->codpdd;
+            array_push($arrUpdt,$sql);
+            $sql="UPDATE PEDIDO SET PDD_ATIVO = 'N' WHERE PDD_CODIGO=".$lote[0]->codpdd;
+            array_push($arrUpdt,$sql);  
           };
           $atuBd  = true;
         };  
@@ -981,12 +986,11 @@
           if( parseInt(jsPub[0].usr_d40)<2 )
             throw "USUARIO NÃO POSSUI DIREITO 40 PARA INCLUIR NA TABELA DE CONTRATO!";            
           chkds=objPdd.gerarJson("1").gerar();
-          /*  voltarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
           chkds.forEach(function(reg){
             if( reg.STATUS != "ASSINADO" )
               throw "Pedido "+reg.CODIGO+" deve estar com status ASSINADO!"; 
           });
-          */
+
           let placa=JSON.parse((chkds[0].JSPLACA).replaceAll('|','"')).placa;
           let clsPlc = jsString("placa");
           clsPlc.principal(false);
@@ -1114,7 +1118,8 @@
           clsJs.add("codfc"       , "BOL"                           );
           clsJs.add("DUPLICATA"   , duplicata                       );          
           clsJs.add("PRODUTO"     , produto                         );                    
-          clsJs.add("PLACA"       , placa                           );                              
+          clsJs.add("PLACA"       , placa                           );
+          clsJs.add("codpdd"      , chkds[0].CODIGO     );                              
 
 //console.log(produto);
 //return;
@@ -1128,7 +1133,8 @@
           if( retPhp[0].retorno != "OK" ){
             gerarMensagemErro("catch",retPhp[0].erro,"Erro");  
           } else {  
-            alert('ok-não excluido pedido devido fase de teste');
+            alert('Contrato Gerado');
+            window.close();
           };  
 
         }catch(e){
