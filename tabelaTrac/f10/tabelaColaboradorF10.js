@@ -20,7 +20,7 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
   clsStr.concat("  FROM PONTOESTOQUEIND A");
   clsStr.concat("  LEFT OUTER JOIN CONTRATOENDERECO ORI ON ORI.CNTE_CODIGO=[codins]");
   clsStr.concat("  LEFT OUTER JOIN FAVORECIDO DES ON A.PEI_CODFVR=DES.FVR_CODIGO");
-  clsStr.concat(" WHERE A.PEI_CODPE IN('CRD','INS','TRC')");
+  clsStr.concat(" WHERE A.PEI_CODPE IN('CRD','INS','TRC','CLN','FVR')");
   clsStr.concat("   AND A.PEI_ATIVO='S'");
   //clsStr.concat(" ORDER BY 5");
   let tblCol     = "tblCol";
@@ -63,7 +63,7 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
         "titulo":[
            {"id":0 ,"labelCol":"OPC"          ,"tipo":"chk"  ,"tamGrd":"3em"  ,"fieldType":"chk"}                                
           ,{"id":1 ,"labelCol":"CODIGO"       ,"tipo":"edt"  ,"tamGrd":"5em"  ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
-          ,{"id":2 ,"labelCol":"PE"           ,"tipo":"edt"  ,"tamGrd":"3em"  ,"fieldType":"str","ordenaColuna":"N"}
+          ,{"id":2 ,"labelCol":"PE"           ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"N"}
           ,{"id":3 ,"labelCol":"COLABORADOR"  ,"tipo":"edt"  ,"tamGrd":"33em" ,"fieldType":"str","ordenaColuna":"S"}
           ,{"id":4 ,"labelCol":"STATUS"       
                     ,"funcCor": "switch (objCell.innerHTML) { case 'OTIMO':objCell.classList.add('corVerde');break; case 'BOM':objCell.classList.add('corAzul');break; case 'RAZOAVEL':objCell.classList.add('corTitulo');break; case 'RUIM':objCell.classList.add('corAlterado');break; default:objCell.classList.remove('corAlterado');break;};"

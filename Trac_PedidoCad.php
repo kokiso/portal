@@ -134,8 +134,8 @@
           $sql.=" WHERE GMS_CODGM='".$lote[0]->codgm."'";
           $sql.="   AND A.GMS_VENDALOCACAO='".$lote[0]->vendalocacao."'";
           $sql.="   AND A.GMS_ATIVO='S'";
-          if( $lote[0]->instpropria=="S" )
-            $sql.="   AND A.GMS_REFINSTALACAO='N'";  
+          // if( $lote[0]->instpropria=="S" )
+          //   $sql.="   AND A.GMS_REFINSTALACAO='N'";  
           $classe->msgSelect(true);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -414,9 +414,9 @@
           ,"fieldReg"       : "*"                       // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "*"                       // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"position"       : "relative"
-          ,"width"          : "112em"                   // Tamanho da table
-          ,"height"         : "40em"                    // Altura da table
-          ,"tableLeft"      : "2px"                     // Se tiver menu esquerdo
+          ,"width"          : "100%"                   // Tamanho da table
+          ,"height"         : "70%"                    // Altura da table
+          //,"tableLeft"      : "2px"                     // Se tiver menu esquerdo
           ,"relTitulo"      : "PEDIDO"                  // Titulo do relatório
           ,"relOrientacao"  : "P"                       // Paisagem ou retrato
           ,"relFonte"       : "7"                       // Fonte do relatório
@@ -870,6 +870,7 @@
           document.getElementById("edtCodGm").setAttribute("data-gmvalorvista",arr[0].VALORVISTA                          );
           document.getElementById("edtCodGm").setAttribute("data-gmvalorprazo",arr[0].VALORPRAZO                          );
           document.getElementById("edtCodGm").setAttribute("data-gmvalorminimo",arr[0].VALORMINIMO                        );
+          document.getElementById("edtCodGm").setAttribute("data-gmvalorinstalacao",arr[0].VALORINSTALACAO);
           document.getElementById("edtCodGm").setAttribute("data-codgp",arr[0].CODGP                                      );
         };
       };
@@ -1075,14 +1076,18 @@
             let vlrMensal   = 0;
             let vlrPontual  = 0;
             let valor       = 0;
-
             tblParc.forEach(function(reg){
               valor+=reg.valor;
               if( reg.pagto=="MENSAL" )
                 vlrMensal+=reg.valor;
               if( reg.pagto=="PONTUAL" )
                 vlrPontual+=reg.valor;
-            }); 
+            });
+            // if ($doc("cbInstPropria").value === 'N'){
+            //   let edtcodgm =  $doc("edtCodGm");
+            //   let valorInstalacao = edtcodgm.getAttribute("data-gmvalorinstalacao");
+            //   vlrPontual+=valorInstalacao;
+            // } 
             $doc("edtVlrMensal").value=jsNmrs(vlrMensal).dolar().sepMilhar().ret();
             $doc("edtVlrPontual").value=jsNmrs(vlrPontual).dolar().sepMilhar().ret();
             $doc("edtVlrMensal").setAttribute("data-vlrdolar",jsNmrs(vlrMensal).dec(2).dolar().ret());      // Para não ter que tirar o separador de milhar
@@ -2067,6 +2072,7 @@
                                                   data-gmvalorvista="0,00"
                                                   data-gmvalorprazo="0,00"
                                                   data-gmvalorminimo="0,00"
+                                                  data-gmvalorinstalacao="0,00"
                                                   autocomplete="off"                                                
                                                   maxlength="6"
                                                   type="text"/>
@@ -2158,9 +2164,9 @@
               <label class="campo_label" for="edtVlrPontual">VLR PONTUAL</label>
             </div>
             
-            <div onClick="fncIncluir();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-plus"> Incluir</i></div>
-            <div onClick="fncRecalculo();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-code"> Recalculo</i></div>            
-            <div onClick="fncObsPedido();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-sort-alpha-asc"> Obs</i></div>
+            <div onClick="fncIncluir();"  class="botaoImagemSup-icon-big"><i class="fa fa-plus"> Incluir</i></div>
+            <div onClick="fncRecalculo();"  class="botaoImagemSup-icon-big"><i class="fa fa-code"> Recalculo</i></div>            
+            <div onClick="fncObsPedido();"  class="botaoImagemSup-icon-big"><i class="fa fa-sort-alpha-asc"> Obs</i></div>
             <div class="campotexto campo10" style="width: 9%">
               <input class="campo_input inputF10" id="edtCodInd"
                                                   OnKeyPress="return mascaraInteiro(event);"

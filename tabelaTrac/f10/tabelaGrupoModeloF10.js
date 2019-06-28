@@ -47,13 +47,13 @@ function fGrupoModeloF10(opc,codGm,foco,topo,objeto){
     if( bdGm.retorno=='OK'){
       var jsGmF10={
         "titulo":[
-           {"id":0 ,"labelCol":"OPC"        ,"tipo":"chk"  ,"tamGrd":"5em"        ,"fieldType":"chk"}                                
-          ,{"id":1 ,"labelCol":"CODIGO"     ,"tipo":"edt"  ,"tamGrd":"6em"        ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
-          ,{"id":2 ,"labelCol":"DESCRICAO"  ,"tipo":"edt"  ,"tamGrd":tamColNome   ,"fieldType":"str","ordenaColuna":"S"}
-          ,{"id":3 ,"labelCol":"VALORVISTA" ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"flo2","ordenaColuna":"N"}
-          ,{"id":4 ,"labelCol":"VALORPRAZO" ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"flo2","ordenaColuna":"N"}
-          ,{"id":5 ,"labelCol":"VALORMINIMO","tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"flo2","ordenaColuna":"N"}          
-          ,{"id":6 ,"labelCol":"CODGP"      ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"str","ordenaColuna":"N"}          
+           {"id":0 ,"labelCol":"OPC"            ,"tipo":"chk"  ,"tamGrd":"5em"        ,"fieldType":"chk"}                                
+          ,{"id":1 ,"labelCol":"CODIGO"         ,"tipo":"edt"  ,"tamGrd":"6em"        ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
+          ,{"id":2 ,"labelCol":"DESCRICAO"      ,"tipo":"edt"  ,"tamGrd":tamColNome   ,"fieldType":"str","ordenaColuna":"S"}
+          ,{"id":3 ,"labelCol":"VALORVISTA"     ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"flo2","ordenaColuna":"N"}
+          ,{"id":4 ,"labelCol":"VALORPRAZO"     ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"flo2","ordenaColuna":"N"}
+          ,{"id":5 ,"labelCol":"VALORMINIMO"    ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"flo2","ordenaColuna":"N"}          
+          ,{"id":6 ,"labelCol":"CODGP"          ,"tipo":"edt"  ,"tamGrd":"0em"        ,"fieldType":"str","ordenaColuna":"N"}          
         ]
         ,"registros"      : bdGm.dados             // Recebe um Json vindo da classe clsBancoDados
         ,"opcRegSeek"     : true                   // Opção para numero registros/botão/procurar                       

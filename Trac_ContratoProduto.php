@@ -1345,7 +1345,6 @@
       // Composicao do auto
       /////////////////////////////////////////////
       function horComposicaoClick(codamp){
-        alert(codamp);
         if( jsNmrs(codamp).inteiro().ret()>0 ){
           try{          
             clsJs   = jsString("lote");  

@@ -4,27 +4,7 @@
 // foco  - Onde vai o foco quando confirmar                               //
 // jsPub[0].usr_clientes) sao os clientes que o usuario pode ver          //
 ////////////////////////////////////////////////////////////////////////////
-function fServicoF10(opc,codSrv,foco,topo,objeto){
-  var sql="SELECT A.SRV_CODIGO AS CODIGO"
-         +"       ,A.SRV_NOME AS DESCRICAO"
-         +"       ,A.SRV_INSS AS INSS_SN"
-         +"       ,A.SRV_INSSALIQ AS INSS_ALIQ"
-         +"       ,A.SRV_INSSBASECALC AS INSS_BASECALC"
-         +"       ,A.SRV_IRRF AS IRRF_SN"
-         +"       ,A.SRV_IRRFALIQ AS IRRF_ALIQ"
-         +"       ,A.SRV_PIS AS PIS_SN"
-         +"       ,A.SRV_PISALIQ AS PIS_ALIQ"
-         +"       ,A.SRV_COFINS AS COFINS_SN"
-         +"       ,A.SRV_COFINSALIQ AS COFINS_ALIQ"
-         +"       ,A.SRV_CSLL AS CSLL_SN"
-         +"       ,A.SRV_CSLLALIQ AS CSLL_ALIQ"
-         +"       ,A.SRV_ISS AS ISS_SN"
-         +"       ,A.SRV_CODCC AS CODCC"
-         +"       ,SPR.SPR_ALIQUOTA AS ISS_ALIQ"
-         +"       ,SPR.SPR_RETIDO AS RETIDO_SN"
-         +"  FROM SERVICO A" 
-         +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
-         
+function fServicoF10(opc,codSrv,foco,topo,objeto){        
   if( objeto.fisjur=="F" ){
     var sql="SELECT A.SRV_CODIGO AS CODIGO"
            +"       ,A.SRV_NOME AS DESCRICAO"
@@ -46,7 +26,7 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
            +"  FROM SERVICO A" 
            +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
   };
-  if( objeto.categoria=="SIM" ){
+  else if( objeto.categoria=="SIM" ){
     var sql="SELECT A.SRV_CODIGO AS CODIGO"
            +"       ,A.SRV_NOME AS DESCRICAO"
            +"       ,A.SRV_INSS AS INSS_SN"
@@ -66,6 +46,27 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
            +"       ,SPR.SPR_RETIDO AS RETIDO_SN"
            +"  FROM SERVICO A" 
            +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
+  };
+  else{
+    var sql="SELECT A.SRV_CODIGO AS CODIGO"
+         +"       ,A.SRV_NOME AS DESCRICAO"
+         +"       ,A.SRV_INSS AS INSS_SN"
+         +"       ,A.SRV_INSSALIQ AS INSS_ALIQ"
+         +"       ,A.SRV_INSSBASECALC AS INSS_BASECALC"
+         +"       ,A.SRV_IRRF AS IRRF_SN"
+         +"       ,A.SRV_IRRFALIQ AS IRRF_ALIQ"
+         +"       ,A.SRV_PIS AS PIS_SN"
+         +"       ,A.SRV_PISALIQ AS PIS_ALIQ"
+         +"       ,A.SRV_COFINS AS COFINS_SN"
+         +"       ,A.SRV_COFINSALIQ AS COFINS_ALIQ"
+         +"       ,A.SRV_CSLL AS CSLL_SN"
+         +"       ,A.SRV_CSLLALIQ AS CSLL_ALIQ"
+         +"       ,A.SRV_ISS AS ISS_SN"
+         +"       ,A.SRV_CODCC AS CODCC"
+         +"       ,SPR.SPR_ALIQUOTA AS ISS_ALIQ"
+         +"       ,SPR.SPR_RETIDO AS RETIDO_SN"
+         +"  FROM SERVICO A" 
+         +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
   };  
   
   if( opc == 0 ){            

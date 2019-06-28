@@ -2121,10 +2121,10 @@ CREATE TABLE dbo.GRUPOMODELO(
   ,GM_CONTRATO VARCHAR(1) NOT NULL  
   ,GM_VENDA VARCHAR(1) NOT NULL
   ,GM_LOCACAO VARCHAR(1) NOT NULL  
-  ,GM_GPOBRIGATORIO VARCHAR(70) NOT NULL  --GM_GPOBRIGATORIO VARCHAR(40) NOT NULL  --ANGELO KOKISO ALTERADO SIZE DO VARCHAR PARA 70
-  ,GM_GMOBRIGATORIO VARCHAR(70) NOT NULL  
-  ,GM_GPACEITO VARCHAR(70) NOT NULL  -- angelo kokiso alterado varchar para 70
-  ,GM_GMACEITO VARCHAR(70) NOT NULL  
+  ,GM_GPOBRIGATORIO VARCHAR (MAX) NOT NULL  --GM_GPOBRIGATORIO VARCHAR(40) NOT NULL  --ANGELO KOKISO ALTERADO SIZE DO VARCHAR PARA 70
+  ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  
+  ,GM_GPACEITO VARCHAR(MAX) NOT NULL  -- angelo kokiso alterado varchar para 70
+  ,GM_GMACEITO VARCHAR(MAX) NOT NULL  
   ,GM_CODIGOPAIFILHO INTEGER NOT NULL DEFAULT 0
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL  
@@ -2222,10 +2222,10 @@ CREATE TABLE dbo.BKPGRUPOMODELO(
   ,GM_CONTRATO VARCHAR(1) NOT NULL  
   ,GM_VENDA VARCHAR(1) NOT NULL
   ,GM_LOCACAO VARCHAR(1) NOT NULL  
-  ,GM_GPOBRIGATORIO VARCHAR(70) NOT NULL  
-  ,GM_GMOBRIGATORIO VARCHAR(70) NOT NULL  
-  ,GM_GPACEITO VARCHAR(40) NOT NULL  
-  ,GM_GMACEITO VARCHAR(70) NOT NULL
+  ,GM_GPOBRIGATORIO VARCHAR(MAX) NOT NULL  
+  ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  
+  ,GM_GPACEITO VARCHAR(MAX) NOT NULL  
+  ,GM_GMACEITO VARCHAR(MAX) NOT NULL
   ,GM_CODIGOPAIFILHO  INTEGER NOT NULL
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL 
@@ -5138,13 +5138,13 @@ BEGIN
         DECLARE @mesFim DATE;
         DECLARE @mesInt INTEGER;
         SELECT @dtInicio=CNTT_DTINICIO,@meses=CNTT_MESES FROM CONTRATO WITH (NOLOCK) WHERE CNTT_CODIGO=@cntpCodCnttOld;
-        IF( @dtInicio IS NULL ) BEGIN
-          SET @mesFim=DateAdd(month, +(@meses+1), @cntpDtAtivacaoNew);
-          SET @mesInt=CAST(Substring(CONVERT(VARCHAR(10),@mesFim,112),1,6) AS INTEGER);
-          UPDATE CONTRATO SET CNTT_DTINICIO=@cntpDtAtivacaoNew,CNTT_DTFIM=@mesInt,CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
-        END ELSE BEGIN
-          UPDATE CONTRATO SET CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
-        END        
+        --IF( @dtInicio IS NULL ) BEGIN -- Angelo Kokiso , Data de inicio do contrato é mutavel de acordo com a ultima ativação
+        SET @mesFim=DateAdd(month, +(@meses+1), @cntpDtAtivacaoNew);
+        SET @mesInt=CAST(Substring(CONVERT(VARCHAR(10),@mesFim,112),1,6) AS INTEGER);
+        UPDATE CONTRATO SET CNTT_DTINICIO=@cntpDtAtivacaoNew,CNTT_DTFIM=@mesInt,CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
+        --END ELSE BEGIN
+        UPDATE CONTRATO SET CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
+        --END        
         INSERT INTO DETALHEAUTO(DA_CODGMP,DA_CODMSG,DA_CODUSR,DA_COMPLEMENTO) VALUES(@cntpCodGmpOld,10,@cntpCodUsrNew,CONCAT('Contrato ',REPLICATE('0', 6 - LEN(@cntpCodCnttNew))+RTrim(@cntpCodCnttNew)));
       END
       ------------------------------------------------
@@ -22407,10 +22407,10 @@ BEGIN
   DECLARE @gmVendaNew VARCHAR(1);
   DECLARE @gmLocacaoNew VARCHAR(1);  
   DECLARE @gmContratoNew VARCHAR(1);
-  DECLARE @gmGpObrigatorioNew VARCHAR(70);
-  DECLARE @gmGmObrigatorioNew VARCHAR(70);  
-  DECLARE @gmGpAceitoNew VARCHAR(70);
-  DECLARE @gmGmAceitoNew VARCHAR(70); 
+  DECLARE @gmGpObrigatorioNew VARCHAR(MAX);
+  DECLARE @gmGmObrigatorioNew VARCHAR(MAX);  
+  DECLARE @gmGpAceitoNew VARCHAR(MAX);
+  DECLARE @gmGmAceitoNew VARCHAR(MAX); 
   DECLARE @gmCodigoPaiFilhoNew INTEGER;
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);
@@ -22702,10 +22702,10 @@ BEGIN
   DECLARE @gmVendaNew VARCHAR(1);
   DECLARE @gmLocacaoNew VARCHAR(1);    
   DECLARE @gmContratoNew VARCHAR(1);
-  DECLARE @gmGpObrigatorioNew VARCHAR(70);
-  DECLARE @gmGmObrigatorioNew VARCHAR(70);  
-  DECLARE @gmGpAceitoNew VARCHAR(70);
-  DECLARE @gmGmAceitoNew VARCHAR(70);
+  DECLARE @gmGpObrigatorioNew VARCHAR(MAX);
+  DECLARE @gmGmObrigatorioNew VARCHAR(MAX);  
+  DECLARE @gmGpAceitoNew VARCHAR(MAX);
+  DECLARE @gmGmAceitoNew VARCHAR(MAX);
   DECLARE @gmCodigoPaiFilhoNew INTEGER;  
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);        
@@ -22809,10 +22809,10 @@ BEGIN
     DECLARE @gmVendaOld VARCHAR(1);
     DECLARE @gmLocacaoOld VARCHAR(1);
     DECLARE @gmContratoOld VARCHAR(1);
-    DECLARE @gmGpObrigatorioOld VARCHAR(40);
-    DECLARE @gmGmObrigatorioOld VARCHAR(70);  
-    DECLARE @gmGpAceitoOld VARCHAR(40);
-    DECLARE @gmGmAceitoOld VARCHAR(70); 
+    DECLARE @gmGpObrigatorioOld VARCHAR(MAX);
+    DECLARE @gmGmObrigatorioOld VARCHAR(MAX);  
+    DECLARE @gmGpAceitoOld VARCHAR(MAX);
+    DECLARE @gmGmAceitoOld VARCHAR(MAX); 
     DECLARE @gmCodigoPaiFilhoOld INTEGER; 
     DECLARE @gmValorVistaOld NUMERIC(15,2);      
     DECLARE @gmValorPrazoOld NUMERIC(15,2);        
@@ -23040,10 +23040,10 @@ BEGIN
   DECLARE @gmVendaOld VARCHAR(1);
   DECLARE @gmLocacaoOld VARCHAR(1);    
   DECLARE @gmContratoOld VARCHAR(1);  
-  DECLARE @gmGpObrigatorioOld VARCHAR(40);
-  DECLARE @gmGmObrigatorioOld VARCHAR(70);  
-  DECLARE @gmGpAceitoOld VARCHAR(40);
-  DECLARE @gmGmAceitoOld VARCHAR(70);
+  DECLARE @gmGpObrigatorioOld VARCHAR(MAX);
+  DECLARE @gmGmObrigatorioOld VARCHAR(MAX);  
+  DECLARE @gmGpAceitoOld VARCHAR(MAX);
+  DECLARE @gmGmAceitoOld VARCHAR(MAX);
   DECLARE @gmCodigoPaiFilhoOld INTEGER;  
   DECLARE @gmValorVistaOld NUMERIC(15,2);      
   DECLARE @gmValorPrazoOld NUMERIC(15,2);        
@@ -37430,7 +37430,8 @@ BEGIN
   DECLARE @vtpNomeNew VARCHAR(20);
   DECLARE @vclCodVmdNew INTEGER;
   DECLARE @vmdNomeNew VARCHAR(30); --@vmdNomeNew VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
-  DECLARE @vclAnoNew INTEGER;  
+  DECLARE @vclAnoNew INTEGER;
+  DECLARE @vclCodCnttNew INTEGER;  
   DECLARE @vclAtivoNew VARCHAR(1);
   DECLARE @vclRegNew VARCHAR(1);
   DECLARE @vclCodUsrNew INTEGER;
@@ -37438,6 +37439,8 @@ BEGIN
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @upD38New INTEGER;
   DECLARE @upD31New INTEGER;
+  DECLARE @cnttCodFvr INTEGER;
+  DECLARE @vlcCodCntt INTEGER;
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
@@ -37453,7 +37456,8 @@ BEGIN
          ,@vclAnoNew      = i.VCL_ANO
          ,@vclAtivoNew    = UPPER(i.VCL_ATIVO)
          ,@vclRegNew      = UPPER(i.VCL_REG)
-         ,@vclCodUsrNew   = i.VCL_CODUSR         
+         ,@vclCodUsrNew   = i.VCL_CODUSR
+         ,@vclCodCnttNew = COALESCE(i.VCL_CODCNTT,'ERRO')         
          ,@usrApelidoNew  = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew   = COALESCE(USR.USR_ADMPUB,'P')
          ,@upD38New       = UP.UP_D38
@@ -37479,6 +37483,8 @@ BEGIN
       RAISERROR('NAO LOCALIZADO MODELO %i PARA ESTE REGISTRO',15,1,@vclCodVmdNew);  --ANGELO KOKISO - MUDNAÇA PARA VARIAVEL INTEIRO.   
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@vclCodUsrNew);
+    IF( @vclCodCnttNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO CONTRATO %i PARA ESTE REGISTRO',15,1,@vclCodCnttNew);
     -------------------------------------------------------------
     -- Checando se o usuario tem direito de cadastro nesta tabela
     -------------------------------------------------------------
@@ -37493,6 +37499,13 @@ BEGIN
     SELECT @uiCodigo=COALESCE(VCL_CODIGO,'OK') FROM VEICULO WHERE VCL_CODIGO=@vclCodigoNew;
     IF( @uiCodigo <> 'OK' )
       RAISERROR('CODIGO JA CADASTRADO NA TABELA VEICULO %s',15,1,@uiCodigo);
+
+    ---------------------------------------------------------------------
+    -- Checando se o favorecido possui contrato
+    ---------------------------------------------------------------------
+    SELECT @cnttCodFvr=COALESCE(CNTT_CODFVR,'OK') FROM CONTRATO WHERE CNTT_CODFVR=@vclCodFvrNew;
+    IF( @uiCodigo <> 'OK' )
+      RAISERROR('CODIGO JA CADASTRADO NA TABELA VEICULO %s',15,1,@cnttCodFvr);
     --  
     INSERT INTO dbo.VEICULO( 
       VCL_CODIGO
@@ -37511,10 +37524,26 @@ BEGIN
       ,@vclCodVtpNew  -- VCL_CODVTP
       ,@vclCodVmdNew  -- VCL_CODVMD
       ,@vclAnoNew     -- VCL_ANO
-      ,0              -- VCL_CODCNTT
+      ,@vclCodCnttNew -- VCL_CODCNTT
       ,@vclAtivoNew   -- VCL_ATIVO
       ,@vclRegNew     -- VCL_REG
       ,@vclCodUsrNew  -- VCL_CODUSR         
+    );
+
+    SELECT @vlcCodCntt=CNTP_CODCNTT FROM CONTRATOPLACA WHERE CNTP_PLACACHASSI=@vclCodigoNew;
+    IF( @@rowcount>0 )
+      RAISERROR('PLACA %s JA CADASTRADA NO CONTRATO %i',15,1,@vclCodigoNew,@vlcCodCntt);
+    --
+    --
+    INSERT INTO dbo.CONTRATOPLACA( 
+      CNTP_CODCNTT
+      ,CNTP_PLACACHASSI
+      ,CNTP_CODGMP
+      ,CNTP_CODUSR) VALUES(
+      @vclCodCnttNew        -- CNTP_CODCNTT
+      ,@vclCodigoNew        -- CNTP_IDUNICO  
+      ,0                    -- CNTP_CODGMP
+      ,@vclCodUsrNew        -- CNTP_CODUSR
     );     
     ---------------
     -- Gravando LOG
@@ -37538,7 +37567,7 @@ BEGIN
       ,@vclCodVtpNew  -- VCL_CODVTP
       ,@vclCodVmdNew  -- VCL_CODVMD
       ,@vclAnoNew     -- VCL_ANO    
-      ,0              -- VCL_CODCNTT      
+      ,@vclCodCnttNew -- VCL_CODCNTT      
       ,@vclAtivoNew   -- VCL_ATIVO
       ,@vclRegNew     -- VCL_REG
       ,@vclCodUsrNew  -- VCL_CODUSR         

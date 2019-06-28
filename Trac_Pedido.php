@@ -53,7 +53,7 @@
           $sql.="'$contrato'";                    // CNTT_CODIGO     
           $sql.=",'".$lote[0]->tipo."'";          // CNTT_TIPO
           $sql.=",'".date('m/d/Y')."'";           // CNTT_EMISSAO
-          $sql.=",'N'";                           // CNTT_ATIVO
+          $sql.=",'S'";                           // CNTT_ATIVO // Angelo Kokiso, Contrato vir ativo a partir do momento que pedido for aprovado e assinado
           $sql.=",".$lote[0]->codfvr;             // CNTT_CODFVR
           $sql.=",".$lote[0]->codvnd;             // CNTT_CODVND
           $sql.=",".$lote[0]->codind;             // CNTT_CODIND
@@ -72,7 +72,6 @@
           $sql.=",".$_SESSION["usr_codigo"];      // CNTT_CODUSR
           $sql.=")";
           array_push($arrUpdt,$sql);
-
           if( $lote[0]->PLACA <> "[]" ){
             $objPlc=$lote[0]->PLACA;
             foreach ( $objPlc as $plc ){

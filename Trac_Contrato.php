@@ -261,6 +261,7 @@
                       ,"padrao":1} 
             ,{"id":1  ,"labelCol"       : "CODIGO"
                       ,"fieldType"      : "int"
+                      ,"obj"            : "edtCnttCod"
                       ,"formato"        : ["i6"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "5em"
@@ -286,7 +287,7 @@
                       ,"padrao":0}
             ,{"id":4  ,"labelCol"       : "INICIO"
                       ,"fieldType"      : "dat"                      
-                      ,"tamGrd"         : "8em"
+                      ,"tamGrd"         : "15em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
@@ -295,7 +296,7 @@
                       ,"padrao":0}
             ,{"id":5  ,"labelCol"       : "FIM"
                       ,"fieldType"      : "dat"                      
-                      ,"tamGrd"         : "6em"
+                      ,"tamGrd"         : "15em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
@@ -475,8 +476,8 @@
           ]
           , 
           "botoesH":[
-            {"texto":"Alterar"          ,"name":"horAlterarPdd" ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"}             
-            ,{"texto":"Excluir"         ,"name":"horExcluir"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-minus"
+             {"texto":"Alterar"         ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"   }
+            ,{"texto":"Excluir"         ,"name":"horExcluir"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-minus"             
                                         ,"popover":{title:"Excluir",texto:"Esta opção exclui o contrato do sistema em definitivo.<hr>Não existe maneira de recuperar o registro",aviso:"warning"}} 
             ,{"texto":"Empenho"         ,"name":"horEmpenho"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
                                         ,"popover":{title:"Empenho",texto:"Opção para empenhar individualmente cada auto pelo seu número de serie<hr>"
@@ -911,9 +912,12 @@
             class="frmTable"
             action="classPhp/imprimirsql.php"
             target="_newpage">
-        <input type="hidden" id="sql" name="sql"/> 
-        <div class="inactive">
-          <input id="edtTerceiroTbl" value="*" type="text" />
+        <div class="frmTituloManutencao">Contrato<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>              
+        <div style="height: 290px; overflow-y: auto;">   
+          <input type="hidden" id="sql" name="sql"/> 
+          <div class="inactive">
+            <input id="edtTerceiroTbl" value="*" type="text" />
+          </div>
         </div>
       </form>  
     </div>

@@ -163,7 +163,8 @@
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>
     <script src="tabelaTrac/f10/tabelaVeiculoModeloF10.js"></script>                
-    <script src="tabelaTrac/f10/tabelaFavorecidoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaFavorecidoF10.js"></script>
+    <script src="tabelaTrac/f10/tabelaContratoF10.js"></script>     
     <script language="javascript" type="text/javascript"></script>
     <script>
       "use strict";
@@ -191,11 +192,15 @@
                       ,"tamImp"         : "30"
                       ,"padrao":0}  
             ,{"id":2 ,"field"           : "CONTRATO" 
-                      ,"insUpDel"       : ["N","N","N"]                      
+                      ,"insUpDel"       : ["S","N","N"]                      
                       ,"labelCol"       : "CONTRATO"  
-                      ,"obj"            : "edtCodCntt"  
+                      ,"obj"            : "edtCodCntt"
+                      ,"fieldType"      : "int"
+                      ,"newRecord"      : ["0000","this","this"]  
                       ,"align"          : "center"  
                       ,"tamGrd"         : "6em"
+                      ,"validar"        : ["notnull"]
+                      ,"digitosMinMax"  : [1,4]
                       ,"tamImp"         : "20"
                       ,"padrao":0}  
             ,{"id":3  ,"field"          : "VCL_CODFVR" 
@@ -222,14 +227,14 @@
                       ,"validar"        : ["notnull"]                      
                       ,"ajudaCampo"     : ["Descrição de FAVORECIDO para este veiculo."]
                       ,"padrao":0}
-            ,{"id":5  ,"field"          : "FVR_APELIDO"   
+            ,{"id":5  ,"field"          : "FVR_NOME"   
                       ,"insUpDel"       : ["N","N","N"]
-                      ,"labelCol"       : "CLIENTE"
-                      ,"obj"            : "edtApelido"
-                      ,"tamGrd"         : "12em"
-                      ,"tamImp"         : "35"
+                      ,"labelCol"       : "NOME_CLIENTE"
+                      ,"obj"            : "edtDesFvr"
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "0"
                       ,"newRecord"      : ["","this","this"]
-                      ,"digitosMinMax"  : [1,15]
+                      ,"digitosMinMax"  : [1,60]
                       ,"validar"        : ["notnull"]                      
                       ,"ajudaCampo"     : ["Descrição de FAVORECIDO para este veiculo."]
                       ,"padrao":0}
@@ -479,7 +484,8 @@
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var objPadF10;                  // Obrigatório para instanciar o JS PadraoF10
       var objVmdF10;                  // Obrigatório para instanciar o JS VeiculoModeloF10                        
-      var objFvrF10;                  // Obrigatório para instanciar o JS FavorecidoF10            
+      var objFvrF10;                  // Obrigatório para instanciar o JS FavorecidoF10
+      var objCnttF10;                 // Obrigatório para instanciar o JS ContratoF10
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
@@ -714,6 +720,29 @@
         };
       };
       /////////////////////////////
+      // AJUDA PARA CONTRATO //////
+      /////////////////////////////
+      function cnttFocus(obj){ 
+        $doc(obj.id).setAttribute("data-oldvalue",$doc(obj.id).value); 
+      };
+      function cnttF10Click(obj){ 
+        fContratoF10(0,obj.id,"edtCodCntt",100,{whr:$doc("edtCodFvr").value}); 
+      };
+      function RetF10tblCntt(arr){
+        $doc("edtCodCntt").value  = arr[0].CODIGO;
+        $doc("edtCodCntt").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function codCnttBlur(obj){
+        var elOld = jsNmrs($doc(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          let ret = fContratoF10(0,obj.id,"edtCodCntt",100,{whr:$doc("edtCodFvr").value});           
+          $doc(obj.id).value       = ( ret.length == 0 ? ""  : ret[0].CODIGO                  );          
+          $doc(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "" : ret[0].CODIGO )  );
+        };
+      };
+
+      /////////////////////////////
       // Trigger olha esta regra //
       /////////////////////////////
       function btnConfirmarClick(){
@@ -765,6 +794,17 @@
               <div class="campotexto campo40">
                 <input class="campo_input_titulo input" id="edtDesFvr" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesFvr">NOME_CLIENTE:</label>
+              </div>
+              <div class="campotexto campo10">
+                <input class="campo_input inputF10" id="edtCodCntt"
+                                                    onBlur="codCnttBlur(this);" 
+                                                    onFocus="cnttFocus(this);" 
+                                                    onClick="cnttF10Click(this);"
+                                                    data-oldvalue=""
+                                                    autocomplete="off"
+                                                    maxlength="6"
+                                                    type="text"/>
+                <label class="campo_label campo_required" for="edtCodCntt">Contrato:</label>
               </div>
               <div class="campotexto campo10">
                 <input class="campo_input inputF10" id="edtCodVcr"
@@ -841,8 +881,7 @@
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>
               <div class="inactive">
-                <input id="edtCodUsr" type="text" />
-                <input id="edtCodCntt" type="text" />                
+                <input id="edtCodUsr" type="text" />             
                 <input id="edtApelido" type="text" />
               </div>
               <div id="btnConfirmar" onclick="btnConfirmarClick();" class="btnImagemEsq bie15 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>

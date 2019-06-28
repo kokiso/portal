@@ -616,7 +616,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function srvF10Click(obj){ 
-        fServicoF10(0,obj.id,"cbMensal",100
+        fServicoF10(0,obj.id,"cbMensal",0
           ,{
             entsai      : "S"
             ,codemp     : jsPub[0].emp_codigo
@@ -631,7 +631,7 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var arr = fServicoF10(1,obj.id,"cbMensal",100
+          var arr = fServicoF10(1,obj.id,"cbMensal",0
             ,{
               entsai      : "S"
               ,codemp     : jsPub[0].emp_codigo

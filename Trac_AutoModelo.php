@@ -226,7 +226,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [3,70]
+                      ,"digitosMinMax"  : [3,999]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
                       ,"ajudaCampo"     : ["Grupos obrigatorios com até 40 caracteres."]
                       ,"truncate"       : true                          
@@ -238,7 +238,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "25em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [1,70]
+                      ,"digitosMinMax"  : [1,999]
                       ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9|_"
                       ,"ajudaCampo"     : ["Modelos aceitos para grupos com até 70 caracteres."]
                       ,"padrao":0}
@@ -249,7 +249,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [3,70]
+                      ,"digitosMinMax"  : [3,999]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
                       ,"ajudaCampo"     : ["Grupos aceitos com até 20 caracteres."]
                       ,"truncate"       : true                          
@@ -261,7 +261,7 @@
                       ,"insUpDel"       : ["S","S","N"]
                       ,"tamGrd"         : "25em"
                       ,"tamImp"         : "0"
-                      ,"digitosMinMax"  : [1,70]
+                      ,"digitosMinMax"  : [1,999]
                       ,"digitosValidos" : "N|S|A|0|1|2|3|4|5|6|7|8|9|_"
                       ,"ajudaCampo"     : ["Modelos aceitos para grupos com até 70 caracteres."]
                       ,"padrao":0}
@@ -1037,7 +1037,7 @@
                                                             autocomplete="off"
                                                             onClick="gpClick(this,'obrigatorio');"
                                                             readonly
-                                                            maxlength="40" />
+                                                             />
                 <label class="campo_label campo_required" for="edtGpObrigatorio">GRUPOs-Obrigatório</label>
               </div>
               <div class="campotexto campo70">
@@ -1046,7 +1046,7 @@
                                                             autocomplete="off"
                                                             onClick="gmClick(this,'obrigatorio',document.getElementById('edtGpObrigatorio').value);"
                                                             readonly
-                                                            maxlength="40" />
+                                                            />
                 <label class="campo_label campo_required" for="edtGmObrigatorio">MODELOs-para obrigatorio</label>
               </div>
               <!-- 
@@ -1059,7 +1059,7 @@
                                                             autocomplete="off"
                                                             onClick="gpClick(this,'aceito');"
                                                             readonly
-                                                            maxlength="40" />
+                                                             />
                 <label class="campo_label campo_required" for="edtGpAceito">GRUPOs-Aceito</label>
               </div>
               <div class="campotexto campo70">
@@ -1068,7 +1068,7 @@
                                                             autocomplete="off"
                                                             onClick="gmClick(this,'aceito',document.getElementById('edtGpAceito').value);"
                                                             readonly
-                                                            maxlength="40" />
+                                                            />
                 <label class="campo_label campo_required" for="edtGmAceito">MODELOs-para aceito</label>
               </div>
               <!-- -->
