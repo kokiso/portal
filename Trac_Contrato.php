@@ -110,6 +110,7 @@
           $sql.="       ,FVR.FVR_APELIDO AS CLIENTE";                    
           //$sql.="       ,CNTT_CODVND";
           //$sql.="       ,CNTT_CODIND";
+          $sql.="       ,(CNTT_VLRMENSAL / CNTT_MESES) AS CVLRMENSALPARC";
           $sql.="       ,CNTT_VLRMENSAL";
           $sql.="       ,CNTT_VLRPONTUAL";
           $sql.="       ,CNTT_QTDAUTO";
@@ -320,7 +321,17 @@
                       ,"ordenaColuna"   : "S"
                       ,"truncate"       : true
                       ,"padrao":0}
-            ,{"id":8  ,"labelCol"       : "VLRMENSAL"
+            ,{"id":8  ,"field"          :"CVLRMENSALPARC"
+                      ,"labelCol"       :'VLRMENSALPARCIAL'
+                      ,"fieldType"      : "flo2" 
+                      ,"tamGrd"         : "12em"
+                      ,"tamImp"         : "0"
+                      ,"sepMilhar"      : true                      
+                      ,"excel"          : "N"
+                      ,"ordenaColuna"   : "N"
+                      ,"padrao":0}
+            ,{"id":9  
+                      ,"labelCol"       :'VLRMENSAL'
                       ,"fieldType"      : "flo2" 
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "25"
@@ -328,7 +339,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":9  ,"labelCol"       : "VLRPONTUAL"
+            ,{"id":10  ,"labelCol"       : "VLRPONTUAL"
                       ,"fieldType"      : "flo2" 
                       ,"tamGrd"         : "0em"
                       ,"sepMilhar"      : true                      
@@ -336,7 +347,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"labelCol"       : "AUTOS"
+            ,{"id":11 ,"labelCol"       : "AUTOS"
                       ,"fieldType"      : "int"
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
@@ -345,7 +356,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":11 ,"labelCol"       : "EMPENHO"
+            ,{"id":12 ,"labelCol"       : "EMPENHO"
                       ,"fieldType"      : "int"
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
@@ -354,7 +365,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":12 ,"labelCol"       : "ENV"
+            ,{"id":13 ,"labelCol"       : "ENV"
                       ,"fieldType"      : "int"
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
@@ -365,7 +376,7 @@
                       ,"popoverTitle"   : "Total de autos enviados e recebidos pelo responsavel"                          
                       ,"popoverLabelCol": "Autos enviados"                      
                       ,"padrao":0}
-            ,{"id":13 ,"labelCol"       : "AGENDA"
+            ,{"id":14 ,"labelCol"       : "AGENDA"
                       ,"fieldType"      : "int"
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
@@ -374,7 +385,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":14 ,"labelCol"       : "OS"
+            ,{"id":15 ,"labelCol"       : "OS"
                       ,"fieldType"      : "int"
                       ,"align"          : "center"    
                       ,"tamGrd"         : "3em"
@@ -384,7 +395,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":15 ,"labelCol"       : "PLACAS"
+            ,{"id":16 ,"labelCol"       : "PLACAS"
                       ,"fieldType"      : "int"
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
@@ -393,7 +404,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":16 ,"labelCol"       : "ATIVACAO"
+            ,{"id":17 ,"labelCol"       : "ATIVACAO"
                       ,"fieldType"      : "int"
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
@@ -402,14 +413,14 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":17 ,"labelCol"       : "STATUS"
+            ,{"id":18 ,"labelCol"       : "STATUS"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":18 ,"labelCol"       : "FID"
+            ,{"id":19 ,"labelCol"       : "FID"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "12"
@@ -417,7 +428,7 @@
                       ,"ordenaColuna"   : "S"
                       ,"popoverTitle"   : "Fidelidade"
                       ,"padrao":0}
-            ,{"id":19 ,"labelCol"       : "IP"
+            ,{"id":20 ,"labelCol"       : "IP"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "2em"
                       ,"tamImp"         : "10"
@@ -425,20 +436,20 @@
                       ,"ordenaColuna"   : "S"
                       ,"popoverTitle"   : "Instalação própria"
                       ,"padrao":0}
-            ,{"id":20 ,"labelCol"       : "USUARIO"
+            ,{"id":21 ,"labelCol"       : "USUARIO"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "25"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":21 ,"labelCol"       : "POP"         
+            ,{"id":22 ,"labelCol"       : "POP"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"fieldType"      : "popover"
                       ,"popoverTitle"   : "Pop up de campos relacionados a este registro"                      
                       ,"padrao":0}
-            ,{"id":22 ,"labelCol"       : "SERV"         
+            ,{"id":23 ,"labelCol"       : "SERV"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -447,7 +458,7 @@
                       ,"tagI"           : "fa fa-clone"
                       ,"popoverTitle"   : "Serviços relacionados a este auto"
                       ,"padrao":0}
-            ,{"id":23 ,"labelCol"       : "END"         
+            ,{"id":24 ,"labelCol"       : "END"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -456,7 +467,7 @@
                       ,"tagI"           : "fa fa-clone"
                       ,"popoverTitle"   : "Endereços relacionados a este auto"                      
                       ,"padrao":0}
-            ,{"id":24 ,"labelCol"       : "TERC"         
+            ,{"id":25 ,"labelCol"       : "TERC"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"

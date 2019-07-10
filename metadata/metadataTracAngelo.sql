@@ -2073,7 +2073,7 @@ GO
 CREATE TABLE dbo.DUPLICIDADEGMP(
   DUP_CODIGO VARCHAR(30) NOT NULL
   ,DUP_CODGMP INTEGER NOT NULL
-  ,CONSTRAINT PKDUPLICIDADEGMP PRIMARY KEY (DUP_CODIGO)    
+  --,CONSTRAINT PKDUPLICIDADEGMP PRIMARY KEY (DUP_CODIGO)    -- angelo kokiso, habilitação de duplicidade
 );
 -------------------------------------------------------------------------------------
 --                      G R U P O M O D E L O L O T E
@@ -2125,6 +2125,7 @@ CREATE TABLE dbo.GRUPOMODELO(
   ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  
   ,GM_GPACEITO VARCHAR(MAX) NOT NULL  -- angelo kokiso alterado varchar para 70
   ,GM_GMACEITO VARCHAR(MAX) NOT NULL  
+  ,GM_GPSERIEOBRIGATORIO VARCHAR(4) NOT NULL DEFAULT 'NSA'
   ,GM_CODIGOPAIFILHO INTEGER NOT NULL DEFAULT 0
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL  
@@ -2186,6 +2187,7 @@ CREATE VIEW VGRUPOMODELO AS
          ,GM_GMOBRIGATORIO
          ,GM_GPACEITO
          ,GM_GMACEITO
+         ,GM_GPSERIEOBRIGATORIO 
          ,GM_CODIGOPAIFILHO
          ,GM_VALORVISTA
          ,GM_VALORPRAZO
@@ -2226,6 +2228,7 @@ CREATE TABLE dbo.BKPGRUPOMODELO(
   ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  
   ,GM_GPACEITO VARCHAR(MAX) NOT NULL  
   ,GM_GMACEITO VARCHAR(MAX) NOT NULL
+  ,GM_GPSERIEOBRIGATORIO VARCHAR(4) NOT NULL
   ,GM_CODIGOPAIFILHO  INTEGER NOT NULL
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL 
@@ -4568,7 +4571,8 @@ BEGIN
         ,VCL_CODVCR
         ,VCL_CODVTP
         ,VCL_CODVMD
-        ,VCL_ANO      
+        ,VCL_ANO
+        ,VCL_CODCNTT      --angelo kokiso
         ,VCL_ATIVO
         ,VCL_REG
         ,VCL_CODUSR) VALUES(
@@ -4578,6 +4582,7 @@ BEGIN
         ,'AUT'                -- VCL_CODVTP // ANGELO KOKISO alteração para 'AUT' como default de tipo
         ,1                    -- VCL_CODVMD
         ,1900                 -- VCL_ANO
+        ,@cntpCodCnttNew      -- VCL_CNTTCOD
         ,'S'                  -- VCL_ATIVO
         ,'P'                  -- VCL_REG
         ,2                    -- vCL_CODUSR( 2=SISTEMA )         
@@ -5071,8 +5076,8 @@ BEGIN
         SELECT @vclCodCntt=VCL_CODCNTT FROM VEICULO WHERE VCL_CODIGO=@cntpPlacaChassiNew;
         IF( @@rowcount=0 ) 
           RAISERROR('VEICULO %s NAO LOCALIZADO',15,1,@vclCodCntt);
-        IF(  @vclCodCntt<>0 )
-          RAISERROR('VEICULO JA VINCULADO AO CONTRATO %i',15,1,@vclCodCntt);
+        -- IF(  @vclCodCntt<>0 )
+        --   RAISERROR('VEICULO JA VINCULADO AO CONTRATO %i',15,1,@vclCodCntt); -- angelo kokiso, alteração na logica após adição de veiculo segregada ao contrato
         UPDATE VEICULO SET VCL_CODCNTT=@cntpCodCnttNew WHERE VCL_CODIGO=@cntpPlacaChassiNew;   
         UPDATE CONTRATO SET CNTT_QTDPLACA=(CNTT_QTDPLACA+1) WHERE CNTT_CODIGO=@cntpCodCnttNew;                
         UPDATE VGRUPOMODELOPRODUTO 
@@ -5143,7 +5148,7 @@ BEGIN
         SET @mesInt=CAST(Substring(CONVERT(VARCHAR(10),@mesFim,112),1,6) AS INTEGER);
         UPDATE CONTRATO SET CNTT_DTINICIO=@cntpDtAtivacaoNew,CNTT_DTFIM=@mesInt,CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
         --END ELSE BEGIN
-        UPDATE CONTRATO SET CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
+        --UPDATE CONTRATO SET CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
         --END        
         INSERT INTO DETALHEAUTO(DA_CODGMP,DA_CODMSG,DA_CODUSR,DA_COMPLEMENTO) VALUES(@cntpCodGmpOld,10,@cntpCodUsrNew,CONCAT('Contrato ',REPLICATE('0', 6 - LEN(@cntpCodCnttNew))+RTrim(@cntpCodCnttNew)));
       END
@@ -5196,7 +5201,7 @@ BEGIN
            ,CNTP_DTENTREGA       = @cntpDtEntregaNew           
            ,CNTP_DTATIVACAO      = @cntpDtAtivacaoNew
            ,CNTP_LOCALINSTALACAO = @cntpLocalInstalacao                     
-           --,CNTP_ACAO           = @cntpAcaoNew
+           ,CNTP_ACAO           = @cntpAcaoNew
            ,CNTP_CODUSR         = @cntpCodUsrNew
      WHERE ((CNTP_CODCNTT=@cntpCodCnttNew) AND (CNTP_IDUNICO=@cntpIdUnicoNew));
     
@@ -22410,7 +22415,8 @@ BEGIN
   DECLARE @gmGpObrigatorioNew VARCHAR(MAX);
   DECLARE @gmGmObrigatorioNew VARCHAR(MAX);  
   DECLARE @gmGpAceitoNew VARCHAR(MAX);
-  DECLARE @gmGmAceitoNew VARCHAR(MAX); 
+  DECLARE @gmGmAceitoNew VARCHAR(MAX);
+  DECLARE @gmGpSerieObrigatorio VARCHAR(4); 
   DECLARE @gmCodigoPaiFilhoNew INTEGER;
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);
@@ -22450,6 +22456,7 @@ BEGIN
          ,@gmGmObrigatorioNew   = COALESCE(dbo.fncTranslate(i.GM_GMOBRIGATORIO,70),'NSA')
          ,@gmGpAceitoNew        = COALESCE(dbo.fncTranslate(i.GM_GPACEITO,40),'NSA')
          ,@gmGmAceitoNew        = COALESCE(dbo.fncTranslate(i.GM_GMACEITO,70),'NSA')
+         ,@gmGpSerieObrigatorio = COALESCE (i.GM_GPSERIEOBRIGATORIO,'NSA')
          ,@gmCodigoPaiFilhoNew  = COALESCE(i.GM_CODIGOPAIFILHO,0)
          ,@gmValorVistaNew      = i.GM_VALORVISTA
          ,@gmValorPrazoNew      = i.GM_VALORPRAZO
@@ -22542,6 +22549,7 @@ BEGIN
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
       ,GM_GMACEITO
+      ,GM_GPSERIEOBRIGATORIO
       ,GM_CODIGOPAIFILHO  
       ,GM_VALORVISTA
       ,GM_VALORPRAZO
@@ -22575,7 +22583,8 @@ BEGIN
       ,@gmGmObrigatorioNew    -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoNew         -- GM_GPACEITO
       ,@gmGmAceitoNew         -- GM_GMACEITO 
-      ,@gmCodigoPaiFilhoNew     
+      ,@gmGpSerieObrigatorio  -- GM_GPSERIEOBRIGATORIO
+      ,@gmCodigoPaiFilhoNew   -- GM_CODPAIEFILHO  
       ,@gmValorVistaNew       -- GM_VALORVISTA
       ,@gmValorPrazoNew       -- GM_VALORPRAZO
       ,@gmValorMinimoNew      -- GM_VALORMINIMO
@@ -22613,6 +22622,7 @@ BEGIN
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
       ,GM_GMACEITO
+      ,GM_GPSERIEOBRIGATORIO
       ,GM_CODIGOPAIFILHO      
       ,GM_VALORVISTA
       ,GM_VALORPRAZO
@@ -22649,6 +22659,7 @@ BEGIN
       ,@gmGmObrigatorioNew          -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoNew               -- GM_GPACEITO
       ,@gmGmAceitoNew               -- GM_GMACEITO
+      ,@gmGpSerieObrigatorio
       ,@gmCodigoPaiFilhoNew      
       ,@gmValorVistaNew             -- GM_VALORVISTA
       ,@gmValorPrazoNew             -- GM_VALORPRAZO
@@ -22706,6 +22717,7 @@ BEGIN
   DECLARE @gmGmObrigatorioNew VARCHAR(MAX);  
   DECLARE @gmGpAceitoNew VARCHAR(MAX);
   DECLARE @gmGmAceitoNew VARCHAR(MAX);
+  DECLARE @gmGpSerieObrigatorioNew VARCHAR(4);
   DECLARE @gmCodigoPaiFilhoNew INTEGER;  
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);        
@@ -22749,6 +22761,7 @@ BEGIN
          ,@gmGmObrigatorioNew   = dbo.fncTranslate(i.GM_GMOBRIGATORIO,70)
          ,@gmGpAceitoNew        = dbo.fncTranslate(i.GM_GPACEITO,40)
          ,@gmGmAceitoNew        = dbo.fncTranslate(i.GM_GMACEITO,70)
+         ,@gmGpSerieObrigatorioNew = i.GM_GPSERIEOBRIGATORIO
          ,@gmCodigoPaiFilhoNew  = i.GM_CODIGOPAIFILHO
          ,@gmValorVistaNew      = i.GM_VALORVISTA
          ,@gmValorPrazoNew      = i.GM_VALORPRAZO
@@ -22812,7 +22825,8 @@ BEGIN
     DECLARE @gmGpObrigatorioOld VARCHAR(MAX);
     DECLARE @gmGmObrigatorioOld VARCHAR(MAX);  
     DECLARE @gmGpAceitoOld VARCHAR(MAX);
-    DECLARE @gmGmAceitoOld VARCHAR(MAX); 
+    DECLARE @gmGmAceitoOld VARCHAR(MAX);
+    DECLARE @gmGpSerieObrigatorioOld VARCHAR(4); 
     DECLARE @gmCodigoPaiFilhoOld INTEGER; 
     DECLARE @gmValorVistaOld NUMERIC(15,2);      
     DECLARE @gmValorPrazoOld NUMERIC(15,2);        
@@ -22847,6 +22861,7 @@ BEGIN
            ,@gmGmObrigatorioOld   = d.GM_GMOBRIGATORIO
            ,@gmGpAceitoOld        = d.GM_GPACEITO
            ,@gmGmAceitoOld        = d.GM_GMACEITO
+           ,@gmGpSerieObrigatorioOld = d.GM_GPSERIEOBRIGATORIO
            ,@gmCodigoPaiFilhoOld  = d.GM_CODIGOPAIFILHO
            ,@gmValorVistaOld      = d.GM_VALORVISTA
            ,@gmValorPrazoOld      = d.GM_VALORPRAZO
@@ -22906,6 +22921,7 @@ BEGIN
           ,GM_GMOBRIGATORIO   = @gmGmObrigatorioNew
           ,GM_GPACEITO        = @gmGpAceitoNew
           ,GM_GMACEITO        = @gmGmAceitoNew
+          ,GM_GPSERIEOBRIGATORIO = @gmGpSerieObrigatorioNew
           ,GM_CODIGOPAIFILHO  = @gmCodigoPaiFilhoNew
           ,GM_VALORVISTA      = @gmValorVistaNew          
           ,GM_VALORPRAZO      = @gmValorPrazoNew                    
@@ -22926,7 +22942,7 @@ BEGIN
      OR (@gmNumSerieOld<>@gmNumSerieNew) OR (@gmSinCardOld<>@gmSinCardNew) OR (@gmOperadoraOld<>@gmOperadoraNew) 
      OR (@gmFoneOld<>@gmFoneNew) OR (@gmVendaOld<>@gmVendaNew) OR (@gmEstoqueSucataOld<>@gmEstoqueSucataNew) OR (@gmEstoqueAutoOld<>@gmEstoqueAutoNew)
      OR (@gmGpObrigatorioOld<>@gmGpObrigatorioNew) OR (@gmGmObrigatorioOld<>@gmGmObrigatorioNew) OR (@gmGpAceitoOld<>@gmGpAceitoNew) OR (@gmGmAceitoOld<>@gmGmAceitoNew) 
-     OR (@gmCodigoPaiFilhoOld<>@gmCodigoPaiFilhoNew) OR (@gmValorVistaOld<>@gmValorVistaNew) OR (@gmValorPrazoOld<>@gmValorPrazoNew) OR (@gmValorMinimoOld<>@gmValorMinimoNew)
+     OR (@gmGpSerieObrigatorioOld<>@gmGpSerieObrigatorioNew) OR (@gmCodigoPaiFilhoOld<>@gmCodigoPaiFilhoNew) OR (@gmValorVistaOld<>@gmValorVistaNew) OR (@gmValorPrazoOld<>@gmValorPrazoNew) OR (@gmValorMinimoOld<>@gmValorMinimoNew)
      OR (@gmVlrNoShowOld<>@gmVlrNoShowNew) OR (@gmVlrImprodutivelOld<>@gmVlrImprodutivelNew) OR (@gmVlrInstalaOld<>@gmVlrInstalaNew) 
      OR (@gmVlrDesistalaOld<>@gmVlrDesistalaNew) OR (@gmVlrReinstalaOld<>@gmVlrReinstalaNew)  OR (@gmVlrManutencaoOld<>@gmVlrManutencaoNew) OR (@gmVlrRevisaoOld<>@gmVlrRevisaoNew)
      OR (@gmLocacaoOld<>@gmLocacaoNew) OR (@gmFirmWareOld<>@gmFirmWareNew) OR (@gmAtivoOld<>@gmAtivoNew) OR (@gmRegOld<>@gmRegNew) ) BEGIN
@@ -22951,6 +22967,7 @@ BEGIN
         ,GM_GMOBRIGATORIO      
         ,GM_GPACEITO
         ,GM_GMACEITO
+        ,GM_GPSERIEOBRIGATORIO
         ,GM_CODIGOPAIFILHO      
         ,GM_VALORVISTA
         ,GM_VALORPRAZO
@@ -22986,6 +23003,7 @@ BEGIN
         ,@gmGmObrigatorioNew    -- GM_GMOBRIGATORIO      
         ,@gmGpAceitoNew         -- GM_GPACEITO
         ,@gmGmAceitoNew         -- GM_GMACEITO
+        ,@gmGpSerieObrigatorioNew
         ,@gmCodigoPaiFilhoNew      
         ,@gmValorVistaNew       -- GM_VALORVISTA
         ,@gmValorPrazoNew       -- GM_VALORPRAZO
@@ -23044,6 +23062,7 @@ BEGIN
   DECLARE @gmGmObrigatorioOld VARCHAR(MAX);  
   DECLARE @gmGpAceitoOld VARCHAR(MAX);
   DECLARE @gmGmAceitoOld VARCHAR(MAX);
+  DECLARE @gmGpSerieObrigatorioOld VARCHAR(4);
   DECLARE @gmCodigoPaiFilhoOld INTEGER;  
   DECLARE @gmValorVistaOld NUMERIC(15,2);      
   DECLARE @gmValorPrazoOld NUMERIC(15,2);        
@@ -23084,6 +23103,7 @@ BEGIN
          ,@gmGmObrigatorioOld   = d.GM_GMOBRIGATORIO
          ,@gmGpAceitoOld        = d.GM_GPACEITO
          ,@gmGmAceitoOld        = d.GM_GMACEITO
+         ,@gmGpSerieObrigatorioOld = d.GM_GPSERIEOBRIGATORIO
          ,@gmCodigoPaiFilhoOld  = d.GM_CODIGOPAIFILHO
          ,@gmValorVistaOld      = d.GM_VALORVISTA
          ,@gmValorPrazoOld      = d.GM_VALORPRAZO
@@ -23157,6 +23177,7 @@ BEGIN
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
       ,GM_GMACEITO
+      ,GM_GPSERIEOBRIGATORIO
       ,GM_CODIGOPAIFILHO      
       ,GM_VALORVISTA
       ,GM_VALORPRAZO
@@ -23192,6 +23213,7 @@ BEGIN
       ,@gmGmObrigatorioOld    -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoOld         -- GM_GPACEITO
       ,@gmGmAceitoOld         -- GM_GMACEITO 
+      ,@gmGpSerieObrigatorioOld -- GM_GPSERIEOBRIGATORIO
       ,@gmCodigoPaiFilhoOld   -- GM_CODIGOPAIFILHO  
       ,@gmValorVistaOld       -- GM_VALORVISTA
       ,@gmValorPrazoOld       -- GM_VALORPRAZO
@@ -31549,17 +31571,17 @@ BEGIN
     ------------------------------------------
     -- CHECANDO A DUPLICIDADE DE SERIE/SINCARD
     ------------------------------------------
-    IF( @gmpNumSerieNew<>'NSA' ) BEGIN
+    --IF( @gmpNumSerieNew<>'NSA' ) BEGIN
       SET @duplicidade=CONCAT('SER',CAST(@gmpCodFbrNew AS VARCHAR(6)),@gmpNumSerieNew);    
       SET @dupCodigo=NULL;
       SELECT @dupCodigo=COALESCE(DUP_CODIGO,NULL) FROM DUPLICIDADEGMP WHERE DUP_CODIGO=@duplicidade;
-      IF( @@ROWCOUNT=0 ) BEGIN
+      --IF( @@ROWCOUNT=0 ) BEGIN
         INSERT INTO DUPLICIDADEGMP(DUP_CODIGO,DUP_CODGMP) VALUES(@duplicidade,@gmpCodigoNew);
-      END ELSE BEGIN
-        RAISERROR('SERIE %s PARA ESTE FABRICANTE JA CADASTRADA NO PRODUTO %i DUPLICIDADE %s',15,1,@gmpNumSerieNew,@gmpCodigoNew,@dupCodigo);
-      END
-    END
-    --
+      --END ELSE BEGIN
+      --  RAISERROR('SERIE %s PARA ESTE FABRICANTE JA CADASTRADA NO PRODUTO %i DUPLICIDADE %s',15,1,@gmpNumSerieNew,@gmpCodigoNew,@dupCodigo);
+      --END
+    --END
+    -- Angelo Kokiso , alteração temporária na regra de duplicidade do sincard
     IF( @gmpSincardNew<>'NSA' ) BEGIN
       SET @duplicidade=CONCAT('SIN',CAST(@gmpCodFbrNew AS VARCHAR(6)),@gmpSincardNew);    
       SET @dupCodigo=NULL;
@@ -37483,8 +37505,8 @@ BEGIN
       RAISERROR('NAO LOCALIZADO MODELO %i PARA ESTE REGISTRO',15,1,@vclCodVmdNew);  --ANGELO KOKISO - MUDNAÇA PARA VARIAVEL INTEIRO.   
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@vclCodUsrNew);
-    IF( @vclCodCnttNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO CONTRATO %i PARA ESTE REGISTRO',15,1,@vclCodCnttNew);
+    -- IF( @vclCodCnttNew='ERRO' )
+    --   RAISERROR('NAO LOCALIZADO CONTRATO %i PARA ESTE REGISTRO',15,1,@vclCodCnttNew);
     -------------------------------------------------------------
     -- Checando se o usuario tem direito de cadastro nesta tabela
     -------------------------------------------------------------
@@ -37531,11 +37553,8 @@ BEGIN
     );
 
     SELECT @vlcCodCntt=CNTP_CODCNTT FROM CONTRATOPLACA WHERE CNTP_PLACACHASSI=@vclCodigoNew;
-    IF( @@rowcount>0 )
-      RAISERROR('PLACA %s JA CADASTRADA NO CONTRATO %i',15,1,@vclCodigoNew,@vlcCodCntt);
-    --
-    --
-    INSERT INTO dbo.CONTRATOPLACA( 
+    IF( @@rowcount=0 ) BEGIN -- angleo kokiso , checagem invertida para segregação do cadastro de veiclo
+      INSERT INTO dbo.CONTRATOPLACA( 
       CNTP_CODCNTT
       ,CNTP_PLACACHASSI
       ,CNTP_CODGMP
@@ -37544,7 +37563,10 @@ BEGIN
       ,@vclCodigoNew        -- CNTP_IDUNICO  
       ,0                    -- CNTP_CODGMP
       ,@vclCodUsrNew        -- CNTP_CODUSR
-    );     
+      );
+    END  
+    --
+    -- 
     ---------------
     -- Gravando LOG
     ---------------
@@ -37583,6 +37605,8 @@ BEGIN
   END CATCH
 END
 GO
+-----------------------
+-----------------------
 CREATE TRIGGER dbo.TRGViewVEICULO_BU ON dbo.VVEICULO
 INSTEAD OF UPDATE
 AS

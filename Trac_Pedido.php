@@ -164,12 +164,12 @@
                 array_push($arrUpdt,$sql);            
               };
             };
-            //Angelo kokiso - Altera ativação do pedido para 'NAO' para criar efeito de DELETE ao gerar um contrato
-            $sql="UPDATE PEDIDO SET PDD_CODUSR=".$_SESSION["usr_codigo"]." WHERE PDD_CODIGO=".$lote[0]->codpdd;
-            array_push($arrUpdt,$sql);
-            $sql="UPDATE PEDIDO SET PDD_ATIVO = 'N' WHERE PDD_CODIGO=".$lote[0]->codpdd;
-            array_push($arrUpdt,$sql);  
           };
+          //Angelo kokiso - Altera ativação do pedido para 'NAO' para criar efeito de DELETE ao gerar um contrato
+          $sql="UPDATE PEDIDO SET PDD_CODUSR=".$_SESSION["usr_codigo"]." WHERE PDD_CODIGO=".$lote[0]->codpdd;
+          array_push($arrUpdt,$sql);
+          $sql="UPDATE PEDIDO SET PDD_ATIVO = 'N' WHERE PDD_CODIGO=".$lote[0]->codpdd;
+          array_push($arrUpdt,$sql);  
           $atuBd  = true;
         };  
 //file_put_contents("aaa.xml",print_r($arrUpdt,true));        
@@ -1122,8 +1122,6 @@
 
 //console.log(produto);
 //return;
-
-
 
           fd = new FormData();
           fd.append("pedido" , clsJs.fim());

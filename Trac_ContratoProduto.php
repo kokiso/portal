@@ -422,7 +422,6 @@
         $doc("spnTitulo").innerHTML=pega.qualRotina;
         $doc("spnCodCntt").innerHTML=jsNmrs(pega.codCntt).emZero(4).ret();
         //localStorage.removeItem("addInd"); //voltarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
-        
         jsCntI={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
@@ -453,7 +452,7 @@
                       ,"padrao":0}
             ,{"id":5  ,"labelCol"       : "REFERENTE"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "15em"
+                      ,"tamGrd"         : "15em" // (pega.qualRotina=='EMPENHO'?"0em":"15em")
                       ,"tamImp"         : "80"
                       ,"truncate"       : "S"                                            
                       ,"excel"          : "S"                      
@@ -709,6 +708,7 @@
                                               ,"REFERENTE"  ,"SE"   ,"SERIE"      ,"USUARIO"  ,"VALOR" ]);
         switch( pega.qualRotina ){
           case 'EMPENHO':
+            // jsCntI.titulo[objCol.REFERENTE].tamGrd = "0em";
             $doc("horPlacaCad").style.display="none";
             $doc("horPlacaExc").style.display="none";
             $doc("horAgenda").style.display="none";
@@ -927,7 +927,8 @@
           //  throw "AUTO DEVE ESTAR CONFIGURADO!";
           
           fGrupoModeloProdutoF10(0,"nsa","null",100
-            ,{codgm:parseInt(chkds[0].CODGM)
+            ,{ cntp:1
+              ,codgm:parseInt(chkds[0].CODGM)
               ,codaut:0
               ,codpe:"EST"
               ,codaut:0 
@@ -1077,7 +1078,7 @@
             ,{codcntt: pega.codCntt
               ,divWidth:"66em"
               ,tblWidth:"64em"
-              ,where:" WHERE ((A.CNTP_CODCNTT="+pega.codCntt+") AND (VCL.VCL_CODCNTT=0))"
+              ,where:" WHERE ((A.CNTP_CODCNTT="+pega.codCntt+") )" //angelo kokiso
           }); 
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});

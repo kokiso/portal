@@ -6,17 +6,29 @@
 ////////////////////////////////////////////////////////////////////////////
 function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
   let clsStr = new concatStr();
+  let flag = false; 
   clsStr.concat("SELECT A.GMP_CODIGO AS CODIGO,GM.GM_NOME AS DESCRICAO,A.GMP_NUMSERIE AS SERIE"   );
-  clsStr.concat("       ,A.GMP_SINCARD AS SINCARD"                                                );
-  clsStr.concat("       ,CASE WHEN A.GMP_DTCONFIGURADO IS NULL THEN 'NAO' ELSE 'SIM' END AS CFG"  );            
+    for (var key in objeto) {
+      if( key === 'cntp' ){
+          clsStr.concat("       ,GMM.GM_NOME AS MODELO"                                                   );
+          flag === true;    
+        };  
+    };  
+  clsStr.concat("  ,A.GMP_SINCARD AS SINCARD"                                                );
+  clsStr.concat("  ,CASE WHEN A.GMP_DTCONFIGURADO IS NULL THEN 'NAO' ELSE 'SIM' END AS CFG"       );            
   clsStr.concat("  FROM GRUPOMODELOPRODUTO A"                                                     );
   clsStr.concat("  LEFT OUTER JOIN GRUPOMODELO GM ON A.GMP_CODGM=GM.GM_CODIGO"                    );
+  
   let tblGmp     = "tblGmp";
   let divWidth  = "54em";
   let tblWidth  = "52em";
   if( typeof objeto === 'object' ){
     for (var key in objeto) {
       switch( key ){
+        case "cntp":
+            clsStr.concat("  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMMP ON A.GMP_NUMSERIE = GMMP.GMP_NUMSERIE AND GMMP.GMP_CODCNTT = 0");
+            clsStr.concat("  LEFT OUTER JOIN GRUPOMODELO GMM ON GMMP.GMP_CODGM=GMM.GM_CODIGO"                    );
+        break;
         case "codgm": 
           clsStr.concat(" {WHERE} (A.GMP_CODGM='"+objeto[key]+"')",true);
           break;
@@ -45,7 +57,7 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
     };  
   };
   sql=clsStr.fim();
-  console.log(sql)
+  var jsGmpF10 = null;
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////
@@ -55,33 +67,57 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
     bdGmp.Assoc=false;
     bdGmp.select( sql );
     if( bdGmp.retorno=='OK'){
-      var jsGmpF10={
-        "titulo":[
-           {"id":0 ,"labelCol":"OPC"       ,"tipo":"chk"  ,"tamGrd":"3em"   ,"fieldType":"chk"}                                
-          ,{"id":1 ,"labelCol":"CODIGO"    ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
-          ,{"id":2 ,"labelCol":"DESCRICAO" ,"tipo":"edt"  ,"tamGrd":"27em"  ,"fieldType":"str","ordenaColuna":"S"}
-          ,{"id":3 ,"labelCol":"SERIE"     ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"S"}
-          ,{"id":4 ,"labelCol":"SINCARD"   ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"S"}          
-          ,{"id":5 ,"labelCol":"CFG"       ,"tipo":"edt"  ,"tamGrd":"3em"   ,"fieldType":"str","ordenaColuna":"N"}                    
-        ]
-        ,"registros"      : bdGmp.dados              // Recebe um Json vindo da classe clsBancoDados
-        ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
-        ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
-        ,"tbl"            : tblGmp                   // Nome da table
-        ,"prefixo"        : "Gmp"                    // Prefixo para elementos do HTML em jsTable2017.js
-        ,"tabelaBD"       : "GRUPOMODELOPRODUTO"    // Nome da tabela no banco de dados  
-        ,"width"          : tblWidth                // Tamanho da table
-        ,"height"         : "39em"                  // Altura da table
-        ,"indiceTable"    : "DESCRICAO"             // Indice inicial da table
-        ,"tamBotao"       : "20"
-      };
+      if (flag === true){
+        var jsGmpF10={
+          "titulo":[
+             {"id":0 ,"labelCol":"OPC"       ,"tipo":"chk"  ,"tamGrd":"3em"   ,"fieldType":"chk"}                                
+            ,{"id":1 ,"labelCol":"CODIGO"    ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
+            ,{"id":2 ,"labelCol":"DESCRICAO" ,"tipo":"edt"  ,"tamGrd":"27em"  ,"fieldType":"str","ordenaColuna":"S"}
+            ,{"id":3 ,"labelCol":"SERIE"     ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"S"}
+            ,{"id":4 ,"labelCol":"MODELO"    ,"tipo":"edt"  ,"tamGrd":"15em"  ,"fieldType":"str","ordenaColuna":"S"}
+            ,{"id":5 ,"labelCol":"SINCARD"   ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"S"}          
+            ,{"id":6 ,"labelCol":"CFG"       ,"tipo":"edt"  ,"tamGrd":"3em"   ,"fieldType":"str","ordenaColuna":"N"}                    
+          ]
+          ,"registros"      : bdGmp.dados              // Recebe um Json vindo da classe clsBancoDados
+          ,"opcRegSeek"     : true                     // Opção para numero registros/botão/procurar                       
+          ,"checarTags"     : "N"                      // Somente em tempo de desenvolvimento(olha as pricipais tags)
+          ,"tbl"            : tblGmp                   // Nome da table
+          ,"prefixo"        : "Gmp"                    // Prefixo para elementos do HTML em jsTable2017.js
+          ,"tabelaBD"       : "GRUPOMODELOPRODUTO"     // Nome da tabela no banco de dados  
+          ,"width"          : tblWidth                 // Tamanho da table
+          ,"height"         : "39em"                   // Altura da table
+          ,"indiceTable"    : "SERIE"                  // Indice inicial da table
+          ,"tamBotao"       : "20"
+        };
+      }else{
+        var jsGmpF10={
+          "titulo":[
+             {"id":0 ,"labelCol":"OPC"       ,"tipo":"chk"  ,"tamGrd":"3em"   ,"fieldType":"chk"}                                
+            ,{"id":1 ,"labelCol":"CODIGO"    ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
+            ,{"id":2 ,"labelCol":"DESCRICAO" ,"tipo":"edt"  ,"tamGrd":"27em"  ,"fieldType":"str","ordenaColuna":"S"}
+            ,{"id":3 ,"labelCol":"SERIE"     ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"S"}
+            ,{"id":4 ,"labelCol":"SINCARD"   ,"tipo":"edt"  ,"tamGrd":"10em"  ,"fieldType":"str","ordenaColuna":"S"}          
+            ,{"id":5 ,"labelCol":"CFG"       ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"str","ordenaColuna":"N"}                    
+          ]
+          ,"registros"      : bdGmp.dados              // Recebe um Json vindo da classe clsBancoDados
+          ,"opcRegSeek"     : true                     // Opção para numero registros/botão/procurar                       
+          ,"checarTags"     : "N"                      // Somente em tempo de desenvolvimento(olha as pricipais tags)
+          ,"tbl"            : tblGmp                   // Nome da table
+          ,"prefixo"        : "Gmp"                    // Prefixo para elementos do HTML em jsTable2017.js
+          ,"tabelaBD"       : "GRUPOMODELOPRODUTO"     // Nome da tabela no banco de dados  
+          ,"width"          : tblWidth                 // Tamanho da table
+          ,"height"         : "39em"                   // Altura da table
+          ,"indiceTable"    : "SERIE"                  // Indice inicial da table
+          ,"tamBotao"       : "20"
+        };
+      }
       if( objGmpF10 === undefined ){          
         objGmpF10         = new clsTable2017("objGmpF10");
         objGmpF10.tblF10  = true;
         if( (foco != undefined) && (foco != "null") ){
           objGmpF10.focoF10=foco;  
         };
-      };  
+      };
       var html          = objGmpF10.montarHtmlCE2017(jsGmpF10);
       var ajudaF10      = new clsMensagem('Ajuda',topo);
       ajudaF10.divHeight= '410px';  /* Altura container geral*/

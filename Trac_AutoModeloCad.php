@@ -96,7 +96,7 @@
                 $qtosComposicao = 0;  // Qtdade de produtos que compoem o auto
                 foreach( $lote as $ns ){
                   if( $ns->item==$nsItem ){
-                    if( $ns->codgp=="RST" ){
+                    if( $ns->codgp==$ns->gpserie){
                       $nsSerie = $ns->serie;
                     };      
                     $qtosComposicao++;
@@ -241,7 +241,6 @@
         //Recuperando os dados recebidos de Trac_CpCr.php
         /////////////////////////////////////////////////
         pega=JSON.parse(localStorage.getItem("addAlt")).lote[0];
-        console.log(pega);
         //localStorage.removeItem("addAlt");      voltarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
         document.getElementById("edtCodAm").value   = pega.codam;        
         document.getElementById("edtDesAm").value   = pega.desam;
@@ -295,23 +294,29 @@
                       ,"tamImp"         : "15"
                       ,"excel"          : "S"
                       ,"padrao":0}
-            ,{"id":7  ,"labelCol"       : "SINCARD"
+            ,{"id":7  ,"labelCol"       : "GPSERIE"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "10em"
+                      ,"tamImp"         : "0"
+                      ,"excel"          : "N"
+                      ,"padrao":0}
+            ,{"id":8  ,"labelCol"       : "SINCARD"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "15"
                       ,"excel"          : "S"
                       ,"padrao":0}
-            ,{"id":8  ,"labelCol"       : "OPC"
-                      ,"fieldType"      : "str"
-                      ,"tamGrd"         : "3em"
-                      ,"excel"          : "S"
-                      ,"padrao":0}
-            ,{"id":9  ,"labelCol"       : "OBR"
+            ,{"id":9  ,"labelCol"       : "OPC"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "0em"
                       ,"excel"          : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"labelCol"       : "UNIDADE"
+            ,{"id":10  ,"labelCol"       : "OBR"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "0em"
+                      ,"excel"          : "S"
+                      ,"padrao":0}
+            ,{"id":11 ,"labelCol"       : "UNIDADE"
                       ,"fieldType"      : "int"
                       ,"formato"        : ["i4"]                                            
                       ,"tamGrd"         : "6em"
@@ -369,7 +374,7 @@
         // Aqui sao as colunas que vou precisar aqui e Trac_GrupoModeloInd.php
         // esta garante o chkds[0].?????? e objCol
         //////////////////////////////////////////////////////////////////////
-        objCol=fncColObrigatoria.call(jsAm,["COD","GRUPO","ITEM","LINHA","OBR","PRODUTO","SERIE","SINCARD","UNIDADE"]);
+        objCol=fncColObrigatoria.call(jsAm,["COD","GRUPO","ITEM","LINHA","OBR","PRODUTO","SERIE","GPSERIE","SINCARD","UNIDADE"]);
       });
       //
       var objAm;                      // Obrigatório para instanciar o JS MOVTOOPERADORPAI
@@ -516,12 +521,14 @@
       };
       function RetF10tblGmp(arr){
         let elImg;        
-        for(let lin=0 ; (lin<pubRows) ; lin++){        
+        for(let lin=0 ; (lin<pubRows) ; lin++){     
+          console.log(pega);   
           if( jsNmrs(linTable).inteiro().ret() == jsNmrs(pubTbl.rows[lin].cells[objCol.LINHA].innerHTML).inteiro().ret() ){   
             elImg = "img"+jsNmrs(pubTbl.rows[lin].cells[objCol.LINHA].innerHTML).inteiro().ret();
             pubTbl.rows[lin].cells[objCol.COD].innerHTML     = arr[0].CODIGO;
             pubTbl.rows[lin].cells[objCol.PRODUTO].innerHTML = arr[0].DESCRICAO;
             pubTbl.rows[lin].cells[objCol.SERIE].innerHTML   = arr[0].SERIE;
+            pubTbl.rows[lin].cells[objCol.GPSERIE].innerHTML = pega.gpobrigatorio;
             pubTbl.rows[lin].cells[objCol.SINCARD].innerHTML = arr[0].SINCARD;            
             document.getElementById(elImg).style.color= "green";
             break;
@@ -536,6 +543,7 @@
             pubTbl.rows[lin].cells[objCol.COD].innerHTML     = "";
             pubTbl.rows[lin].cells[objCol.PRODUTO].innerHTML = "";
             pubTbl.rows[lin].cells[objCol.SERIE].innerHTML   = "";
+            pubTbl.rows[lin].cells[objCol.GPSERIE].innerHTML = "";
             pubTbl.rows[lin].cells[objCol.SINCARD].innerHTML = "";
             if( pubTbl.rows[lin].cells[objCol.OBR].innerHTML=="S" )
               document.getElementById(elImg).style.color= "red";
@@ -585,6 +593,7 @@
               clsJs.add("codam"      , jsNmrs("edtCodAm").inteiro().ret()               );
               clsJs.add("codgmp"     , pubTbl.rows[lin].cells[objCol.COD].innerHTML     );
               clsJs.add("serie"      , pubTbl.rows[lin].cells[objCol.SERIE].innerHTML   );
+              clsJs.add("gpserie"    , pubTbl.rows[lin].cells[objCol.GPSERIE].innerHTML );
               clsJs.add("codgp"      , pubTbl.rows[lin].cells[objCol.GRUPO].innerHTML   );
               clsJs.add("novoitem"   , novoItem                                         );
               clsJs.add("item"       , pubTbl.rows[lin].cells[objCol.ITEM].innerHTML    );
