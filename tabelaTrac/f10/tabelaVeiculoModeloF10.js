@@ -56,6 +56,7 @@ function fVeiculoModeloF10(opc,codVmd,foco,topo,objeto){
         ,"opcRegSeek"     : true                   // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                    // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblVmd                  // Nome da table
+        ,"div"            : "vmd"
         ,"prefixo"        : "vmd"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "MODELO"               // Nome da tabela no banco de dados  
         ,"width"          : "52em"                 // Tamanho da table

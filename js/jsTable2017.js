@@ -426,7 +426,12 @@ function clsTable2017(obj) {
     var param=['','',''];
     param[0]=ttl;
     param[1]="\'"+self.Js.tbl+"'";
-    param[2]='txtProcurar_'+self.Js.div+'.value';
+    //param[2]='txtProcurar_'+self.Js.div+'.value';
+    if( self.Js.div === undefined ){
+			param[2]='txtProcurar_'+self.Js.prefixo+'.value';
+		} else {
+			param[2]='txtProcurar_'+self.Js.div+'.value';
+	  };		
     param[3]='lblProcurar_'+self.Js.tbl+'.innerHTML';
     var func=self.obj+'.filtraTbl('+param[1]+','+param[2]+','+param[3]+');';
     ceInput.setAttribute("onkeyup",func);
@@ -3136,7 +3141,7 @@ function clsTable2017(obj) {
     var seq     = -1;
     var col     = 0;
     var tipo    = "";
-    var coluna  = ( strCol==undefined ? self.Js.indiceTable : strCol ); 
+    var coluna  = ( strCol==undefined ?  self.Js.indiceTable : strCol);
     var tam     = (self.Js.titulo).length;
     var reg;
     var datA;
@@ -3244,7 +3249,6 @@ function clsTable2017(obj) {
       for( var checados=0; checados<tamC; checados++ ){
         indice=self.buscaRowIndexArray(parseInt(chkds[checados]._ID));
         self.Js.registros.splice(indice,1);
-        break;
       };  
       clsChecados = null;
       var tbl=document.getElementById(self.Js.tbl);

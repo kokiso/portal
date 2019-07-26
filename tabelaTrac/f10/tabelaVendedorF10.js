@@ -56,6 +56,7 @@ function fVendedorF10(opc,codVnd,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblVnd                  // Nome da table
+        ,"div"            : "vnd"                   // Nome da div
         ,"prefixo"        : "vnd"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "VENDEDOR"              // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

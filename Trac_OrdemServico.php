@@ -47,7 +47,7 @@
         };  
         if( $lote[0]->rotina=="detOs" ){
           $cSql   = new SelectRepetido();
-          $retSql = $cSql->qualSelect("detOs",$lote[0]->login,$lote[0]->os_codigo);
+          $retSql = $cSql->qualSelect("detOs",$lote[0]->login,$lote[0]->dos_codgmp);
           $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
         };
         /////////////////////////
@@ -934,6 +934,7 @@
           clsJs.add("rotina"      , "detOs"             );  // Detalhe da OS
           clsJs.add("login"       , jsPub[0].usr_login  );
           clsJs.add("os_codigo"   , chkds[0].OS         );
+          clsJs.add("dos_codgmp"  , chkds[0].AUTO    ); // Angelo Kokiso - alterando where para pegar todos detalhes do mesmo auto.
           //////////////////////
           // Enviando para o Php
           //////////////////////

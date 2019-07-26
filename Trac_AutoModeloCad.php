@@ -522,13 +522,12 @@
       function RetF10tblGmp(arr){
         let elImg;        
         for(let lin=0 ; (lin<pubRows) ; lin++){     
-          console.log(pega);   
           if( jsNmrs(linTable).inteiro().ret() == jsNmrs(pubTbl.rows[lin].cells[objCol.LINHA].innerHTML).inteiro().ret() ){   
             elImg = "img"+jsNmrs(pubTbl.rows[lin].cells[objCol.LINHA].innerHTML).inteiro().ret();
             pubTbl.rows[lin].cells[objCol.COD].innerHTML     = arr[0].CODIGO;
             pubTbl.rows[lin].cells[objCol.PRODUTO].innerHTML = arr[0].DESCRICAO;
             pubTbl.rows[lin].cells[objCol.SERIE].innerHTML   = arr[0].SERIE;
-            pubTbl.rows[lin].cells[objCol.GPSERIE].innerHTML = pega.gpobrigatorio;
+            pubTbl.rows[lin].cells[objCol.GPSERIE].innerHTML = pega.gmgpsrobr;
             pubTbl.rows[lin].cells[objCol.SINCARD].innerHTML = arr[0].SINCARD;            
             document.getElementById(elImg).style.color= "green";
             break;

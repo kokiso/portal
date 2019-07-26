@@ -33,7 +33,9 @@ function fPlacaF10(opc,codPlc,foco,topo,objeto){
       };  
     };  
   };
+
   sql=clsStr.fim();
+  console.log(sql)
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////
@@ -55,7 +57,8 @@ function fPlacaF10(opc,codPlc,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblPlc                   // Nome da table
-        ,"prefixo"        : "Plc"                    // Prefixo para elementos do HTML em jsTable2017.js
+        ,"div"            : "plc"                    // Prefixo para elementos do HTML em jsTable2017.js
+        ,"prefixo"        : "plc"                    // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "GRUPOMODELOPRODUTO"    // Nome da tabela no banco de dados  
         ,"width"          : tblWidth                // Tamanho da table
         ,"height"         : "39em"                  // Altura da table

@@ -28,6 +28,7 @@ function fBancoF10(opc,codBnc,foco,topo){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : "tblBnc"                // Nome da table
+        ,"div"            : "bnc"                // Nome da table
         ,"prefixo"        : "Bnc"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "CLIENTE"               // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

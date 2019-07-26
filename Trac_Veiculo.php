@@ -191,7 +191,7 @@
                       ,"tamGrd"         : "12em"
                       ,"tamImp"         : "30"
                       ,"padrao":0}  
-            ,{"id":2 ,"field"           : "CONTRATO" 
+            ,{"id":2 ,"field"           : "VCL_CODCNTT" 
                       ,"insUpDel"       : ["S","N","N"]                      
                       ,"labelCol"       : "CONTRATO"  
                       ,"obj"            : "edtCodCntt"
@@ -804,7 +804,7 @@
                                                     autocomplete="off"
                                                     maxlength="6"
                                                     type="text"/>
-                <label class="campo_label campo_required" for="edtCodCntt">Contrato:</label>
+                <label class="campo_label campo_required" for="edtCodCntt">CONTRATO:</label>
               </div>
               <div class="campotexto campo10">
                 <input class="campo_input inputF10" id="edtCodVcr"

@@ -59,6 +59,7 @@ function fGrupoModeloF10(opc,codGm,foco,topo,objeto){
         ,"opcRegSeek"     : true                   // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                    // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblGm                  // Nome da table
+        ,"div"        : "gm"
         ,"prefixo"        : "gm"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "MODELO"               // Nome da tabela no banco de dados  
         ,"width"          : "52em"                 // Tamanho da table

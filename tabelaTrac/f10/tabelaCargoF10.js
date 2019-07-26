@@ -25,7 +25,8 @@ function fCargoF10(opc,codCrg,foco,topo){
         ,"registros"      : bdCrg.dados             // Recebe um Json vindo da classe clsBancoDados
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
-        ,"tbl"            : "tblCrg"                // Nome da table
+        ,"tbl"            : "tblCrg"  
+        ,"div"            : "crg"              // Nome da table
         ,"prefixo"        : "crg"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "CARGO"                 // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

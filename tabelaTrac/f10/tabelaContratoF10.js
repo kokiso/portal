@@ -45,6 +45,7 @@ function fContratoF10(opc,codCntt,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblCntt                   // Nome da table
+        ,"div"            : 'cntt'
         ,"prefixo"        : "Cntt"                    // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "CONTRATO"    // Nome da tabela no banco de dados  
         ,"width"          : tblWidth                // Tamanho da table

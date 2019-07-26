@@ -41,6 +41,7 @@ function fFavorecidoF10(opc,codFvr,foco,topo, objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : "tblFvr"                // Nome da table
+        ,"div"            : "fvr"                   // Nome da div
         ,"prefixo"        : "fvr"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "FAVORECIDO"            // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

@@ -117,6 +117,7 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : "tblSrv"                // Nome da table
+        ,"div"            : "srv" 
         ,"prefixo"        : "srv"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "SERVICO"               // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

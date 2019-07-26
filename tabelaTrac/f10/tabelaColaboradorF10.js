@@ -79,6 +79,7 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblCol                  // Nome da table
+        ,"div"            : "col"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"prefixo"        : "col"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "PRODUTOESTOQUEIND"     // Nome da tabela no banco de dados  
         ,"width"          : tblWidth                // Tamanho da table

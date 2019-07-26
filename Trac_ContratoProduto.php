@@ -235,6 +235,17 @@
         // Placa cadastrar
         //////////////////
         if( $lote[0]->rotina=="placacad" ){
+
+          $sql="";
+          $sql.="UPDATE VCONTRATOPLACA";
+          $sql.="   SET CNTP_CODCNTT='".$lote[0]->cntp_codcntt."'";
+          $sql.="       ,CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
+          $sql.="       ,CNTP_CODGMP=".$lote[0]->cntp_codgmp;
+          $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
+          $sql.=" WHERE ((CNTP_CODCNTT='".$lote[0]->cntp_codcntt."') AND (CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'))";
+          //var_dump($sql);     
+          array_push($arrUpdt,$sql); 
+
           $sql="";
           $sql.="UPDATE VCONTRATOPRODUTO";
           $sql.="   SET CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
@@ -248,6 +259,15 @@
         // Placa retirar
         //////////////////
         if( $lote[0]->rotina=="placaexc" ){
+          $sql="";
+          $sql.="UPDATE VCONTRATOPLACA";
+          $sql.="   SET CNTP_CODCNTT='".$lote[0]->cntp_codcntt."'";
+          $sql.="       ,CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
+          $sql.="       ,CNTP_CODGMP= 0";
+          $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
+          $sql.=" WHERE ((CNTP_CODCNTT='".$lote[0]->cntp_codcntt."') AND (CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'))";     
+          array_push($arrUpdt,$sql); 
+
           $sql="";
           $sql.="UPDATE VCONTRATOPRODUTO";
           $sql.="   SET CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";   // Esta para pode usar no trigger
@@ -354,7 +374,7 @@
           $sql.="  LEFT OUTER JOIN CONTRATOENDERECO CEE ON A.CNTP_CODENTREGA=CEE.CNTE_CODIGO";
           $sql.="  LEFT OUTER JOIN CONTRATOENDERECO CEI ON A.CNTP_CODINSTALA=CEI.CNTE_CODIGO";          
           $sql.=" WHERE (A.CNTP_CODCNTT='".$lote[0]->codcntt."')"; 
-//file_put_contents("aaa.xml",$sql);
+//file_put_contents("aaa2.xml",$sql);
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -1071,14 +1091,16 @@
 
           if( chkds[0].EMPENHO == "" )
             throw "AUTO SEM EMPENHO!";
+          if( chkds[0].PLACA_CHASSI != "NSA0000" && chkds[0].PLACA_CHASSI != "")
+            throw "PLACA JA CADASTRADA!";
           if( jsConverte(chkds[0].OS).inteiro()>0 )
             throw "PLACA DEVE SER INFORMADA ATRAVÉS DA OS "+chkds[0].OS;
-          
+        
           fPlacaF10(0,"nsa","null",100
             ,{codcntt: pega.codCntt
               ,divWidth:"66em"
               ,tblWidth:"64em"
-              ,where:" WHERE ((A.CNTP_CODCNTT="+pega.codCntt+") )" //angelo kokiso
+              ,where:" WHERE ((A.CNTP_CODCNTT="+pega.codCntt+") AND (A.CNTP_CODGMP=0))"
           }); 
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});
@@ -1133,6 +1155,8 @@
           clsJs = jsString("lote");
 
           if( chkds[0].PLACA_CHASSI == "" )
+            throw "AUTO SEM PLACA!";
+          if( chkds[0].PLACA_CHASSI == "NSA0000" )
             throw "AUTO SEM PLACA!";
           if( chkds[0].ATIVADO != "" )
             throw "AUTO ATIVADO!";

@@ -56,6 +56,7 @@ function fCidadeF10(opc,codCdd,foco,topo,objeto){
         ,"opcRegSeek"     : true                   // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                    // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblCdd                  // Nome da table
+        ,"div"            : "cdd"
         ,"prefixo"        : "Cdd"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "MODELO"               // Nome da tabela no banco de dados  
         ,"width"          : "52em"                 // Tamanho da table

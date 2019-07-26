@@ -445,7 +445,7 @@
           $sql.="  FROM DETALHEOS A";
           $sql.="  LEFT OUTER JOIN MENSAGEM MSG ON A.DOS_CODMSG=MSG.MSG_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA US ON A.DOS_CODUSR=US.US_CODIGO";
-          $sql.=" WHERE A.DOS_CODOS=".$codigo;
+          $sql.=" WHERE A.DOS_CODGMP=".$codigo;  // Angelo Kokiso - alterando where para pegar todos detalhes do mesmo auto.
           $classe   = new conectaBd();
           $classe->conecta($login);
           $classe->msgSelect(false);

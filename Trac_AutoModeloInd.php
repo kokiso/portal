@@ -199,13 +199,13 @@
                       ,"padrao":0}
             ,{"id":3  ,"labelCol"       : "GRP"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "3em"
+                      ,"tamGrd"         : "8em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"                      
                       ,"padrao":0}
             ,{"id":4  ,"labelCol"       : "PE"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "3em"
+                      ,"tamGrd"         : "8em"
                       ,"tamImp"         : "10"
                       ,"funcCor"        : "(objCell.innerHTML=='SUC'  ? objCell.classList.add('fontVermelho') : objCell.classList.remove('fontVermelho'))"                      
                       ,"excel"          : "S"                      
@@ -254,7 +254,7 @@
                       ,"fieldType"      : "int"
                       ,"formato"        : ["i2"]
                       ,"align"          : "center"                                                            
-                      ,"tamGrd"         : "3em"
+                      ,"tamGrd"         : "8em"
                       ,"tamImp"         : "12"
                       ,"excel"          : "S"
                       ,"padrao":0}

@@ -45,6 +45,7 @@ function fServicoPrefeituraF10(opc,codSpr,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblSpr                  // Nome da table
+        ,"div"            : "spr"
         ,"prefixo"        : "spr"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "SERVICOPREFEITURA"     // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

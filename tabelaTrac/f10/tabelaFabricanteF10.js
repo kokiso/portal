@@ -49,6 +49,7 @@ function fFabricanteF10(opc,codFbr,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblFbr                  // Nome da table
+        ,"div"            : "fbr"
         ,"prefixo"        : "fbr"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "FABRICANTE"            // Nome da tabela no banco de dados  
         ,"width"          : "52em"                  // Tamanho da table

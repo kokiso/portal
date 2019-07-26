@@ -229,7 +229,7 @@
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "0"
                       ,"digitosMinMax"  : [3,999]
-                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
+                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_|-|0|1|2|3|4|5|6|7|8|9"
                       ,"ajudaCampo"     : ["Grupos obrigatorios com até 40 caracteres."]
                       ,"truncate"       : true                          
                       ,"padrao":0}
@@ -252,7 +252,7 @@
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "0"
                       ,"digitosMinMax"  : [3,999]
-                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
+                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_|-|0|1|2|3|4|5|6|7|8|9"
                       ,"ajudaCampo"     : ["Grupos aceitos com até 20 caracteres."]
                       ,"truncate"       : true                          
                       ,"padrao":0}
@@ -597,9 +597,10 @@
         clsCode.concat("<table id='tblGpChk' class='fpTable' style='width:100%;'>");
         clsCode.concat("  <thead class='fpThead'>");
         clsCode.concat("    <tr>");
-        clsCode.concat("      <th class='fpTh' style='width:20%'>CODIGO</th>");
+        clsCode.concat("      <th class='fpTh' style='width:15%'>CODIGO</th>");
         clsCode.concat("      <th class='fpTh' style='width:60%'>DESCRICAO</th>");
-        clsCode.concat("      <th class='fpTh' style='width:20%'>SIM</th>");        
+        clsCode.concat("      <th class='fpTh' style='width:15%'>SIM</th>");
+        clsCode.concat('      <th class="fpTh" style="width:10%">Quantidade</th>');          
         clsCode.concat("    </tr>");
         clsCode.concat("  </thead>");
         clsCode.concat("  <tbody id='tbody_tblChk'>");
@@ -637,6 +638,7 @@
           clsCode.concat("          <i id='img"+reg.cod+"' data-value='"+reg.sn+"' class='"+reg.fa+"' style='margin-left:10px;font-size:1.5em;color:"+reg.cor+";'></i>");
           clsCode.concat("        </div>");
           clsCode.concat("      </td>");
+          clsCode.concat("      <td class='fpTd'><input type='text'style='max-width:50px' data-newrecord='1'></input></td>");
           clsCode.concat("    </tr>");
         });
         //////  
@@ -683,16 +685,20 @@
           let elImg;
           if( nl>0 ){
             let filtroGp="";
+            let filtroGpQtd="";
             for(let lin=0 ; (lin<nl) ; lin++){
               elImg="img"+tbl.rows[lin].cells[0].innerHTML;
               
               if( document.getElementById(elImg).getAttribute("data-value") == "S" ){
-                filtroGp+=( filtroGp=="" ? tbl.rows[lin].cells[0].innerHTML  : "_".concat(tbl.rows[lin].cells[0].innerHTML) );
+                filtroGp+=( filtroGp=="" ? tbl.rows[lin].cells[0].innerHTML: "_".concat(tbl.rows[lin].cells[0].innerHTML) );
+                filtroGpQtd+=( filtroGp=="" ? tbl.rows[lin].cells[3].children[0].value: "_".concat(tbl.rows[lin].cells[3].children[0].value) );
               };
             };
             if( filtroGp=="" )
               filtroGp="NSA";  
             document.getElementById(obj).value=filtroGp;
+            document.getElementById('edtGpObrigatorioQtd').value=filtroGpQtd;
+
             janelaFechar();
           };  
         }catch(e){
@@ -936,7 +942,6 @@
         if( msg != "ok" ){
           gerarMensagemErro("am",msg,{cabec:"Aviso"});              
         } else {  
-          console.log(objAm);
           objAm.gravar(true);
         };
       };
@@ -985,7 +990,7 @@
        };
       function RetF10tblGm(arr){
         document.getElementById("edtCodPaiFilho").value  = jsNmrs(arr[0].CODIGO).emZero(4).ret();
-        document.getElementById("edtCodPaiFilho").setAttribute("data-oldvalue",arr[0].CODIGO);
+        document.getElementById("edtCodPaiFilho").setAttribute("data-oldvalue",jsNmrs(arr[0].CODIGO).emZero(4).ret());
         
       };
       function codGmBlur(obj){
@@ -1123,7 +1128,7 @@
                 <input class="campo_input inputF10" id="edtGpSerieObrig"
                                                     onBlur="codGpBlur(this);" 
                                                     onFocus="gpFocus(this);" 
-                                                    onClick="gpF10Click(this);"
+                                                    onClick="gpF10Click(this);" 
                                                     data-oldvalue=""
                                                     data-newrecord="NSA"
                                                     autocomplete="off"
@@ -1134,9 +1139,9 @@
               <div class="campotexto campo10">
                <input class="campo_input inputF10" id="edtCodPaiFilho"
                                                     onBlur="codGmBlur(this);" 
-                                                    onFocus="gmfocus(this);" 
+                                                    onFocus="gmFocus(this);" 
                                                     onClick="gmF10Click(this);"
-                                                    data-oldvalue=""
+                                                    data-oldvalue="0000"
                                                     data-newrecord="0000"
                                                     autocomplete="off"
                                                     maxlength="6"

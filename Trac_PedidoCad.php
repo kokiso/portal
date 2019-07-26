@@ -541,7 +541,8 @@
           document.getElementById("frmPedidoCad").newRecord("data-newrecord");
           document.getElementById("edtNumPedido").value     = pega.codpdd;
           document.getElementById("edtDtPedido").value      = pega.emissao;
-          document.getElementById("edtCodFvr").value        = pega.codfvr;          
+          document.getElementById("edtCodFvr").value        = pega.codfvr;
+          document.getElementById("edtCodFvr").setAttribute('data-oldvalue',pega.codfvr);          
           document.getElementById("edtCnpjCpf").value       = pega.cnpj;
           document.getElementById("edtDesFvr").value        = pega.desfvr;
           document.getElementById("cbPrazoContrato").value  = pega.meses;
@@ -738,9 +739,9 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fFavorecidoF10(0,obj.id,"edtCnpjCpf",100         
+          var ret = fFavorecidoF10(1,obj.id,"edtCnpjCpf",100         
             ,{gpfvr:'cliente'
-           });   ;   
+           });   
           document.getElementById(obj.id).value       = ( ret.length == 0 ? ""  : jsNmrs(ret[0].CODIGO).emZero(4).ret() );
           document.getElementById("edtCnpjCpf").value = ( ret.length == 0 ? ""  : ret[0].CNPJCPF                        );
           document.getElementById("edtDesFvr").value  = ( ret.length == 0 ? ""  : ret[0].DESCRICAO                      );
@@ -894,7 +895,7 @@
       };
       ///////////////////////////
       // Excluindo item do pedido
-      ///////////////////////////  
+      ///////////////////////////
       function pedExcluirClick(){
         try{ 
           clsChecados   = objIte.gerarJson("1");
@@ -925,8 +926,6 @@
               };    
             };  
           };
-          //
-          //
           objIte.apagaChecadosSoTable();
           fncTotalPedido();
           $doc("edtVlrMensal").value="0,00";
@@ -934,7 +933,8 @@
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
-      }; 
+      };   
+    
       //////////////////////////////////////////////////////////////////
       // Qquer alteracao em um dos dois combobox altera o valor unitario
       //////////////////////////////////////////////////////////////////
@@ -1437,7 +1437,8 @@
                   +",|codgp|:|"+reg.CODGP+"|"                  
                   +"},";
               if( reg.CODGP=="AUT" ){
-                qtdadeAuto+=reg.QTDADE;
+                //qtdadeAuto+=reg.QTDADE;
+                qtdadeAuto+= jsNmrs(reg.QTDADE).inteiro().ret(); //Angelo kokiso - correção na somatoria quando possui diferentes autos
               };    
             });
             jsItem=jsItem.slice(0,-1);          
@@ -1860,9 +1861,9 @@
       
       function fncAbrirPlc(){
         try{
+          
           clsChecados = objIte.gerarJson("1");
           chkds       = clsChecados.gerar();
-          
           chkds.forEach(function(reg){
             if( reg.PS != "P" )
               throw "Favor selecionar produto principal!"; 
@@ -1888,6 +1889,7 @@
             msg     = requestPedido("Trac_PedidoCad.php",fd); 
             retPhp  = JSON.parse(msg);
             if( retPhp[0].retorno == "OK" ){
+              
               tamC=(retPhp[0]["dados"]).length;
               let achei;
               for( let lin=0; lin<tamC; lin++ ){
@@ -1941,7 +1943,7 @@
         <div style="margin-top:-0.3em; margin-right: 10px; font-size: 14px; float: right;">
           <a onClick="window.close();" href="#"><h2><i class="fa fa-arrow-left"></i> Voltar</h2></a>
         </div>        
-        <!-- <div onClick="fncGravarPedido();"  class="btnImagemEsq bie10 bieAzul" style="margin-top:2px;"><i class="fa fa-check"> Gravar pedido</i></div>         -->
+        <div onClick="fncGravarPedido();"  class="btnImagemEsq bie10 bieAzul" style="margin-top:2px;"><i class="fa fa-check"> Gravar pedido</i></div>        
       </div>
 
       <div id="divCadastro">  

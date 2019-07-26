@@ -2073,7 +2073,7 @@ GO
 CREATE TABLE dbo.DUPLICIDADEGMP(
   DUP_CODIGO VARCHAR(30) NOT NULL
   ,DUP_CODGMP INTEGER NOT NULL
-  --,CONSTRAINT PKDUPLICIDADEGMP PRIMARY KEY (DUP_CODIGO)    -- angelo kokiso, habilitação de duplicidade
+  CONSTRAINT PKDUPLICIDADEGMP PRIMARY KEY (DUP_CODIGO)
 );
 -------------------------------------------------------------------------------------
 --                      G R U P O M O D E L O L O T E
@@ -2108,7 +2108,7 @@ GO
 CREATE TABLE dbo.GRUPOMODELO(
   GM_CODIGO INTEGER IDENTITY NOT NULL
   ,GM_CODFBR INTEGER NOT NULL
-  ,GM_NOME VARCHAR(30) NOT NULL  
+  ,GM_NOME VARCHAR(120) NOT NULL  
   ,GM_CODGP VARCHAR(3) NOT NULL
   ,GM_ESTOQUE INTEGER NOT NULL  
   ,GM_ESTOQUEMINIMO INTEGER NOT NULL    
@@ -2122,11 +2122,13 @@ CREATE TABLE dbo.GRUPOMODELO(
   ,GM_VENDA VARCHAR(1) NOT NULL
   ,GM_LOCACAO VARCHAR(1) NOT NULL  
   ,GM_GPOBRIGATORIO VARCHAR (MAX) NOT NULL  --GM_GPOBRIGATORIO VARCHAR(40) NOT NULL  --ANGELO KOKISO ALTERADO SIZE DO VARCHAR PARA 70
-  ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  
-  ,GM_GPACEITO VARCHAR(MAX) NOT NULL  -- angelo kokiso alterado varchar para 70
-  ,GM_GMACEITO VARCHAR(MAX) NOT NULL  
+  ,GM_GPOBRIGATORIOQTD VARCHAR(MAX) NOT NULL DEFAULT '0' -- ANGELO KOKISO CRIAÇÃO DA QUANTIDADE MAXIMA DE PRODUTOS OBRIGATORIO NO AUTO
+  ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  -- angelo kokiso alterado varchar para max
+  ,GM_GPACEITO VARCHAR(MAX) NOT NULL  -- angelo kokiso alterado varchar para max
+  ,GM_GPACEITOQTD VARCHAR(MAX) NOT NULL DEFAULT '0' -- ANGELO KOKISO CRIAÇÃO DA QUANTIDADE MAXIMA DE PRODUTOS ACEITOS NO AUTO
+  ,GM_GMACEITO VARCHAR(MAX) NOT NULL   -- angelo kokiso alterado varchar para max
   ,GM_GPSERIEOBRIGATORIO VARCHAR(4) NOT NULL DEFAULT 'NSA'
-  ,GM_CODIGOPAIFILHO INTEGER NOT NULL DEFAULT 0
+  ,GM_CODIGOPAIFILHO INTEGER NOT NULL DEFAULT 0 -- angelo kokiso criação do codigo pai do auto
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL  
   ,GM_VALORMINIMO NUMERIC(15,2) NOT NULL  
@@ -2184,8 +2186,10 @@ CREATE VIEW VGRUPOMODELO AS
          ,GM_VENDA
          ,GM_LOCACAO         
          ,GM_GPOBRIGATORIO
+         ,GM_GPOBRIGATORIOQTD
          ,GM_GMOBRIGATORIO
          ,GM_GPACEITO
+         ,GM_GPACEITOQTD
          ,GM_GMACEITO
          ,GM_GPSERIEOBRIGATORIO 
          ,GM_CODIGOPAIFILHO
@@ -2211,7 +2215,7 @@ CREATE TABLE dbo.BKPGRUPOMODELO(
   ,GM_DATA DATE DEFAULT GETDATE() NOT NULL
   ,GM_CODIGO INTEGER NOT NULL
   ,GM_CODFBR INTEGER NOT NULL
-  ,GM_NOME VARCHAR(30) NOT NULL  
+  ,GM_NOME VARCHAR(120) NOT NULL  
   ,GM_CODGP VARCHAR(3) NOT NULL
   ,GM_ESTOQUE INTEGER NOT NULL  
   ,GM_ESTOQUEMINIMO INTEGER NOT NULL    
@@ -2224,9 +2228,11 @@ CREATE TABLE dbo.BKPGRUPOMODELO(
   ,GM_CONTRATO VARCHAR(1) NOT NULL  
   ,GM_VENDA VARCHAR(1) NOT NULL
   ,GM_LOCACAO VARCHAR(1) NOT NULL  
-  ,GM_GPOBRIGATORIO VARCHAR(MAX) NOT NULL  
+  ,GM_GPOBRIGATORIO VARCHAR(MAX) NOT NULL
+  ,GM_GPOBRIGATORIOQTD VARCHAR(MAX) NOT NULL  
   ,GM_GMOBRIGATORIO VARCHAR(MAX) NOT NULL  
-  ,GM_GPACEITO VARCHAR(MAX) NOT NULL  
+  ,GM_GPACEITO VARCHAR(MAX) NOT NULL
+  ,GM_GPACEITOQTD VARCHAR(MAX) NOT NULL  
   ,GM_GMACEITO VARCHAR(MAX) NOT NULL
   ,GM_GPSERIEOBRIGATORIO VARCHAR(4) NOT NULL
   ,GM_CODIGOPAIFILHO  INTEGER NOT NULL
@@ -2440,7 +2446,7 @@ CREATE TABLE dbo.BKPGRUPOPRODUTO(
   ,GP_ATIVO VARCHAR(1) NOT NULL
   ,GP_REG VARCHAR(1) NOT NULL
   ,GP_CODUSR INTEGER NOT NULL  
-  ,CONSTRAINT chk_bkpPgrAcao CHECK( GP_ACAO IN('I','A','E'))  
+  ,CONSTRAINT chk_bkpGpAcao CHECK( GP_ACAO IN('I','A','E'))  -- Alteração Orlando , alteração no nome da constraint
 );
 -------------------------------------------------------------------------------------
 --                                I M P O S T O                                    --
@@ -4127,7 +4133,8 @@ CREATE TABLE CONTRATO(
   ,CNTT_CODEMP INTEGER NOT NULL    
   ,CNTT_CODLGN INTEGER NOT NULL    
   ,CNTT_CODUSR INTEGER NOT NULL  
-  ,CONSTRAINT chk_cnttTipo CHECK( CNTT_TIPO IN('D','L','V'))      
+  ,CONSTRAINT chk_cnttTipo CHECK( CNTT_TIPO IN('D','L','V'))   
+  ,CONSTRAINT chk_cnttQtdAuto CHECK( (CNTT_QTDAUTO>=0) AND (CNTT_QTDAUTO>=CNTT_QTDEMPENHO) ) -- angelo kokiso, regra pra qtdd de auto
   ,CONSTRAINT chk_cnttQtdEnviado CHECK( (CNTT_QTDENVIADO>=0) AND (CNTT_QTDENVIADO<=CNTT_QTDAUTO) )
   ,CONSTRAINT chk_cnttQtdEmpenho CHECK( (CNTT_QTDEMPENHO>=0) AND (CNTT_QTDEMPENHO<=CNTT_QTDAUTO) )
   ,CONSTRAINT chk_cnttQtdAgenda CHECK( (CNTT_QTDAGENDA>=0) AND (CNTT_QTDAGENDA<=CNTT_QTDAUTO) )
@@ -4572,7 +4579,7 @@ BEGIN
         ,VCL_CODVTP
         ,VCL_CODVMD
         ,VCL_ANO
-        ,VCL_CODCNTT      --angelo kokiso
+        ,VCL_CODCNTT      --angelo kokiso adição do vinculo de contrato no cadastro de veiculos
         ,VCL_ATIVO
         ,VCL_REG
         ,VCL_CODUSR) VALUES(
@@ -4598,6 +4605,68 @@ BEGIN
     RETURN;
   END CATCH
 END
+--angelo kokiso criação da trigger de update na tabela de contratoplaca
+GO
+CREATE TRIGGER dbo.TRGViewCONTRATOPLACA_BU ON dbo.VCONTRATOPLACA
+INSTEAD OF UPDATE 
+AS
+BEGIN
+   -- -------------- --|-----|----|----|------------------|----------------------------------------------------------   
+   -- CAMPO            |INS  |UPD |DEL | TIPO             | Obs
+   -- -----------------|-----|----|----|------------------|----------------------------------------------------------
+   -- CNTP_CODCNTT     | SEL |    |    | INT NN           | Campo relacionado (CONTRATO)   
+   -- CNTP_PLACACHASSI | SEL |    |    | VC(20) NN        |
+   -- CNTP_CODGMP      | SEL |    |    | INT              | Campo relacionado (GRUPOMODELOPRODUTO)          
+   -- CNTP_CODUSR      | OK  |    |    | INT NN           | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
+   -- USR_APELIDO      | SEL |    |    | VC(15) NN        | Campo relacionado (USUARIO)
+   -- -----------------|-----|----|----|------------------|----------------------------------------------------------   
+   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
+   -- ---------------------------------------------------------------------------------------------------------------
+  SET NOCOUNT ON;  
+  DECLARE @uiCodigo VARCHAR(20);            -- Para procurar unique index
+  DECLARE @uiCodCntt INTEGER;               -- Para procurar duplicidade neste cadastro
+  -------------------
+  -- Campos da tabela
+  -------------------
+  DECLARE @cntpCodCnttNew INTEGER;
+  DECLARE @cntpPlacaChassiNew VARCHAR(20);
+  DECLARE @cntpCodGmpNew INTEGER;
+  DECLARE @cnttCodFvrNew INTEGER;
+  DECLARE @cntpCodUsrNew INTEGER;
+
+  --------------------------------------------------
+  -- Buscando os campos para checagem antes do insert
+  ---------------------------------------------------
+  SELECT @cntpCodCnttNew      = i.CNTP_CODCNTT
+        ,@cntpPlacaChassiNew = i.CNTP_PLACACHASSI
+        ,@cntpCodGmpNew      = i.CNTP_CODGMP
+        ,@cnttCodFvrNew      = CNTT.CNTT_CODFVR
+        ,@cntpCodUsrNew      = i.CNTP_CODUSR
+  FROM inserted i
+  LEFT OUTER JOIN CONTRATO CNTT ON i.CNTP_CODCNTT=CNTT.CNTT_CODIGO;
+  BEGIN TRY   
+    -------------------------------------------------------
+    -- A PLACA NAUM PODE ESTAR CADASTRADA EM OUTRO CONTRATO
+    -------------------------------------------------------
+    SELECT @uiCodCntt=CNTP_CODCNTT FROM CONTRATOPLACA WHERE CNTP_PLACACHASSI=@cntpPlacaChassiNew;
+    IF( @@rowcount=0 )
+      RAISERROR('PLACA %s NÃO CADASTRADA NO CONTRATO %i',15,1,@cntpPlacaChassiNew,@uiCodCntt);
+    
+    UPDATE CONTRATOPLACA
+      SET CNTP_CODGMP = @cntpCodGmpNew
+    WHERE CNTP_CODCNTT = @cntpCodCnttNew AND CNTP_PLACACHASSI = @cntpPlacaChassiNew;
+  END TRY
+  BEGIN CATCH
+    DECLARE @ErrorMessage NVARCHAR(4000);
+    DECLARE @ErrorSeverity INT;
+    DECLARE @ErrorState INT;
+    SELECT @ErrorMessage=ERROR_MESSAGE(),@ErrorSeverity=ERROR_SEVERITY(),@ErrorState=ERROR_STATE();
+    RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+    RETURN;
+  END CATCH
+END
+
+--angelo kokiso final trigger
 /*
 -------------------------------------------------------------------------------------
 --                          C O N T R A T O S E R V I C O
@@ -4886,7 +4955,7 @@ BEGIN
            ,@cntpDtEntregaOld     = d.CNTP_DTENTREGA           
            ,@cntpDtAtivacaoOld    = d.CNTP_DTATIVACAO
            ,@cntpAcaoOld          = d.CNTP_ACAO
-           ,@cntpCodUsrOld        = d.CNTP_CODUSR
+           ,@cntpCodUsrOld        = d.CNTP_CODUSR       
       FROM CONTRATOPRODUTO d 
       LEFT OUTER JOIN GRUPOMODELOPRODUTO GMP ON d.CNTP_CODGMP=GMP.GMP_CODIGO
      WHERE ((d.CNTP_CODCNTT=@cntpCodCnttNew) AND (d.CNTP_IDUNICO=@cntpIdUnicoNew));
@@ -5003,7 +5072,7 @@ BEGIN
         DECLARE @reGmpCodPe VARCHAR(3);
         DECLARE @reGmpCodAut INTEGER;
         DECLARE @reGmpPlaca VARCHAR(20);
-        DECLARE @reGmpDtConfigurado DATE;
+        DECLARE @reGmpDtConfigurado DATE; 
         DECLARE @reGmpDtEmpenho DATE;
         DECLARE @reGmpCodCntt INTEGER;
         SELECT @reGmpCodPe=GMP_CODPE
@@ -5071,7 +5140,7 @@ BEGIN
       -- Cadastrando nova placa ao contrato
       ------------------------------------------------
       IF( @cntpAcaoNew=3 ) BEGIN
-        DECLARE @vclCodigo VARCHAR(20);
+        DECLARE @vclCodigo VARCHAR(20); 
         DECLARE @vclCodCntt INTEGER;
         SELECT @vclCodCntt=VCL_CODCNTT FROM VEICULO WHERE VCL_CODIGO=@cntpPlacaChassiNew;
         IF( @@rowcount=0 ) 
@@ -5143,7 +5212,7 @@ BEGIN
         DECLARE @mesFim DATE;
         DECLARE @mesInt INTEGER;
         SELECT @dtInicio=CNTT_DTINICIO,@meses=CNTT_MESES FROM CONTRATO WITH (NOLOCK) WHERE CNTT_CODIGO=@cntpCodCnttOld;
-        --IF( @dtInicio IS NULL ) BEGIN -- Angelo Kokiso , Data de inicio do contrato é mutavel de acordo com a ultima ativação
+        IF( @dtInicio IS NULL ) BEGIN 
         SET @mesFim=DateAdd(month, +(@meses+1), @cntpDtAtivacaoNew);
         SET @mesInt=CAST(Substring(CONVERT(VARCHAR(10),@mesFim,112),1,6) AS INTEGER);
         UPDATE CONTRATO SET CNTT_DTINICIO=@cntpDtAtivacaoNew,CNTT_DTFIM=@mesInt,CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
@@ -5204,8 +5273,8 @@ BEGIN
            ,CNTP_ACAO           = @cntpAcaoNew
            ,CNTP_CODUSR         = @cntpCodUsrNew
      WHERE ((CNTP_CODCNTT=@cntpCodCnttNew) AND (CNTP_IDUNICO=@cntpIdUnicoNew));
-    
-  END TRY
+
+  END TRY 
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
     DECLARE @ErrorSeverity INT;
@@ -22401,7 +22470,7 @@ BEGIN
   --DECLARE @gmCodigoNew INTEGER;
   DECLARE @gmCodFbrNew INTEGER;
   DECLARE @fvrApelidoNew VARCHAR(15);  
-  DECLARE @gmNomeNew VARCHAR(30);
+  DECLARE @gmNomeNew VARCHAR(120);
   DECLARE @gmCodGpNew VARCHAR(3);
   DECLARE @gpNomeNew VARCHAR(40);
   DECLARE @gmEstoqueMinimoNew INTEGER;  
@@ -22441,7 +22510,7 @@ BEGIN
   ---------------------------------------------------
   SELECT @gmCodFbrNew           = COALESCE(i.GM_CODFBR,0)
          ,@fvrApelidoNew        = COALESCE(FVR.FVR_APELIDO,'ERRO')
-         ,@gmNomeNew            = dbo.fncTranslate(i.GM_NOME,30)
+         ,@gmNomeNew            = dbo.fncTranslate(i.GM_NOME,120)
          ,@gmCodGpNew           = dbo.fncTranslate(i.GM_CODGP,3)
          ,@gmEstoqueMinimoNew   = COALESCE(i.GM_ESTOQUEMINIMO,0)
          ,@gpNomeNew            = COALESCE(GP.GP_NOME,'ERRO')
@@ -22452,11 +22521,11 @@ BEGIN
          ,@gmVendaNew           = UPPER(i.GM_VENDA)
          ,@gmLocacaoNew         = UPPER(i.GM_LOCACAO)         
          ,@gmContratoNew        = COALESCE(UPPER(i.GM_CONTRATO),'N')
-         ,@gmGpObrigatorioNew   = COALESCE(dbo.fncTranslate(i.GM_GPOBRIGATORIO,40),'NSA')
-         ,@gmGmObrigatorioNew   = COALESCE(dbo.fncTranslate(i.GM_GMOBRIGATORIO,70),'NSA')
-         ,@gmGpAceitoNew        = COALESCE(dbo.fncTranslate(i.GM_GPACEITO,40),'NSA')
-         ,@gmGmAceitoNew        = COALESCE(dbo.fncTranslate(i.GM_GMACEITO,70),'NSA')
-         ,@gmGpSerieObrigatorio = COALESCE (i.GM_GPSERIEOBRIGATORIO,'NSA')
+         ,@gmGpObrigatorioNew   = COALESCE(i.GM_GPOBRIGATORIO,'NSA')
+         ,@gmGmObrigatorioNew   = COALESCE(i.GM_GMOBRIGATORIO,'NSA')
+         ,@gmGpAceitoNew        = COALESCE(i.GM_GPACEITO,'NSA')
+         ,@gmGmAceitoNew        = COALESCE(i.GM_GMACEITO,'NSA')
+         ,@gmGpSerieObrigatorio = COALESCE(i.GM_GPSERIEOBRIGATORIO,'NSA')
          ,@gmCodigoPaiFilhoNew  = COALESCE(i.GM_CODIGOPAIFILHO,0)
          ,@gmValorVistaNew      = i.GM_VALORVISTA
          ,@gmValorPrazoNew      = i.GM_VALORPRAZO
@@ -22699,7 +22768,7 @@ BEGIN
   DECLARE @gmCodigoNew INTEGER;
   DECLARE @gmCodFbrNew INTEGER;
   DECLARE @fvrApelidoNew VARCHAR(15);  
-  DECLARE @gmNomeNew VARCHAR(30);
+  DECLARE @gmNomeNew VARCHAR(120);
   DECLARE @gmCodGpNew VARCHAR(3);
   DECLARE @gpNomeNew VARCHAR(20);  
   DECLARE @gmEstoqueNew INTEGER;
@@ -22743,7 +22812,7 @@ BEGIN
   SELECT @gmCodigoNew           = i.GM_CODIGO
          ,@gmCodFbrNew          = i.GM_CODFBR
          ,@fvrApelidoNew        = COALESCE(FVR.FVR_APELIDO,'ERRO')
-         ,@gmNomeNew            = dbo.fncTranslate(i.GM_NOME,30)
+         ,@gmNomeNew            = dbo.fncTranslate(i.GM_NOME,120)
          ,@gmCodGpNew           = i.GM_CODGP
          ,@gpNomeNew            = COALESCE(GP.GP_NOME,'ERRO')
          ,@gmEstoqueNew         = i.GM_ESTOQUE
@@ -22757,10 +22826,10 @@ BEGIN
          ,@gmVendaNew           = UPPER(i.GM_VENDA)
          ,@gmLocacaoNew         = UPPER(i.GM_LOCACAO)                  
          ,@gmContratoNew        = UPPER(i.GM_CONTRATO)         
-         ,@gmGpObrigatorioNew   = dbo.fncTranslate(i.GM_GPOBRIGATORIO,40)
-         ,@gmGmObrigatorioNew   = dbo.fncTranslate(i.GM_GMOBRIGATORIO,70)
-         ,@gmGpAceitoNew        = dbo.fncTranslate(i.GM_GPACEITO,40)
-         ,@gmGmAceitoNew        = dbo.fncTranslate(i.GM_GMACEITO,70)
+         ,@gmGpObrigatorioNew   = i.GM_GPOBRIGATORIO
+         ,@gmGmObrigatorioNew   = i.GM_GMOBRIGATORIO
+         ,@gmGpAceitoNew        = i.GM_GPACEITO
+         ,@gmGmAceitoNew        = i.GM_GMACEITO
          ,@gmGpSerieObrigatorioNew = i.GM_GPSERIEOBRIGATORIO
          ,@gmCodigoPaiFilhoNew  = i.GM_CODIGOPAIFILHO
          ,@gmValorVistaNew      = i.GM_VALORVISTA
@@ -22809,7 +22878,7 @@ BEGIN
     ------------------------------------------------------------------------------------
     DECLARE @gmCodigoOld INTEGER;
     DECLARE @gmCodFbrOld INTEGER;
-    DECLARE @gmNomeOld VARCHAR(30);
+    DECLARE @gmNomeOld VARCHAR(120);
     DECLARE @gmCodGpOld VARCHAR(3);    
     DECLARE @gmEstoqueOld INTEGER;
     DECLARE @gmEstoqueMinimoOld INTEGER;      
@@ -23045,7 +23114,7 @@ BEGIN
   -------------------
   DECLARE @gmCodigoOld INTEGER;
   DECLARE @gmCodFbrOld INTEGER;
-  DECLARE @gmNomeOld VARCHAR(30);
+  DECLARE @gmNomeOld VARCHAR(120);
   DECLARE @gmCodGpOld VARCHAR(5);      
   DECLARE @gmEstoqueOld INTEGER;
   DECLARE @gmEstoqueMinimoOld INTEGER;        
@@ -23192,7 +23261,7 @@ BEGIN
       ,GM_FIRMWARE      
       ,GM_ATIVO
       ,GM_REG
-      ,GM_CODUSR) VALUES(
+      ,GM_CODUSR) VALUES (
       'E'                     -- GM_ACAO
       ,@gmCodigoOld           -- GM_CODIGO
       ,@gmCodFbrOld           -- GM_CODFBR
@@ -23263,7 +23332,7 @@ BEGIN
   -- ---------------|---------|----|----|--------------------|----------------------------------------------------------
   -- GML_CODIGO     | FNC     |    |    | INT NN             |
   -- GML_CODGM      |         |    |    | INT NN             | Campo relacionado (GRUPOMODELO)  
-  -- GM_NOME        |         |    |    | VC(20) NN          | Campo relacionado (GRUPOPRODUTO)    
+  -- GM_NOME        |         |    |    | VC(120) NN          | Campo relacionado (GRUPOPRODUTO)    
   -- GML_DATA       |         |    |    | DAT NN             | Data da entrada em estoque
   -- GML_ENTRADA    |         |    |    | INT NN             | Quantidade de modelo importados
   -- GML_CODGMPINI  |         |    |    | INT NN             | Primeiro codigo(GRUPOMODELOPRODUTO) importado ( Para abertura )
@@ -23283,7 +23352,7 @@ BEGIN
   -------------------
   DECLARE @gmlCodigoNew INTEGER;
   DECLARE @gmlCodGmNew INTEGER;
-  DECLARE @gmNomeNew  VARCHAR(20);
+  DECLARE @gmNomeNew  VARCHAR(120);
   DECLARE @gmlDataNew  DATE;
   DECLARE @gmlEntradaNew INTEGER;
   DECLARE @gmlCodGmpIni INTEGER;
@@ -23402,7 +23471,7 @@ BEGIN
   -- Campos da tabela
   -------------------
   DECLARE @gmsCodGmNew INTEGER;
-  DECLARE @gmNomeNew VARCHAR(30);
+  DECLARE @gmNomeNew VARCHAR(120);
   DECLARE @gmsCodSrvNew INTEGER;
   DECLARE @srvNomeNew VARCHAR(60);
   DECLARE @gmsVendaLocacaoNew VARCHAR(1);
@@ -31571,17 +31640,17 @@ BEGIN
     ------------------------------------------
     -- CHECANDO A DUPLICIDADE DE SERIE/SINCARD
     ------------------------------------------
-    --IF( @gmpNumSerieNew<>'NSA' ) BEGIN
-      SET @duplicidade=CONCAT('SER',CAST(@gmpCodFbrNew AS VARCHAR(6)),@gmpNumSerieNew);    
+    IF( @gmpNumSerieNew<>'NSA' ) BEGIN
+      SET @duplicidade=CONCAT('SER',CAST(@gmpCodGmNew AS VARCHAR(6)),@gmpNumSerieNew);    --alterada regra de duplicidade, por grupomodelo e num_serie
       SET @dupCodigo=NULL;
       SELECT @dupCodigo=COALESCE(DUP_CODIGO,NULL) FROM DUPLICIDADEGMP WHERE DUP_CODIGO=@duplicidade;
-      --IF( @@ROWCOUNT=0 ) BEGIN
+      IF( @@ROWCOUNT=0 ) BEGIN
         INSERT INTO DUPLICIDADEGMP(DUP_CODIGO,DUP_CODGMP) VALUES(@duplicidade,@gmpCodigoNew);
-      --END ELSE BEGIN
-      --  RAISERROR('SERIE %s PARA ESTE FABRICANTE JA CADASTRADA NO PRODUTO %i DUPLICIDADE %s',15,1,@gmpNumSerieNew,@gmpCodigoNew,@dupCodigo);
-      --END
-    --END
-    -- Angelo Kokiso , alteração temporária na regra de duplicidade do sincard
+      END ELSE BEGIN
+       RAISERROR('SERIE %s PARA ESTE MODELO JA CADASTRADA NO PRODUTO %i DUPLICIDADE %s',15,1,@gmpNumSerieNew,@gmpCodigoNew,@dupCodigo);
+      END
+    END
+ 
     IF( @gmpSincardNew<>'NSA' ) BEGIN
       SET @duplicidade=CONCAT('SIN',CAST(@gmpCodFbrNew AS VARCHAR(6)),@gmpSincardNew);    
       SET @dupCodigo=NULL;
@@ -37553,7 +37622,7 @@ BEGIN
     );
 
     SELECT @vlcCodCntt=CNTP_CODCNTT FROM CONTRATOPLACA WHERE CNTP_PLACACHASSI=@vclCodigoNew;
-    IF( @@rowcount=0 ) BEGIN -- angleo kokiso , checagem invertida para segregação do cadastro de veiclo
+    IF( @@rowcount=0 ) BEGIN -- angelo kokiso , checagem invertida para segregação do cadastro de veiclo
       INSERT INTO dbo.CONTRATOPLACA( 
       CNTP_CODCNTT
       ,CNTP_PLACACHASSI

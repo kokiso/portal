@@ -61,6 +61,7 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblCntE                   // Nome da table
+        ,"div"        : "cnte"
         ,"prefixo"        : "cnte"                    // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "CONTRATOENDERECO"    // Nome da tabela no banco de dados  
         ,"width"          : tblWidth                // Tamanho da table

@@ -201,7 +201,7 @@
                       ,"tamGrd"         : "29em"
                       ,"tamImp"         : "0"
                       ,"newRecord"      : [pega.desam,"this","this"]
-                      ,"digitosMinMax"  : [1,30]
+                      ,"digitosMinMax"  : [1,120]
                       ,"validar"        : ["notnull"]                      
                       ,"ajudaCampo"     : ["Descrição do auto."]
                       ,"padrao":0}

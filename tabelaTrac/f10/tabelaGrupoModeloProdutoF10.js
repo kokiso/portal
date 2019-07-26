@@ -8,12 +8,10 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
   let clsStr = new concatStr();
   let flag = false; 
   clsStr.concat("SELECT A.GMP_CODIGO AS CODIGO,GM.GM_NOME AS DESCRICAO,A.GMP_NUMSERIE AS SERIE"   );
-    for (var key in objeto) {
-      if( key === 'cntp' ){
-          clsStr.concat("       ,GMM.GM_NOME AS MODELO"                                                   );
-          flag === true;    
+      if( objeto['cntp']){
+          clsStr.concat("       ,GMM.GM_NOME AS MODELO"                                           );
+          flag = true;    
         };  
-    };  
   clsStr.concat("  ,A.GMP_SINCARD AS SINCARD"                                                );
   clsStr.concat("  ,CASE WHEN A.GMP_DTCONFIGURADO IS NULL THEN 'NAO' ELSE 'SIM' END AS CFG"       );            
   clsStr.concat("  FROM GRUPOMODELOPRODUTO A"                                                     );
@@ -26,7 +24,7 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
     for (var key in objeto) {
       switch( key ){
         case "cntp":
-            clsStr.concat("  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMMP ON A.GMP_NUMSERIE = GMMP.GMP_NUMSERIE AND GMMP.GMP_CODCNTT = 0");
+            clsStr.concat("  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMMP ON A.GMP_NUMSERIE = GMMP.GMP_NUMSERIE AND GMMP.GMP_CODCNTT = 0 AND GMMP.GMP_CODPE ='aut'");
             clsStr.concat("  LEFT OUTER JOIN GRUPOMODELO GMM ON GMMP.GMP_CODGM=GMM.GM_CODIGO"                    );
         break;
         case "codgm": 
@@ -57,6 +55,7 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
     };  
   };
   sql=clsStr.fim();
+
   var jsGmpF10 = null;
   //            
   if( opc == 0 ){            
@@ -81,7 +80,8 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
           ,"registros"      : bdGmp.dados              // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                     // Opção para numero registros/botão/procurar                       
           ,"checarTags"     : "N"                      // Somente em tempo de desenvolvimento(olha as pricipais tags)
-          ,"tbl"            : tblGmp                   // Nome da table
+          ,"tbl"            : tblGmp
+          ,"div"            : 'tblGmp'                                  // Nome da table
           ,"prefixo"        : "Gmp"                    // Prefixo para elementos do HTML em jsTable2017.js
           ,"tabelaBD"       : "GRUPOMODELOPRODUTO"     // Nome da tabela no banco de dados  
           ,"width"          : tblWidth                 // Tamanho da table
@@ -103,6 +103,7 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
           ,"opcRegSeek"     : true                     // Opção para numero registros/botão/procurar                       
           ,"checarTags"     : "N"                      // Somente em tempo de desenvolvimento(olha as pricipais tags)
           ,"tbl"            : tblGmp                   // Nome da table
+          ,"div"            : 'tblGmp'               
           ,"prefixo"        : "Gmp"                    // Prefixo para elementos do HTML em jsTable2017.js
           ,"tabelaBD"       : "GRUPOMODELOPRODUTO"     // Nome da tabela no banco de dados  
           ,"width"          : tblWidth                 // Tamanho da table
@@ -125,7 +126,7 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
       ajudaF10.tagH2    = false;
       ajudaF10.mensagem = html;
       ajudaF10.Show('ajudaGmp');
-      document.getElementById('tblGmp').rows[0].cells[2].click();
+      document.getElementById('tblGmp').rows[0].cells[3].click(); 
       delete(ajudaF10);
       delete(objGmpF10);
     };

@@ -41,7 +41,21 @@
           $sql.=" WHERE (CNTT_CODIGO=".$lote[0]->codcntt.")";
           array_push($arrUpdt,$sql);                                    
           $atuBd = true;
-        };  
+        };   
+        if( $lote[0]->rotina=="gravaEdtVlr" ){
+          if ($lote[0]->cntt_dtinicio == '//')
+            $lote[0]->cntt_dtinicio = NULL;
+          $sql ="UPDATE VCONTRATO SET";
+          $sql.=" CNTT_EMISSAO='".$lote[0]->cntt_emissao."'";
+          $sql.=",CNTT_DTINICIO='".$lote[0]->cntt_dtinicio."'";
+          $sql.=",CNTT_DTFIM=".$lote[0]->cntt_dtfim;
+          $sql.=",CNTT_QTDAUTO=".$lote[0]->cntt_qtdauto;
+          $sql.=",CNTT_VLRMENSAL=".$lote[0]->cntt_vlrmensal;
+          $sql.=",CNTT_VLRPONTUAL=".$lote[0]->cntt_vlrpontual;
+          $sql.=" WHERE (CNTT_CODIGO=".$lote[0]->codcntt.")";
+          array_push($arrUpdt,$sql);                                    
+          $atuBd = true;
+        };
         if( $lote[0]->rotina=="vlrOs" ){
           $sql="";          
           $sql.="SELECT CNTT_VLRNOSHOW,CNTT_VLRIMPRODUTIVEL,CNTT_VLRINSTALA,CNTT_VLRDESISTALA,CNTT_VLRREINSTALA,CNTT_VLRMANUTENCAO,CNTT_VLRREVISAO";
@@ -50,7 +64,21 @@
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-        };  
+        }; 
+        if( $lote[0]->rotina=="edtCnttVal" ){
+          $sql="";          
+          $sql.="SELECT CONVERT(VARCHAR(10),CNTT_EMISSAO,103) AS EMISSAO
+              ,CONVERT(VARCHAR(10),CNTT_DTINICIO,103) AS INICIO
+              ,CONVERT(VARCHAR(10),CNTT_DTFIM,103) AS FIM
+              ,CNTT_QTDAUTO
+              ,CNTT_VLRMENSAL
+              ,CNTT_VLRPONTUAL";
+          $sql.="  FROM CONTRATO";
+          $sql.=" WHERE (CNTT_CODIGO=".$lote[0]->codcntt.")";
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+        };   
         if( $lote[0]->rotina=="umaplaca" ){
           $sql="SELECT A.VCL_CODCNTT FROM VEICULO A WITH(NOLOCK) WHERE VCL_CODIGO='".$lote[0]->placa."'";
           $classe->msgSelect(false);
@@ -110,7 +138,7 @@
           $sql.="       ,FVR.FVR_APELIDO AS CLIENTE";                    
           //$sql.="       ,CNTT_CODVND";
           //$sql.="       ,CNTT_CODIND";
-          $sql.="       ,(CNTT_VLRMENSAL / CNTT_MESES) AS CVLRMENSALPARC";
+          $sql.="       ,(CNTT_VLRMENSAL / CNTT_MESES) AS VLRMENSALPARCIAL";
           $sql.="       ,CNTT_VLRMENSAL";
           $sql.="       ,CNTT_VLRPONTUAL";
           $sql.="       ,CNTT_QTDAUTO";
@@ -263,6 +291,7 @@
             ,{"id":1  ,"labelCol"       : "CODIGO"
                       ,"fieldType"      : "int"
                       ,"obj"            : "edtCnttCod"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"formato"        : ["i6"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "5em"
@@ -272,6 +301,8 @@
                       ,"padrao":0}
             ,{"id":2  ,"labelCol"       : "TP"
                       ,"fieldType"      : "str"
+                      ,"obj"            : "edtCnttTp"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"tamGrd"         : "2em"
                       ,"tamImp"         : "15"
                       ,"excel"          : "S"
@@ -280,14 +311,18 @@
                       ,"popoverLabelCol": "Tipo"                      
                       ,"padrao":0}
             ,{"id":3  ,"labelCol"       : "EMISSAO"
-                      ,"fieldType"      : "dat"                      
+                      ,"fieldType"      : "dat"
+                      ,"obj"            : "edtCnttEmissao" 
+                      ,"insUpDel"       : ["N","N","N"]                     
                       ,"tamGrd"         : "7em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
             ,{"id":4  ,"labelCol"       : "INICIO"
-                      ,"fieldType"      : "dat"                      
+                      ,"fieldType"      : "dat"
+                      ,"obj"            : "edtCnttIni"     
+                      ,"insUpDel"       : ["N","N","N"]                  
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
@@ -296,7 +331,9 @@
                       ,"popoverLabelCol": "Inicio do contrato"                      
                       ,"padrao":0}
             ,{"id":5  ,"labelCol"       : "FIM"
-                      ,"fieldType"      : "dat"                      
+                      ,"fieldType"      : "dat"
+                      ,"obj"            : "edtCnttFim"   
+                      ,"insUpDel"       : ["N","N","N"]                    
                       ,"tamGrd"         : "15em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
@@ -306,6 +343,8 @@
                       ,"padrao":0}
             ,{"id":6  ,"labelCol"       : "CODFVR"
                       ,"fieldType"      : "int"
+                      ,"obj"            : "edtCnttCodFvr" 
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       //,"align"          : "center"    
                       ,"tamGrd"         : "0em"
@@ -315,14 +354,18 @@
                       ,"padrao":0}
             ,{"id":7  ,"labelCol"       : "CLIENTE"
                       ,"fieldType"      : "str"
+                      ,"obj"            : "edtCnttFvrNome"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"tamGrd"         : "12em"
                       ,"tamImp"         : "35"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"truncate"       : true
-                      ,"padrao":0}
-            ,{"id":8  ,"field"          :"CVLRMENSALPARC"
-                      ,"labelCol"       :'VLRMENSALPARCIAL'
+                      ,"padrao":0}  
+            ,{"id":8  ,"field"          :"VLRMENSALPARCIAL"
+                      ,"labelCol"       :"VLRMENSALPARCIAL"
+                      ,"obj"            : "edtCnttVlrMensalParcial"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"fieldType"      : "flo2" 
                       ,"tamGrd"         : "12em"
                       ,"tamImp"         : "0"
@@ -331,7 +374,9 @@
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
             ,{"id":9  
-                      ,"labelCol"       :'VLRMENSAL'
+                      ,"labelCol"       :"VLRMENSAL"
+                      ,"obj"            :"edtVlrMensal"
+                      ,"insUpDel"       : ["N","S","N"] 
                       ,"fieldType"      : "flo2" 
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "25"
@@ -340,8 +385,10 @@
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
             ,{"id":10  ,"labelCol"       : "VLRPONTUAL"
-                      ,"fieldType"      : "flo2" 
-                      ,"tamGrd"         : "0em"
+                      ,"fieldType"      : "flo2"
+                      ,"obj"            :"edtVlrPontual" 
+                      ,"insUpDel"       : ["N","S","N"] 
+                      ,"tamGrd"         : "8em"
                       ,"sepMilhar"      : true                      
                       ,"tamImp"         : "0"
                       ,"excel"          : "S"
@@ -349,6 +396,8 @@
                       ,"padrao":0}
             ,{"id":11 ,"labelCol"       : "AUTOS"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtAutos"
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
@@ -358,6 +407,8 @@
                       ,"padrao":0}
             ,{"id":12 ,"labelCol"       : "EMPENHO"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtEmpenho"
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
@@ -367,6 +418,8 @@
                       ,"padrao":0}
             ,{"id":13 ,"labelCol"       : "ENV"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtVEnv"
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "3em"
@@ -378,6 +431,8 @@
                       ,"padrao":0}
             ,{"id":14 ,"labelCol"       : "AGENDA"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtAgenda"
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
@@ -387,6 +442,8 @@
                       ,"padrao":0}
             ,{"id":15 ,"labelCol"       : "OS"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtOs"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "0"
@@ -397,6 +454,8 @@
                       ,"padrao":0}
             ,{"id":16 ,"labelCol"       : "PLACAS"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtVPlacas"
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
@@ -406,6 +465,8 @@
                       ,"padrao":0}
             ,{"id":17 ,"labelCol"       : "ATIVACAO"
                       ,"fieldType"      : "int"
+                      ,"obj"            :"edtVAtivacao"
+                      ,"insUpDel"       : ["N","N","N"] 
                       //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
@@ -415,6 +476,8 @@
                       ,"padrao":0}
             ,{"id":18 ,"labelCol"       : "STATUS"
                       ,"fieldType"      : "str"
+                      ,"obj"            :"edtStatus"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
@@ -422,6 +485,8 @@
                       ,"padrao":0}
             ,{"id":19 ,"labelCol"       : "FID"
                       ,"fieldType"      : "str"
+                      ,"obj"            :"edtFid"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "12"
                       ,"excel"          : "S"
@@ -430,6 +495,8 @@
                       ,"padrao":0}
             ,{"id":20 ,"labelCol"       : "IP"
                       ,"fieldType"      : "str"
+                      ,"obj"            :"edtIp"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"tamGrd"         : "2em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
@@ -438,6 +505,8 @@
                       ,"padrao":0}
             ,{"id":21 ,"labelCol"       : "USUARIO"
                       ,"fieldType"      : "str"
+                      ,"obj"            :"cbCodUsr"
+                      ,"insUpDel"       : ["N","N","N"] 
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "25"
                       ,"excel"          : "S"
@@ -487,10 +556,10 @@
           ]
           , 
           "botoesH":[
-             {"texto":"Alterar"         ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"   }
-            ,{"texto":"Excluir"         ,"name":"horExcluir"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-minus"             
-                                        ,"popover":{title:"Excluir",texto:"Esta opção exclui o contrato do sistema em definitivo.<hr>Não existe maneira de recuperar o registro",aviso:"warning"}} 
-            ,{"texto":"Empenho"         ,"name":"horEmpenho"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
+             //{"texto":"Alterar"         ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"   }
+            //,{"texto":"Excluir"         ,"name":"horExcluir"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-minus"             
+                                        // ,"popover":{title:"Excluir",texto:"Esta opção exclui o contrato do sistema em definitivo.<hr>Não existe maneira de recuperar o registro",aviso:"warning"}} 
+            {"texto":"Empenho"         ,"name":"horEmpenho"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
                                         ,"popover":{title:"Empenho",texto:"Opção para empenhar individualmente cada auto pelo seu número de serie<hr>"
                                                                           +"O auto obrigatoriamente deve estar em estoque"}} 
             ,{"texto":"Agenda"          ,"name":"horAgenda"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-calendar"
@@ -513,7 +582,7 @@
           ,"divModal"       : "divTopoInicio"           // Onde vai se appendado abaixo deste a table 
           ,"divModalDentro" : "sctnCntt"                // Onde vai se appendado dentro do objeto(Ou uma ou outra, se existir esta despreza a divModal)
           ,"tbl"            : "tblCntt"                 // Nome da table
-          ,"prefixo"        : "Me"                      // Prefixo para elementos do HTML em jsTable2017.js
+          ,"prefixo"        : "Cntt"                      // Prefixo para elementos do HTML em jsTable2017.js
           ,"tabelaBD"       : "VCONTRATO"               // Nome da tabela no banco de dados  
           ,"tabelaBKP"      : "*"                       // Nome da tabela no banco de dados  
           ,"fieldAtivo"     : "*"                       // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
@@ -523,6 +592,7 @@
           ,"width"          : "140em"                   // Tamanho da table
           ,"height"         : "58em"                    // Altura da table
           ,"nChecks"        : false                     // Se permite multiplos registros na grade checados
+          ,"tableLeft"      : "sim"                 // Se tiver menu esquerdo
           ,"tableLeft"      : "opc"                     // Se tiver menu esquerdo
           ,"relTitulo"      : "CONTRATO"                // Titulo do relatório
           ,"relOrientacao"  : "P"                       // Paisagem ou retrato
@@ -821,7 +891,57 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
         
-      }  
+      }
+      function gravaEdtVlr(){
+        try{
+          $doc("edtDataFim").value   = document.getElementById("edtDataFim").value.soNumeros();
+          $doc("edtQtdAuto").value  = document.getElementById("edtQtdAuto").value.soNumeros();
+
+          msg = new clsMensagem("Erro");          
+          
+          msg.notNull("DATA EMISSAO"           , document.getElementById("edtCnttEmissao").value                      );
+          msg.notNull("DATA FIM"          , document.getElementById("edtDataFim").value                               ); 
+          msg.notNull("QUANTIDADE AUTO"          , document.getElementById("edtQtdAuto").value                        );          
+          msg.intMaiorZero("QUANTIDADE AUTO" , document.getElementById("edtQtdAuto").value                                );
+          msg.floMaiorZero("VALOR MENSAL"        , jsConverte("#edtVlrMensal").dolar());
+          msg.floMaiorIgualZero("VALOR PONTUAL"  , jsConverte("#edtVlrPontual").dolar()  ); 
+           
+          if( msg.ListaErr() != "" ){
+            msg.Show();
+          } 
+          else {
+            ///////////////////////////////////////////////////////////////////////////
+            // Classe para montar envio para o Php
+            ///////////////////////////////////////////////////////////////////////////    
+            clsJs = jsString("lote");                
+            clsJs.add("rotina"                , "gravaEdtVlr"                              );              
+            clsJs.add("login"                 , jsPub[0].usr_login                         );
+            clsJs.add("codcntt"               , chkds[0].CODIGO                            );          
+            clsJs.add("cntt_emissao"          , jsDatas("edtCnttEmissao").retMMDDYYYY()    );
+            clsJs.add("cntt_dtinicio"         , jsDatas("edtCnttDtInicio").retMMDDYYYY()   );
+            clsJs.add("cntt_dtfim"            , jsConverte("#edtDataFim").inteiro()        );
+            clsJs.add("cntt_qtdauto"          , jsConverte("#edtQtdAuto").inteiro()        );
+            clsJs.add("cntt_vlrmensal"        , jsConverte("#edtVlrMensal").dolar()        );
+            clsJs.add("cntt_vlrpontual"       , jsConverte("#edtVlrPontual").dolar()       );
+            //////////////////////
+            // Enviando para o Php
+            //////////////////////    
+            var fd = new FormData();
+            fd.append("contrato" , clsJs.fim());
+            msg=requestPedido("Trac_Contrato.php",fd); 
+            retPhp=JSON.parse(msg);
+            if( retPhp[0].retorno != "OK" ){
+              gerarMensagemErro("cnti",retPhp[0].erro,{cabec:"Aviso"});            
+            } else {  
+              modalInitEdtJS.hide();  0
+              location.reload();          
+            };
+          }  
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Erro"});
+        };
+        
+      }   
     </script>
   </head>
   <body style="background-color: #ecf0f5;">
@@ -857,6 +977,20 @@
               </div>
             </div>
           </div>
+
+          <div id="divEdtCntt" class="divBarraLateral" 
+                              data-toggle="modal" data-target="#modalEdtCntt"                              
+                              data-content="Alterar valores do contrato.">
+            <i class="indFa fa-plus"></i>
+          </div>
+          <div id="modalEdtCntt" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalEdtCnttLabel" aria-hidden="true">
+            <div class="modal-dialog" style="width:25%;" >
+              <div class="modal-content">
+
+              </div>
+            </div>
+          </div>
+          
         </section>
       </aside>
       <div id="indDivInforme" class="indTopoInicio indTopoInicio100">
@@ -923,15 +1057,15 @@
             class="frmTable"
             action="classPhp/imprimirsql.php"
             target="_newpage">
-        <div class="frmTituloManutencao">Contrato<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>              
-        <div style="height: 290px; overflow-y: auto;">   
-          <input type="hidden" id="sql" name="sql"/> 
-          <div class="inactive">
-            <input id="edtTerceiroTbl" value="*" type="text" />
+        <div class="frmTituloManutencao">Contrato<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>             
+          <div style="height: 290px; overflow-y: auto;">
+            <input type="hidden" id="sql" name="sql"/> 
+            <div class="inactive">
+              <input id="edtTerceiroTbl" value="*" type="text" />
+            </div>
           </div>
         </div>
-      </form>  
-    </div>
+      </form> 
     <!--
     Buscando as placas deste contrato
     -->
@@ -1086,6 +1220,7 @@
       }, false);
       //
       //
+
       ///////////////////////////////////////////////////
       // Formulario para alteracao de valores de contrato
       ///////////////////////////////////////////////////
@@ -1116,7 +1251,7 @@
       clsStr.concat(  '<div class="form-group campo50" style="float:left;height:53px"></div>'               );
       clsStr.concat('</div>'                                                                                );            
       clsStr.concat('<div class="modal-footer">'                                                            );
-      clsStr.concat(  '<button type="button" class="btn btn-primary" onClick="gravaVlr();">Gravar</button>'                       );
+      clsStr.concat(  '<button type="button" class="btn btn-primary" onClick="gravaVlr();">Gravar</button>' );
       clsStr.concat(  '<button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>'  );
       clsStr.concat(  '</div>'                                                                              );
       clsStr.concat('</div>'                                                                                );      
@@ -1163,7 +1298,112 @@
       }, false);      
       modalCntt.addEventListener('shown.bs.modal', function(event){
         $doc("edtVlrNoShow").foco();
+      }, false); 
+
+
+      ///////////////////////////////////////////////////
+      // Formulario para alteracao do contrato
+      ///////////////////////////////////////////////////
+      var modalEdtCntt = document.getElementById('modalEdtCntt');
+      var btnEdtModal  = document.getElementById('divEdtCntt');
+      
+      let arrEdtObj=["edtCnttEmissao"  ,"edtCnttDtInicio" ,"edtDataFim","edtQtdAuto","edtVlrMensal","edtVlrPontual"];
+      let arrEdtLbl=["Data Emissao"  ,"Data de inicio" ,"Ano e mes fim (YYYY/MM)" ,"Quantidade de autos","Valor mensal Total","Valor Pontual Total"];
+      
+      
+      let clsEdtStr = new concatStr();
+      clsEdtStr.concat('<div class="modal-header">'                                                            );
+      clsEdtStr.concat(  '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'        );
+      clsEdtStr.concat(    '<span aria-hidden="true">×</span>'                                                 );
+      clsEdtStr.concat(  '</button>'                                                                           );
+      clsEdtStr.concat(  '<h4 class="modal-title" id="modalEdtCnttLabel">VALORES PARA CONTRATO</h4>'              );
+      clsEdtStr.concat('</div>'                                                                                );
+      clsStr.concat('<div class="modal-body">'                                                              );
+      for(let lin=0;lin<2;lin++){
+        clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
+        clsEdtStr.concat(    '<label for="'+arrEdtObj[lin]+'" class="control-label">'+arrEdtLbl[lin]+'</label>'      );
+        clsEdtStr.concat(    '<input type="text"'                                                              );
+        clsEdtStr.concat(           'id="'+arrEdtObj[lin]+'"'                                                     );
+        clsEdtStr.concat(           'class="form-control edtDireita"'                                          );
+        clsEdtStr.concat(           'onkeyup="mascaraNumero(\'##/##/####\',this,event,\'dig\')"'             );
+        clsEdtStr.concat(           'placeholder="##/##/####"/>'             );
+        clsEdtStr.concat(  '</div>'                                                                            );
+      };
+      //
+      clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
+      clsEdtStr.concat(    '<label for="edtDataFim" class="control-label">Ano e mes fim (YYYYMM)</label>'      );
+      clsEdtStr.concat(    '<input type="text"'                                                              );
+      clsEdtStr.concat(           'id="edtDataFim"'                                                     );    
+      clsEdtStr.concat(           'class="form-control edtDireita"'                                          );
+      clsEdtStr.concat(           '/>'             );
+      clsEdtStr.concat(  '</div>'                                                                            );    
+      //
+      clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
+      clsEdtStr.concat(    '<label for="edtQtdAuto" class="control-label">Quantidade de autos</label>'      );
+      clsEdtStr.concat(    '<input type="text"'                                                              );
+      clsEdtStr.concat(           'id="edtQtdAuto"'                                                     );    
+      clsEdtStr.concat(           'class="form-control edtDireita"'                                          );
+      clsEdtStr.concat(           '/>'                                      );
+      clsEdtStr.concat(  '</div>'                                                                            );
+      for(let lin=4;lin<6;lin++){
+        clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
+        clsEdtStr.concat(    '<label for="'+arrEdtObj[lin]+'" class="control-label">'+arrEdtLbl[lin]+'</label>'      );
+        clsEdtStr.concat(    '<input type="text"'                                                              );
+        clsEdtStr.concat(           'id="'+arrEdtObj[lin]+'"'                                                     );    
+        clsEdtStr.concat(           'class="form-control edtDireita"'                                          );
+        clsEdtStr.concat(           'onBlur="fncCasaDecimal(this,2);" />'                                      );
+        clsEdtStr.concat(  '</div>'                                                                            );
+      };    
+      clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;height:53px"></div>'               );
+      clsEdtStr.concat('</div>'                                                                                );            
+      clsEdtStr.concat('<div class="modal-footer">'                                                            );
+      clsEdtStr.concat(  '<button type="button" class="btn btn-primary" onClick="gravaEdtVlr();">Gravar</button>' );
+      clsEdtStr.concat(  '<button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>'  );
+      clsEdtStr.concat(  '</div>'                                                                              );
+      clsEdtStr.concat('</div>'                                                                                );      
+      //////////////////////////  
+      // Inicilializando o modal
+      //////////////////////////
+      var modalInitEdtJS = new Modal(modalEdtCntt, {
+        content: sql=clsEdtStr.fim(),
+        backdrop: 'static'
+      });
+      btnEdtModal.addEventListener('click',function(e){
+        try{
+          chkds=objCntt.gerarJson("1").gerar();
+          clsJs=jsString("lote");                      
+          clsJs.add("rotina"      , "edtCnttVal"             );
+          clsJs.add("login"       , jsPub[0].usr_login  );
+          clsJs.add("codcntt"     , chkds[0].CODIGO     );
+          //////////////////////
+          // Enviando para o Php
+          //////////////////////
+          var fd = new FormData();
+          fd.append("contrato" , clsJs.fim());
+          msg=requestPedido("Trac_Contrato.php",fd); 
+          retPhp=JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            let tblEdt=retPhp[0].dados[0];
+            $doc("edtCnttEmissao").value        = tblEdt.EMISSAO;
+            $doc("edtCnttDtInicio").value  = tblEdt.INICIO;
+            $doc("edtDataFim").value       = tblEdt.FIM
+            $doc("edtQtdAuto").value     = tblEdt.CNTT_QTDAUTO
+            $doc("edtVlrMensal").value     = tblEdt.CNTT_VLRMENSAL
+            $doc("edtVlrPontual").value    = tblEdt.CNTT_VLRPONTUAL
+          };  
+          modalInitEdtJS.show();
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Aviso"});  
+        };
+      },false);
+      //////////////////////////
+      // Instanciando os eventos
+      //////////////////////////
+      modalEdtCntt.addEventListener('show.bs.modal', function(event){
       }, false);      
+      modalEdtCntt.addEventListener('shown.bs.modal', function(event){
+        $doc("edtCnttEmissao").foco();
+      }, false);     
       //
       //
     </script>
