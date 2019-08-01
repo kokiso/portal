@@ -21,7 +21,8 @@
         unset($retCls,$vldr);      
       } else {
         $strExcel = "*"; 
-        $arrUpdt  = []; 
+        $arrUpdt  = [];
+        $arrUpdt2 = [];
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
         $classe   = new conectaBd();
@@ -137,33 +138,24 @@
               $sql.=")";
               array_push($arrUpdt,$sql);            
             }; 
-            if( $ite->codgp=="SRV" ){
-              if( $ite->addCnts=="S" ){  
-                $sql="";
-                $sql.="INSERT INTO CONTRATOMENSAL(CNTM_CODCNTT";
-                $sql.=",CNTM_IDUNICO";
-                $sql.=",CNTM_IDSRV";
-                $sql.=",CNTM_CODGM";
-                $sql.=",CNTM_CODSRV";
-                $sql.=",CNTM_CODGP";
-                $sql.=",CNTM_MENSAL";
-                $sql.=",CNTM_CODGMP";
-                $sql.=",CNTM_VALOR";
-                $sql.=",CNTM_CODUSR) VALUES(";
-                $sql.="'$contrato'";                // CNTS_CODCNTT  
-                $sql.=",".$cntpIdSrv;               // CNTS_IDUNICO
-                $sql.=",".$cntpIdSrv;               // CNTS_IDSRV
-                $sql.=",".$ite->codgm;              // CNTS_CODGM
-                $sql.=",".$ite->codsrv;             // CNTS_CODSRV
-                $sql.=",'".$ite->codgp."'";         // CNTS_CODGP
-                $sql.=",'".$ite->mensal."'";        // CNTS_MENSAL
-                $sql.=",0";                         // CNTS_CODGMP
-                $sql.=",".$ite->valor;              // CNTS_VALOR
-                $sql.=",".$_SESSION["usr_codigo"];  // CNTS_CODUSR  
-                $sql.=")";
-                array_push($arrUpdt,$sql);            
-              };
-            };
+          };
+          $objCob = $lote[0]->COBRANCA;
+          foreach ( $objCob as $cob ){
+              $sql="";
+              $sql.="INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT";
+              $sql.=",CNTC_CODGM";
+              $sql.=",CNTC_CODSRV";
+              $sql.=",CNTC_PGTO"; 
+              $sql.=",CNTC_VLRMENSAL";  
+              $sql.=",CNTC_VLRTOTAL) VALUES(";                        
+              $sql.="'$contrato'";               // CNTC_CODCNTT
+              $sql.=",'" .$cob->codgm."'";       // CNTC_CODGM
+              $sql.=",'" .$cob->codsrv."'";      // CNTC_CODSRV
+              $sql.=",'" .$cob->pgto."'";        // CNTC_PGTO
+              $sql.=",'" .$cob->vlrmensal."'";   // CNTC_VLRMENSAL
+              $sql.=",'" .$cob->vlrtotal."'";    // CNTC_VLRTOTAL
+              $sql.=")";
+              array_push($arrUpdt,$sql);    
           };
           //Angelo kokiso - Altera ativação do pedido para 'NAO' para criar efeito de DELETE ao gerar um contrato
           $sql="UPDATE PEDIDO SET PDD_CODUSR=".$_SESSION["usr_codigo"]." WHERE PDD_CODIGO=".$lote[0]->codpdd;
@@ -1011,7 +1003,7 @@
           let compet=0;
           let novaData;
           let dtInicio  = "";
-          let dtFim     = "";
+         // let dtFim     = "";
           let dataIniFim;
           //////////////////////////////////////////////
           // Procurando a competencia anterior do vencto
@@ -1028,7 +1020,7 @@
                 dataIniFim="01/"+compet.substring(4,6)+"/"+compet.substring(0,4);  
                 if( dtInicio=="" )
                   dtInicio=dataIniFim;
-                dtFim=jsDatas(dataIniFim).retUltDiaMes();
+              //  dtFim=jsDatas(dataIniFim).retUltDiaMes();
                 //
                 break;
               };  
@@ -1053,16 +1045,26 @@
           ////////////////////////////
           let item        = JSON.parse((chkds[0].JSITEM).replaceAll('|','"')).item;
           let clsIte      = jsString("item");
+          let clsCob      = jsString("cobranca");
           let pontual     = true;
           let mensal      = "";
           let quantidade  = 0;
           let addCnts     = "N";  // se insere em CONTRATOMENSAL( Apenas os servicos de um auto ) 
           let cnttCodGm   = 0;    // Preciso pegar o primeiro grupo modelo para cadastrar em contrato valores NOSHOW/INST/DESIST/MANUT/REVISAO  
           clsIte.principal(false);
+          clsCob.principal(false);
           ///////////////////////////////////////////////////////////
           // Primeiro foreach pega somente a qtdade de itens vendidos
           ///////////////////////////////////////////////////////////
+
           item.forEach(function(qtd){
+            if( qtd.codgp!="AUT" ){
+              clsCob.add("codgm"     , qtd.produto                       );
+              clsCob.add("codsrv"    , qtd.servico                       );
+              clsCob.add("pgto"      , (qtd.pagto).substring(0,1)        );
+              clsCob.add("vlrmensal" , jsNmrs(qtd.unitario).dolar().ret());
+              clsCob.add("vlrtotal"  , jsNmrs(qtd.mensal).dolar().ret()  );
+            }
             if( qtd.codgp=="AUT" ){
               quantidade=parseInt(qtd.qtdade);
               addCnts="S";
@@ -1070,35 +1072,40 @@
               // Aqui vou cadastrar auto por auto pois preciso colocar a placa/num serie/codgmp(grupo modelo produto
               //////////////////////////////////////////////////////////////////////////////////////////////////////
               for( let lin=1;lin<=quantidade;lin++ ){
-                item.forEach(function(reg){
-                  reg.produto=parseInt(reg.produto);
-                  reg.servico=parseInt(reg.servico);
-
-                  clsIte.add("codgm"  , reg.produto                             );
-                  clsIte.add("codsrv" , reg.servico                             );
-                  clsIte.add("codgp"  , (reg.codgp=="***" ? "SRV" : reg.codgp)  );
-                  clsIte.add("mensal" , (reg.pagto).substring(0,1)              );
-                  clsIte.add("valor"  , jsNmrs(reg.mensal).dolar().ret()        );
-                  clsIte.add("addCnts", addCnts                                 );
-                  //////////////////////////////////////////////////////////////////
-                  // Pegar o primeiro grupo para TRGViewCONTRATO_BI ON dbo.VCONTRATO
-                  //////////////////////////////////////////////////////////////////
+                  clsIte.add("codgm"  , qtd.produto                             );
+                  clsIte.add("codsrv" , qtd.servico                             );
+                  clsIte.add("codgp"  , (qtd.codgp=="***" ? "SRV" : qtd.codgp)  );
+                  clsIte.add("mensal" , (qtd.pagto).substring(0,1)              );
+                  clsIte.add("valor"  , jsNmrs(qtd.mensal).dolar().ret()        );
+                  clsIte.add("addCnts", addCnts                                 );//
+                // item.forEach(function(reg){
+                //   reg.produto=parseInt(reg.produto);
+                //   reg.servico=parseInt(reg.servico);
+                //   clsIte.add("codgm"  , reg.produto                             );
+                //   clsIte.add("codsrv" , reg.servico                             );
+                //   clsIte.add("codgp"  , (reg.codgp=="***" ? "SRV" : reg.codgp)  );
+                //   clsIte.add("mensal" , (reg.pagto).substring(0,1)              );
+                //   clsIte.add("valor"  , jsNmrs(reg.mensal).dolar().ret()        );
+                //   clsIte.add("addCnts", addCnts                                 );//
+                //   //////////////////////////////////////////////////////////////////
+                //   // Pegar o primeiro grupo para TRGViewCONTRATO_BI ON dbo.VCONTRATO
+                //   //////////////////////////////////////////////////////////////////
                   if( cnttCodGm==0 )
-                    cnttCodGm=reg.produto;
-                  //
-                  //
-                });  
+                    cnttCodGm=qtd.produto;
+                //   //
+                //   //
+                // });  
                 addCnts="N";
               };  
             };  
-          });    
+          });
+          let cobranca = clsCob.fim();
           let produto = clsIte.fim();
+
           clsJs   = jsString("lote");  
           clsJs.add("rotina"      , "emContrato"                    );
           clsJs.add("login"       , jsPub[0].usr_login              );
-          clsJs.add("tipo"        , chkds[0].TP                     );          
-          clsJs.add("dtinicio"    , jsDatas(dtInicio).retMMDDYYYY() );          
-          clsJs.add("dtfim"       , jsDatas(dtFim).retMMDDYYYY()    );                    
+          clsJs.add("tipo"        , chkds[0].TP                     );                           
           clsJs.add("codfvr"      , chkds[0].CODFVR                 );
           clsJs.add("codvnd"      , chkds[0].VND                    );
           clsJs.add("codind"      , chkds[0].CODIND                 );
@@ -1114,10 +1121,10 @@
           clsJs.add("codlgn"      , chkds[0].CODLGN                 );          
           clsJs.add("jsplaca"     , chkds[0].JSPLACA                );          
           clsJs.add("codbnc"      , jsPub[0].emp_codbnc             );
-          clsJs.add("codfc"       , "BOL"                           );
-          clsJs.add("DUPLICATA"   , duplicata                       );          
+          clsJs.add("codfc"       , "BOL"                           );         
           clsJs.add("PRODUTO"     , produto                         );                    
           clsJs.add("PLACA"       , placa                           );
+          clsJs.add("COBRANCA"    , cobranca                        );
           clsJs.add("codpdd"      , chkds[0].CODIGO     );                              
 
 //console.log(produto);
@@ -1131,7 +1138,7 @@
             gerarMensagemErro("catch",retPhp[0].erro,"Erro");  
           } else {  
             alert('Contrato Gerado');
-            window.close();
+            window.open('Trac_Contrato.php');
           };  
 
         }catch(e){

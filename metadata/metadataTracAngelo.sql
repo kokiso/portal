@@ -4100,7 +4100,7 @@ CREATE TABLE CONTRATO(
   ,CNTT_EMISSAO DATE NOT NULL
   ,CNTT_ATIVO VARCHAR(1) NOT NULL  
   ,CNTT_DTINICIO DATE
-  ,CNTT_DTFIM INTEGER NOT NULL
+  --,CNTT_DTFIM INTEGER NOT NULL retirado da logica
   ,CNTT_CODFVR INTEGER NOT NULL  
   ,CNTT_CODVND INTEGER NOT NULL  
   ,CNTT_CODIND INTEGER NOT NULL    
@@ -4164,7 +4164,7 @@ CREATE VIEW VCONTRATO AS
         ,CNTT_EMISSAO
         ,CNTT_ATIVO
         ,CNTT_DTINICIO
-        ,CNTT_DTFIM
+        --,CNTT_DTFIM
         ,CNTT_CODFVR
         ,CNTT_CODVND
         ,CNTT_CODIND
@@ -4344,7 +4344,7 @@ BEGIN
       ,CNTT_TIPO      
       ,CNTT_EMISSAO
       ,CNTT_ATIVO
-      ,CNTT_DTFIM
+      --,CNTT_DTFIM
       ,CNTT_CODFVR
       ,CNTT_CODVND
       ,CNTT_CODIND
@@ -4381,7 +4381,7 @@ BEGIN
       ,@cnttTipoNew             -- CNTT_TIPO
       ,@cnttEmissaoNew          -- CNTT_EMISSAO
       ,@cnttAtivoNew            -- CNTT_ATIVO
-      ,0                        -- CNTT_DTFIM
+     -- ,0                        -- CNTT_DTFIM
       ,@cnttCodFvrNew           -- CNTT_CODFVR
       ,@cnttCodVndNew           -- CNTT_CODVND
       ,@cnttCodIndNew           -- CNTT_CODIND
@@ -4692,20 +4692,46 @@ GO
 --                          C O N T R A T O M E N S A L
 --tblcontratomensal( valores a serem cobrados mensalmente )
 -------------------------------------------------------------------------------------
+-- GO
+-- CREATE TABLE CONTRATOMENSAL(
+--   CNTM_CODCNTT INTEGER NOT NULL
+--   ,CNTM_IDUNICO INTEGER NOT NULL   
+--   ,CNTM_IDSRV INTEGER NOT NULL     
+--   ,CNTM_CODGM INTEGER NOT NULL 
+--   ,CNTM_CODSRV INTEGER NOT NULL   
+--   ,CNTM_CODGP VARCHAR(3) NOT NULL        
+--   ,CNTM_MENSAL VARCHAR(1) NOT NULL         
+--   ,CNTM_CODGMP INTEGER NOT NULL   
+--   ,CNTM_VALOR NUMERIC(15,2) NOT NULL  
+--   ,CNTM_CODUSR INTEGER NOT NULL       
+--   ,CONSTRAINT PKCONTRATOMENSAL PRIMARY KEY (CNTM_CODCNTT,CNTM_IDSRV,CNTM_CODSRV)); 
+-- GO 
+
+-------------------------------------------------------------------------------------
+--                       C O N T R A T O C O B R A N C A
+--tblcontratocobranca( valores de serviço e cobrança que serão faturados mensalmente )
+-------------------------------------------------------------------------------------
 GO
-CREATE TABLE CONTRATOMENSAL(
-  CNTM_CODCNTT INTEGER NOT NULL
-  ,CNTM_IDUNICO INTEGER NOT NULL   
-  ,CNTM_IDSRV INTEGER NOT NULL     
-  ,CNTM_CODGM INTEGER NOT NULL 
-  ,CNTM_CODSRV INTEGER NOT NULL   
-  ,CNTM_CODGP VARCHAR(3) NOT NULL        
-  ,CNTM_MENSAL VARCHAR(1) NOT NULL         
-  ,CNTM_CODGMP INTEGER NOT NULL   
-  ,CNTM_VALOR NUMERIC(15,2) NOT NULL  
-  ,CNTM_CODUSR INTEGER NOT NULL       
-  ,CONSTRAINT PKCONTRATOMENSAL PRIMARY KEY (CNTM_CODCNTT,CNTM_IDSRV,CNTM_CODSRV)); 
-GO  
+CREATE TABLE CONTRATOCOBRANCA(
+  CNTC_CODCNTT INTEGER NOT NULL
+  ,CNTC_CODGM INTEGER NOT NULL
+  ,CNTC_CODSRV INTEGER NOT NULL
+  ,CNTC_PGTO VARCHAR(1) NOT NULL
+  ,CNTC_VLRMENSAL NUMERIC(15,2) NOT NULL
+  ,CNTC_VLRTOTAL NUMERIC(15,2) NOT NULL
+  CONSTRAINT PKCONTRATOCOBRANCA PRIMARY KEY (CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV)
+);
+GO
+--metodo insert
+-- SELECT 'INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES('
+-- +CAST(CNTC_CODCNTT AS VARCHAR(10))
+-- +','''+CAST(CNTC_CODGM AS VARCHAR(20))
+-- +''','''+CAST(CNTC_CODSRV AS VARCHAR(20))
+-- +''','''+CAST(CNTC_PGTO AS VARCHAR(10))
+-- +''','''+CAST(CNTC_VLRMENSAL AS VARCHAR(10))
+-- +''','''+CAST(CNTC_VLRTOTAL AS VARCHAR(60))
+-- +''');'
+-- FROM CONTRATOCOBRANCA
 -------------------------------------------------------------------------------------
 --                          C O N T R A T O P R O D U T O
 --tblcontratoproduto
@@ -4720,7 +4746,7 @@ CREATE TABLE CONTRATOPRODUTO(
   ,CNTP_CODGP VARCHAR(3) NOT NULL         
   ,CNTP_MENSAL VARCHAR(1) NOT NULL       
   ,CNTP_CODGMP INTEGER NOT NULL   
-  ,CNTP_VALOR NUMERIC(15,2) NOT NULL  
+  ,CNTP_VALOR NUMERIC(15,2) NOT NULL 
   ,CNTP_MODOENTREGA VARCHAR(3) NOT NULL           
   ,CNTP_STATUSENTREGA VARCHAR(3) NOT NULL
   ,CNTP_CODENTREGA INTEGER NOT NULL
@@ -5209,16 +5235,17 @@ BEGIN
       IF( @cntpAcaoNew=6 ) BEGIN
         DECLARE @dtInicio DATE;
         DECLARE @meses INTEGER;
+        DECLARE @dia INTEGER;
+        DECLARE @primVencto DATE;
         DECLARE @mesFim DATE;
-        DECLARE @mesInt INTEGER;
         SELECT @dtInicio=CNTT_DTINICIO,@meses=CNTT_MESES FROM CONTRATO WITH (NOLOCK) WHERE CNTT_CODIGO=@cntpCodCnttOld;
         IF( @dtInicio IS NULL ) BEGIN 
-        SET @mesFim=DateAdd(month, +(@meses+1), @cntpDtAtivacaoNew);
-        SET @mesInt=CAST(Substring(CONVERT(VARCHAR(10),@mesFim,112),1,6) AS INTEGER);
-        UPDATE CONTRATO SET CNTT_DTINICIO=@cntpDtAtivacaoNew,CNTT_DTFIM=@mesInt,CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
-        --END ELSE BEGIN
-        --UPDATE CONTRATO SET CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
-        --END        
+          SELECT @dia = CNTT_DIA FROM CONTRATO WITH (NOLOCK) WHERE CNTT_CODIGO=@cntpCodCnttOld;
+          SET @primvencto = CONVERT(varchar(10),CONCAT(DATEPART(year,@cntpDtAtivacaoNew),'-',DATEPART(MONTH,@cntpDtAtivacaoNew),'-',@dia),103);
+          UPDATE CONTRATO SET CNTT_DTINICIO=@primvencto,CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
+        END ELSE BEGIN
+          UPDATE CONTRATO SET CNTT_QTDATIVADO=(CNTT_QTDATIVADO+1) WHERE CNTT_CODIGO=@cntpCodCnttOld;
+        END        
         INSERT INTO DETALHEAUTO(DA_CODGMP,DA_CODMSG,DA_CODUSR,DA_COMPLEMENTO) VALUES(@cntpCodGmpOld,10,@cntpCodUsrNew,CONCAT('Contrato ',REPLICATE('0', 6 - LEN(@cntpCodCnttNew))+RTrim(@cntpCodCnttNew)));
       END
       ------------------------------------------------
@@ -22482,8 +22509,10 @@ BEGIN
   DECLARE @gmLocacaoNew VARCHAR(1);  
   DECLARE @gmContratoNew VARCHAR(1);
   DECLARE @gmGpObrigatorioNew VARCHAR(MAX);
+  DECLARE @gmGpObrigatorioQtdNew VARCHAR(MAX);
   DECLARE @gmGmObrigatorioNew VARCHAR(MAX);  
   DECLARE @gmGpAceitoNew VARCHAR(MAX);
+  DECLARE @gmGpAceitoQtdNew VARCHAR(MAX);
   DECLARE @gmGmAceitoNew VARCHAR(MAX);
   DECLARE @gmGpSerieObrigatorio VARCHAR(4); 
   DECLARE @gmCodigoPaiFilhoNew INTEGER;
@@ -22522,8 +22551,10 @@ BEGIN
          ,@gmLocacaoNew         = UPPER(i.GM_LOCACAO)         
          ,@gmContratoNew        = COALESCE(UPPER(i.GM_CONTRATO),'N')
          ,@gmGpObrigatorioNew   = COALESCE(i.GM_GPOBRIGATORIO,'NSA')
+         ,@gmGpObrigatorioQtdNew   = COALESCE(i.GM_GPOBRIGATORIOQTD,'0')
          ,@gmGmObrigatorioNew   = COALESCE(i.GM_GMOBRIGATORIO,'NSA')
          ,@gmGpAceitoNew        = COALESCE(i.GM_GPACEITO,'NSA')
+         ,@gmGpAceitoQtdNew        = COALESCE(i.GM_GPACEITOQTD,'NSA')
          ,@gmGmAceitoNew        = COALESCE(i.GM_GMACEITO,'NSA')
          ,@gmGpSerieObrigatorio = COALESCE(i.GM_GPSERIEOBRIGATORIO,'NSA')
          ,@gmCodigoPaiFilhoNew  = COALESCE(i.GM_CODIGOPAIFILHO,0)
@@ -22615,8 +22646,10 @@ BEGIN
       ,GM_LOCACAO      
       ,GM_CONTRATO      
       ,GM_GPOBRIGATORIO
+      ,GM_GPOBRIGATORIOQTD
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
+      ,GM_GPACEITOQTD
       ,GM_GMACEITO
       ,GM_GPSERIEOBRIGATORIO
       ,GM_CODIGOPAIFILHO  
@@ -22649,8 +22682,10 @@ BEGIN
       ,@gmLocacaoNew          -- GM_LOCACAO
       ,@gmContratoNew         -- GM_CONTRATO
       ,@gmGpObrigatorioNew    -- GM_GPOBRIGATORIO
+      ,@gmGpObrigatorioQtdNew -- GM_GPOBRIGATORIOQTD
       ,@gmGmObrigatorioNew    -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoNew         -- GM_GPACEITO
+      ,@gmGpAceitoQtdNew      -- GM_GPACEITOQTD
       ,@gmGmAceitoNew         -- GM_GMACEITO 
       ,@gmGpSerieObrigatorio  -- GM_GPSERIEOBRIGATORIO
       ,@gmCodigoPaiFilhoNew   -- GM_CODPAIEFILHO  
@@ -22688,8 +22723,10 @@ BEGIN
       ,GM_LOCACAO      
       ,GM_CONTRATO
       ,GM_GPOBRIGATORIO
+      ,GM_GPOBRIGATORIOQTD
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
+      ,GM_GPACEITOQTD
       ,GM_GMACEITO
       ,GM_GPSERIEOBRIGATORIO
       ,GM_CODIGOPAIFILHO      
@@ -22725,8 +22762,10 @@ BEGIN
       ,@gmLocacaoNew                -- GM_LOCACAO      
       ,@gmContratoNew               -- GM_CONTRATO
       ,@gmGpObrigatorioNew          -- GM_GPOBRIGATORIO
+      ,@gmGpObrigatorioQtdNew
       ,@gmGmObrigatorioNew          -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoNew               -- GM_GPACEITO
+      ,@gmGpAceitoQtdNew
       ,@gmGmAceitoNew               -- GM_GMACEITO
       ,@gmGpSerieObrigatorio
       ,@gmCodigoPaiFilhoNew      
@@ -22783,8 +22822,10 @@ BEGIN
   DECLARE @gmLocacaoNew VARCHAR(1);    
   DECLARE @gmContratoNew VARCHAR(1);
   DECLARE @gmGpObrigatorioNew VARCHAR(MAX);
+  DECLARE @gmGpObrigatorioQtdNew VARCHAR(MAX);
   DECLARE @gmGmObrigatorioNew VARCHAR(MAX);  
   DECLARE @gmGpAceitoNew VARCHAR(MAX);
+  DECLARE @gmGpAceitoQtdNew VARCHAR(MAX);
   DECLARE @gmGmAceitoNew VARCHAR(MAX);
   DECLARE @gmGpSerieObrigatorioNew VARCHAR(4);
   DECLARE @gmCodigoPaiFilhoNew INTEGER;  
@@ -22827,8 +22868,10 @@ BEGIN
          ,@gmLocacaoNew         = UPPER(i.GM_LOCACAO)                  
          ,@gmContratoNew        = UPPER(i.GM_CONTRATO)         
          ,@gmGpObrigatorioNew   = i.GM_GPOBRIGATORIO
+         ,@gmGpObrigatorioQtdNew= i.GM_GPOBRIGATORIOQTD
          ,@gmGmObrigatorioNew   = i.GM_GMOBRIGATORIO
          ,@gmGpAceitoNew        = i.GM_GPACEITO
+         ,@gmGpAceitoQtdNew     = i.GM_GPACEITOQTD
          ,@gmGmAceitoNew        = i.GM_GMACEITO
          ,@gmGpSerieObrigatorioNew = i.GM_GPSERIEOBRIGATORIO
          ,@gmCodigoPaiFilhoNew  = i.GM_CODIGOPAIFILHO
@@ -22892,8 +22935,10 @@ BEGIN
     DECLARE @gmLocacaoOld VARCHAR(1);
     DECLARE @gmContratoOld VARCHAR(1);
     DECLARE @gmGpObrigatorioOld VARCHAR(MAX);
+    DECLARE @gmGpObrigatorioQtdOld VARCHAR(MAX);
     DECLARE @gmGmObrigatorioOld VARCHAR(MAX);  
     DECLARE @gmGpAceitoOld VARCHAR(MAX);
+    DECLARE @gmGpAceitoQtdOld VARCHAR(MAX);
     DECLARE @gmGmAceitoOld VARCHAR(MAX);
     DECLARE @gmGpSerieObrigatorioOld VARCHAR(4); 
     DECLARE @gmCodigoPaiFilhoOld INTEGER; 
@@ -22927,8 +22972,10 @@ BEGIN
            ,@gmLocacaoOld         = d.GM_LOCACAO
            ,@gmContratoOld        = d.GM_CONTRATO
            ,@gmGpObrigatorioOld   = d.GM_GPOBRIGATORIO
+           ,@gmGpObrigatorioQtdOld= d.GM_GPOBRIGATORIOQTD
            ,@gmGmObrigatorioOld   = d.GM_GMOBRIGATORIO
            ,@gmGpAceitoOld        = d.GM_GPACEITO
+           ,@gmGpAceitoQtdOld     = d.GM_GPACEITOQTD
            ,@gmGmAceitoOld        = d.GM_GMACEITO
            ,@gmGpSerieObrigatorioOld = d.GM_GPSERIEOBRIGATORIO
            ,@gmCodigoPaiFilhoOld  = d.GM_CODIGOPAIFILHO
@@ -22987,8 +23034,10 @@ BEGIN
           ,GM_LOCACAO         = @gmLocacaoNew     
           ,GM_CONTRATO        = @gmContratoNew     
           ,GM_GPOBRIGATORIO   = @gmGpObrigatorioNew
+          ,GM_GPOBRIGATORIOQTD= @gmGpObrigatorioQtdNew
           ,GM_GMOBRIGATORIO   = @gmGmObrigatorioNew
           ,GM_GPACEITO        = @gmGpAceitoNew
+          ,GM_GPACEITOQTD     = @gmGpAceitoQtdNew
           ,GM_GMACEITO        = @gmGmAceitoNew
           ,GM_GPSERIEOBRIGATORIO = @gmGpSerieObrigatorioNew
           ,GM_CODIGOPAIFILHO  = @gmCodigoPaiFilhoNew
@@ -23033,8 +23082,10 @@ BEGIN
         ,GM_LOCACAO        
         ,GM_CONTRATO        
         ,GM_GPOBRIGATORIO
+        ,GM_GPOBRIGATORIOQTD
         ,GM_GMOBRIGATORIO      
         ,GM_GPACEITO
+        ,GM_GPACEITOQTD
         ,GM_GMACEITO
         ,GM_GPSERIEOBRIGATORIO
         ,GM_CODIGOPAIFILHO      
@@ -23069,8 +23120,10 @@ BEGIN
         ,@gmLocacaoNew          -- GM_LOCACAO        
         ,@gmContratoNew         -- GM_CONTRATO
         ,@gmGpObrigatorioNew    -- GM_GPOBRIGATORIO
+        ,@gmGpObrigatorioQtdNew
         ,@gmGmObrigatorioNew    -- GM_GMOBRIGATORIO      
         ,@gmGpAceitoNew         -- GM_GPACEITO
+        ,@gmGpAceitoQtdNew
         ,@gmGmAceitoNew         -- GM_GMACEITO
         ,@gmGpSerieObrigatorioNew
         ,@gmCodigoPaiFilhoNew      
@@ -23128,8 +23181,10 @@ BEGIN
   DECLARE @gmLocacaoOld VARCHAR(1);    
   DECLARE @gmContratoOld VARCHAR(1);  
   DECLARE @gmGpObrigatorioOld VARCHAR(MAX);
+  DECLARE @gmGpObrigatorioQtdOld VARCHAR(MAX);
   DECLARE @gmGmObrigatorioOld VARCHAR(MAX);  
   DECLARE @gmGpAceitoOld VARCHAR(MAX);
+  DECLARE @gmGpAceitoQtdOld VARCHAR(MAX);
   DECLARE @gmGmAceitoOld VARCHAR(MAX);
   DECLARE @gmGpSerieObrigatorioOld VARCHAR(4);
   DECLARE @gmCodigoPaiFilhoOld INTEGER;  
@@ -23169,8 +23224,10 @@ BEGIN
          ,@gmLocacaoOld         = d.GM_LOCACAO
          ,@gmContratoOld        = d.GM_CONTRATO
          ,@gmGpObrigatorioOld   = d.GM_GPOBRIGATORIO
+         ,@gmGpObrigatorioQtdOld= d.GM_GPOBRIGATORIOQTD 
          ,@gmGmObrigatorioOld   = d.GM_GMOBRIGATORIO
          ,@gmGpAceitoOld        = d.GM_GPACEITO
+         ,@gmGpAceitoQtdOld     = d.GM_GPACEITOQTD
          ,@gmGmAceitoOld        = d.GM_GMACEITO
          ,@gmGpSerieObrigatorioOld = d.GM_GPSERIEOBRIGATORIO
          ,@gmCodigoPaiFilhoOld  = d.GM_CODIGOPAIFILHO
@@ -23243,8 +23300,10 @@ BEGIN
       ,GM_LOCACAO      
       ,GM_CONTRATO 
       ,GM_GPOBRIGATORIO
+      ,GM_GPOBRIGATORIOQTD
       ,GM_GMOBRIGATORIO      
       ,GM_GPACEITO
+      ,GM_GPACEITOQTD
       ,GM_GMACEITO
       ,GM_GPSERIEOBRIGATORIO
       ,GM_CODIGOPAIFILHO      
@@ -23279,8 +23338,10 @@ BEGIN
       ,@gmLocacaoOld          -- GM_LOCACAO      
       ,@gmContratoOld         -- GM_CONTRATO
       ,@gmGpObrigatorioOld    -- GM_GPOBRIGATORIO
+      ,@gmGpObrigatorioQtdOld
       ,@gmGmObrigatorioOld    -- GM_GMOBRIGATORIO      
       ,@gmGpAceitoOld         -- GM_GPACEITO
+      ,@gmGpAceitoQtdOld
       ,@gmGmAceitoOld         -- GM_GMACEITO 
       ,@gmGpSerieObrigatorioOld -- GM_GPSERIEOBRIGATORIO
       ,@gmCodigoPaiFilhoOld   -- GM_CODIGOPAIFILHO  
@@ -23308,6 +23369,15 @@ BEGIN
     RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
     RETURN;
   END CATCH
+END
+GO
+CREATE TRIGGER dbo.TRGBKPGRUPOMODELO_BUD ON dbo.BKPGRUPOMODELO
+INSTEAD OF UPDATE,DELETE 
+AS 
+BEGIN
+  -- Nenhum registro da tabela BKP pode ser alterado ou excluido
+  SET NOCOUNT ON;    
+  RAISERROR('REGISTRO NAO PODE SER ALTERADO/EXCLUIDO', 16, 10);
 END
 GO
 CREATE TRIGGER dbo.TRGBKPGRUPOMODELO_BUD ON dbo.BKPGRUPOMODELO

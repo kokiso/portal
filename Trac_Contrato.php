@@ -48,7 +48,7 @@
           $sql ="UPDATE VCONTRATO SET";
           $sql.=" CNTT_EMISSAO='".$lote[0]->cntt_emissao."'";
           $sql.=",CNTT_DTINICIO='".$lote[0]->cntt_dtinicio."'";
-          $sql.=",CNTT_DTFIM=".$lote[0]->cntt_dtfim;
+          //$sql.=",CNTT_DTFIM=".$lote[0]->cntt_dtfim;
           $sql.=",CNTT_QTDAUTO=".$lote[0]->cntt_qtdauto;
           $sql.=",CNTT_VLRMENSAL=".$lote[0]->cntt_vlrmensal;
           $sql.=",CNTT_VLRPONTUAL=".$lote[0]->cntt_vlrpontual;
@@ -69,7 +69,6 @@
           $sql="";          
           $sql.="SELECT CONVERT(VARCHAR(10),CNTT_EMISSAO,103) AS EMISSAO
               ,CONVERT(VARCHAR(10),CNTT_DTINICIO,103) AS INICIO
-              ,CONVERT(VARCHAR(10),CNTT_DTFIM,103) AS FIM
               ,CNTT_QTDAUTO
               ,CNTT_VLRMENSAL
               ,CNTT_VLRPONTUAL";
@@ -133,7 +132,7 @@
           $sql.="       ,CNTT_TIPO AS TP";          
           $sql.="       ,CONVERT(VARCHAR(10),A.CNTT_EMISSAO,127) AS EMISSAO";                                        
           $sql.="       ,CONVERT(VARCHAR(10),A.CNTT_DTINICIO,127) AS INICIO";                                          
-          $sql.="       ,CONVERT(VARCHAR(10),A.CNTT_DTFIM,127) AS FIM";                                          
+          //$sql.="       ,CONVERT(VARCHAR(10),A.CNTT_DTFIM,127) AS FIM";                                          
           $sql.="       ,CNTT_CODFVR";
           $sql.="       ,FVR.FVR_APELIDO AS CLIENTE";                    
           //$sql.="       ,CNTT_CODVND";
@@ -330,18 +329,7 @@
                       ,"popoverTitle"   : "Data da primeira ativação"                          
                       ,"popoverLabelCol": "Inicio do contrato"                      
                       ,"padrao":0}
-            ,{"id":5  ,"labelCol"       : "FIM"
-                      ,"fieldType"      : "dat"
-                      ,"obj"            : "edtCnttFim"   
-                      ,"insUpDel"       : ["N","N","N"]                    
-                      ,"tamGrd"         : "15em"
-                      ,"tamImp"         : "20"
-                      ,"excel"          : "S"
-                      ,"ordenaColuna"   : "S"
-                      ,"popoverTitle"   : "Ano/Mês( YYYYMM ) da última cobrança"                          
-                      ,"popoverLabelCol": "Termino do contrato"                      
-                      ,"padrao":0}
-            ,{"id":6  ,"labelCol"       : "CODFVR"
+            ,{"id":5  ,"labelCol"       : "CODFVR"
                       ,"fieldType"      : "int"
                       ,"obj"            : "edtCnttCodFvr" 
                       ,"insUpDel"       : ["N","N","N"] 
@@ -352,7 +340,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":7  ,"labelCol"       : "CLIENTE"
+            ,{"id":6  ,"labelCol"       : "CLIENTE"
                       ,"fieldType"      : "str"
                       ,"obj"            : "edtCnttFvrNome"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -362,7 +350,7 @@
                       ,"ordenaColuna"   : "S"
                       ,"truncate"       : true
                       ,"padrao":0}  
-            ,{"id":8  ,"field"          :"VLRMENSALPARCIAL"
+            ,{"id":7  ,"field"          :"VLRMENSALPARCIAL"
                       ,"labelCol"       :"VLRMENSALPARCIAL"
                       ,"obj"            : "edtCnttVlrMensalParcial"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -373,7 +361,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":9  
+            ,{"id":8  
                       ,"labelCol"       :"VLRMENSAL"
                       ,"obj"            :"edtVlrMensal"
                       ,"insUpDel"       : ["N","S","N"] 
@@ -384,7 +372,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":10  ,"labelCol"       : "VLRPONTUAL"
+            ,{"id":9  ,"labelCol"       : "VLRPONTUAL"
                       ,"fieldType"      : "flo2"
                       ,"obj"            :"edtVlrPontual" 
                       ,"insUpDel"       : ["N","S","N"] 
@@ -394,7 +382,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":11 ,"labelCol"       : "AUTOS"
+            ,{"id":10 ,"labelCol"       : "AUTOS"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtAutos"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -405,7 +393,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":12 ,"labelCol"       : "EMPENHO"
+            ,{"id":11 ,"labelCol"       : "EMPENHO"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtEmpenho"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -416,7 +404,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":13 ,"labelCol"       : "ENV"
+            ,{"id":12 ,"labelCol"       : "ENV"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtVEnv"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -429,7 +417,7 @@
                       ,"popoverTitle"   : "Total de autos enviados e recebidos pelo responsavel"                          
                       ,"popoverLabelCol": "Autos enviados"                      
                       ,"padrao":0}
-            ,{"id":14 ,"labelCol"       : "AGENDA"
+            ,{"id":13 ,"labelCol"       : "AGENDA"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtAgenda"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -440,7 +428,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":15 ,"labelCol"       : "OS"
+            ,{"id":14 ,"labelCol"       : "OS"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtOs"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -452,7 +440,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":16 ,"labelCol"       : "PLACAS"
+            ,{"id":15 ,"labelCol"       : "PLACAS"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtVPlacas"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -463,7 +451,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":17 ,"labelCol"       : "ATIVACAO"
+            ,{"id":16 ,"labelCol"       : "ATIVACAO"
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtVAtivacao"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -474,7 +462,7 @@
                       ,"excel"          : "N"
                       ,"ordenaColuna"   : "N"
                       ,"padrao":0}
-            ,{"id":18 ,"labelCol"       : "STATUS"
+            ,{"id":17 ,"labelCol"       : "STATUS"
                       ,"fieldType"      : "str"
                       ,"obj"            :"edtStatus"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -483,7 +471,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":19 ,"labelCol"       : "FID"
+            ,{"id":18 ,"labelCol"       : "FID"
                       ,"fieldType"      : "str"
                       ,"obj"            :"edtFid"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -493,7 +481,7 @@
                       ,"ordenaColuna"   : "S"
                       ,"popoverTitle"   : "Fidelidade"
                       ,"padrao":0}
-            ,{"id":20 ,"labelCol"       : "IP"
+            ,{"id":19 ,"labelCol"       : "IP"
                       ,"fieldType"      : "str"
                       ,"obj"            :"edtIp"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -503,7 +491,7 @@
                       ,"ordenaColuna"   : "S"
                       ,"popoverTitle"   : "Instalação própria"
                       ,"padrao":0}
-            ,{"id":21 ,"labelCol"       : "USUARIO"
+            ,{"id":20 ,"labelCol"       : "USUARIO"
                       ,"fieldType"      : "str"
                       ,"obj"            :"cbCodUsr"
                       ,"insUpDel"       : ["N","N","N"] 
@@ -512,13 +500,13 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":22 ,"labelCol"       : "POP"         
+            ,{"id":21 ,"labelCol"       : "POP"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"fieldType"      : "popover"
                       ,"popoverTitle"   : "Pop up de campos relacionados a este registro"                      
                       ,"padrao":0}
-            ,{"id":23 ,"labelCol"       : "SERV"         
+            ,{"id":22 ,"labelCol"       : "SERV"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -527,7 +515,7 @@
                       ,"tagI"           : "fa fa-clone"
                       ,"popoverTitle"   : "Serviços relacionados a este auto"
                       ,"padrao":0}
-            ,{"id":24 ,"labelCol"       : "END"         
+            ,{"id":23 ,"labelCol"       : "END"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -536,7 +524,7 @@
                       ,"tagI"           : "fa fa-clone"
                       ,"popoverTitle"   : "Endereços relacionados a este auto"                      
                       ,"padrao":0}
-            ,{"id":25 ,"labelCol"       : "TERC"         
+            ,{"id":24 ,"labelCol"       : "TERC"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -612,7 +600,7 @@
         // esta garante o chkds[0].?????? e objCol
         ///////////////////////////////////////////////////////////////////////
         objCol=fncColObrigatoria.call(jsCntt,["AGENDA","ATIVACAO" ,"STATUS" ,"AUTOS","CLIENTE","CODIGO" ,"EMISSAO"  ,"EMPENHO","ENV"
-                                             ,"FID"   ,"FIM"      ,"INICIO" ,"IP"   ,"OS"     ,"PLACAS" ,"USUARIO","VLRMENSAL","VLRPONTUAL"]);
+                                             ,"FID"  ,"INICIO" ,"IP"   ,"OS"     ,"PLACAS" ,"USUARIO","VLRMENSAL","VLRPONTUAL"]);
         //                                     
         btnFiltrarClick($doc("cbStatus").getAttribute("data-indice"));
         adicionarDataToggle(); // Mostra popover para campos na grade com grade dentro
@@ -894,13 +882,11 @@
       }
       function gravaEdtVlr(){
         try{
-          $doc("edtDataFim").value   = document.getElementById("edtDataFim").value.soNumeros();
           $doc("edtQtdAuto").value  = document.getElementById("edtQtdAuto").value.soNumeros();
 
           msg = new clsMensagem("Erro");          
           
           msg.notNull("DATA EMISSAO"           , document.getElementById("edtCnttEmissao").value                      );
-          msg.notNull("DATA FIM"          , document.getElementById("edtDataFim").value                               ); 
           msg.notNull("QUANTIDADE AUTO"          , document.getElementById("edtQtdAuto").value                        );          
           msg.intMaiorZero("QUANTIDADE AUTO" , document.getElementById("edtQtdAuto").value                                );
           msg.floMaiorZero("VALOR MENSAL"        , jsConverte("#edtVlrMensal").dolar());
@@ -919,7 +905,6 @@
             clsJs.add("codcntt"               , chkds[0].CODIGO                            );          
             clsJs.add("cntt_emissao"          , jsDatas("edtCnttEmissao").retMMDDYYYY()    );
             clsJs.add("cntt_dtinicio"         , jsDatas("edtCnttDtInicio").retMMDDYYYY()   );
-            clsJs.add("cntt_dtfim"            , jsConverte("#edtDataFim").inteiro()        );
             clsJs.add("cntt_qtdauto"          , jsConverte("#edtQtdAuto").inteiro()        );
             clsJs.add("cntt_vlrmensal"        , jsConverte("#edtVlrMensal").dolar()        );
             clsJs.add("cntt_vlrpontual"       , jsConverte("#edtVlrPontual").dolar()       );
@@ -1307,8 +1292,8 @@
       var modalEdtCntt = document.getElementById('modalEdtCntt');
       var btnEdtModal  = document.getElementById('divEdtCntt');
       
-      let arrEdtObj=["edtCnttEmissao"  ,"edtCnttDtInicio" ,"edtDataFim","edtQtdAuto","edtVlrMensal","edtVlrPontual"];
-      let arrEdtLbl=["Data Emissao"  ,"Data de inicio" ,"Ano e mes fim (YYYY/MM)" ,"Quantidade de autos","Valor mensal Total","Valor Pontual Total"];
+      let arrEdtObj=["edtCnttEmissao"  ,"edtCnttDtInicio" ,"edtQtdAuto","edtVlrMensal","edtVlrPontual"];
+      let arrEdtLbl=["Data Emissao"  ,"Data de inicio" ,"Quantidade de autos","Valor mensal Total","Valor Pontual Total"];
       
       
       let clsEdtStr = new concatStr();
@@ -1331,21 +1316,13 @@
       };
       //
       clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
-      clsEdtStr.concat(    '<label for="edtDataFim" class="control-label">Ano e mes fim (YYYYMM)</label>'      );
-      clsEdtStr.concat(    '<input type="text"'                                                              );
-      clsEdtStr.concat(           'id="edtDataFim"'                                                     );    
-      clsEdtStr.concat(           'class="form-control edtDireita"'                                          );
-      clsEdtStr.concat(           '/>'             );
-      clsEdtStr.concat(  '</div>'                                                                            );    
-      //
-      clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
       clsEdtStr.concat(    '<label for="edtQtdAuto" class="control-label">Quantidade de autos</label>'      );
       clsEdtStr.concat(    '<input type="text"'                                                              );
       clsEdtStr.concat(           'id="edtQtdAuto"'                                                     );    
       clsEdtStr.concat(           'class="form-control edtDireita"'                                          );
       clsEdtStr.concat(           '/>'                                      );
       clsEdtStr.concat(  '</div>'                                                                            );
-      for(let lin=4;lin<6;lin++){
+      for(let lin=3;lin<5;lin++){
         clsEdtStr.concat(  '<div class="form-group campo50" style="float:left;">'                              );
         clsEdtStr.concat(    '<label for="'+arrEdtObj[lin]+'" class="control-label">'+arrEdtLbl[lin]+'</label>'      );
         clsEdtStr.concat(    '<input type="text"'                                                              );
@@ -1386,7 +1363,6 @@
             let tblEdt=retPhp[0].dados[0];
             $doc("edtCnttEmissao").value        = tblEdt.EMISSAO;
             $doc("edtCnttDtInicio").value  = tblEdt.INICIO;
-            $doc("edtDataFim").value       = tblEdt.FIM
             $doc("edtQtdAuto").value     = tblEdt.CNTT_QTDAUTO
             $doc("edtVlrMensal").value     = tblEdt.CNTT_VLRMENSAL
             $doc("edtVlrPontual").value    = tblEdt.CNTT_VLRPONTUAL

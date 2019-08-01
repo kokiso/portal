@@ -66,8 +66,10 @@
           $sql.="       ,CASE WHEN A.GM_VENDA='S' THEN 'SIM' ELSE 'NAO' END AS GM_VENDA";
           $sql.="       ,CASE WHEN A.GM_LOCACAO='S' THEN 'SIM' ELSE 'NAO' END AS GM_LOCACAO";
           $sql.="       ,A.GM_GPOBRIGATORIO";
+          $sql.="       ,A.GM_GPOBRIGATORIOQTD";
           $sql.="       ,A.GM_GMOBRIGATORIO";          
           $sql.="       ,A.GM_GPACEITO";
+          $sql.="       ,A.GM_GPACEITOQTD";
           $sql.="       ,A.GM_GMACEITO";
           $sql.="       ,A.GM_GPSERIEOBRIGATORIO"; 
           $sql.="       ,A.GM_CODIGOPAIFILHO";         
@@ -233,7 +235,20 @@
                       ,"ajudaCampo"     : ["Grupos obrigatorios com até 40 caracteres."]
                       ,"truncate"       : true                          
                       ,"padrao":0}
-            ,{"id":7  ,"field"          : "GM_GMOBRIGATORIO"   
+            ,{"id":7  ,"field"          : "GM_GPOBRIGATORIOQTD"   
+                      ,"labelCol"       : "QTD OBRIGATORIO"
+                      ,"obj"            : "edtGpObrigatorioQtd"
+                      ,"newRecord"      : ["0","this","this"]
+                      ,"insUpDel"       : ["S","S","N"]
+                      ,"tamGrd"         : "8em"
+                      ,"tamImp"         : "0"
+                      ,"digitosMinMax"  : [1,999]
+                      ,"digitosValidos" : "_|0|1|2|3|4|5|6|7|8|9"
+                      ,"ajudaCampo"     : ["Grupos obrigatorios com até 40 caracteres."]
+                      ,"truncate"       : true
+                      ,"inputDisabled"  : true                          
+                      ,"padrao":0}
+            ,{"id":8  ,"field"          : "GM_GMOBRIGATORIO"   
                       ,"labelCol"       : "OBR_MODELO"
                       ,"obj"            : "edtGmObrigatorio"
                       ,"newRecord"      : ["NSA","this","this"]
@@ -244,7 +259,7 @@
                       ,"digitosValidos" : "N|S|A|0|1|2|3|4|5|6|7|8|9|_"
                       ,"ajudaCampo"     : ["Modelos aceitos para grupos com até 70 caracteres."]
                       ,"padrao":0}   
-            ,{"id":8  ,"field"          : "GM_GPACEITO"   
+            ,{"id":9  ,"field"          : "GM_GPACEITO"   
                       ,"labelCol"       : "ACEITO"
                       ,"obj"            : "edtGpAceito"
                       ,"newRecord"      : ["NSA","this","this"]
@@ -256,7 +271,20 @@
                       ,"ajudaCampo"     : ["Grupos aceitos com até 20 caracteres."]
                       ,"truncate"       : true                          
                       ,"padrao":0}
-            ,{"id":9  ,"field"          : "GM_GMACEITO"   
+            ,{"id":10  ,"field"          : "GM_GPACEITOQTD"   
+                      ,"labelCol"       : "QTD ACEITO"
+                      ,"obj"            : "edtGpAceitoQtd"
+                      ,"newRecord"      : ["0","this","this"]
+                      ,"insUpDel"       : ["S","S","N"]
+                      ,"tamGrd"         : "8em"
+                      ,"tamImp"         : "0"
+                      ,"digitosMinMax"  : [1,999]
+                      ,"digitosValidos" : "_|0|1|2|3|4|5|6|7|8|9"
+                      ,"ajudaCampo"     : ["Grupos obrigatorios com até 40 caracteres."]
+                      ,"truncate"       : true 
+                      ,"inputDisabled"  : true                          
+                      ,"padrao":0}
+            ,{"id":11  ,"field"          : "GM_GMACEITO"   
                       ,"labelCol"       : "ACT_MODELO"
                       ,"obj"            : "edtGmAceito"
                       ,"newRecord"      : ["NSA","this","this"]
@@ -267,7 +295,7 @@
                       ,"digitosValidos" : "N|S|A|0|1|2|3|4|5|6|7|8|9|_"
                       ,"ajudaCampo"     : ["Modelos aceitos para grupos com até 70 caracteres."]
                       ,"padrao":0}
-           ,{"id":10  ,"field"          : "GM_GPSERIEOBRIGATORIO"   
+           ,{"id":12  ,"field"          : "GM_GPSERIEOBRIGATORIO"   
                       ,"labelCol"       : "GPSERIEOBRIGATORIO"
                       ,"obj"            : "edtGpSerieObrig"
                       ,"newRecord"      : ["NSA","this","this"]
@@ -278,7 +306,7 @@
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_"
                       ,"ajudaCampo"     : ["Modelo série obrigatorio."]
                       ,"padrao":0}
-           ,{"id":11  ,"field"          : "GM_CODIGOPAIFILHO"   
+           ,{"id":13  ,"field"          : "GM_CODIGOPAIFILHO"   
                       ,"labelCol"       : "CODPAIFILHO"
                       ,"obj"            : "edtCodPaiFilho"
                       ,"newRecord"      : ["0000","this","this"]
@@ -289,7 +317,7 @@
                       ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
                       ,"ajudaCampo"     : ["Codigo Pai do auto."]
                       ,"padrao":0}
-            ,{"id":12 ,"field"          : "GM_VALORVISTA"  
+            ,{"id":14 ,"field"          : "GM_VALORVISTA"  
                       ,"labelCol"       : "VLRVISTA" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorVista"
@@ -301,7 +329,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":13 ,"field"          : "GM_VALORPRAZO"  
+            ,{"id":15 ,"field"          : "GM_VALORPRAZO"  
                       ,"labelCol"       : "VLRPRAZO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorPrazo"
@@ -313,7 +341,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":14 ,"field"          : "GM_VALORMINIMO"  
+            ,{"id":16 ,"field"          : "GM_VALORMINIMO"  
                       ,"labelCol"       : "VLRMINIMO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorMinimo"
@@ -325,7 +353,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}     
-            ,{"id":15 ,"field"          : "GM_VLRNOSHOW"                        
+            ,{"id":17 ,"field"          : "GM_VLRNOSHOW"                        
                       ,"labelCol"       : "VLRNOSHOW"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrNoShow"
@@ -337,7 +365,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":16 ,"field"          : "GM_VLRIMPRODUTIVEL"
+            ,{"id":18 ,"field"          : "GM_VLRIMPRODUTIVEL"
                       ,"labelCol"       : "VLRIMPROD"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrImprodutivel"
@@ -349,7 +377,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":17 ,"field"          : "GM_VLRINSTALA"
+            ,{"id":19 ,"field"          : "GM_VLRINSTALA"
                       ,"labelCol"       : "VLRINSTALA"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrInstala"
@@ -361,7 +389,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":18 ,"field"          : "GM_VLRDESISTALA"
+            ,{"id":20 ,"field"          : "GM_VLRDESISTALA"
                       ,"labelCol"       : "VLRDESISTALA"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrDesistala"
@@ -373,7 +401,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":19 ,"field"          : "GM_VLRREINSTALA"
+            ,{"id":21 ,"field"          : "GM_VLRREINSTALA"
                       ,"labelCol"       : "VLRREINSTALA"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrReinstala"
@@ -385,7 +413,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":20 ,"field"          : "GM_VLRMANUTENCAO"
+            ,{"id":22 ,"field"          : "GM_VLRMANUTENCAO"
                       ,"labelCol"       : "VLRMANUT"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrManutencao"
@@ -397,7 +425,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":21 ,"field"          : "GM_VLRREVISAO"
+            ,{"id":23 ,"field"          : "GM_VLRREVISAO"
                       ,"labelCol"       : "VLRREVISAO"             
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtVlrRevisao"
@@ -409,26 +437,26 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":22 ,"field"          : "GM_ATIVO"  
+            ,{"id":24 ,"field"          : "GM_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"padrao":2}                                        
-            ,{"id":23 ,"field"          : "GM_REG"    
+            ,{"id":25 ,"field"          : "GM_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":24 ,"field"          : "US_APELIDO" 
+            ,{"id":26 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"tamImp"         : "0"                                            
                       ,"obj"            : "edtUsuario" 
                       ,"padrao":4}                
-            ,{"id":25 ,"field"          : "GM_CODUSR" 
+            ,{"id":27 ,"field"          : "GM_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":26 ,"field"          : "GM_CODGP"   
+            ,{"id":28 ,"field"          : "GM_CODGP"   
                       ,"labelCol"       : "GP"
                       ,"obj"            : "edtCodGp"
                       ,"newRecord"      : ["AUT","this","this"]
@@ -436,7 +464,7 @@
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
-            ,{"id":27 ,"labelCol"       : "PP"      
+            ,{"id":29 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -638,7 +666,7 @@
           clsCode.concat("          <i id='img"+reg.cod+"' data-value='"+reg.sn+"' class='"+reg.fa+"' style='margin-left:10px;font-size:1.5em;color:"+reg.cor+";'></i>");
           clsCode.concat("        </div>");
           clsCode.concat("      </td>");
-          clsCode.concat("      <td class='fpTd'><input type='text'style='max-width:50px' data-newrecord='1'></input></td>");
+          clsCode.concat("      <td class='fpTd'><input type='text'style='max-width:50px;text-align:center'value='0'></input></td>");
           clsCode.concat("    </tr>");
         });
         //////  
@@ -691,13 +719,14 @@
               
               if( document.getElementById(elImg).getAttribute("data-value") == "S" ){
                 filtroGp+=( filtroGp=="" ? tbl.rows[lin].cells[0].innerHTML: "_".concat(tbl.rows[lin].cells[0].innerHTML) );
-                filtroGpQtd+=( filtroGp=="" ? tbl.rows[lin].cells[3].children[0].value: "_".concat(tbl.rows[lin].cells[3].children[0].value) );
+                filtroGpQtd+=( filtroGpQtd=="" ? tbl.rows[lin].cells[3].children[0].value: "_".concat(tbl.rows[lin].cells[3].children[0].value) );
               };
             };
             if( filtroGp=="" )
-              filtroGp="NSA";  
+              filtroGp="NSA"; 
+              console.log(obj);
             document.getElementById(obj).value=filtroGp;
-            document.getElementById('edtGpObrigatorioQtd').value=filtroGpQtd;
+            document.getElementById(obj.concat('Qtd')).value=filtroGpQtd;
 
             janelaFechar();
           };  
@@ -1050,7 +1079,7 @@
               action="classPhp/imprimirsql.php" 
               target="_newpage">
           <div class="frmTituloManutencao">Auto<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>              
-          <div style="height: 290px; overflow-y: auto;">
+          <div style="height: 400px; overflow-y: auto;">
             <input type="hidden" id="sql" name="sql"/>
             <div class="campotexto campo100">
               <div class="campotexto campo10">
@@ -1083,7 +1112,7 @@
                 Gp=GrupoProduto 
                 Gm=GrupoModelo
               -->
-              <div class="campotexto campo30">
+              <div class="campotexto campo20">
                 <input class="campo_input_titulo inputF10"  id="edtGpObrigatorio" 
                                                             type="text" 
                                                             autocomplete="off"
@@ -1091,6 +1120,15 @@
                                                             readonly
                                                              />
                 <label class="campo_label campo_required" for="edtGpObrigatorio">GRUPOs-Obrigatório</label>
+              </div>
+              <div class="campotexto campo25">
+                <input class="campo_input_titulo inputF10"  id="edtGpObrigatorioQtd" 
+                                                            type="text" 
+                                                            autocomplete="off"
+                                                            readonly
+                                                            disabled
+                                                             />
+                <label class="campo_label campo_required" for="edtGpObrigatorioQtd">GRUPOs-Obrigatório Quantidade</label>
               </div>
               <div class="campotexto campo70">
                 <input class="campo_input_titulo inputF10"  id="edtGmObrigatorio" 
@@ -1113,6 +1151,15 @@
                                                             readonly
                                                              />
                 <label class="campo_label campo_required" for="edtGpAceito">GRUPOs-Aceito</label>
+              </div>
+              <div class="campotexto campo30">
+                <input class="campo_input_titulo inputF10"  id="edtGpAceitoQtd" 
+                                                            type="text" 
+                                                            autocomplete="off"
+                                                            readonly
+                                                            disabled
+                                                             />
+                <label class="campo_label campo_required" for="edtGpAceitoQtd">GRUPOs-Aceito Quantidade</label>
               </div>
               <div class="campotexto campo70">
                 <input class="campo_input_titulo inputF10"  id="edtGmAceito" 

@@ -330,42 +330,42 @@
           $sql.="      ,US.US_APELIDO";                    
           $sql.="      ,A.CNTP_CODENTREGA AS CODENTREGA";          
           $sql.="      ,A.CNTP_CODINSTALA AS CODINSTALA";
-          $sql.="      ,CONCAT('<table class=''fpTable'' style=''width:250px;''>'";
-          $sql.="       ,'<thead class=''fpThead''>'";    
-          $sql.="       ,'<tr>'";
-          $sql.="       ,'<th class=''fpTh'' style=''width:40%;''> CAMPO'";
-          $sql.="       ,'</th>'";
-          $sql.="       ,'<th class=''fpTh'' style=''width:60%;''> CONTEUDO'";
-          $sql.="       ,'</th>'";
-          $sql.="       ,'</tr>'";
-          $sql.="       ,'</thead>'";          
-          $sql.="       ,'<tbody>'";              
-          $sql.="       ,'<tr>'";
-          $sql.="       ,'<td class=''fpTd''>GRUPO</td>'";          
-          $sql.="       ,'<td class=''fpTd''>',CNTP_CODGP,'</td>'";
-          $sql.="       ,'</tr>'";          
-          $sql.="       ,'<tr>'";
-          $sql.="       ,'<td class=''fpTd''>CODIGO AUTO</td>'";          
-          $sql.="       ,'<td class=''fpTd''>',CNTP_CODGMP,'</td>'";
-          $sql.="       ,'</tr>'";          
-          $sql.="       ,'<tr>'";
-          $sql.="       ,'<td class=''fpTd''>VALOR</td>'";          
-          $sql.="       ,'<td class=''fpTd''>',CNTP_VALOR,'</td>'";
-          $sql.="       ,'</tr>'";          
-          $sql.="       ,'<tr>'";          
-          $sql.="       ,'<td class=''fpTd''>COD RASTREADOR</td>'";          
-          $sql.="       ,'<td class=''fpTd''>',CNTP_CODRASTREIO,'</td>'";
-          $sql.="       ,'</tr>'";          
-          $sql.="       ,'<tr>'";          
-          $sql.="       ,'<td class=''fpTd''>ENTREGA</td>'";          
-          $sql.="       ,'<td class=''fpTd''>',CONVERT(VARCHAR(10),CNTP_DTENTREGA,103),'</td>'";
-          $sql.="       ,'</tr>'";          
-          $sql.="       ,'<tr>'";
-          $sql.="       ,'<td class=''fpTd''>USUARIO</td>'";          
-          $sql.="       ,'<td class=''fpTd''>',US_APELIDO,'</td>'";
-          $sql.="       ,'</tr>'";          
-          $sql.="       ,'</tbody>'";                       
-          $sql.="       ,'</table>') AS POPOVER";
+          // $sql.="      ,CONCAT('<table class=''fpTable'' style=''width:250px;''>'";
+          // $sql.="       ,'<thead class=''fpThead''>'";    
+          // $sql.="       ,'<tr>'";
+          // $sql.="       ,'<th class=''fpTh'' style=''width:40%;''> CAMPO'";
+          // $sql.="       ,'</th>'";
+          // $sql.="       ,'<th class=''fpTh'' style=''width:60%;''> CONTEUDO'";
+          // $sql.="       ,'</th>'";
+          // $sql.="       ,'</tr>'";
+          // $sql.="       ,'</thead>'";          
+          // $sql.="       ,'<tbody>'";              
+          // $sql.="       ,'<tr>'";
+          // $sql.="       ,'<td class=''fpTd''>GRUPO</td>'";          
+          // $sql.="       ,'<td class=''fpTd''>',CNTP_CODGP,'</td>'";
+          // $sql.="       ,'</tr>'";          
+          // $sql.="       ,'<tr>'";
+          // $sql.="       ,'<td class=''fpTd''>CODIGO AUTO</td>'";          
+          // $sql.="       ,'<td class=''fpTd''>',CNTP_CODGMP,'</td>'";
+          // $sql.="       ,'</tr>'";          
+          // $sql.="       ,'<tr>'";
+          // $sql.="       ,'<td class=''fpTd''>VALOR</td>'";          
+          // $sql.="       ,'<td class=''fpTd''>',CNTP_VALOR,'</td>'";
+          // $sql.="       ,'</tr>'";          
+          // $sql.="       ,'<tr>'";          
+          // $sql.="       ,'<td class=''fpTd''>COD RASTREADOR</td>'";          
+          // $sql.="       ,'<td class=''fpTd''>',CNTP_CODRASTREIO,'</td>'";
+          // $sql.="       ,'</tr>'";          
+          // $sql.="       ,'<tr>'";          
+          // $sql.="       ,'<td class=''fpTd''>ENTREGA</td>'";          
+          // $sql.="       ,'<td class=''fpTd''>',CONVERT(VARCHAR(10),CNTP_DTENTREGA,103),'</td>'";
+          // $sql.="       ,'</tr>'";          
+          // $sql.="       ,'<tr>'";
+          // $sql.="       ,'<td class=''fpTd''>USUARIO</td>'";          
+          // $sql.="       ,'<td class=''fpTd''>',US_APELIDO,'</td>'";
+          // $sql.="       ,'</tr>'";          
+          // $sql.="       ,'</tbody>'";                       
+          // $sql.="       ,'</table>') AS POPOVER";
           $sql.="  FROM CONTRATOPRODUTO A WITH (NOLOCK)";                    
           $sql.="  LEFT OUTER JOIN GRUPOMODELO GM ON A.CNTP_CODGM=GM.GM_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA US ON A.CNTP_CODUSR=US.US_CODIGO"; 
@@ -638,13 +638,13 @@
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
-            ,{"id":28 ,"labelCol"       : "POP"         
-                      ,"obj"            : "imgPP"
-                      ,"tamGrd"         : "5em"
-                      ,"fieldType"      : "popover"
-                      ,"popoverTitle"   : "Pop up de campos relacionados a este registro"                      
-                      ,"padrao":0}
-            ,{"id":29 ,"labelCol"       : "COMP"         
+            // ,{"id":28 ,"labelCol"       : "POP"         
+            //           ,"obj"            : "imgPP"
+            //           ,"tamGrd"         : "5em"
+            //           ,"fieldType"      : "popover"
+            //           ,"popoverTitle"   : "Pop up de campos relacionados a este registro"                      
+            //           ,"padrao":0}
+            ,{"id":28 ,"labelCol"       : "COMP"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
