@@ -14,7 +14,12 @@
 function $doc(element){
   element = document.getElementById(element);
   return element;
-};      
+}; 
+function fncFileName(str){
+  let splt=str.split("/");
+  return splt[ splt.length-1 ];
+};  
+    
 //***************************
 //**APENAS PARA MENU OPÇÕES
 //***************************
@@ -260,7 +265,8 @@ function jsDatas(data){
     }    
     ,retDDMM      : function(){ return this.dia()+'/'+this.mes(); }        
     ,retExt       : function(cidade){ return cidade+", "+this.dia()+" de "+this.mesExt()+" de "+this.anoYYYY(); }
-    ,retMMDDYYYY  : function(){ return this.mes()+'/'+this.dia()+'/'+this.anoYYYY(); }
+    ,retMMDDYYYY  : function(){ 
+      return this.mes()+'/'+this.dia()+'/'+this.anoYYYY(); }
     ,retYYYYtMMtDD: function(){ return this.anoYYYY()+'-'+this.mes()+'-'+this.dia(); }  // "t" = traço
     ,retMMMYY     : function(){ return this.mesExt().substring(0,3).toUpperCase()+this.anoYY(); }
     ,retMMMbYY    : function(){ return this.mesExt().substring(0,3).toUpperCase()+'/'+this.anoYY(); }   // "b" = Barra
@@ -543,7 +549,7 @@ function jsCmpAtivo(data){
     ,add(str){
       let arr=str.split(" ");
       arr.forEach(function(reg){
-        document.getElementById(data).classList.add(str);
+        document.getElementById(data).classList.add(reg);
       })  
       return this;
     }
@@ -710,6 +716,7 @@ function jsConverte(data){
   //////////////////////////////////////////////////////////////////////////////////
   // Converte quando vem da classe principal jsNmrs(str) ou jsNmrs().dolar(str);  //
   // # = getElementById
+  // ^ = document.getElementById('cbOpcao').options[document.getElementById('cbOpcao').selectedIndex].text
   //////////////////////////////////////////////////////////////////////////////////
   function converte(n){
     if( n==undefined ){
@@ -724,7 +731,10 @@ function jsConverte(data){
             throw "NAO LOCALIZADO ELEMENTO "+n+" PARA ATRIBUIR VALOR";
           };    
           break;
-          
+        case "^":  
+          n=n.substring(1);        
+          retorno=document.getElementById(n).options[document.getElementById(n).selectedIndex].text;
+          break;
         default :  retorno=n; break;       
       };
       ////////////////////////////////////////////////////
@@ -743,6 +753,10 @@ function jsConverte(data){
   ////////////////////////
   return {
      data       : converte(data)
+    ,abs(){
+      retorno=retorno.toString();
+      return retorno.replace("-","");  
+    } 
     ,alltrim(){
       return retorno.split(" ").join("");  
     } 
@@ -768,11 +782,11 @@ function jsConverte(data){
       };  
       return ret;
     }  
-    ,dolar(){
+    ,dolar(retFloat=false){
       compara[0]=retorno.length;
       compara[1]=retorno.replace(/[^0-9-.,]/g,"").replace(",",".");
       if( compara[0]==(compara[1]).length )
-        return compara[1];
+        return ( retFloat==false ? compara[1] : parseFloat(compara[1]) );
       else
         throw "VALOR RECEBIDO COM PARAMETRO NÃO É UM NUMERO";
     }  
@@ -788,12 +802,59 @@ function jsConverte(data){
           break;
       };
     }    
-    ,inteiro(){
-      return parseInt( retorno="" ? "0" : retorno.replace(/[^0-9]/g,"") );
+    ,inteiro(retInteiro=false){
+      return parseInt( retorno="" ? "0" : retorno.replace(/[^0-9-]/g,"") );
     }  
     ,lower(){
       return retorno.toLowerCase();
     }
+    ,real(){
+      compara[0]=retorno.length;
+      compara[1]=retorno.replace(/[^0-9-.,]/g,"").replace(".",",");
+      if( compara[0]==(compara[1]).length )
+        return compara[1];
+      else
+        throw "VALOR RECEBIDO COM PARAMETRO NÃO É UM NUMERO";
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
+    // somarDias eh chamada de duas maneiras
+    // jsConverte("#edtData").somarDias(10) Le um imput e adiciona "n(10)" a este
+    // jsConverte("hoje").somarDias(0)      Pega a data de hoje e adiciona "n(0)" a esta
+    ////////////////////////////////////////////////////////////////////////////////////
+    ,somarDias(i,formato="dd/mm/yyyy",retInteiro=false){
+      let dataAtual = new Date();
+      if( retorno=="hoje" ){
+        dataAtual.setDate(dataAtual.getDate()+i);
+      } else {
+        let ehUmaData=this.datavalida();
+        if( ehUmaData ){
+          let splt=retorno.split('/');
+          dataAtual = new Date(splt[2],(splt[1]-1),splt[0]);
+          dataAtual.setDate(dataAtual.getDate()+i);
+        } else {
+          throw "A data informada "+retorno+" nao e valida!";
+        }  
+      };
+      data = (dataAtual.getDate()<10 ? '0'+dataAtual.getDate() : dataAtual.getDate())+'/'+
+            ((dataAtual.getMonth()+1)<10 ? '0'+(dataAtual.getMonth()+1) : (dataAtual.getMonth()+1))+'/'+
+            dataAtual.getFullYear();
+            
+      splt=data.split('/');      
+      switch( formato.toUpperCase() ){
+        case "DD/MM/YYYY" : 
+          break;
+        case "MM/DD/YYYY" : 
+          data=splt[1]+"/"+(splt[0])+"/"+splt[2];
+          break;
+        case "YYYYMM" : 
+          data=splt[2]+splt[1];
+          if( retInteiro )
+            data=parseInt(data);
+          break;
+          
+      };  
+      return data;            
+    } 
     ,soNumeros(){
       return retorno.replace(/\D/g,"");
     }
@@ -803,6 +864,9 @@ function jsConverte(data){
       };
       return retorno;
     }
+    ,texto(){
+      return retorno;
+    }  
     ,upper(){
       return retorno.toUpperCase();
     }
@@ -1128,7 +1192,7 @@ function gerarMensagemErro(parRotina,parMensagem,objeto){
           break;
       };
     };    
-  };  
+  }; 
   var erro = new clsMensagem(cabec,topo);
   erro.ListaErr(parMensagem);
   erro.Show(parRotina,foco);
@@ -1622,7 +1686,7 @@ function clsMensagem(cabec,topo){
     str='';
     str+='<div id="'+divModal+'" class="divShowModal" style="'+zModal+'"></div>';
     str+='<div id="'+divMsg+'" ';
-    str+=  'style="left:0;right:0;margin-left:5%;margin-right:auto;';
+    str+=  'style="left:0;right:0;margin-left:auto;margin-right:auto;';
     str+=        'width:'+self.divWidth+';height:'+self.divHeight+';position:absolute;top:'+self.divTopo+';'+zMsg+'">';
     str+=  '<div class="alertContainer" style="'+zCls+'">';      
     str+=    '<label id="'+lblCls+'" class="alertClose" for="alternar">X</label>';  
@@ -1644,6 +1708,7 @@ function clsMensagem(cabec,topo){
       document.getElementById(divMsg).remove();
       if( foco != undefined )
         document.getElementById(foco).foco();
+        //document.getElementById(foco).focus();
     });
     if( typeof self.mensagem=='object') 
       document.getElementById(pObj).appendChild(self.mensagem);    
@@ -2476,7 +2541,8 @@ function janelaDialogo(objeto){
     let stlWidth        = "50em";
     let tituloBarra     = "Não informado";      // Se não passar assume este
     let fontSizeTitulo  = "2em";                // Variavel qdo se tem frame e naum
-    let code            = objeto.code;          // Html recebido da rotina chamadora       
+    let code            = objeto.code;          // Html recebido da rotina chamadora   
+    //let fncCheckUm      = false;                // Se vou adicionar a funcao para permitir apenas um registro checado    
     let ceModal;
     let ceDiv;
     
@@ -2500,6 +2566,9 @@ function janelaDialogo(objeto){
         case "width": 
           stlWidth=objeto[key];
           break;
+        //case "fncCheckUm":  
+        //  fncCheckUm=objeto[key];
+        //  break;
       };  
     }; 
     ///////////////////////
@@ -2571,6 +2640,29 @@ function janelaDialogo(objeto){
     clsInn.concat("  document.getElementById('"+divModal+"').remove();");
     clsInn.concat("  document.getElementById('"+divMsg+"').remove();");
     clsInn.concat("}");
+    /*
+    clsInn.concat("function ola() {");    
+    clsInn.concat("  alert('oi');");
+    clsInn.concat("}");
+    */
+    /*
+    if( fncCheckUm ){
+      clsInn.concat("function fncCheck(pLin){");
+      clsInn.concat("  let elImg;");
+      clsInn.concat("  tblChk.getElementsByTagName('tbody')[0].querySelectorAll('tr').forEach(function (row,indexTr) {");  
+      clsInn.concat("    elImg = 'img'+row.cells[0].innerHTML;");
+      clsInn.concat("    if( indexTr==pLin ){");
+      clsInn.concat("      jsCmpAtivo(elImg).remove('fa-thumbs-o-down').add('fa-thumbs-o-up').cor('blue');");
+      //clsInn.concat("      $doc('edtStatusTbl').value=row.cells[0].innerHTML+'|'+row.cells[1].innerHTML;");   //Pegando o codigo e descricao para atualizar grade
+      clsInn.concat("    } else {");
+      clsInn.concat("      jsCmpAtivo(elImg).remove('fa-thumbs-o-up').add('fa-thumbs-o-down').cor('red');");
+      clsInn.concat("    };");
+      clsInn.concat("  });");
+      clsInn.concat("};");
+    };
+    */
+    
+    
     if( objeto.foco != undefined ){
       clsInn.concat("  document.getElementById('"+objeto.foco+"').foco();");      
     }  

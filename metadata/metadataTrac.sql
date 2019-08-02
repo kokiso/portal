@@ -22,7 +22,7 @@ USE TRAC;
 -- CONTRATO               | CNTT| 13  |  x  |  x  |  x  |      |  x   |  x  | (CNTT devido contador(CNT))
 -- CONTRATOMENSAL         | CNTM| 13  |     |     |     |      |      |     | (CNTM Valores a serem cobrados mensalmente)
 -- CFOP                   | CFO | 14  |  x  |  x  |  x  |      |  x   |  x  |
--- CNABARQUIVO            | ARQ | 10  |     |     |     |      |      |     | (Ver se necessario)
+-- CNAB                   | CNB | 10  |     |     |     |      |      |     | (Ver se necessario)
 -- CNABENVIO              | ENV | 10  |     |     |     |      |      |     | (Ver se necessario)
 -- CNABERRO               | ERR | 30  |  x  |  x  |  x  |      |  x   |  x  |
 -- CNABINSTRUCAO          | CI  | 30  |  x  |  x  |  x  |      |  x   |  x  |
@@ -104,8 +104,6 @@ USE TRAC;
 -- USUARIOPERFIL          | UP  | 01  |  x  |  x  |  x  |      |  x   |  x  |
 -- USUARIOSISTEMA         | US  | **  |  x  |  ?  |  ?  |  ?   |  x   |  ?  |
 -- VENDEDOR               | VND | 29  |  x  |  x  |  x  |      |  x   |  x  |
-
--------Para edi
 -- PAGARTITULO      | PTT | 25  |  x  |  x  |     |      |      |     |
 
 --
@@ -189,6 +187,99 @@ BEGIN
     SET @DISTANCIA=9999999;
   RETURN @DISTANCIA;
 END
+---------------------------------
+-- Somente em fase de homologacao
+-- DELETE FROM PAGAR
+-- DELETE FROM RATEIO
+-- DELETE FROM PAGARMASTER
+-- DELETE FROM PAGARRATEIO
+-- DELETE FROM EXTRATO
+---------------------------------
+/*
+GO
+CREATE PROCEDURE dbo.addCnab
+@json NVARCHAR(MAX)
+,@Retorno INTEGER OUTPUT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  DECLARE @tblAdd TABLE(
+    CODBNC INTEGER
+    ,CODCNAB INTEGER
+    ,LANCTO INTEGER
+  );
+  INSERT @tblAdd SELECT codbnc,codcnb,lancto FROM OPENJSON(@json)  WITH (codbnc int 'strict $.codbnc',codcnb int 'strict $.codcnb',lancto int 'strict $.lancto')
+  -- cmp(campo)
+  DECLARE @cmpCod INTEGER;
+  DECLARE @cmpCnb INTEGER;
+  DECLARE @cmpLan INTEGER;
+  
+  DECLARE crsrAdd CURSOR FOR SELECT CODBNC,CODCNAB,LANCTO FROM @tblAdd;
+  OPEN crsrAdd
+  FETCH NEXT FROM crsrAdd INTO @cmpCod,@cmpCnb,@cmpLan
+  WHILE @@FETCH_STATUS = 0 BEGIN  
+    UPDATE PAGAR SET PGR_LOTECNAB=@cmpCnb WHERE PGR_LANCTO=@cmpLan;
+    FETCH NEXT FROM crsrAdd INTO @cmpCod,@cmpCnb,@cmpLan
+  END
+END
+*/
+GO
+CREATE PROCEDURE dbo.lancaRateio
+AS
+BEGIN
+  SET NOCOUNT ON;
+  DECLARE @lancto INTEGER;
+  DECLARE @codpt INTEGER;
+  DECLARE @codcc VARCHAR(15);
+  DECLARE @debcre VARCHAR(1);
+  DECLARE @dtmovto DATE;
+  DECLARE @codemp INTEGER;
+  DECLARE @vlrliquido NUMERIC(15,2);
+  DECLARE @vlrdebito NUMERIC(15,2);
+  DECLARE @vlrcredito NUMERIC(15,2);
+  DECLARE @codcmp INTEGER;
+  DECLARE @codusr INTEGER;
+  DECLARE crsrLr CURSOR 
+  FOR SELECT PGR_LANCTO,PGR_CODPT,PT_CODCC,PT_DEBCRE,PGR_DTMOVTO,PGR_CODEMP,PGR_VLRLIQUIDO,PGR_CODUSR 
+        FROM PAGAR
+		LEFT OUTER JOIN PADRAOTITULO ON PGR_CODPT=PT_CODIGO
+  OPEN crsrLr;
+  FETCH NEXT FROM crsrLr INTO @lancto,@codpt,@codcc,@debcre,@dtmovto,@codemp,@vlrliquido,@codusr
+  WHILE @@FETCH_STATUS = 0 BEGIN
+    PRINT @lancto
+
+    SET @codcmp=CAST(YEAR(@dtmovto) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(@dtmovto) AS VARCHAR(2)),2);
+    IF( @debcre='D' ) BEGIN
+      SET @vlrdebito  = @vlrliquido;
+      SET @vlrcredito = 0;
+    END ELSE BEGIN
+      SET @vlrdebito  = 0;
+      SET @vlrcredito = @vlrliquido;
+    END
+
+    INSERT INTO VRATEIO(
+      RAT_LANCTO
+      ,RAT_CODCC
+      ,RAT_DEBITO
+      ,RAT_CREDITO
+      ,RAT_CODEMP
+      ,RAT_CODCMP
+      ,RAT_CONTABIL
+      ,RAT_CODUSR) VALUES(
+      @lancto       -- RAT_LANCTO
+      ,@codcc       -- RAT_CODCC
+      ,@vlrdebito   -- RAT_DEBITO
+      ,@vlrcredito  -- RAT_CREDITO
+      ,@codemp      -- RAT_CODEMP
+      ,@codcmp      -- RAT_CODCMP
+      ,'S'          -- RAT_CONTABIL
+      ,@codusr      -- RAT_CODUSR
+    );
+    FETCH NEXT FROM crsrLr INTO @lancto,@codpt,@codcc,@debcre,@dtmovto,@codemp,@vlrliquido,@codusr
+  END
+  CLOSE crsrLr
+  DEALLOCATE crsrLr
+END
 GO
 CREATE PROCEDURE dbo.prcGenerator
 @Tabela VARCHAR(20)
@@ -199,6 +290,7 @@ BEGIN
   UPDATE GENERATOR SET GNR_VALOR=(GNR_VALOR+1) WHERE GNR_CODIGO=@Tabela;
   SELECT @Retorno=GNR_VALOR FROM GENERATOR WHERE GNR_CODIGO=@Tabela;
 END
+/*
 GO
 CREATE PROCEDURE dbo.prcNumNf
 @Codigo INTEGER
@@ -209,6 +301,7 @@ BEGIN
   UPDATE SERIENF SET SNF_NFFIM=(SNF_NFFIM+1) WHERE SNF_CODIGO=@Codigo;
   SELECT @Retorno=(SNF_NFFIM-1) FROM SERIENF WHERE SNF_CODIGO=@Codigo;
 END
+*/
 GO
 CREATE FUNCTION dbo.fncCampoRegInc(@parAdmPub VARCHAR(1),@parReg VARCHAR(1),@parDir31 INTEGER)
 RETURNS VARCHAR(70)
@@ -307,14 +400,12 @@ BEGIN
   DECLARE @retorno VARCHAR(1);
   DECLARE @tam INTEGER;
   DECLARE @dig VARCHAR(1);
-  --DECLARE @validos VARCHAR(60);
-  
   SET @retorno  = 'F';
   SET @tam      = 1;
-  -------------------------------------------------------------
-  -- FLAG 1 = SN
-  --      2 = PAB
-  -------------------------------------------------------------
+	-------------------------------------------------------------
+	-- FLAG 1 = SN
+	--      2 = PAB
+	-------------------------------------------------------------
   IF( @parFlag=1 ) BEGIN
     IF( (@parString='S') OR (@parString='N') ) BEGIN
       SET @retorno  = 'T';  
@@ -423,7 +514,6 @@ GO
 CREATE TABLE ALIQUOTASIMPLES(
   AS_ANEXO INTEGER NOT NULL
   ,AS_ITEM INTEGER NOT NULL
-  ,AS_CODEMP INTEGER NOT NULL  
   ,AS_VLRINI NUMERIC(15,2) NOT NULL
   ,AS_VLRFIM NUMERIC(15,2) NOT NULL
   ,AS_ALIQUOTA NUMERIC(15,2) NOT NULL
@@ -437,11 +527,24 @@ CREATE TABLE ALIQUOTASIMPLES(
   ,AS_ISS NUMERIC(15,2) NOT NULL
   ,AS_REG VARCHAR(1) NOT NULL
   ,AS_CODUSR INTEGER NOT NULL  
+  ,CONSTRAINT chk_asAnexo CHECK( AS_ANEXO>0 ) 
+  ,CONSTRAINT chk_asItem CHECK( AS_ITEM>0 )
+  ,CONSTRAINT chk_asVlrIni CHECK( AS_VLRINI>=0 )
+  ,CONSTRAINT chk_asVlrFim CHECK( AS_VLRFIM>AS_VLRINI )
+  ,CONSTRAINT chk_asAliquota CHECK( AS_ALIQUOTA>=0 )
+  ,CONSTRAINT chk_asIrpj CHECK( AS_IRPJ>=0 )
+  ,CONSTRAINT chk_asCsll CHECK( AS_CSLL>=0 )
+  ,CONSTRAINT chk_asCofins CHECK( AS_COFINS>=0 )
+  ,CONSTRAINT chk_asPis CHECK( AS_PIS>=0 )
+  ,CONSTRAINT chk_asCpp CHECK( AS_CPP>=0 )
+  ,CONSTRAINT chk_asIcms CHECK( AS_ICMS>=0 )
+  ,CONSTRAINT chk_asIpi CHECK( AS_IPI>=0 )
+  ,CONSTRAINT chk_asIss CHECK( AS_ISS>=0 )
   ,CONSTRAINT chk_asReg CHECK( AS_REG IN('A','P','S'))
-  ,CONSTRAINT PKALIQUOTASIMPLES PRIMARY KEY(AS_ANEXO,AS_ITEM,AS_CODEMP));  
+  ,CONSTRAINT PKALIQUOTASIMPLES PRIMARY KEY(AS_ANEXO,AS_ITEM));  
 GO  
 CREATE VIEW VALIQUOTASIMPLES AS
-  SELECT AS_ANEXO,AS_ITEM,AS_CODEMP,AS_VLRINI,AS_VLRFIM,AS_ALIQUOTA,AS_IRPJ,AS_CSLL,AS_COFINS
+  SELECT AS_ANEXO,AS_ITEM,AS_VLRINI,AS_VLRFIM,AS_ALIQUOTA,AS_IRPJ,AS_CSLL,AS_COFINS
          ,AS_PIS,AS_CPP,AS_ICMS,AS_IPI,AS_ISS,AS_REG,AS_CODUSR FROM ALIQUOTASIMPLES
 GO         
 CREATE TABLE dbo.BKPALIQUOTASIMPLES(
@@ -450,7 +553,6 @@ CREATE TABLE dbo.BKPALIQUOTASIMPLES(
   ,AS_DATA DATE DEFAULT GETDATE() NOT NULL
   ,AS_ANEXO INTEGER NOT NULL
   ,AS_ITEM INTEGER NOT NULL
-  ,AS_CODEMP INTEGER NOT NULL  
   ,AS_VLRINI NUMERIC(15,2) NOT NULL
   ,AS_VLRFIM NUMERIC(15,2) NOT NULL
   ,AS_ALIQUOTA NUMERIC(15,2) NOT NULL
@@ -471,7 +573,6 @@ CREATE TABLE dbo.BKPALIQUOTASIMPLES(
    -- ---------------|-----|----|----|--------------------|----------------------------------------------------------
    -- AS_ANEXO       | PK  |    |    | INT                | 
    -- AS_ITEM        | PK  |    |    | INT                |    
-   -- AS_CODEMP      | PK  |    |    | INT NN             | Campo relacionado (EMPRESA)  
    -- EMP_APELIDO    | SEL |    |    | VC(15) NN          | Campo relacionado (EMPRESA)     
    -- AS_VLRINI      |     |    |    | NUM(15,2) NN       |
    -- AS_VLRFIM      |     |    |    | NUM(15,2) NN       |
@@ -570,12 +671,14 @@ CREATE TABLE BANCO(
   ,BNC_AGENCIADV VARCHAR(1)
   ,BNC_CONTA VARCHAR(20)
   ,BNC_CONTADV VARCHAR(1)
+  ,BNC_CNAB VARCHAR(1) NOT NULL
   ,BNC_SALDO NUMERIC(15,2) NOT NULL
   ,BNC_ATIVO VARCHAR(1) NOT NULL
   ,BNC_REG VARCHAR(1) NOT NULL
   ,BNC_CODUSR INTEGER NOT NULL  
   ,CONSTRAINT chk_bncEntraFluxo CHECK( BNC_ENTRAFLUXO IN('S','N'))
   ,CONSTRAINT chk_bncPadraoFluxo CHECK( BNC_PADRAOFLUXO IN('S','N'))  
+  ,CONSTRAINT chk_bncCnab CHECK( BNC_CNAB IN('S','N'))  
   ,CONSTRAINT chk_bncAtivo CHECK( BNC_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_bncReg CHECK( BNC_REG IN('A','P','S')));
 GO
@@ -593,6 +696,7 @@ CREATE VIEW VBANCO AS
          ,BNC_AGENCIADV
          ,BNC_CONTA
          ,BNC_CONTADV
+         ,BNC_CNAB
          ,BNC_SALDO
          ,BNC_ATIVO
          ,BNC_REG
@@ -616,6 +720,7 @@ CREATE TABLE dbo.BKPBANCO(
   ,BNC_AGENCIADV VARCHAR(1)
   ,BNC_CONTA VARCHAR(20)
   ,BNC_CONTADV VARCHAR(1)
+  ,BNC_CNAB VARCHAR(1) NOT NULL  
   ,BNC_ATIVO VARCHAR(1) NOT NULL
   ,BNC_REG VARCHAR(1) NOT NULL
   ,BNC_CODUSR INTEGER NOT NULL  
@@ -815,6 +920,31 @@ CREATE TABLE dbo.BKPCIDADE(
   ,CONSTRAINT chk_bkpCddAcao CHECK( CDD_ACAO IN('I','A','E'))  
 );
 -------------------------------------------------------------------------------------
+--                                 C N A B                                         --
+--tblcnab
+-------------------------------------------------------------------------------------
+GO
+CREATE TABLE CNAB(
+  CNB_CODIGO INTEGER IDENTITY PRIMARY KEY NOT NULL
+  ,CNB_CODBNC INTEGER NOT NULL    
+  ,CNB_DTCADASTRO DATE DEFAULT GETDATE() NOT NULL
+  ,CNB_VLRARQUIVO NUMERIC(15,2) DEFAULT 0 NOT NULL    
+  ,CNB_VLREXCLUIDO NUMERIC(15,2) DEFAULT 0 NOT NULL    
+  ,CNB_VLRBAIXADO NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,CNB_ARQUIVO VARCHAR(40)
+  ,CNB_DTARQUIVO DATE
+  ,CNB_ATIVO VARCHAR(1) NOT NULL  
+  ,CNB_LANCTOINI INTEGER DEFAULT 0 NOT NULL
+  ,CNB_LANCTOFIM INTEGER DEFAULT 0 NOT NULL
+  ,CONSTRAINT chk_cnbAtivo CHECK( CNB_ATIVO IN('S','N'))   
+  ,CONSTRAINT chk_cnbVlrArquivo CHECK( CNB_VLRARQUIVO>=0 )
+  ,CONSTRAINT chk_cnbVlrExcluido CHECK( CNB_VLREXCLUIDO>=0 )
+  ,CONSTRAINT chk_cnbVlrBaixado CHECK( CNB_VLRBAIXADO>=0 )
+  ,CONSTRAINT chk_cnbLanctoIni CHECK( CNB_LANCTOINI >=0 )   
+  ,CONSTRAINT chk_cnbLanctoFim CHECK( CNB_LANCTOFIM >=CNB_LANCTOINI )   
+)
+
+-------------------------------------------------------------------------------------
 --                          C N A B E R R O                                        --
 --tblcnaberro
 -------------------------------------------------------------------------------------
@@ -997,7 +1127,7 @@ CREATE TABLE CONTACONTABIL(
   ,CC_ATIVO VARCHAR(1) NOT NULL
   ,CC_REG VARCHAR(1) NOT NULL
   ,CC_CODUSR INTEGER NOT NULL  
-  ,CONSTRAINT chk_ccCodigo CHECK( CC_CODIGO LIKE('[0-9][.][0-9][0-9][.][0-9][0-9][.][0-9][0-9][.][0-9][0-9][0-9][0-9]'))  
+  ,CONSTRAINT chk_ccCodigo CHECK( CC_CODIGO LIKE('[0-9][.][0-9][.][0-9][.][0-9][0-9][.][0-9][0-9][0-9][0-9]'))  
   ,CONSTRAINT chk_ccLancto CHECK( CC_LANCTO IN('S','N'))  
   ,CONSTRAINT chk_ccF10 CHECK( CC_F10 IN('S','N'))    
   ,CONSTRAINT chk_ccAtivo CHECK( CC_ATIVO IN('S','N'))  
@@ -1752,7 +1882,7 @@ CREATE TABLE FAVORECIDO(
   ,FVR_REG VARCHAR(1) NOT NULL
   ,FVR_CODUSR INTEGER NOT NULL  
   ,CONSTRAINT chk_fvrCnpjCpf CHECK( FVR_CNPJCPF NOT LIKE '%[^0-9]%' )    
-  -- ,CONSTRAINT chk_fvrCep CHECK( FVR_CEP LIKE('[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'))  
+  ,CONSTRAINT chk_fvrCep CHECK( FVR_CEP LIKE('[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'))  
   ,CONSTRAINT chk_fvrFisJur CHECK( FVR_FISJUR IN('F','J'))  
   ,CONSTRAINT chk_fvrAtivo CHECK( FVR_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_fvrReg CHECK( FVR_REG IN('A','P','S')));
@@ -2121,9 +2251,9 @@ CREATE TABLE dbo.GRUPOMODELO(
   ,GM_CONTRATO VARCHAR(1) NOT NULL  
   ,GM_VENDA VARCHAR(1) NOT NULL
   ,GM_LOCACAO VARCHAR(1) NOT NULL  
-  ,GM_GPOBRIGATORIO VARCHAR(70) NOT NULL  --GM_GPOBRIGATORIO VARCHAR(40) NOT NULL  --ANGELO KOKISO ALTERADO SIZE DO VARCHAR PARA 70
+  ,GM_GPOBRIGATORIO VARCHAR(40) NOT NULL  
   ,GM_GMOBRIGATORIO VARCHAR(70) NOT NULL  
-  ,GM_GPACEITO VARCHAR(70) NOT NULL  -- angelo kokiso alterado varchar para 70
+  ,GM_GPACEITO VARCHAR(40) NOT NULL  
   ,GM_GMACEITO VARCHAR(70) NOT NULL  
   ,GM_VALORVISTA NUMERIC(15,2) NOT NULL
   ,GM_VALORPRAZO NUMERIC(15,2) NOT NULL  
@@ -2220,7 +2350,7 @@ CREATE TABLE dbo.BKPGRUPOMODELO(
   ,GM_CONTRATO VARCHAR(1) NOT NULL  
   ,GM_VENDA VARCHAR(1) NOT NULL
   ,GM_LOCACAO VARCHAR(1) NOT NULL  
-  ,GM_GPOBRIGATORIO VARCHAR(70) NOT NULL  
+  ,GM_GPOBRIGATORIO VARCHAR(40) NOT NULL  
   ,GM_GMOBRIGATORIO VARCHAR(70) NOT NULL  
   ,GM_GPACEITO VARCHAR(40) NOT NULL  
   ,GM_GMACEITO VARCHAR(70) NOT NULL  
@@ -2434,7 +2564,7 @@ CREATE TABLE dbo.BKPGRUPOPRODUTO(
   ,GP_ATIVO VARCHAR(1) NOT NULL
   ,GP_REG VARCHAR(1) NOT NULL
   ,GP_CODUSR INTEGER NOT NULL  
-  ,CONSTRAINT chk_bkpPgrAcao CHECK( GP_ACAO IN('I','A','E'))  
+  ,CONSTRAINT chk_bkpGpAcao CHECK( GP_ACAO IN('I','A','E'))  
 );
 -------------------------------------------------------------------------------------
 --                                I M P O S T O                                    --
@@ -2540,7 +2670,7 @@ CREATE TABLE dbo.BKPIMPOSTO(
    -- CTG_NOME       | SEL |    |    | VC(20) NN          | Campo relacionado (CATEGORIA) 
    -- IMP_ENTSAI     | CC  |    |    | VC(1) NN           |  
    -- IMP_CODNO      |     |    |    | VC(2) NN           | Campo relacionado (NATUREZAOPERACAO)
-   -- NO_NOME        | SEL |    |    | VC(30) NN          | Campo relacionado (NATUREZAOPERACAO)    
+   -- NO_NOME        | SEL |    |    | VC(60) NN          | Campo relacionado (NATUREZAOPERACAO)    
    -- IMP_CFOP       | SEL |    |    | VC(5) NN           | Campo relacionado (CFOP)      
    -- CFO_NOME       | SEL |    |    | VC(30) NN          | Campo relacionado (CFOP)       
    -- IMP_CSTICMS    | SEL |    |    | VC(3) NN           | Campo relacionado (CSTICMS)       
@@ -2643,9 +2773,6 @@ INSERT INTO MENSAGEM VALUES(27,'DESISTALACAO/NOSHOW');
 INSERT INTO MENSAGEM VALUES(28,'MANUTENCAO/NOSHOW');
 INSERT INTO MENSAGEM VALUES(29,'REINSTALACAO/NOSHOW');
 INSERT INTO MENSAGEM VALUES(30,'INSTALACAO/NOSHOW');
-INSERT INTO MENSAGEM VALUES(31,'EM ANDAMENTO'); -- Angelo kokiso
-INSERT INTO MENSAGEM VALUES(32,'APROVADO'); -- Angelo Kokiso
-INSERT INTO MENSAGEM VALUES(33,'RECUSADO'); -- Angelo Kokiso
 -------------------------------------------------------------------------------------
 --                                  M O E D A                                      --
 --tblmoeda                                                                         --
@@ -2679,25 +2806,30 @@ CREATE TABLE dbo.BKPMOEDA(
 -------------------------------------------------------------------------------------
 CREATE TABLE NATUREZAOPERACAO(
   NO_CODIGO VARCHAR(2) PRIMARY KEY NOT NULL
-  ,NO_NOME VARCHAR(30) NOT NULL
+  ,NO_NOME VARCHAR(60) NOT NULL
   ,NO_FINNFE VARCHAR(1) NOT NULL
+  ,NO_CODPTP VARCHAR(2) NOT NULL
+  ,NO_CODPT INTEGER NOT NULL    
   ,NO_ATIVO VARCHAR(1) NOT NULL
   ,NO_REG VARCHAR(1) NOT NULL
   ,NO_CODUSR INTEGER NOT NULL
-  ,CONSTRAINT chk_noFinNfe CHECK( NO_FINNFE IN('1','2','3','4'))    
+  --,CONSTRAINT chk_noFinNfe CHECK( NO_FINNFE IN('1','2','3','4'))    
+  ,CONSTRAINT chk_noCodPt CHECK( NO_CODPT > 0 )    
   ,CONSTRAINT chk_noAtivo CHECK( NO_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_noReg CHECK( NO_REG IN('A','P','S')));
 GO
 CREATE VIEW VNATUREZAOPERACAO AS
-  SELECT NO_CODIGO,NO_NOME,NO_FINNFE,NO_ATIVO,NO_REG,NO_CODUSR FROM NATUREZAOPERACAO
+  SELECT NO_CODIGO,NO_NOME,NO_FINNFE,NO_CODPTP,NO_CODPT,NO_ATIVO,NO_REG,NO_CODUSR FROM NATUREZAOPERACAO
 GO  
 CREATE TABLE dbo.BKPNATUREZAOPERACAO(
   NO_ID INTEGER IDENTITY PRIMARY KEY NOT NULL 
   ,NO_ACAO VARCHAR(1) NOT NULL
   ,NO_DATA DATE DEFAULT GETDATE() NOT NULL
   ,NO_CODIGO VARCHAR(2) NOT NULL
-  ,NO_NOME VARCHAR(30) NOT NULL
+  ,NO_NOME VARCHAR(60) NOT NULL
   ,NO_FINNFE VARCHAR(1) NOT NULL
+  ,NO_CODPTP VARCHAR(2) NOT NULL
+  ,NO_CODPT INTEGER NOT NULL    
   ,NO_ATIVO VARCHAR(1) NOT NULL
   ,NO_REG VARCHAR(1) NOT NULL
   ,NO_CODUSR INTEGER NOT NULL  
@@ -2733,7 +2865,330 @@ CREATE TABLE dbo.BKPNCM(
   ,NCM_CODUSR INTEGER NOT NULL  
   ,CONSTRAINT chk_bkpNcmAcao CHECK( NCM_ACAO IN('I','A','E'))  
 );
-
+-------------------------------------------------------------------------------------
+--                               N F P R O D U T O                                 --
+-- NFP_ENTSAI tem checar com SNF_ENTSAI                                            --
+--tblnfproduto
+-------------------------------------------------------------------------------------
+GO
+CREATE TABLE NFPRODUTO(
+  NFP_NUMNF INTEGER NOT NULL
+  ,NFP_CODSNF INTEGER NOT NULL            --SERIENF
+  ,NFP_EMISSOR VARCHAR(14) NOT NULL
+  ,NFP_CODNO VARCHAR(2) NOT NULL          --NATUREZAOPERACAO
+  ,NFP_LANCTO INTEGER NOT NULL
+  ,NFP_VLRITEM NUMERIC(15,2) NOT NULL
+  ,NFP_VLRFRETE NUMERIC(15,2) NOT NULL
+  ,NFP_VLRSEGURO NUMERIC(15,2) NOT NULL
+  ,NFP_VLROUTRAS NUMERIC(15,2) NOT NULL
+  ,NFP_VLRIPI NUMERIC(15,2) NOT NULL
+  ,NFP_VLRICMS NUMERIC(15,2) NOT NULL
+  ,NFP_VLRST NUMERIC(15,2) NOT NULL
+  ,NFP_VLRPIS NUMERIC(15,2) NOT NULL
+  ,NFP_VLRCOFINS NUMERIC(15,2) NOT NULL
+  ,NFP_VLRDESCONTO NUMERIC(15,2) NOT NULL
+  ,NFP_VLRTOTAL NUMERIC(15,2) NOT NULL
+  ,NFP_CODTRN INTEGER NOT NULL              --TRANSPORTADORA
+  ,NFP_VOLUME VARCHAR(10)
+  ,NFP_ESPECIE VARCHAR(10)
+  ,NFP_CODVND INTEGER NOT NULL              --VENDEDOR
+  ,NFP_DTCANCELA DATE
+  ,NFP_CODCMP INTEGER NOT NULL              --COMPETENCIA
+  ,NFP_LIVRO VARCHAR(1) NOT NULL
+  ,NFP_DTENTRADA DATE NOT NULL
+  ,NFP_PESOBRUTO NUMERIC(15,4) NOT NULL
+  ,NFP_PESOLIQUIDO NUMERIC(15,4) NOT NULL
+  ,NFP_RECIBONFE VARCHAR(20)
+  ,NFP_CHAVENFE VARCHAR(50)
+  ,NFP_CANCNFE VARCHAR(20)
+  ,NFP_ENTSAI VARCHAR(1) NOT NULL
+  ,NFP_REG VARCHAR(1) NOT NULL
+  ,NFP_CODUSR INTEGER NOT NULL
+  ,CONSTRAINT chk_NfpNumNf CHECK( NFP_NUMNF>0 )
+  ,CONSTRAINT chk_NfpCodSnf CHECK( NFP_CODSNF>0 )
+  ,CONSTRAINT chk_NfpLancto CHECK( NFP_LANCTO>0 )  
+  ,CONSTRAINT chk_NfpVlrItem CHECK( NFP_VLRITEM>0 )
+  ,CONSTRAINT chk_NfpVlrFrete CHECK( NFP_VLRFRETE>=0 )
+  ,CONSTRAINT chk_NfpSeguro CHECK( NFP_VLRSEGURO>=0 )
+  ,CONSTRAINT chk_NfpOutras CHECK( NFP_VLROUTRAS>=0 )
+  ,CONSTRAINT chk_NfpIpi CHECK( NFP_VLRIPI>=0 )
+  ,CONSTRAINT chk_NfpIcms CHECK( NFP_VLRICMS>=0 )
+  ,CONSTRAINT chk_NfpSt CHECK( NFP_VLRST>=0 )
+  ,CONSTRAINT chk_NfpPis CHECK( NFP_VLRPIS>=0 )
+  ,CONSTRAINT chk_NfpCofins CHECK( NFP_VLRCOFINS>=0 )
+  ,CONSTRAINT chk_NfpDesconto CHECK( NFP_VLRDESCONTO>=0 )
+  ,CONSTRAINT chk_NfpTotal CHECK( NFP_VLRTOTAL=(NFP_VLRITEM+NFP_VLRFRETE+NFP_VLRSEGURO+NFP_VLROUTRAS+NFP_VLRIPI+NFP_VLRST-NFP_VLRDESCONTO) )
+  ,CONSTRAINT chk_NfpCodTrn CHECK( NFP_CODTRN>=0 )  
+  ,CONSTRAINT chk_NfpCodVnd CHECK( NFP_CODVND>=0 )    
+  ,CONSTRAINT chk_NfpPesoBruto CHECK( NFP_PESOBRUTO>=0 )    
+  ,CONSTRAINT chk_NfpPesoLiquido CHECK( NFP_PESOLIQUIDO>=0 )      
+  ,CONSTRAINT chk_NfpLivro CHECK( NFP_LIVRO IN('S','N'))  
+  ,CONSTRAINT chk_NfpEntSai CHECK( NFP_ENTSAI IN('E','S'))    
+  ,CONSTRAINT chk_NfpReg CHECK( NFP_REG IN('A','P','S'))
+  ,CONSTRAINT PKNFPRODUTO PRIMARY KEY(NFP_NUMNF,NFP_CODSNF));      
+GO
+CREATE INDEX NFP_CODCMPX ON NFPRODUTO(NFP_CODCMP);
+GO
+CREATE VIEW VNFPRODUTO AS
+  SELECT NFP_NUMNF
+         ,NFP_CODSNF
+         ,NFP_EMISSOR
+         ,NFP_CODNO
+         ,NFP_LANCTO
+         ,NFP_VLRITEM
+         ,NFP_VLRFRETE
+         ,NFP_VLRSEGURO
+         ,NFP_VLROUTRAS
+         ,NFP_VLRIPI
+         ,NFP_VLRICMS
+         ,NFP_VLRST
+         ,NFP_VLRPIS
+         ,NFP_VLRCOFINS
+         ,NFP_VLRDESCONTO
+         ,NFP_VLRTOTAL
+         ,NFP_CODTRN
+         ,NFP_VOLUME
+         ,NFP_ESPECIE
+         ,NFP_CODVND
+         ,NFP_DTCANCELA
+         ,NFP_CODCMP
+         ,NFP_LIVRO
+         ,NFP_DTENTRADA
+         ,NFP_PESOBRUTO
+         ,NFP_PESOLIQUIDO
+         ,NFP_RECIBONFE
+         ,NFP_CHAVENFE
+         ,NFP_CANCNFE
+         ,NFP_ENTSAI
+         ,NFP_REG
+         ,NFP_CODUSR
+    FROM NFPRODUTO
+   -- ---------------|------|----|----|--------------------|----------------------------------------------------------   
+   -- CAMPO          |INS   |UPD |DEL | TIPO               | Obs
+   -- ---------------|------|----|----|--------------------|----------------------------------------------------------
+   -- NFS_NUMNF      | PK   |    |    | INT NN             |  
+   -- NFP_CODSNF     |SEL/PK|    |    | INT NN             | Campo relacionado (SERIENF)
+   -- SNF_ENTSAI     | SEL  |    |    | VC(1) NN           | Campo relacionado (SERIENF)   
+   -- NFP_EMISSOR    |      |    |    | VC(18) NN          |
+   -- NFP_CODNO      | SEL  |    |    | VC(2) NN           | Campo relacionado (NATUREZAOPERACAO)
+   -- NO_NOME        | SEL  |    |    | VC(60) NN          | Campo relacionado (NATUREZAOPERACAO)    
+   -- NFP_LANCTO     |      |    |    | INT NN             |      
+   -- NFP_VLRITEM    |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRFRETE   |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRSEGURO  |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLROUTRAS  |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRIPI     |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRICMS    |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRST      |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRPIS     |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRCOFINS  |      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRDESCONTO|      |    |    | NUM(15,2) NN       |
+   -- NFP_VLRTOTAL   |      |    |    | NUM(15,2) NN       |
+   -- NFP_CODTRN     | SEL  |    |    | INT NN             | Campo relacionado (TRANSPORTADORA)
+   -- TRN_APELIDO    | SEL  |    |    | VC(15) NN          | Campo relacionado (TRANSPORTADORA)        
+   -- NFP_VOLUME     |      |    |    | VC(10) NN          |   
+   -- NFP_ESPECIE    |      |    |    | VC(10) NN          |   
+   -- NFP_CODVND     | SEL  |    |    | INT NN             | Campo relacionado (VENDEDOR)
+   -- VND_NOME       | SEL  |    |    | VC(40) NN          | Campo relacionado (VENDEDOR)        
+   -- NFP_DTCANCELA  |      |    |    | DAT                |       
+   -- NFP_CODCMP     | SEL  |    |    | INT NN             | Campo relacionado (COMPETENCIA)
+   -- CMP_NOME       | SEL  |    |    | VC(6) NN           | Campo relacionado (COMPETENCIA)        
+   -- NFP_LIVRO      | CC   |    |    | VC(1) NN           |
+   -- NFP_DTENTRADA  |      |    |    | DAT NN             |   
+   -- NFP_PESOBRUTO  |      |    |    | NUM(15,4) NN       |
+   -- NFP_PESOLIQUIDO|      |    |    | NUM(15,4) NN       |
+   -- NFP_RECIBONFE  |      |    |    | VC(20)             |
+   -- NFP_CHAVENFE   |      |    |    | VC(50)             | 
+   -- NFP_CANCNFE    |      |    |    | VC(20)             | 
+   -- NFP_ENTSAI     | CC   |    |    | VC(1) NN           |  
+   -- NFP_REG        | FNC  |    |    | VC(1) NN           | P|A|S   P=Publico  A=Administrador S=Sistema
+   -- NFP_CODUSR     | OK   |    |    | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
+   -- USR_APELIDO    | SEL  |    |    | VC(15) NN          | Campo relacionado (USUARIO)
+   -- USR_ADMPUB     | SEL  |    |    | VC(1) NN           | Retornar se o usuario eh PUB/ADM
+   -- UP_D26         | SEL |    |    | INT NN             | Recupera o direito de usuario para esta tabela
+   -- UP_D31         | SEL |    |    | INT NN             | Recupera o direito se pode transformar registro do sistema
+   -- ---------------|------|----|----|--------------------|----------------------------------------------------------   
+   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
+   -- -----------------------------------------------------------------------------------------------------------------
+GO
+CREATE TABLE NFPRODUTOITEM(
+  NFPI_LANCTO INTEGER NOT NULL
+  ,NFPI_ITEM INTEGER NOT NULL
+  ,NFPI_CODPRD VARCHAR(15) NOT NULL                --PRODUTO
+  ,NFPI_CFOP VARCHAR(5) NOT NULL                   --CFOP
+  ,NFPI_VLRUNITARIO NUMERIC(15,2) NOT NULL
+  ,NFPI_UNIDADES NUMERIC(15,4) NOT NULL
+  ,NFPI_VLRITEM NUMERIC(15,2) NOT NULL
+  ,NFPI_CODEMB VARCHAR(3) NOT NULL                 --EMBALAGEM
+  ,NFPI_VLRFRETE NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRSEGURO NUMERIC(15,2) NOT NULL
+  ,NFPI_VLROUTRAS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRDESCONTO NUMERIC(15,2) NOT NULL
+  ,NFPI_CSTICMS VARCHAR(3) NOT NULL                --CSTICMS
+  ,NFPI_ALIQICMS NUMERIC(15,2) NOT NULL
+  ,NFPI_REDUCAOBC NUMERIC(15,2) NOT NULL
+  ,NFPI_BCICMS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRICMS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRICMSISENTAS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRICMSOUTRAS NUMERIC(15,2) NOT NULL
+  ,NFPI_CSTIPI VARCHAR(3) NOT NULL                 --CSTIPI
+  ,NFPI_ALIQIPI NUMERIC(15,2) NOT NULL
+  ,NFPI_BCIPI NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRIPI NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRIPIISENTAS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRIPIOUTRAS NUMERIC(15,2) NOT NULL
+  ,NFPI_CSTPIS VARCHAR(3) NOT NULL                 --CSTPIS
+  ,NFPI_ALIQPIS NUMERIC(15,2) NOT NULL
+  ,NFPI_BCPIS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRPIS NUMERIC(15,2) NOT NULL
+  ,NFPI_CSTCOFINS VARCHAR(3) NOT NULL              --CSTPIS
+  ,NFPI_ALIQCOFINS NUMERIC(15,2) NOT NULL
+  ,NFPI_BCCOFINS NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRCOFINS NUMERIC(15,2) NOT NULL
+  ,NFPI_ALIQST NUMERIC(15,2) NOT NULL
+  ,NFPI_BCST NUMERIC(15,2) NOT NULL
+  ,NFPI_VLRST NUMERIC(15,2) NOT NULL
+  ,NFPI_TOTALITEM NUMERIC(15,2) NOT NULL
+  ,NFPI_ENTSAI VARCHAR(1) NOT NULL                 --somente para facilitar estoque
+  ,NFPI_REG VARCHAR(1) NOT NULL
+  ,NFPI_CODUSR INTEGER NOT NULL  
+  ,CONSTRAINT chk_NfpiLancto CHECK( NFPI_LANCTO>0 )    
+  ,CONSTRAINT chk_NfpiItem CHECK( NFPI_ITEM>0 ) 
+  ,CONSTRAINT chk_NfpiVlrUnitario CHECK( NFPI_VLRUNITARIO>0 ) 
+  ,CONSTRAINT chk_NfpiUnidades CHECK( NFPI_UNIDADES>0 ) 
+  ,CONSTRAINT chk_NfpiVlrItem CHECK( NFPI_VLRITEM>0 ) 
+  ,CONSTRAINT chk_NfpiVlrFrete CHECK( NFPI_VLRFRETE>=0 ) 
+  ,CONSTRAINT chk_NfpiVlrSeguro CHECK( NFPI_VLRSEGURO>=0 )
+  ,CONSTRAINT chk_NfpiVlrOutras CHECK( NFPI_VLROUTRAS>=0 )
+  ,CONSTRAINT chk_NfpiVlrDesconto CHECK( NFPI_VLRDESCONTO>=0 )
+  ,CONSTRAINT chk_NfpiAliqIcms CHECK( NFPI_ALIQICMS>=0 )
+  ,CONSTRAINT chk_NfpiReducaoBc CHECK( NFPI_REDUCAOBC>=0 )
+  ,CONSTRAINT chk_NfpiBcIcms CHECK( NFPI_BCICMS>=0 )
+  ,CONSTRAINT chk_NfpiVlrIcms CHECK( NFPI_VLRICMS>=0 )
+  ,CONSTRAINT chk_NfpiVlrIcmsIsentas CHECK( NFPI_VLRICMSISENTAS>=0 )
+  ,CONSTRAINT chk_NfpiVlrIcmsOutras CHECK( NFPI_VLRICMSOUTRAS>=0 )
+  ,CONSTRAINT chk_NfpiAliqIpi CHECK( NFPI_ALIQIPI>=0 )
+  ,CONSTRAINT chk_NfpiBcIpi CHECK( NFPI_BCIPI>=0 )
+  ,CONSTRAINT chk_NfpiVlrIpi CHECK( NFPI_VLRIPI>=0 )
+  ,CONSTRAINT chk_NfpiVlrIpiIsentas CHECK( NFPI_VLRIPIISENTAS>=0 )
+  ,CONSTRAINT chk_NfpiVlrIpiOutras CHECK( NFPI_VLRIPIOUTRAS>=0 )
+  ,CONSTRAINT chk_NfpiAliqPis CHECK( NFPI_ALIQPIS>=0 )
+  ,CONSTRAINT chk_NfpiBcPis CHECK( NFPI_BCPIS>=0 )
+  ,CONSTRAINT chk_NfpiVlrPis CHECK( NFPI_VLRPIS>=0 )
+  ,CONSTRAINT chk_NfpiAliqCofins CHECK( NFPI_ALIQCOFINS>=0 )
+  ,CONSTRAINT chk_NfpiBcCofins CHECK( NFPI_BCCOFINS>=0 )
+  ,CONSTRAINT chk_NfpiVlrCofins CHECK( NFPI_VLRCOFINS>=0 )
+  ,CONSTRAINT chk_NfpiAliqSt CHECK( NFPI_ALIQST>=0 )
+  ,CONSTRAINT chk_NfpiBcSt CHECK( NFPI_BCST>=0 )
+  ,CONSTRAINT chk_NfpiVlrSt CHECK( NFPI_VLRST>=0 )
+  ,CONSTRAINT chk_NfpiTotalItem CHECK( NFPI_TOTALITEM=(NFPI_VLRITEM+NFPI_VLRFRETE+NFPI_VLRSEGURO+NFPI_VLROUTRAS+NFPI_VLRIPI+NFPI_VLRST-NFPI_VLRDESCONTO) )  
+  ,CONSTRAINT chk_NfpiEntSai CHECK( NFPI_ENTSAI IN('E','S'))  
+  ,CONSTRAINT chk_NfpiReg CHECK( NFPI_REG IN('A','P','S'))
+  ,CONSTRAINT PKNFPRODUTOITEM PRIMARY KEY (NFPI_LANCTO, NFPI_ITEM));
+GO
+CREATE VIEW VNFPRODUTOITEM AS
+  SELECT NFPI_LANCTO
+         ,NFPI_ITEM
+         ,NFPI_CODPRD
+         ,NFPI_CFOP
+         ,NFPI_VLRUNITARIO
+         ,NFPI_UNIDADES
+         ,NFPI_VLRITEM
+         ,NFPI_CODEMB
+         ,NFPI_VLRFRETE
+         ,NFPI_VLRSEGURO
+         ,NFPI_VLROUTRAS
+         ,NFPI_VLRDESCONTO
+         ,NFPI_CSTICMS
+         ,NFPI_ALIQICMS
+         ,NFPI_REDUCAOBC
+         ,NFPI_BCICMS
+         ,NFPI_VLRICMS
+         ,NFPI_VLRICMSISENTAS
+         ,NFPI_VLRICMSOUTRAS
+         ,NFPI_CSTIPI
+         ,NFPI_ALIQIPI
+         ,NFPI_BCIPI
+         ,NFPI_VLRIPI
+         ,NFPI_VLRIPIISENTAS
+         ,NFPI_VLRIPIOUTRAS
+         ,NFPI_CSTPIS
+         ,NFPI_ALIQPIS
+         ,NFPI_BCPIS
+         ,NFPI_VLRPIS
+         ,NFPI_CSTCOFINS
+         ,NFPI_ALIQCOFINS
+         ,NFPI_BCCOFINS
+         ,NFPI_VLRCOFINS
+         ,NFPI_ALIQST
+         ,NFPI_BCST
+         ,NFPI_VLRST
+         ,NFPI_TOTALITEM
+         ,NFPI_ENTSAI
+         ,NFPI_REG
+         ,NFPI_CODUSR
+    FROM NFPRODUTOITEM;
+   -- -------------------|------|----|----|--------------------|----------------------------------------------------------   
+   -- CAMPO              |INS   |UPD |DEL | TIPO               | Obs
+   -- -------------------|------|----|----|--------------------|----------------------------------------------------------
+   -- NFPI_LANCTO        | PK  |    |    | INT NN             |
+   -- NFPI_ITEM          | PK  |    |    | INT NN             |
+   -- NFPI_CODPRD        | SEL |    |    | INT NN             | Campo relacionado (PRODUTO)   
+   -- PRD_NOME           | SEL |    |    | VC(60) NN          | Campo relacionado (PRODUTO)      
+   -- NFPI_CFOP          | SEL |    |    | VC(5) NN           | Campo relacionado (CFOP)      
+   -- CFO_NOME           | SEL |    |    | VC(30) NN          | Campo relacionado (CFOP)       
+   -- NFPI_VLRUNITARIO   |     |    |    | NUM(15,2) NN       |
+   -- NFPI_UNIDADES      |     |    |    | NUM(15,4) NN       |
+   -- NFPI_VLRITEM       |     |    |    | NUM(15,2) NN       |
+   -- NFPI_CODEMB        | SEL |    |    | VC(3) NN           | Campo relacionado (EMBALAGEM)   
+   -- EMB_NOME           | SEL |    |    | VC(30) NN          | Campo relacionado (EMBALAGEM)      
+   -- NFPI_VLRFRETE      |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRSEGURO     |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLROUTRAS     |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRDESCONTO   |     |    |    | NUM(15,2) NN       |
+   -- NFPI_CSTICMS       | SEL |    |    | VC(3) NN           | Campo relacionado (CSTICMS)       
+   -- ICMS_NOME          | SEL |    |    | VC(60) NN          | Campo relacionado (CSTICMS)   
+   -- NFPI_ALIQICMS      |     |    |    | NUM(15,2) NN       |
+   -- NFPI_REDUCAOBC     |     |    |    | NUM(15,2) NN       |
+   -- NFPI_BCICMS        |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRICMS       |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRICMSISENTAS|     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRICMSOUTRAS |     |    |    | NUM(15,2) NN       |
+   -- NFPI_CSTIPI        | SEL |    |    | VC(3) NN           | Campo relacionado (CSTIPI)
+   -- IPI_NOME           | SEL |    |    | VC(60) NN          | Campo relacionado (CSTIPI)   
+   -- NFPI_ALIQIPI       |     |    |    | NUM(15,2) NN       |
+   -- NFPI_BCIPI         |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRIPI        |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRIPIISENTAS |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRIPIOUTRAS  |     |    |    | NUM(15,2) NN       |
+   -- NFPI_CSTPIS        | SEL |    |    | VC(3) NN           | Campo relacionado (CSTPIS)
+   -- PIS_NOME           | SEL |    |    | VC(60) NN          | Campo relacionado (CSTPIS)   
+   -- NFPI_ALIQPIS       |     |    |    | NUM(15,2) NN       |
+   -- NFPI_BCPIS         |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRPIS        |     |    |    | NUM(15,2) NN       |
+   -- NFPI_CSTCOFINS     | SEL |    |    | VC(3) NN           | Campo relacionado (CSTPIS)  
+   -- NFPI_ALIQCOFINS    |     |    |    | NUM(15,2) NN       |
+   -- NFPI_BCCOFINS      |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRCOFINS     |     |    |    | NUM(15,2) NN       |
+   -- NFPI_ALIQST        |     |    |    | NUM(15,2) NN       |
+   -- NFPI_BCST          |     |    |    | NUM(15,2) NN       |
+   -- NFPI_VLRST         |     |    |    | NUM(15,2) NN       |
+   -- NFPI_TOTALITEM     |     |    |    | NUM(15,2) NN       |
+   -- NFPI_ENTSAI        | CC  |    |    | VC(1) NN           | Somente para facilitar estoque   
+   -- NFPI_REG           | FNC |    |    | VC(1) NN           | P|A|S   P=Publico  A=Administrador S=Sistema
+   -- NFPI_CODUSR        | OK  |    |    | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
+   -- USR_APELIDO        | SEL |    |    | VC(15) NN          | Campo relacionado (USUARIO)
+   -- USR_ADMPUB         | SEL |    |    | VC(1) NN           | Retornar se o usuario eh PUB/ADM
+   -- UP_D26             | SEL |    |    | INT NN             | Recupera o direito de usuario para esta tabela
+   -- UP_D31             | SEL |    |    | INT NN             | Recupera o direito se pode transformar registro do sistema
+   -- -------------------|-----|----|----|--------------------|----------------------------------------------------------   
+   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
+   -- ------------------------------------------------------------------------------------------------------------------
+   
+   
+   
+   
+   
 -------------------------------------------------------------------------------------
 --                               N F S E R V I C O                                 --
 -- NFS_ENTSAI tem checar com SNF_ENTSAI                                            --
@@ -2756,12 +3211,22 @@ CREATE TABLE NFSERVICO(
   ,NFS_CODCDD VARCHAR(7) NOT NULL           -- CIDADE
   ,NFS_STATUSWS VARCHAR(200)
   ,NFS_CONTRATO INTEGER NOT NULL
+  ,NFS_LIVRO VARCHAR(1) NOT NULL  
   ,NFS_ENTSAI VARCHAR(1) NOT NULL  
   ,NFS_REG VARCHAR(1) NOT NULL
   ,NFS_CODUSR INTEGER NOT NULL
+  ,CONSTRAINT chk_NfsNumNf CHECK( NFS_NUMNF>0 )
+  ,CONSTRAINT chk_NfsCodSnf CHECK( NFS_CODSNF>0 )
+  ,CONSTRAINT chk_NfsLancto CHECK( NFS_LANCTO>0 )  
+  ,CONSTRAINT chk_NfsVlrTotal CHECK( NFS_VLRTOTAL>0 )  
+  ,CONSTRAINT chk_NfsVlrRetencao CHECK( NFS_VLRRETENCAO>=0 )  
+  ,CONSTRAINT chk_NfsCodVnd CHECK( NFS_CODVND>=0 )  
+  ,CONSTRAINT chk_NfsLivro CHECK( NFS_LIVRO IN('S','N'))    
   ,CONSTRAINT chk_nfsEntSai CHECK( NFS_ENTSAI IN('E','S'))    
   ,CONSTRAINT chk_nfsReg CHECK( NFS_REG IN('A','P','S'))
   ,CONSTRAINT PKNFSERVICO PRIMARY KEY(NFS_NUMNF,NFS_CODSNF));      
+GO
+CREATE INDEX NFS_CODCMPX ON NFSERVICO(NFS_CODCMP);
 GO
 CREATE VIEW VNFSERVICO AS
   SELECT NFS_NUMNF
@@ -2779,8 +3244,8 @@ CREATE VIEW VNFSERVICO AS
          ,NFS_CODCDD
          ,NFS_STATUSWS
          ,NFS_CONTRATO
+         ,NFS_LIVRO
          ,NFS_ENTSAI
-         --,NFS_ATIVO
          ,NFS_REG
          ,NFS_CODUSR
     FROM NFSERVICO
@@ -2872,6 +3337,49 @@ CREATE TABLE NFSERVICOITEM(
   ,NFSI_ATIVO VARCHAR(1) NOT NULL
   ,NFSI_REG VARCHAR(1) NOT NULL
   ,NFSI_CODUSR INTEGER NOT NULL  
+  ,CONSTRAINT chk_nfsiLancto CHECK( NFSI_LANCTO>0 )
+  ,CONSTRAINT chk_nfsiItem CHECK( NFSI_ITEM>0 )
+  ,CONSTRAINT chk_nfsiCodSrv CHECK( NFSI_CODSRV>0 )
+  ,CONSTRAINT chk_nfsiUnidades CHECK( NFSI_UNIDADES>0 )
+  ,CONSTRAINT chk_nfsiVlrUnitario CHECK( NFSI_VLRUNITARIO>0 )
+  ,CONSTRAINT chk_nfsiVlrItem CHECK( NFSI_VLRITEM>0 )
+  ,CONSTRAINT chk_nfsiVlrDesconto CHECK( NFSI_VLRDESCONTO>=0 )
+  ,CONSTRAINT chk_nfsiAliqInssFat CHECK( NFSI_ALIQINSSFAT>=0 )
+  ,CONSTRAINT chk_nfsiBcInssFat CHECK( NFSI_BCINSSFAT>=0 )
+  ,CONSTRAINT chk_nfsiVlrInssFat CHECK( NFSI_VLRINSSFAT>=0 )
+  ,CONSTRAINT chk_nfsiAliqInss CHECK( NFSI_ALIQINSS>=0 )
+  ,CONSTRAINT chk_nfsiBcInss CHECK( NFSI_BCINSS>=0 )
+  ,CONSTRAINT chk_nfsiVlrInss CHECK( NFSI_VLRINSS>=0 )
+  ,CONSTRAINT chk_nfsiAliqIrrfFat CHECK( NFSI_ALIQIRRFFAT>=0 )
+  ,CONSTRAINT chk_nfsiBcIrrfFat CHECK( NFSI_BCIRRFFAT>=0 )
+  ,CONSTRAINT chk_nfsiVlrIrrfFat CHECK( NFSI_VLRIRRFFAT>=0 )
+  ,CONSTRAINT chk_nfsiAliqIrrf CHECK( NFSI_ALIQIRRF>=0 )
+  ,CONSTRAINT chk_nfsiBcIrrf CHECK( NFSI_BCIRRF>=0 )
+  ,CONSTRAINT chk_nfsiVlrIrrf CHECK( NFSI_VLRIRRF>=0 )
+  ,CONSTRAINT chk_nfsiAliqPisFat CHECK( NFSI_ALIQPISFAT>=0 )
+  ,CONSTRAINT chk_nfsiBcPisFat CHECK( NFSI_BCPISFAT>=0 )
+  ,CONSTRAINT chk_nfsiVlrPisFat CHECK( NFSI_VLRPISFAT>=0 )
+  ,CONSTRAINT chk_nfsiAliqPis CHECK( NFSI_ALIQPIS>=0 )
+  ,CONSTRAINT chk_nfsiBcPis CHECK( NFSI_BCPIS>=0 )
+  ,CONSTRAINT chk_nfsiVlrPis CHECK( NFSI_VLRPIS>=0 )
+  ,CONSTRAINT chk_nfsiAliqCofinsFat CHECK( NFSI_ALIQCOFINSFAT>=0 )
+  ,CONSTRAINT chk_nfsiBcCofinsFat CHECK( NFSI_BCCOFINSFAT>=0 )
+  ,CONSTRAINT chk_nfsiVlrCofinsFat CHECK( NFSI_VLRCOFINSFAT>=0 )
+  ,CONSTRAINT chk_nfsiAliqCofins CHECK( NFSI_ALIQCOFINS>=0 )
+  ,CONSTRAINT chk_nfsiBcCofins CHECK( NFSI_BCCOFINS>=0 )
+  ,CONSTRAINT chk_nfsiVlrCofins CHECK( NFSI_VLRCOFINS>=0 )
+  ,CONSTRAINT chk_nfsiAliqCsll CHECK( NFSI_ALIQCSLL>=0 )
+  ,CONSTRAINT chk_nfsiBcCsll CHECK( NFSI_BCCSLL>=0 )
+  ,CONSTRAINT chk_nfsiVlrCsll CHECK( NFSI_VLRCSLL>=0 )
+  ,CONSTRAINT chk_nfsiAliqIssFat CHECK( NFSI_ALIQISSFAT>=0 )
+  ,CONSTRAINT chk_nfsiBcIssFat CHECK( NFSI_BCISSFAT>=0 )
+  ,CONSTRAINT chk_nfsiVlrIssFat CHECK( NFSI_VLRISSFAT>=0 )
+  ,CONSTRAINT chk_nfsiAliqIss CHECK( NFSI_ALIQISS>=0 )
+  ,CONSTRAINT chk_nfsiBcIss CHECK( NFSI_BCISS>=0 )
+  ,CONSTRAINT chk_nfsiVlrIss CHECK( NFSI_VLRISS>=0 )
+  ,CONSTRAINT chk_nfsiAliqCsllFat CHECK( NFSI_ALIQCSLLFAT>=0 )
+  ,CONSTRAINT chk_nfsiBcCsllFat CHECK( NFSI_BCCSLLFAT>=0 )
+  ,CONSTRAINT chk_nfsiVlrCsllFat CHECK( NFSI_VLRCSLLFAT>=0 )
   ,CONSTRAINT chk_nfsiEntSai CHECK( NFSI_ENTSAI IN('E','S'))  
   ,CONSTRAINT chk_nfsiAtivo CHECK( NFSI_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_nfsiReg CHECK( NFSI_REG IN('A','P','S'))
@@ -3226,13 +3734,13 @@ BEGIN
     );
 
     INSERT INTO DETALHEOS(
-      DOS_CODGMP  -- Angelo Kokiso adição do insert da coluna codgmp
+      DOS_CODOS
       ,DOS_CODMSG
       ,DOS_CODUSR) VALUES(
-      @osCodGmpNew    -- angelo kokiso adição da coluna codgmp
+      @osCodigoNew
       ,12
       ,@osCodUsrNew
-    ); 
+    );    
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -3434,15 +3942,15 @@ BEGIN
       --
       --
       INSERT INTO DETALHEOS(
-        DOS_CODGMP
+        DOS_CODOS
         ,DOS_CODMSG
         ,DOS_COMPLEMENTO
         ,DOS_CODUSR) VALUES(
-        @osCodGmpNew
+        @osCodigoNew
         ,15
         ,@osComplementoNew
         ,@osCodUsrNew
-      );
+      );    
     END
     -------------------------
     -- NOSHOW
@@ -3463,17 +3971,17 @@ BEGIN
              ,OS_DTBAIXA=GETDATE()
              ,OS_CODUSR=@osCodUsrNew
        WHERE (OS_CODIGO=@osCodigoNew);      
-      
+       
       INSERT INTO DETALHEOS(
-        DOS_CODGMP
+        DOS_CODOS
         ,DOS_CODMSG
         ,DOS_COMPLEMENTO
         ,DOS_CODUSR) VALUES(
-        @osCodGmpNew
+        @osCodigoNew
         ,32
         ,@osComplementoNew
         ,@osCodUsrNew
-      );
+      );    
     END
     -------------------------
     -- IMPRODUTIVIDADE
@@ -3495,95 +4003,18 @@ BEGIN
              ,OS_DTBAIXA=GETDATE()
              ,OS_CODUSR=@osCodUsrNew
        WHERE (OS_CODIGO=@osCodigoNew);      
-      
+       
       INSERT INTO DETALHEOS(
-        DOS_CODGMP
+        DOS_CODOS
         ,DOS_CODMSG
         ,DOS_COMPLEMENTO
         ,DOS_CODUSR) VALUES(
-        @osCodGmpNew
+        @osCodigoNew
         ,31
         ,@osComplementoNew
         ,@osCodUsrNew
-      );
-   
+      );    
     END
-    /*
-            EXEC prcGenerator 'PAGAR',@retorno=@smCodigo output
-            INSERT INTO VPAGAR(
-            PGR_LANCTO
-            ,PGR_BLOQUEADO
-            ,PGR_CODBNC
-            ,PGR_CODFVR
-            ,PGR_CODFC
-            ,PGR_CODTD
-            ,PGR_VENCTO
-            ,PGR_DATAPAGA
-            ,PGR_DOCTO
-            ,PGR_DTDOCTO
-            ,PGR_CODPTT
-            ,PGR_MASTER
-            ,PGR_OBSERVACAO
-            ,PGR_CODPTP
-            ,PGR_CODPT
-            ,PGR_VLRDESCONTO
-            ,PGR_VLREVENTO
-            ,PGR_VLRPARCELA
-            ,PGR_VLRMULTA
-            ,PGR_VLRRETENCAO
-            ,PGR_VLRPIS
-            ,PGR_VLRCOFINS
-            ,PGR_VLRCSLL
-            ,PGR_CODCC
-            ,PGR_CODSNF
-            ,PGR_APR
-            ,PGR_CODEMP
-            ,PGR_CODFLL
-            ,PGR_LOTECNAB
-            ,PGR_CODCNTT            
-            ,PGR_VERDIREITO
-            ,PGR_CODCMP
-            ,PGR_REG
-            ,PGR_CODUSR) VALUES(
-            @retorno  -- PGR_LANCTO
-            ,'N'-- BLOQUEADO
-            ,-- CODBNC
-            ,-- CODFVR
-            ,-- CODFC
-            ,-- CODTD
-            ,-- VENCTO
-            ,-- DATAPAGA
-            ,-- DOCTO
-            ,-- DTDOCTO
-            ,-- CODPTT
-            ,-- MASTER
-            ,-- OBSERVACAO
-            ,-- CODPTP
-            ,-- CODPT
-            ,-- VLRDESCONTO
-            ,-- VLREVENTO
-            ,-- VLRPARCELA
-            ,-- VLRMULTA
-            ,-- VLRRETENCAO
-            ,-- VLRPIS
-            ,-- VLRCOFINS
-            ,-- VLRCSLL
-            ,-- CODCC
-            ,-- CODSNF
-            ,-- APR
-            ,-- CODEMP
-            ,-- CODFLL
-            ,-- LOTECNAB
-            ,-- CODCNTT
-            ,-- VERDIREITO
-            ,-- CODCMP -- Referencia para RATEIO
-            ,-- REG
-            ,-- CODUSR
-  */
-
-
-
-    
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -3752,14 +4183,14 @@ CREATE TABLE dbo.BKPPADRAOTITULO(
 --tblpagar
 -------------------------------------------------------------------------------------
 CREATE TABLE PAGAR(
-  PGR_LANCTO INTEGER NOT NULL 
+  PGR_LANCTO INTEGER NOT NULL
   ,PGR_BLOQUEADO VARCHAR(1) NOT NULL
   ,PGR_CHEQUE VARCHAR(10) DEFAULT NULL
   ,PGR_CODBNC INTEGER NOT NULL
   ,PGR_CODFVR INTEGER NOT NULL
   ,PGR_CODFC VARCHAR(3) NOT NULL
   ,PGR_CODTD VARCHAR(3) NOT NULL
-  ,PGR_VENCTO DATE NOT NULL  
+  ,PGR_VENCTO DATE NOT NULL
   ,PGR_DATAPAGA DATE DEFAULT NULL
   ,PGR_DOCTO VARCHAR(12) NOT NULL
   ,PGR_DTDOCTO DATE NOT NULL
@@ -3770,16 +4201,16 @@ CREATE TABLE PAGAR(
   ,PGR_CODPTP VARCHAR(2) NOT NULL
   ,PGR_INDICE INTEGER NOT NULL
   ,PGR_CODPT INTEGER NOT NULL
-  ,PGR_VLREVENTO NUMERIC(15,2) NOT NULL  
-  ,PGR_VLRPARCELA NUMERIC(15,2) NOT NULL  
+  ,PGR_VLREVENTO NUMERIC(15,2) NOT NULL
+  ,PGR_VLRPARCELA NUMERIC(15,2) NOT NULL
   ,PGR_VLRDESCONTO NUMERIC(15,2) DEFAULT 0 NOT NULL
-  ,PGR_VLRMULTA NUMERIC(15,2) DEFAULT 0 NOT NULL  
-  ,PGR_VLRLIQUIDO NUMERIC(15,2) NOT NULL
+  ,PGR_VLRMULTA NUMERIC(15,2) DEFAULT 0 NOT NULL
   ,PGR_VLRBAIXA NUMERIC(15,2) DEFAULT 0 NOT NULL
   ,PGR_VLRRETENCAO NUMERIC(15,2) DEFAULT 0 NOT NULL
   ,PGR_VLRPIS NUMERIC(15,2) DEFAULT 0 NOT NULL
   ,PGR_VLRCOFINS NUMERIC(15,2) DEFAULT 0 NOT NULL
   ,PGR_VLRCSLL NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRLIQUIDO NUMERIC(15,2) NOT NULL
   ,PGR_CODCC VARCHAR(15) NOT NULL
   ,PGR_CODSNF INTEGER DEFAULT 0 NOT NULL
   ,PGR_DTMOVTO DATE DEFAULT GETDATE() NOT NULL
@@ -3790,7 +4221,7 @@ CREATE TABLE PAGAR(
   ,PGR_VERDIREITO INTEGER NOT NULL
   ,PGR_CODCNTT INTEGER NOT NULL  
   ,PGR_CODCMP INTEGER NOT NULL
-  ,PGR_CODALT INTEGER NOT NULL  
+  ,PGR_CODALT INTEGER NOT NULL
   ,PGR_REG VARCHAR(1) DEFAULT 'P' NOT NULL
   ,PGR_CODUSR INTEGER NOT NULL
   ,CONSTRAINT PKPAGAR PRIMARY KEY (PGR_LANCTO)    
@@ -3803,12 +4234,16 @@ CREATE TABLE PAGAR(
   ,CONSTRAINT chk_pgrVlrDesconto CHECK( PGR_VLRDESCONTO >= 0 )
   ,CONSTRAINT chk_pgrVlrEvento CHECK( PGR_VLREVENTO > 0 )
   ,CONSTRAINT chk_pgrVlrParcela CHECK( PGR_VLRPARCELA > 0 )
-  ,CONSTRAINT chk_pgrVlrLiquido CHECK( PGR_VLRLIQUIDO > 0 )
   ,CONSTRAINT chk_pgrVlrMulta CHECK( PGR_VLRMULTA >= 0 )
+  ,CONSTRAINT chk_pgrVlrBaixa CHECK( PGR_VLRBAIXA >= 0 )  
   ,CONSTRAINT chk_pgrVlrRetencao CHECK( PGR_VLRRETENCAO >= 0 )
   ,CONSTRAINT chk_pgrVlrPis CHECK( PGR_VLRPIS >= 0 )
   ,CONSTRAINT chk_pgrVlrCofins CHECK( PGR_VLRCOFINS >= 0 )
   ,CONSTRAINT chk_pgrVlrCsll CHECK( PGR_VLRCSLL >= 0 )
+  ,CONSTRAINT chk_pgrVlrLiquido CHECK( PGR_VLRLIQUIDO=(PGR_VLRPARCELA-PGR_VLRDESCONTO+PGR_VLRMULTA-PGR_VLRBAIXA-PGR_VLRRETENCAO) )  
+  ,CONSTRAINT chk_pgrCodSnf CHECK( PGR_CODSNF >= 0 )  
+  ,CONSTRAINT chk_pgrLoteCnab CHECK( PGR_LOTECNAB >= 0 )    
+  ,CONSTRAINT chk_pgrCodCntt CHECK( PGR_CODCNTT >= 0 )      
   ,CONSTRAINT chk_pgrVerDireito CHECK( PGR_VERDIREITO IN(26,27,28,34))
   ,CONSTRAINT chk_pgrCodAlt CHECK( PGR_CODALT IN(0,1,2,3,4,5,6,7))  
   ,CONSTRAINT chk_pgrApr CHECK( PGR_APR IN('S','N'))    
@@ -3816,6 +4251,7 @@ CREATE TABLE PAGAR(
 );
 GO
 CREATE INDEX PGR_VENCTOX ON PAGAR(PGR_VENCTO);
+CREATE INDEX PGR_DATAPAGAX ON PAGAR(PGR_DATAPAGA);
 GO
 CREATE VIEW VPAGAR AS
   SELECT 
@@ -3841,12 +4277,12 @@ CREATE VIEW VPAGAR AS
     ,PGR_VLRPARCELA    
     ,PGR_VLRDESCONTO
     ,PGR_VLRMULTA    
-    ,PGR_VLRLIQUIDO
     ,PGR_VLRBAIXA    
     ,PGR_VLRRETENCAO
     ,PGR_VLRPIS
     ,PGR_VLRCOFINS
     ,PGR_VLRCSLL
+    ,PGR_VLRLIQUIDO    
     ,PGR_CODCC
     ,PGR_CODSNF
     ,PGR_DTMOVTO
@@ -3861,6 +4297,53 @@ CREATE VIEW VPAGAR AS
     ,PGR_REG
     ,PGR_CODUSR
   FROM PAGAR
+GO
+CREATE TABLE dbo.BKPPAGAR(
+  PGR_ID INTEGER IDENTITY PRIMARY KEY NOT NULL 
+  ,PGR_ACAO VARCHAR(1) NOT NULL
+  ,PGR_DATA DATE DEFAULT GETDATE() NOT NULL
+  ,PGR_LANCTO INTEGER NOT NULL 
+  ,PGR_BLOQUEADO VARCHAR(1) NOT NULL
+  ,PGR_CHEQUE VARCHAR(10) DEFAULT NULL
+  ,PGR_CODBNC INTEGER NOT NULL
+  ,PGR_CODFVR INTEGER NOT NULL
+  ,PGR_CODFC VARCHAR(3) NOT NULL
+  ,PGR_CODTD VARCHAR(3) NOT NULL
+  ,PGR_VENCTO DATE NOT NULL  
+  ,PGR_DATAPAGA DATE DEFAULT NULL
+  ,PGR_DOCTO VARCHAR(12) NOT NULL
+  ,PGR_DTDOCTO DATE NOT NULL
+  ,PGR_CODPTT VARCHAR(1) NOT NULL
+  ,PGR_MASTER INTEGER NOT NULL
+  ,PGR_OBSERVACAO VARCHAR(120) NOT NULL
+  ,PGR_PARCELA INTEGER NOT NULL
+  ,PGR_CODPTP VARCHAR(2) NOT NULL
+  ,PGR_INDICE INTEGER NOT NULL
+  ,PGR_CODPT INTEGER NOT NULL
+  ,PGR_VLREVENTO NUMERIC(15,2) NOT NULL   
+  ,PGR_VLRPARCELA NUMERIC(15,2) NOT NULL  
+  ,PGR_VLRDESCONTO NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRMULTA NUMERIC(15,2) DEFAULT 0 NOT NULL  
+  ,PGR_VLRBAIXA NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRRETENCAO NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRPIS NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRCOFINS NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRCSLL NUMERIC(15,2) DEFAULT 0 NOT NULL
+  ,PGR_VLRLIQUIDO NUMERIC(15,2) NOT NULL  
+  ,PGR_CODCC VARCHAR(15) NOT NULL
+  ,PGR_CODSNF INTEGER DEFAULT 0 NOT NULL
+  ,PGR_DTMOVTO DATE DEFAULT GETDATE() NOT NULL
+  ,PGR_APR VARCHAR(1) DEFAULT 'S' NOT NULL
+  ,PGR_CODEMP INTEGER NOT NULL
+  ,PGR_CODFLL INTEGER NOT NULL
+  ,PGR_LOTECNAB INTEGER DEFAULT 0 NOT NULL
+  ,PGR_VERDIREITO INTEGER NOT NULL
+  ,PGR_CODCNTT INTEGER NOT NULL  
+  ,PGR_CODCMP INTEGER NOT NULL
+  ,PGR_REG VARCHAR(1) DEFAULT 'P' NOT NULL
+  ,PGR_CODUSR INTEGER NOT NULL
+  ,CONSTRAINT chk_bkpPgrAcao CHECK( PGR_ACAO IN('I','A','E'))  
+);
 -------------------------------------------------------------------------------------------
 --                               P A G A R M A S T E R
 --tblpagar
@@ -4129,7 +4612,7 @@ CREATE TABLE CONTRATO(
   ,CONSTRAINT chk_cnttQtdPlaca CHECK( (CNTT_QTDPLACA>=0) AND (CNTT_QTDPLACA<=CNTT_QTDAUTO) )  
   ,CONSTRAINT chk_cnttQtdAtivado CHECK( (CNTT_QTDATIVADO>=0) AND (CNTT_QTDATIVADO<=CNTT_QTDAUTO) )    
   ,CONSTRAINT chk_cnttAtivo CHECK( CNTT_ATIVO IN('S','N'))    
-  ,CONSTRAINT chk_cnttVlrMensal CHECK( CNTT_VLRMENSAL>=0 )      
+  ,CONSTRAINT chk_cnttVlrMensal CHECK( CNTT_VLRMENSAL>0 )      
   ,CONSTRAINT chk_cnttVlrPontual CHECK( CNTT_VLRPONTUAL>=0 )   
   ,CONSTRAINT chk_cnttFidelidade CHECK( CNTT_FIDELIDADE IN('S','N'))    
   ,CONSTRAINT chk_cnttInstPropria CHECK( CNTT_INSTPROPRIA IN('S','N'))      
@@ -4572,12 +5055,12 @@ BEGIN
         @cntpPlacaChassiNew   -- VCL_CODIGO
         ,@cnttCodFvrNew       -- VCL_CODFVR            
         ,1                    -- VCL_CODVCR
-        ,'AUT'                -- VCL_CODVTP // ANGELO KOKISO alteração para 'AUT' como default de tipo
+        ,'NSA'                -- VCL_CODVTP
         ,1                    -- VCL_CODVMD
         ,1900                 -- VCL_ANO
         ,'S'                  -- VCL_ATIVO
         ,'P'                  -- VCL_REG
-        ,2                    -- vCL_CODUSR( 2=SISTEMA )         
+        ,2                    -- VCL_CODUSR( 2=SISTEMA )         
       );     
     END
   END TRY
@@ -4648,11 +5131,10 @@ CREATE TABLE CONTRATOPRODUTO(
   ,CNTP_STATUSENTREGA VARCHAR(3) NOT NULL
   ,CNTP_CODENTREGA INTEGER NOT NULL
   ,CNTP_CODINSTALA INTEGER NOT NULL
-  ,CNTP_LOCALINSTALACAO VARCHAR(MAX) NOT NULL DEFAULT 'NSA' -- ANGELO KOKISO ADIÇÃO DO LOCAL DE INSTALAÇÃO 
   ,CNTP_DTAGENDA DATE
   ,CNTP_CODRASTREIO VARCHAR(20)
   ,CNTP_DTENTREGA DATE
-  ,CNTP_DTATIVACAO DATE
+  ,CNTP_DTATIVACAO DATE  
   ,CNTP_AGENDADO VARCHAR(1) NOT NULL      
   ,CNTP_CODOS INTEGER NOT NULL     
   ,CNTP_ACAO INTEGER NOT NULL         
@@ -4759,7 +5241,6 @@ BEGIN
   DECLARE @cntpDtAtivacaoNew DATE;          -- CNTP_DTATIVACAO
   DECLARE @cntpAcaoNew INTEGER;             -- CNTP_ACAO
   DECLARE @cntpCodUsrNew INTEGER;           -- CNTP_CODUSR
-  DECLARE @cntpLocalInstalacao VARCHAR(MAX);
 END
 GO
 CREATE TRIGGER dbo.TRGViewCONTRATOPRODUTO_BU ON dbo.VCONTRATOPRODUTO
@@ -4798,7 +5279,6 @@ BEGIN
   DECLARE @cntpDtAtivacaoNew DATE;
   DECLARE @cntpAcaoNew INTEGER;
   DECLARE @cntpCodUsrNew INTEGER;
-  DECLARE @cntpLocalInstalacao VARCHAR(MAX);
   -------------------------------------------------------
   -- Buscando os campos NEW para checagem antes do insert
   -------------------------------------------------------
@@ -4828,7 +5308,6 @@ BEGIN
          ,@cntpDtAtivacaoNew    = i.CNTP_DTATIVACAO
          ,@cntpAcaoNew          = i.CNTP_ACAO
          ,@cntpCodUsrNew        = i.CNTP_CODUSR
-         ,@cntpLocalInstalacao  = i.CNTP_LOCALINSTALACAO
     FROM inserted i
     LEFT OUTER JOIN GRUPOMODELOPRODUTO GMP ON i.CNTP_CODGMP=GMP.GMP_CODIGO
     LEFT OUTER JOIN CONTRATO CNTT ON i.CNTP_CODCNTT=CNTT.CNTT_CODIGO;
@@ -5180,18 +5659,17 @@ BEGIN
     -- Atualizando o registro do trigger
     ------------------------------------
     UPDATE dbo.CONTRATOPRODUTO
-       SET CNTP_CODGMP           = @cntpCodGmpNew
-           ,CNTP_MODOENTREGA     = @cntpModoEntregaNew       
-           ,CNTP_STATUSENTREGA   = @cntpStatusEntregaNew                  
-           ,CNTP_CODENTREGA      = @cntpCodEntregaNew
-           ,CNTP_CODINSTALA      = @cntpCodInstalaNew
-           ,CNTP_DTAGENDA        = @cntpDtAgendaNew
-           ,CNTP_AGENDADO        = @cntpAgendadoNew
-           ,CNTP_CODOS           = @cntpCodOsNew           
-           ,CNTP_CODRASTREIO     = @cntpCodRastreioNew           
-           ,CNTP_DTENTREGA       = @cntpDtEntregaNew           
-           ,CNTP_DTATIVACAO      = @cntpDtAtivacaoNew
-           ,CNTP_LOCALINSTALACAO = @cntpLocalInstalacao                     
+       SET CNTP_CODGMP          = @cntpCodGmpNew
+           ,CNTP_MODOENTREGA    = @cntpModoEntregaNew       
+           ,CNTP_STATUSENTREGA  = @cntpStatusEntregaNew                  
+           ,CNTP_CODENTREGA     = @cntpCodEntregaNew
+           ,CNTP_CODINSTALA     = @cntpCodInstalaNew
+           ,CNTP_DTAGENDA       = @cntpDtAgendaNew
+           ,CNTP_AGENDADO       = @cntpAgendadoNew
+           ,CNTP_CODOS          = @cntpCodOsNew           
+           ,CNTP_CODRASTREIO    = @cntpCodRastreioNew           
+           ,CNTP_DTENTREGA      = @cntpDtEntregaNew           
+           ,CNTP_DTATIVACAO     = @cntpDtAtivacaoNew                      
            --,CNTP_ACAO           = @cntpAcaoNew
            ,CNTP_CODUSR         = @cntpCodUsrNew
      WHERE ((CNTP_CODCNTT=@cntpCodCnttNew) AND (CNTP_IDUNICO=@cntpIdUnicoNew));
@@ -5278,7 +5756,6 @@ CREATE TABLE dbo.BKPPONTOESTOQUEIND(
 GO
 CREATE TABLE PRODUTO(
   PRD_CODIGO VARCHAR(15) NOT NULL
-  ,PRD_CODEMP INTEGER NOT NULL
   ,PRD_NOME VARCHAR(60) NOT NULL
   ,PRD_CODNCM VARCHAR(10) NOT NULL
   ,PRD_ST VARCHAR(1) NOT NULL
@@ -5293,6 +5770,9 @@ CREATE TABLE PRODUTO(
   ,PRD_CODBARRAS VARCHAR(20)
   ,PRD_PESOBRUTO NUMERIC(15,4) NOT NULL
   ,PRD_PESOLIQUIDO NUMERIC(15,4) NOT NULL
+  ,PRD_ENTRADA VARCHAR(1) NOT NULL
+  ,PRD_SAIDA VARCHAR(1) NOT NULL
+  ,PRD_CODNCMIMP VARCHAR(10) NOT NULL
   ,PRD_DTCADASTRO DATE DEFAULT GETDATE() NOT NULL
   ,PRD_ATIVO VARCHAR(1) NOT NULL
   ,PRD_REG VARCHAR(1) NOT NULL
@@ -5305,13 +5785,14 @@ CREATE TABLE PRODUTO(
   ,CONSTRAINT chk_prdPesoBruto CHECK( PRD_PESOBRUTO >=0 )  
   ,CONSTRAINT chk_prdPesoLiquido CHECK( PRD_PESOLIQUIDO >=0 )    
   ,CONSTRAINT chk_prdIpi CHECK( PRD_IPI IN('S','N'))  
+  ,CONSTRAINT chk_prdEntrada CHECK( PRD_ENTRADA IN('S','N'))    
+  ,CONSTRAINT chk_prdSaida CHECK( PRD_SAIDA IN('S','N'))      
   ,CONSTRAINT chk_prdAtivo CHECK( PRD_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_prdReg CHECK( PRD_REG IN('A','P','S'))
-  ,CONSTRAINT PKPRODUTO PRIMARY KEY (PRD_CODIGO,PRD_CODEMP));  
+  ,CONSTRAINT PKPRODUTO PRIMARY KEY (PRD_CODIGO));  
 GO
 CREATE VIEW VPRODUTO AS
   SELECT PRD_CODIGO                                     
-         ,PRD_CODEMP
          ,PRD_NOME
          ,PRD_CODNCM
          ,PRD_ST
@@ -5326,6 +5807,9 @@ CREATE VIEW VPRODUTO AS
          ,PRD_CODBARRAS
          ,PRD_PESOBRUTO
          ,PRD_PESOLIQUIDO
+         ,PRD_ENTRADA
+         ,PRD_SAIDA
+         ,PRD_CODNCMIMP
          ,PRD_ATIVO
          ,PRD_REG
          ,PRD_CODUSR
@@ -5336,7 +5820,6 @@ CREATE TABLE dbo.BKPPRODUTO(
   ,PRD_ACAO VARCHAR(1) NOT NULL
   ,PRD_DATA DATE DEFAULT GETDATE() NOT NULL
   ,PRD_CODIGO VARCHAR(15) NOT NULL                                              
-  ,PRD_CODEMP INTEGER NOT NULL
   ,PRD_NOME VARCHAR(60) NOT NULL
   ,PRD_CODNCM VARCHAR(10) NOT NULL
   ,PRD_ST VARCHAR(1) NOT NULL
@@ -5351,6 +5834,9 @@ CREATE TABLE dbo.BKPPRODUTO(
   ,PRD_CODBARRAS VARCHAR(20)
   ,PRD_PESOBRUTO NUMERIC(15,4) NOT NULL
   ,PRD_PESOLIQUIDO NUMERIC(15,4) NOT NULL
+  ,PRD_ENTRADA VARCHAR(1) NOT NULL
+  ,PRD_SAIDA VARCHAR(1) NOT NULL
+  ,PRD_CODNCMIMP VARCHAR(10) NOT NULL  
   ,PRD_ATIVO VARCHAR(1) NOT NULL
   ,PRD_REG VARCHAR(1) NOT NULL
   ,PRD_CODUSR INTEGER NOT NULL
@@ -5487,12 +5973,10 @@ CREATE TABLE SERIENF(
   ,SNF_SERIE VARCHAR(4) NOT NULL
   ,SNF_ENTSAI VARCHAR(1) NOT NULL
   ,SNF_CODTD VARCHAR(3) NOT NULL
-  ,SNF_INFORMARNF VARCHAR(1) NOT NULL
-  ,SNF_NFINICIO INTEGER NOT NULL
-  ,SNF_NFFIM INTEGER NOT NULL
+  ,SNF_NFPROXIMA INTEGER NOT NULL
   ,SNF_IDF VARCHAR(20) NOT NULL
   ,SNF_MODELO VARCHAR(5) NOT NULL -- Faltou tabela relacionada
-  ,SNF_INDICE VARCHAR(12) NOT NULL
+  ,SNF_INDICE VARCHAR(15) NOT NULL
   ,SNF_LIVRO VARCHAR(1) NOT NULL
   ,SNF_ENVIO VARCHAR(1) NOT NULL
   ,SNF_CODFLL INTEGER NOT NULL    
@@ -5501,7 +5985,7 @@ CREATE TABLE SERIENF(
   ,SNF_REG VARCHAR(1) NOT NULL
   ,SNF_CODUSR INTEGER NOT NULL
   ,CONSTRAINT chk_snfEntSai CHECK( SNF_ENTSAI IN('E','S'))    
-  ,CONSTRAINT chk_snfInformarNf CHECK( SNF_INFORMARNF IN('S','N'))
+  --,CONSTRAINT chk_snfInformarNf CHECK( SNF_INFORMARNF IN('S','N'))
   ,CONSTRAINT chk_snfLivro CHECK( SNF_LIVRO IN('S','N'))
   ,CONSTRAINT chk_snfEnvio CHECK( SNF_ENVIO IN('P','S','N'))  
   ,CONSTRAINT chk_snfAtivo CHECK( SNF_ATIVO IN('S','N'))  
@@ -5509,7 +5993,7 @@ CREATE TABLE SERIENF(
 );
 GO
 CREATE VIEW VSERIENF AS
-  SELECT SNF_CODIGO,SNF_SERIE,SNF_ENTSAI,SNF_CODTD,SNF_INFORMARNF,SNF_NFINICIO,SNF_NFFIM
+  SELECT SNF_CODIGO,SNF_SERIE,SNF_ENTSAI,SNF_CODTD,SNF_NFPROXIMA
          ,SNF_IDF,SNF_MODELO,SNF_INDICE
          ,SNF_LIVRO
          ,SNF_ENVIO
@@ -5523,12 +6007,12 @@ CREATE TABLE dbo.BKPSERIENF(
   ,SNF_SERIE VARCHAR(4) NOT NULL
   ,SNF_ENTSAI VARCHAR(1) NOT NULL
   ,SNF_CODTD VARCHAR(3) NOT NULL
-  ,SNF_INFORMARNF VARCHAR(1) NOT NULL
-  ,SNF_NFINICIO INTEGER NOT NULL
-  ,SNF_NFFIM INTEGER NOT NULL
+  --,SNF_INFORMARNF VARCHAR(1) NOT NULL
+  ,SNF_NFPROXIMA INTEGER NOT NULL
+  --,SNF_NFFIM INTEGER NOT NULL
   ,SNF_IDF VARCHAR(20) NOT NULL
   ,SNF_MODELO VARCHAR(5) NOT NULL -- Faltou tabela relacionada
-  ,SNF_INDICE VARCHAR(12) NOT NULL
+  ,SNF_INDICE VARCHAR(15) NOT NULL
   ,SNF_LIVRO VARCHAR(1) NOT NULL
   ,SNF_ENVIO VARCHAR(1) NOT NULL
   ,SNF_CODFLL INTEGER NOT NULL      
@@ -5547,9 +6031,7 @@ CREATE TABLE dbo.BKPSERIENF(
    -- SNF_CODTD      | SEL |    |    | VC(3) NN           | Campo relacionado (TIPODOCUMENTO)   
    -- TD_NOME        | SEL |    |    | VC(20) NN          | Campo relacionado (TIPODOCUMENTO)      
    -- EMP_APELIDO    | SEL |    |    | VC(15) NN          | Campo relacionado (EMPRESA)     
-   -- SNF_INFORMARNF | CC  |    |    | VC(1) NN           |    
-   -- SNF_NFINICIO   |     |    |    | INT NN             |
-   -- SNF_NFFIM      |     |    |    | INT NN             |   
+   -- SNF_NFPROXIMA  |     |    |    | INT NN             |
    -- SNF_IDF        |     |    |    | VC(20) NN          |   
    -- SNF_MODELO     |     |    |    | VC(5) NN           | 
    -- SNF_CODEMP     | SEL |    |    | INT NN             | Campo relacionado (EMPRESA)  
@@ -5586,12 +6068,13 @@ CREATE TABLE SERVICO(
   ,SRV_CSLL VARCHAR(1) NOT NULL
   ,SRV_CSLLALIQ NUMERIC(6,2) NOT NULL
   ,SRV_ISS VARCHAR(1) NOT NULL
-  ,SRV_CODCC VARCHAR(15) NOT NULL
+  --,SRV_CODCC VARCHAR(15) NOT NULL
   ,SRV_CODSPR VARCHAR(10) NOT NULL
   ,SRV_CODPRD VARCHAR(15) NOT NULL
   ,SRV_CODEMP INTEGER NOT NULL
   ,SRV_PODEVENDA VARCHAR(1) NOT NULL
   ,SRV_PODELOCACAO VARCHAR(1) NOT NULL
+  ,SRV_CODPT INTEGER NOT NULL      
   ,SRV_ATIVO VARCHAR(1) NOT NULL
   ,SRV_REG VARCHAR(1) NOT NULL
   ,SRV_CODUSR INTEGER NOT NULL
@@ -5609,6 +6092,7 @@ CREATE TABLE SERVICO(
   ,CONSTRAINT chk_srvCsll CHECK( SRV_CSLL IN('S','N'))      
   ,CONSTRAINT chk_srvCsllAliq CHECK( (((SRV_CSLL='S') AND (SRV_CSLLALIQ >0)) OR ((SRV_CSLL='N') AND (SRV_CSLLALIQ =0)))  )        
   ,CONSTRAINT chk_srvIss CHECK( SRV_ISS IN('S','N'))      
+  ,CONSTRAINT chk_srvCodPt CHECK( SRV_CODPT > 0 )      
   ,CONSTRAINT chk_srvAtivo CHECK( SRV_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_srvReg CHECK( SRV_REG IN('A','P','S')));
 GO
@@ -5628,12 +6112,13 @@ CREATE VIEW VSERVICO AS
          ,SRV_CSLL
          ,SRV_CSLLALIQ
          ,SRV_ISS
-         ,SRV_CODCC
+         --,SRV_CODCC
          ,SRV_CODSPR
          ,SRV_CODPRD
          ,SRV_CODEMP
          ,SRV_PODEVENDA
          ,SRV_PODELOCACAO
+         ,SRV_CODPT
          ,SRV_ATIVO
          ,SRV_REG
          ,SRV_CODUSR
@@ -5658,12 +6143,13 @@ CREATE TABLE dbo.BKPSERVICO(
   ,SRV_CSLL VARCHAR(1) NOT NULL
   ,SRV_CSLLALIQ NUMERIC(6,2) NOT NULL
   ,SRV_ISS VARCHAR(1) NOT NULL
-  ,SRV_CODCC VARCHAR(15) NOT NULL
+  --,SRV_CODCC VARCHAR(15) NOT NULL
   ,SRV_CODSPR VARCHAR(10) NOT NULL
   ,SRV_CODPRD VARCHAR(15) NOT NULL
   ,SRV_CODEMP INTEGER NOT NULL
   ,SRV_PODEVENDA VARCHAR(1) NOT NULL
   ,SRV_PODELOCACAO VARCHAR(1) NOT NULL
+  ,SRV_CODPT INTEGER NOT NULL  
   ,SRV_ATIVO VARCHAR(1) NOT NULL
   ,SRV_REG VARCHAR(1) NOT NULL
   ,SRV_CODUSR INTEGER NOT NULL
@@ -5783,23 +6269,21 @@ CREATE TABLE dbo.BKPTIPODOCUMENTO(
 GO  
 CREATE TABLE TRANSPORTADORA(
   TRN_CODFVR INTEGER NOT NULL
-  ,TRN_CODEMP INTEGER NOT NULL    
   ,TRN_ATIVO VARCHAR(1) NOT NULL
   ,TRN_REG VARCHAR(1) NOT NULL
   ,TRN_CODUSR INTEGER NOT NULL  
   ,CONSTRAINT chk_trnAtivo CHECK( TRN_ATIVO IN('S','N'))  
   ,CONSTRAINT chk_trnReg CHECK( TRN_REG IN('A','P','S'))
-  ,CONSTRAINT PKTRANSPORTADORA PRIMARY KEY (TRN_CODFVR,TRN_CODEMP));
+  ,CONSTRAINT PKTRANSPORTADORA PRIMARY KEY (TRN_CODFVR));
 GO
 CREATE VIEW VTRANSPORTADORA AS
-  SELECT TRN_CODFVR,TRN_CODEMP,TRN_ATIVO,TRN_REG,TRN_CODUSR FROM TRANSPORTADORA
+  SELECT TRN_CODFVR,TRN_ATIVO,TRN_REG,TRN_CODUSR FROM TRANSPORTADORA
 GO  
 CREATE TABLE dbo.BKPTRANSPORTADORA(
   TRN_ID INTEGER IDENTITY PRIMARY KEY NOT NULL 
   ,TRN_ACAO VARCHAR(1) NOT NULL
   ,TRN_DATA DATE DEFAULT GETDATE() NOT NULL
   ,TRN_CODFVR INTEGER NOT NULL
-  ,TRN_CODEMP INTEGER NOT NULL  
   ,TRN_ATIVO VARCHAR(1) NOT NULL
   ,TRN_REG VARCHAR(1) NOT NULL
   ,TRN_CODUSR INTEGER NOT NULL  
@@ -6204,7 +6688,7 @@ CREATE TABLE dbo.BKPVEICULOFABRICANTE(
 GO
 CREATE TABLE VEICULOMODELO(
   VMD_CODIGO INTEGER IDENTITY PRIMARY KEY NOT NULL
-  ,VMD_NOME VARCHAR(30) NOT NULL --VMD_NOME VARCHAR(20) NOT NULL ANGELO KOKISO AUMENTO DO TAMANHO DE 20 PRA 30
+  ,VMD_NOME VARCHAR(20) NOT NULL
   ,VMD_CODVFB VARCHAR(3) NOT NULL
   ,VMD_ATIVO VARCHAR(1) NOT NULL
   ,VMD_REG VARCHAR(1) NOT NULL
@@ -6220,7 +6704,7 @@ CREATE TABLE dbo.BKPVEICULOMODELO(
   ,VMD_ACAO VARCHAR(1) NOT NULL
   ,VMD_DATA DATE DEFAULT GETDATE() NOT NULL
   ,VMD_CODIGO INTEGER NOT NULL
-  ,VMD_NOME VARCHAR(30) NOT NULL --VMD_NOME VARCHAR(20) NOT NULL ANGELO KOKISO AUMENTO DO TAMANHO DE 20 PRA 30
+  ,VMD_NOME VARCHAR(20) NOT NULL
   ,VMD_CODVFB VARCHAR(3) NOT NULL
   ,VMD_ATIVO VARCHAR(1) NOT NULL
   ,VMD_REG VARCHAR(1) NOT NULL
@@ -6590,7 +7074,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkStrEst VARCHAR(3) = 'OK'; -- Para procurar campo foreign key str (ESTADO)
   DECLARE @erroOld VARCHAR(70);        -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -6936,8 +7419,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -6982,15 +7463,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@atCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('AGENDATAREFA UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@atCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('AGENDATAREFA UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.AGENDATAREFA WHERE AT_CODIGO=@atCodigoOld;
@@ -7042,7 +7516,6 @@ BEGIN
    -- ---------------|-----|----|----|--------------------|----------------------------------------------------------
    -- AS_ANEXO       | PK  |    |    | INT                | 
    -- AS_ITEM        | PK  |    |    | INT                |    
-   -- AS_CODEMP      | PK  |    |    | INT NN             | Campo relacionado (EMPRESA)  
    -- EMP_APELIDO    | SEL |    |    | VC(15) NN          | Campo relacionado (EMPRESA)     
    -- AS_VLRINI      |     |    |    | NUM(15,2) NN       |
    -- AS_VLRFIM      |     |    |    | NUM(15,2) NN       |
@@ -7071,8 +7544,6 @@ BEGIN
   -------------------
   DECLARE @asAnexoNew INTEGER;  
   DECLARE @asItemNew INTEGER;
-  DECLARE @asCodEmpNew  INTEGER;
-  DECLARE @empApelidoNew  VARCHAR(15);
   DECLARE @asVlrIniNew NUMERIC(15,2);
   DECLARE @asVlrFimNew NUMERIC(15,2);
   DECLARE @asAliquotaNew NUMERIC(15,2);
@@ -7095,11 +7566,9 @@ BEGIN
   ---------------------------------------------------
   SELECT @asAnexoNew      = i.AS_ANEXO
          ,@asItemNew      = i.AS_ITEM
-         ,@asCodEmpNew    = i.AS_CODEMP
-         ,@empApelidoNew  = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@asVlrIniNew    = i.AS_VLRINI
          ,@asVlrFimNew    = i.AS_VLRFIM
-         ,@asAliquotaNew  = i.AS_ALIQUOTA 
+         ,@asAliquotaNew  = i.AS_ALIQUOTA
          ,@asIrpjNew      = i.AS_IRPJ
          ,@asCsllNew      = i.AS_CSLL
          ,@asCofinsNew    = i.AS_COFINS
@@ -7115,15 +7584,12 @@ BEGIN
          ,@upD32New       = UP.UP_D32
          ,@upD31New       = UP.UP_D31
     FROM inserted i
-    LEFT OUTER JOIN EMPRESA EMP ON i.AS_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN USUARIO USR ON i.AS_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
     -----------------------------
     -- VERIFICANDO A FOREIGN KEYs
     -----------------------------
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@asCodEmpNew);
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@asCodUsrNew);
     -------------------------------------------------------------
@@ -7140,7 +7606,6 @@ BEGIN
     INSERT INTO dbo.ALIQUOTASIMPLES( 
       AS_ANEXO
       ,AS_ITEM
-      ,AS_CODEMP
       ,AS_VLRINI
       ,AS_VLRFIM
       ,AS_ALIQUOTA
@@ -7156,7 +7621,6 @@ BEGIN
       ,AS_CODUSR) VALUES(
       @asAnexoNew       -- AS_ANEXO    
       ,@asItemNew       -- AS_ITEM    
-      ,@asCodEmpNew     -- AS_CODEMP    
       ,@asVlrIniNew     -- AS_VLRINI    
       ,@asVlrFimNew     -- AS_VLRFIM    
       ,@asAliquotaNew   -- AS_ALIQUOTA    
@@ -7176,7 +7640,6 @@ BEGIN
       AS_ACAO
       ,AS_ANEXO
       ,AS_ITEM
-      ,AS_CODEMP
       ,AS_VLRINI
       ,AS_VLRFIM
       ,AS_ALIQUOTA
@@ -7193,7 +7656,6 @@ BEGIN
       'I'
       ,@asAnexoNew      -- AS_ANEXO    
       ,@asItemNew       -- AS_ITEM    
-      ,@asCodEmpNew     -- AS_CODEMP    
       ,@asVlrIniNew     -- AS_VLRINI    
       ,@asVlrFimNew     -- AS_VLRFIM    
       ,@asAliquotaNew   -- AS_ALIQUOTA    
@@ -7230,8 +7692,6 @@ BEGIN
   -----------------------
   DECLARE @asAnexoNew INTEGER;  
   DECLARE @asItemNew INTEGER;
-  DECLARE @asCodEmpNew  INTEGER;
-  DECLARE @empApelidoNew  VARCHAR(15);
   DECLARE @asVlrIniNew NUMERIC(15,2);
   DECLARE @asVlrFimNew NUMERIC(15,2);
   DECLARE @asAliquotaNew NUMERIC(15,2);
@@ -7254,8 +7714,6 @@ BEGIN
   -------------------------------------------------------
   SELECT @asAnexoNew      = i.AS_ANEXO
          ,@asItemNew      = i.AS_ITEM
-         ,@asCodEmpNew    = i.AS_CODEMP
-         ,@empApelidoNew  = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@asVlrIniNew    = i.AS_VLRINI
          ,@asVlrFimNew    = i.AS_VLRFIM
          ,@asAliquotaNew  = i.AS_ALIQUOTA
@@ -7274,15 +7732,12 @@ BEGIN
          ,@upD32New       = UP.UP_D32
          ,@upD31New       = UP.UP_D31
     FROM inserted i
-    LEFT OUTER JOIN EMPRESA EMP ON i.AS_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN USUARIO USR ON i.AS_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
     -----------------------------
     -- VERIFICANDO A FOREIGN KEYs
     -----------------------------
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@asCodEmpNew);
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@asCodUsrNew);
     -------------------------------------------------------------
@@ -7296,7 +7751,6 @@ BEGIN
     ------------------------------------------------------------------------------------
     DECLARE @asAnexoOld INTEGER;  
     DECLARE @asItemOld INTEGER;
-    DECLARE @asCodEmpOld  INTEGER;
     DECLARE @asVlrIniOld NUMERIC(15,2);
     DECLARE @asVlrFimOld NUMERIC(15,2);
     DECLARE @asAliquotaOld NUMERIC(15,2);
@@ -7312,7 +7766,6 @@ BEGIN
     DECLARE @asCodUsrOld INTEGER;
     SELECT @asAnexoOld      = d.AS_ANEXO
            ,@asItemOld      = d.AS_ITEM
-           ,@asCodEmpOld    = d.AS_CODEMP
            ,@asVlrIniOld    = d.AS_VLRINI
            ,@asVlrFimOld    = d.AS_VLRFIM
            ,@asAliquotaOld  = d.AS_ALIQUOTA
@@ -7326,14 +7779,12 @@ BEGIN
            ,@asIssOld       = d.AS_ISS
            ,@asRegOld       = d.AS_REG
            ,@asCodUsrOld    = d.AS_CODUSR         
-      FROM ALIQUOTASIMPLES d WHERE (d.AS_ANEXO=@asAnexoNew) AND (d.AS_ITEM=@asItemNew) AND (d.AS_CODEMP=@asCodEmpNew);  
+      FROM ALIQUOTASIMPLES d WHERE ((d.AS_ANEXO=@asAnexoNew) AND (d.AS_ITEM=@asItemNew));  
     ---------------------------------------------------------------------
     -- Primary Key nao pode ser alterada
     ---------------------------------------------------------------------
     IF( @asAnexoOld<>@asAnexoNew )
       RAISERROR('CAMPO CODIGO NAO PODE SER ALTERADO',15,1);  
-    IF( @asCodEmpOld<>@asCodEmpNew )
-      RAISERROR('CAMPO EMPRESA NAO PODE SER ALTERADO',15,1);  
     IF( @asItemOld<>@asItemNew )
       RAISERROR('CAMPO ITEM NAO PODE SER ALTERADO',15,1);  
     ------------------------------------------------------------------
@@ -7359,7 +7810,7 @@ BEGIN
            ,AS_ISS      = @asIssNew     
            ,AS_REG      = @asRegNew     
            ,AS_CODUSR   = @asCodUsrNew  
-    WHERE (AS_ANEXO=@asAnexoNew) AND (AS_ITEM=@asItemNew) AND (AS_CODEMP=@asCodEmpNew);  
+    WHERE (AS_ANEXO=@asAnexoNew) AND (AS_ITEM=@asItemNew);  
     
     IF( (@asVlrIniOld<>@asVlrIniNew) OR (@asVlrFimOld<>@asVlrFimNew) OR (@asAliquotaOld<>@asAliquotaNew) OR  (@asIrpjOld<>@asIrpjNew) OR (@asCsllOld<>@asCsllNew) 
      OR (@asCofinsOld<>@asCofinsNew) OR (@asPisOld<>@asPisNew) OR (@asCppOld<>@asCppNew) OR (@asIcmsOld<>@asIcmsNew) OR (@asIpiOld<>@asIpiNew) 
@@ -7368,7 +7819,6 @@ BEGIN
         AS_ACAO
         ,AS_ANEXO
         ,AS_ITEM
-        ,AS_CODEMP
         ,AS_VLRINI
         ,AS_VLRFIM
         ,AS_ALIQUOTA
@@ -7385,7 +7835,6 @@ BEGIN
         'A'
         ,@asAnexoNew      -- AS_ANEXO    
         ,@asItemNew       -- AS_ITEM    
-        ,@asCodEmpNew     -- AS_CODEMP    
         ,@asVlrIniNew     -- AS_VLRINI    
         ,@asVlrFimNew     -- AS_VLRFIM    
         ,@asAliquotaNew   -- AS_ALIQUOTA    
@@ -7423,7 +7872,6 @@ BEGIN
   -------------------
   DECLARE @asAnexoOld INTEGER;  
   DECLARE @asItemOld INTEGER;
-  DECLARE @asCodEmpOld  INTEGER;
   DECLARE @asVlrIniOld NUMERIC(15,2);
   DECLARE @asVlrFimOld NUMERIC(15,2);
   DECLARE @asAliquotaOld NUMERIC(15,2);
@@ -7445,7 +7893,6 @@ BEGIN
   ---------------------------------------------------
   SELECT @asAnexoOld      = d.AS_ANEXO
          ,@asItemOld      = d.AS_ITEM
-         ,@asCodEmpOld    = d.AS_CODEMP
          ,@asVlrIniOld    = d.AS_VLRINI
          ,@asVlrFimOld    = d.AS_VLRFIM
          ,@asAliquotaOld  = d.AS_ALIQUOTA
@@ -7489,13 +7936,12 @@ BEGIN
     --IF( @fkStrEst <> 'OK' )
     --  RAISERROR('ALIQUOTASIMPLES UTILIZADA NO ESTADO %s',15,1,@fkStrEst);
     --
-    DELETE FROM dbo.ALIQUOTASIMPLES WHERE (AS_ANEXO=@asAnexoOld) AND (AS_ITEM=@asItemOld) AND (AS_CODEMP=@asCodEmpOld);  
+    DELETE FROM dbo.ALIQUOTASIMPLES WHERE ((AS_ANEXO=@asAnexoOld) AND (AS_ITEM=@asItemOld));  
     -- Gravando LOG
     INSERT INTO dbo.BKPALIQUOTASIMPLES( 
       AS_ACAO
       ,AS_ANEXO
       ,AS_ITEM
-      ,AS_CODEMP
       ,AS_VLRINI
       ,AS_VLRFIM
       ,AS_ALIQUOTA
@@ -7512,7 +7958,6 @@ BEGIN
       'E'
       ,@asAnexoOld      -- AS_ANEXO    
       ,@asItemOld       -- AS_ITEM    
-      ,@asCodEmpOld     -- AS_CODEMP    
       ,@asVlrIniOld     -- AS_VLRINI    
       ,@asVlrFimOld     -- AS_VLRFIM    
       ,@asAliquotaOld   -- AS_ALIQUOTA    
@@ -7707,7 +8152,6 @@ BEGIN
   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo VARCHAR(15) = 'OK'; -- Para procurar unique index
   DECLARE @uiNome VARCHAR(40) = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
@@ -7755,12 +8199,6 @@ BEGIN
     -------------------------------------------------------------
     IF( @upD13New<2 )
       RAISERROR('USUARIO %s NAO POSSUI DIREITO 13 PARA INCLUIR NA TABELA BALANCO',15,1,@usrApelidoNew);
-    ---------------------------------------------------------------------
-    -- Campo NOME deve ser unico da tabela
-    ---------------------------------------------------------------------
-    --SELECT @uiCodigo=COALESCE(BLN_CODIGO,'OK') FROM BALANCO WHERE BLN_NOME=@blnNomeNew;
-    --IF( @uiCodigo <> 'OK' )
-    --  RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA BALANCO COM CODIGO %i',15,1,@uiCodigo);
     ---------------------------------------------------------------------
     -- Verificando a chave primaria quando nao for identity
     ---------------------------------------------------------------------
@@ -7844,7 +8282,6 @@ INSTEAD OF UPDATE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo VARCHAR(15) = 'OK';  -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70);         -- Buscando retorno de erro para funcao
   -----------------------
   -- Campos NEW da tabela
@@ -7972,8 +8409,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -8020,15 +8455,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@blnCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('BALANCO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@blnCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('BALANCO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.BALANCO WHERE BLN_CODIGO=@blnCodigoOld;
@@ -8096,6 +8524,7 @@ BEGIN
   -- BNC_AGENCIADV  |     |    |    | VC(1)              |
   -- BNC_CONTA      |     |    |    | VC(20)             |
   -- BNC_CONTADV    |     |    |    | VC(1)              |
+  -- BNC_CNAB       | CC  |    |    | VC(1) NN           | S|N  Se aceita gerar arquivo cnab
   -- BNC_SALDO      |     |    |    | NUM(15,2) NN       |  
   -- BNC_CODEMP     | SEL |    |    | INT NN             | Campo relacionado (EMPRESA)  
   -- EMP_APELIDO    | SEL |    |    | VC(15) NN          | Campo relacionado (EMPRESA)     
@@ -8115,7 +8544,6 @@ BEGIN
   -------------------
   -- Campos da tabela
   -------------------
-  --DECLARE @bncCodigoNew INTEGER;
   DECLARE @bncNomeNew VARCHAR(40);
   DECLARE @bncCodFvrNew INTEGER;
   DECLARE @fvrApelidoNew VARCHAR(15);
@@ -8131,6 +8559,7 @@ BEGIN
   DECLARE @bncAgenciaDvNew VARCHAR(1);
   DECLARE @bncContaNew VARCHAR(20);
   DECLARE @bncContaDvNew VARCHAR(1);
+  DECLARE @bncCnabNew VARCHAR(1);  
   DECLARE @bncCodEmpNew INTEGER;
   DECLARE @empApelidoNew VARCHAR(15);
   DECLARE @bncAtivoNew VARCHAR(1);
@@ -8143,12 +8572,9 @@ BEGIN
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
-  SELECT --@bncCodigoNew        = i.BNC_CODIGO
-         @bncNomeNew         = dbo.fncTranslate(i.BNC_NOME,40)
+  SELECT @bncNomeNew         = dbo.fncTranslate(i.BNC_NOME,40)
          ,@bncCodFvrNew       = i.BNC_CODFVR
          ,@fvrApelidoNew      = COALESCE(FVR.FVR_APELIDO,'ERRO')
-         --,@bncCodCcNew        = dbo.fncTranslate(i.BNC_CODCC,15)
-         --,@ccNomeNew          = COALESCE(CC.CC_NOME,'ERRO')
          ,@bncEntraFluxoNew   = UPPER(i.BNC_ENTRAFLUXO)
          ,@bncCodBstNew       = dbo.fncTranslate(i.BNC_CODBST,3)
          ,@bsNomeNew          = COALESCE(BST.BST_NOME,'ERRO')
@@ -8159,6 +8585,7 @@ BEGIN
          ,@bncAgenciaDvNew    = dbo.fncTranslate(i.BNC_AGENCIADV,1)
          ,@bncContaNew        = dbo.fncTranslate(i.BNC_CONTA,20)
          ,@bncContaDvNew      = dbo.fncTranslate(i.BNC_CONTADV,1)
+         ,@bncCnabNew         = UPPER(i.BNC_CNAB)         
          ,@bncCodEmpNew       = i.BNC_CODEMP
          ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@bncAtivoNew        = UPPER(i.BNC_ATIVO)
@@ -8177,26 +8604,29 @@ BEGIN
     LEFT OUTER JOIN USUARIO USR ON i.BNC_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
-    -----------------------------
+    --------------------------------------------------
     -- VERIFICANDO A FOREIGN KEYs
-    -----------------------------
-    IF( @fvrApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO FAVORECIDO %i PARA ESTE REGISTRO',15,1,@bncCodFvrNew);
-    IF( @ccNomeNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO CONTA CONTABIL %s PARA ESTE REGISTRO',15,1,@bncCodCcNew);    
-    IF( @bsNomeNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO STATUS %s PARA ESTE REGISTRO',15,1,@bncCodBstNew);    
-    IF( @bcdNomeNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO CODIGO BANCO %s PARA ESTE REGISTRO',15,1,@bncCodBcdNew);    
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@bncCodEmpNew);        
-    IF( @usrApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@bncCodUsrNew);    
-    -------------------------------------------------------------
-    -- Checando se o usuario tem direito de cadastro nesta tabela
-    -------------------------------------------------------------
-    IF( @upD06New<2 )
-      RAISERROR('USUARIO %s NAO POSSUI DIREITO 06 PARA INCLUIR NA TABELA BANCO',15,1,@usrApelidoNew);
+    -- Qdo usuario=2(SISTEMA) o cadastro eh automatico
+    --------------------------------------------------
+    IF( @bncCodUsrNew <> 2 ) BEGIN
+      IF( @fvrApelidoNew='ERRO' )
+        RAISERROR('NAO LOCALIZADO FAVORECIDO %i PARA ESTE REGISTRO',15,1,@bncCodFvrNew);
+      IF( @ccNomeNew='ERRO' )
+        RAISERROR('NAO LOCALIZADO CONTA CONTABIL %s PARA ESTE REGISTRO',15,1,@bncCodCcNew);    
+      IF( @bsNomeNew='ERRO' )
+        RAISERROR('NAO LOCALIZADO STATUS %s PARA ESTE REGISTRO',15,1,@bncCodBstNew);    
+      IF( @bcdNomeNew='ERRO' )
+        RAISERROR('NAO LOCALIZADO CODIGO BANCO %s PARA ESTE REGISTRO',15,1,@bncCodBcdNew);    
+      IF( @empApelidoNew='ERRO' )
+        RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@bncCodEmpNew);        
+      IF( @usrApelidoNew='ERRO' )
+        RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@bncCodUsrNew);    
+      -------------------------------------------------------------
+      -- Checando se o usuario tem direito de cadastro nesta tabela
+      -------------------------------------------------------------
+      IF( @upD06New<2 )
+        RAISERROR('USUARIO %s NAO POSSUI DIREITO 06 PARA INCLUIR NA TABELA BANCO',15,1,@usrApelidoNew);
+    END  
     ----------------------------------------------------------------
     -- Soh pode existir um banco padrao para fluxo para cada empresa
     ----------------------------------------------------------------
@@ -8205,18 +8635,11 @@ BEGIN
       IF( @uiPadraoFluxo IS NOT NULL )
         RAISERROR('BANCO %i JA PARAMETRIZADO COM PADRÃO',15,1,@uiPadraoFluxo);
     END    
-    ---------------------------------------------------------------------
-    -- Campo NOME deve ser unico da tabela
-    ---------------------------------------------------------------------
-    --SELECT @uiCodigo=COALESCE(BNC_CODIGO,'OK') FROM BANCO WHERE BNC_NOME=@bncNomeNew;
-    --IF( @uiCodigo <> 'OK' )
-    --  RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA BANCO COM CODIGO %s',15,1,@uiCodigo);
-    ---------------------------------------------------------------------
-    -- Verificando a chave primaria quando nao for identity
-    ---------------------------------------------------------------------
-    --SELECT @uiNome=COALESCE(BNC_NOME,'OK') FROM BANCO WHERE BNC_CODIGO=@bncCodigoNew;
-    --IF( @uiNome <> 'OK' )
-    --  RAISERROR('CODIGO JA CADASTRADO NA TABELA BANCO %s',15,1,@uiNome);
+    ------------------------------------------------------------------
+    -- Verificando se aceita CNAB
+    ------------------------------------------------------------------
+    IF( (@bncCnabNew='S') AND (@bncCodBstNew<>'BCO') )
+      RAISERROR('PARA CNAB SIM STATUS DO BANCO DEVE SER "BCO"',15,1);
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Soh olhar se for diferente de "P"
     ------------------------------------------------------------------
@@ -8228,13 +8651,13 @@ BEGIN
     -----------------------------------------------------------------
     --  Aqui vou cadastrar a conta contabil para banco
     -----------------------------------------------------------------
-    DECLARE @seekConta VARCHAR(15)= NULL;
-    DECLARE @intConta INTEGER     = 2;
+    DECLARE @seekConta VARCHAR(15)  = NULL;
+    DECLARE @intConta INTEGER       = 2;
     WHILE( @intConta<9999 ) BEGIN
-      SET @bncCodCcNew = CONCAT('1.01.01.02.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4));
+      SET @bncCodCcNew = CONCAT('1.1.1.02.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4));
       SET @seekConta   = NULL;
-      SELECT @seekConta=COALESCE(CC_CODIGO,NULL) FROM CONTACONTABIL WHERE CC_CODIGO=@bncCodCcNew;
-      IF( @seekConta IS NULL ) BEGIN
+      SELECT @seekConta=CC_CODIGO FROM CONTACONTABIL WHERE CC_CODIGO=@bncCodCcNew;
+      IF( @@rowcount=0 ) BEGIN
         SET @ccNomeNew=SUBSTRING(CONCAT(@bcdNomeNew,' ',@bncContaNew),1,40);
         INSERT INTO CONTACONTABIL(
           CC_CODIGO
@@ -8245,14 +8668,14 @@ BEGIN
           ,CC_ATIVO
           ,CC_REG
           ,CC_CODUSR) VALUES(
-          @bncCodCcNew          -- CC_CODIGO
-          ,@ccNomeNew           -- CC_NOME
-          ,'S'                  -- CC_LANCTO
-          ,'1.01.0002'          -- CC_CODCTR
-          ,'N'                  -- CC_F10
-          ,'S'                  -- CC_ATIVO
-          ,'P'                  -- CC_REG
-          ,@bncCodUsrNew        -- CC_CODUSR
+          @bncCodCcNew                                                            -- CC_CODIGO
+          ,@ccNomeNew                                                             -- CC_NOME
+          ,'S'                                                                    -- CC_LANCTO
+          ,CASE WHEN @bncEntraFluxoNew='S' THEN '1.01.0002' ELSE '1.01.0003' END  -- CC_CODCTR
+          ,'N'                                                                    -- CC_F10
+          ,'S'                                                                    -- CC_ATIVO
+          ,'P'                                                                    -- CC_REG
+          ,@bncCodUsrNew                                                          -- CC_CODUSR
         );
         -- Gravando LOG
         INSERT INTO dbo.BKPCONTACONTABIL(
@@ -8265,15 +8688,15 @@ BEGIN
           ,CC_ATIVO
           ,CC_REG
           ,CC_CODUSR) VALUES(
-          'I'                      -- CC_ACAO
-          ,@bncCodCcNew            -- CC_CODIGO
-          ,@ccNomeNew              -- CC_NOME
-          ,'S'                     -- CC_LANCTO
-          ,'1.01.0002'             -- CC_CODCTR
-          ,'N'                     -- CC_F10          
-          ,'S'                     -- CC_ATIVO
-          ,'P'                     -- CC_REG
-          ,@bncCodUsrNew           -- CC_CODUSR
+          'I'                                                                     -- CC_ACAO
+          ,@bncCodCcNew                                                           -- CC_CODIGO
+          ,@ccNomeNew                                                             -- CC_NOME
+          ,'S'                                                                    -- CC_LANCTO
+          ,CASE WHEN @bncEntraFluxoNew='S' THEN '1.01.0002' ELSE '1.01.0003' END  -- CC_CODCTR
+          ,'N'                                                                    -- CC_F10          
+          ,'S'                                                                    -- CC_ATIVO
+          ,'P'                                                                    -- CC_REG
+          ,@bncCodUsrNew                                                          -- CC_CODUSR
         );  
         --
         --
@@ -8326,6 +8749,7 @@ BEGIN
       ,BNC_AGENCIADV
       ,BNC_CONTA
       ,BNC_CONTADV
+      ,BNC_CNAB      
       ,BNC_SALDO
       ,BNC_CODEMP
       ,BNC_ATIVO
@@ -8342,6 +8766,7 @@ BEGIN
       ,@bncAgenciaDvNew         -- BNC_AGENCIADV
       ,@bncContaNew             -- BNC_CONTA
       ,@bncContaDvNew           -- BNC_CONTADV
+      ,@bncCnabNew              -- BNC_CNAB
       ,0                        -- BNC_CONTADV
       ,@bncCodEmpNew            -- BNC_CODEMP
       ,@bncAtivoNew             -- BNC_ATIVO
@@ -8363,6 +8788,7 @@ BEGIN
       ,BNC_AGENCIADV
       ,BNC_CONTA
       ,BNC_CONTADV
+      ,BNC_CNAB      
       ,BNC_CODEMP
       ,BNC_ATIVO
       ,BNC_REG
@@ -8380,6 +8806,7 @@ BEGIN
       ,@bncAgenciaDvNew               -- BNC_AGENCIADV
       ,@bncContaNew                   -- BNC_CONTA
       ,@bncContaDvNew                 -- BNC_CONTADV
+      ,@bncCnabNew                    -- BNC_CNAB
       ,@bncCodEmpNew                  -- BNC_CODEMP
       ,@bncAtivoNew                   -- BNC_ATIVO
       ,@bncRegNew                     -- BNC_REG
@@ -8422,6 +8849,7 @@ BEGIN
   DECLARE @bncAgenciaDvNew VARCHAR(1);
   DECLARE @bncContaNew VARCHAR(20);
   DECLARE @bncContaDvNew VARCHAR(1);
+  DECLARE @bncCnabNew VARCHAR(1);    
   DECLARE @bncCodEmpNew INTEGER;
   DECLARE @empApelidoNew VARCHAR(15);
   DECLARE @bncAtivoNew VARCHAR(1);
@@ -8450,6 +8878,7 @@ BEGIN
          ,@bncAgenciaDvNew    = dbo.fncTranslate(i.BNC_AGENCIADV,1)
          ,@bncContaNew        = dbo.fncTranslate(i.BNC_CONTA,20)
          ,@bncContaDvNew      = dbo.fncTranslate(i.BNC_CONTADV,1)
+         ,@bncCnabNew         = UPPER(i.BNC_CNAB)         
          ,@bncCodEmpNew       = i.BNC_CODEMP
          ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@bncAtivoNew        = UPPER(i.BNC_ATIVO)
@@ -8505,6 +8934,7 @@ BEGIN
     DECLARE @bncAgenciaDvOld VARCHAR(1);
     DECLARE @bncContaOld VARCHAR(20);
     DECLARE @bncContaDvOld VARCHAR(1);
+    DECLARE @bncCnabOld VARCHAR(1);      
     DECLARE @bncCodEmpOld INTEGER;
     DECLARE @bncAtivoOld VARCHAR(1);
     DECLARE @bncRegOld VARCHAR(1);
@@ -8522,6 +8952,7 @@ BEGIN
            ,@bncAgenciaDvOld    = d.BNC_AGENCIADV
            ,@bncContaOld        = d.BNC_CONTA
            ,@bncContaDvOld      = d.BNC_CONTADV
+           ,@bncCnabOld         = d.BNC_CNAB
            ,@bncCodEmpOld       = d.BNC_CODEMP
            ,@bncAtivoOld        = d.BNC_ATIVO
            ,@bncRegOld          = d.BNC_REG
@@ -8544,15 +8975,13 @@ BEGIN
       IF( @uiPadraoFluxo IS NOT NULL )
         RAISERROR('BANCO %i JA PARAMETRIZADO COM PADRÃO',15,1,@uiPadraoFluxo);
     END    
-      
-    ---------------------------------------------------------------------
-    -- Campo NOME deve ser unico da tabela
-    ---------------------------------------------------------------------
-    --IF( @bncNomeOld<>@bncNomeNew ) BEGIN
-    --  SELECT @uiCodigo=COALESCE(BNC_CODIGO,'OK') FROM BANCO WHERE BNC_NOME=@bncNomeNew;
-    --  IF( @uiCodigo <> 'OK' )
-    --    RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA BANCO COM CODIGO %s',15,1,@uiCodigo);
-    --END   
+    ------------------------------------------------------------------
+    -- Verificando se aceita CNAB
+    ------------------------------------------------------------------
+    IF( (@bncCnabOld<>@bncCnabNew) OR (@bncCodBstOld<>@bncCodBstNew) ) BEGIN
+      IF( (@bncCnabNew='S') AND (@bncCodBstNew<>'BCO') )
+        RAISERROR('PARA CNAB SIM STATUS DO BANCO DEVE SER "BCO"',15,1);
+    END
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Olhar todos, Old pode ser "S"
     ------------------------------------------------------------------
@@ -8574,6 +9003,7 @@ BEGIN
            ,BNC_AGENCIADV   = @bncAgenciaDvNew
            ,BNC_CONTA       = @bncContaNew
            ,BNC_CONTADV     = @bncContaDvNew
+           ,BNC_CNAB        = @bncCnabNew
            ,BNC_CODEMP      = @bncCodEmpNew
            ,BNC_ATIVO       = @bncAtivoNew
            ,BNC_REG         = @bncRegNew
@@ -8584,7 +9014,7 @@ BEGIN
     IF( (@bncNomeOld<>@bncNomeNew) OR (@bncCodFvrOld<>@bncCodFvrNew) OR (@bncEntraFluxoOld<>@bncEntraFluxoNew) OR (@bncCodBstOld<>@bncCodBstNew) 
      OR (@bncPadraoFluxoOld<>@bncPadraoFluxoNew) OR (@bncCodBcdOld<>@bncCodBcdNew) OR (@bncAgenciaOld<>@bncAgenciaNew) OR (@bncAgenciaDvOld<>@bncAgenciaDvNew) 
      OR (@bncContaOld<>@bncContaNew) OR (@bncContaDvOld<>@bncContaDvNew) OR (@bncCodEmpOld<>@bncCodEmpNew) OR (@bncAtivoOld<>@bncAtivoNew) 
-     OR (@bncRegOld<>@bncRegNew) OR (@bncCodUsrOld<>@bncCodUsrNew) ) BEGIN     
+     OR (@bncCnabOld<>@bncCnabNew) OR (@bncRegOld<>@bncRegNew) OR (@bncCodUsrOld<>@bncCodUsrNew) ) BEGIN     
      
       INSERT INTO dbo.BKPBANCO(
         BNC_ACAO
@@ -8600,6 +9030,7 @@ BEGIN
         ,BNC_AGENCIADV
         ,BNC_CONTA
         ,BNC_CONTADV
+        ,BNC_CNAB        
         ,BNC_CODEMP
         ,BNC_ATIVO
         ,BNC_REG
@@ -8617,6 +9048,7 @@ BEGIN
         ,@bncAgenciaDvNew               -- BNC_AGENCIADV
         ,@bncContaNew                   -- BNC_CONTA
         ,@bncContaDvNew                 -- BNC_CONTADV
+        ,@bncCnabNew                    -- BNC_CNAB
         ,@bncCodEmpNew                  -- BNC_CODEMP
         ,@bncAtivoNew                   -- BNC_ATIVO
         ,@bncRegNew                     -- BNC_REG
@@ -8634,15 +9066,14 @@ BEGIN
   END CATCH
 END
 GO
-
 CREATE TRIGGER dbo.TRGViewBANCO_BD ON dbo.VBANCO
 INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkPagar INTEGER;       -- Para procurar campo foreign key int (PAGAR)     
+  DECLARE @fkExtrato INTEGER;     -- Para procurar campo foreign key int (EXTRATO)       
   -------------------
   -- Campos da tabela
   -------------------
@@ -8659,6 +9090,7 @@ BEGIN
   DECLARE @bncAgenciaDvOld VARCHAR(1);
   DECLARE @bncContaOld VARCHAR(20);
   DECLARE @bncContaDvOld VARCHAR(1);
+  DECLARE @bncCnabOld VARCHAR(1);      
   DECLARE @bncCodEmpOld INTEGER;
   DECLARE @bncAtivoOld VARCHAR(1);
   DECLARE @bncRegOld VARCHAR(1);
@@ -8681,6 +9113,7 @@ BEGIN
          ,@bncAgenciaDvOld    = d.BNC_AGENCIADV
          ,@bncContaOld        = d.BNC_CONTA
          ,@bncContaDvOld      = d.BNC_CONTADV
+         ,@bncCnabOld         = d.BNC_CNAB         
          ,@bncCodEmpOld       = d.BNC_CODEMP
          ,@bncAtivoOld        = d.BNC_ATIVO
          ,@bncRegOld          = d.BNC_REG
@@ -8709,15 +9142,14 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@bncCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('BANCO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@bncCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('BANCO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkPagar=PGR_LANCTO FROM PAGAR WHERE (PGR_CODBNC=@bncCodigoOld);
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('BANCO UTILIZADO NO LANCAMENTO %i',15,1,@fkPagar);
+    SELECT TOP 1 @fkExtrato=EXT_LANCTO FROM EXTRATO WHERE (EXT_CODBNC=@bncCodigoOld);
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('BANCO UTILIZADO NO EM EXTRATO LANCAMENTO %i',15,1,@fkExtrato);
     --
     --
     DELETE FROM dbo.BANCO WHERE BNC_CODIGO=@bncCodigoOld;
@@ -8736,6 +9168,7 @@ BEGIN
       ,BNC_AGENCIADV
       ,BNC_CONTA
       ,BNC_CONTADV
+      ,BNC_CNAB      
       ,BNC_CODEMP
       ,BNC_ATIVO
       ,BNC_REG
@@ -8753,6 +9186,7 @@ BEGIN
       ,@bncAgenciaDvOld               -- BNC_AGENCIADV
       ,@bncContaOld                   -- BNC_CONTA
       ,@bncContaDvOld                 -- BNC_CONTADV
+      ,@bncCnabOld                    -- BNC_CNAB      
       ,@bncCodEmpOld                  -- BNC_CODEMP
       ,@bncAtivoOld                   -- BNC_ATIVO
       ,@bncRegOld                     -- BNC_REG
@@ -9023,9 +9457,8 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkBanco INTEGER;       -- Para procurar campo foreign key int (BANCO)       
   -------------------
   -- Campos da tabela
   -------------------
@@ -9069,15 +9502,11 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@bcdCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('BANCOCODIGO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@bcdCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('BANCOCODIGO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkBanco=BNC_CODIGO FROM BANCO WHERE (BNC_CODBCD=@bcdCodigoOld);
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CODIGO UTILIZADO NO BANCO %i',15,1,@fkBanco);
     --
     --
     DELETE FROM dbo.BANCOCODIGO WHERE BCD_CODIGO=@bcdCodigoOld;
@@ -9361,9 +9790,8 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkBanco INTEGER;       -- Para procurar campo foreign key int (BANCO)     
   -------------------
   -- Campos da tabela
   -------------------
@@ -9407,15 +9835,11 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@bstCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('BANCOSTATUS UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@bstCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('BANCOSTATUS UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkBanco=BNC_CODIGO FROM BANCO WHERE (BNC_CODBST=@bstCodigoOld);
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('STATUS UTILIZADO NO BANCO %i',15,1,@fkBanco);
     --
     --
     DELETE FROM dbo.BANCOSTATUS WHERE BST_CODIGO=@bstCodigoOld;
@@ -10098,9 +10522,9 @@ BEGIN
     SET @erroOld=dbo.fncCampoRegExc( @usrAdmPubOld,@ctgRegOld );
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
-    --------------------------------------
+    -----------------------------------------
     --   Checando a FK FVR_CODCTG(FAVORECIDO)
-    --------------------------------------
+    -----------------------------------------
     SELECT TOP 1 @fkIntFvr=COALESCE(FVR_CODIGO,0) FROM FAVORECIDO WHERE FVR_CODCTG=@ctgCodigoOld;
     IF( @fkIntFvr > 0 )
       RAISERROR('CATEGORIA UTILIZADO NO FAVORECIDO %i',15,1,@fkIntFvr);
@@ -10443,11 +10867,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntCnt INTEGER = 0; -- Para procurar campo foreign key int (CONTADOR)
-  --DECLARE @fkIntEmp INTEGER = 0; -- Para procurar campo foreign key int (EMPRESA)
-  --DECLARE @fkIntFll INTEGER = 0; -- Para procurar campo foreign key int (FILIAL)
-  --DECLARE @fkIntFvr INTEGER = 0; -- Para procurar campo foreign key int (FAVORECIDO)
-  --DECLARE @fkIntTrn INTEGER = 0; -- Para procurar campo foreign key int (TRANSPORTADORA)
   DECLARE @erroOld VARCHAR(70);  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -10885,7 +11304,6 @@ BEGIN
   DECLARE @fkIntFvr INTEGER = 0;        -- Para procurar campo foreign key int (FAVORECIDO)
   DECLARE @fkIntNfs INTEGER = 0;        -- Para procurar campo foreign key int (NFSERVICO)
   DECLARE @fkStrSpr VARCHAR(10) = 'OK'; -- Para procurar campo foreign key str (SERVICOPREFEITURA)
-  --DECLARE @fkIntTrn INTEGER = 0;        -- Para procurar campo foreign key int (TRANSPORTADORA)
   DECLARE @erroOld VARCHAR(70);         -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -11126,42 +11544,52 @@ BEGIN
     IF( @mes='12' ) SET @cmpNomeNew=CONCAT('DEZ/',@ano);
     IF(@cmpNomeNew IS NULL )
       RAISERROR('COMPETENCIA INVALIDA',15,1);
-    --  
-    INSERT INTO dbo.COMPETENCIA( 
-      CMP_CODIGO
-      ,CMP_CODEMP
-      ,CMP_NOME
-      ,CMP_FECHAMENTO
-      ,CMP_ATIVO
-      ,CMP_REG
-      ,CMP_CODUSR) VALUES(
-      @cmpCodigoNew         -- CMP_CODIGO
-      ,@cmpCodEmpNew        -- CMP_CODEMP
-      ,@cmpNomeNew          -- CMP_NOME
-      ,@cmpFechamentoNew    -- CMP_FECHAMENTO
-      ,@cmpAtivoNew         -- CMP_ATIVO
-      ,@cmpRegNew           -- CMP_REG
-      ,@cmpCodUsrNew        -- CMP_CODUSR
-    );
-    -- Gravando LOG
-    INSERT INTO dbo.BKPCOMPETENCIA(
-      CMP_ACAO
-      ,CMP_CODIGO
-      ,CMP_CODEMP
-      ,CMP_NOME
-      ,CMP_FECHAMENTO
-      ,CMP_ATIVO
-      ,CMP_REG
-      ,CMP_CODUSR) VALUES(
-      'I'                       -- CMP_ACAO
-      ,@cmpCodigoNew            -- CMP_CODIGO
-      ,@cmpCodEmpNew            -- CMP_CODEMP
-      ,@cmpNomeNew              -- CMP_NOME
-      ,@cmpFechamentoNew        -- CMP_FECHAMENTO
-      ,@cmpAtivoNew             -- CMP_ATIVO
-      ,@cmpRegNew               -- CMP_REG
-      ,@cmpCodUsrNew            -- CMP_CODUSR
-    );  
+    -- 
+    DECLARE @codemp INTEGER;
+    DECLARE crsrEmp CURSOR FOR SELECT EMP_CODIGO FROM EMPRESA WHERE EMP_ATIVO='S'
+    OPEN crsrEmp
+    FETCH NEXT FROM crsrEmp into @codemp
+    WHILE @@FETCH_STATUS = 0 BEGIN
+      INSERT INTO dbo.COMPETENCIA( 
+        CMP_CODIGO
+        ,CMP_CODEMP
+        ,CMP_NOME
+        ,CMP_FECHAMENTO
+        ,CMP_ATIVO
+        ,CMP_REG
+        ,CMP_CODUSR) VALUES(
+        @cmpCodigoNew         -- CMP_CODIGO
+        ,@codemp              -- CMP_CODEMP
+        ,@cmpNomeNew          -- CMP_NOME
+        ,@cmpFechamentoNew    -- CMP_FECHAMENTO
+        ,@cmpAtivoNew         -- CMP_ATIVO
+        ,@cmpRegNew           -- CMP_REG
+        ,@cmpCodUsrNew        -- CMP_CODUSR
+      );
+      -- Gravando LOG
+      INSERT INTO dbo.BKPCOMPETENCIA(
+        CMP_ACAO
+        ,CMP_CODIGO
+        ,CMP_CODEMP
+        ,CMP_NOME
+        ,CMP_FECHAMENTO
+        ,CMP_ATIVO
+        ,CMP_REG
+        ,CMP_CODUSR) VALUES(
+        'I'                       -- CMP_ACAO
+        ,@cmpCodigoNew            -- CMP_CODIGO
+        ,@codemp                  -- CMP_CODEMP
+        ,@cmpNomeNew              -- CMP_NOME
+        ,@cmpFechamentoNew        -- CMP_FECHAMENTO
+        ,@cmpAtivoNew             -- CMP_ATIVO
+        ,@cmpRegNew               -- CMP_REG
+        ,@cmpCodUsrNew            -- CMP_CODUSR
+      );  
+      FETCH NEXT FROM crsrEmp into @codemp
+    END
+    CLOSE crsrEmp
+    DEALLOCATE crsrEmp
+    
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -11306,8 +11734,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -11356,15 +11782,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@cmpCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('COMPETENCIA UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@cmpCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('COMPETENCIA UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.COMPETENCIA WHERE ((CMP_CODIGO=@cmpCodigoOld) AND (CMP_CODEMP=@cmpCodEmpOld));
@@ -11490,9 +11909,9 @@ BEGIN
     ---------------------------------------------------------------------
     -- Campo NOME deve ser unico da tabela
     ---------------------------------------------------------------------
-    SELECT @uiCodigo=COALESCE(CC_CODIGO,'OK') FROM CONTACONTABIL WHERE CC_NOME=@ccNomeNew;
-    IF( @uiCodigo <> 'OK' )
-      RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA CONTACONTABIL COM CODIGO %s',15,1,@uiCodigo);
+    --SELECT @uiCodigo=COALESCE(CC_CODIGO,'OK') FROM CONTACONTABIL WHERE CC_NOME=@ccNomeNew;
+    --IF( @uiCodigo <> 'OK' )
+    --  RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA CONTACONTABIL COM CODIGO %s',15,1,@uiCodigo);
     ---------------------------------------------------------------------
     -- Verificando a chave primaria quando nao for identity
     ---------------------------------------------------------------------
@@ -11706,8 +12125,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -11758,15 +12175,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@ccCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('CONTACONTABIL UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@ccCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('CONTACONTABIL UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.CONTACONTABIL WHERE CC_CODIGO=@ccCodigoOld;
@@ -11876,8 +12286,6 @@ BEGIN
   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
-  --DECLARE @uiNome VARCHAR(60) = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -12432,8 +12840,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -12522,15 +12928,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@cntCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('CONTADOR UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@cntCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('CONTADOR UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.CONTADOR WHERE CNT_CODIGO=@cntCodigoOld;
@@ -13230,7 +13629,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkStrEst VARCHAR(3) = 'OK'; -- Para procurar campo foreign key str (ESTADO)
   DECLARE @erroOld VARCHAR(70);        -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -13574,7 +13972,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkStrEst VARCHAR(3) = 'OK'; -- Para procurar campo foreign key str (ESTADO)
   DECLARE @cioOld VARCHAR(70);        -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -13924,7 +14321,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkStrEst VARCHAR(3) = 'OK'; -- Para procurar campo foreign key str (ESTADO)
   DECLARE @erroOld VARCHAR(70);        -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -14348,9 +14744,9 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
-  DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @erroOld VARCHAR(70);         -- Buscando retorno de erro para funcao
+  DECLARE @fkImposto VARCHAR(10);       -- Para procurar campo foreign key str (IMPOSTO)   
+  DECLARE @fkNfProdutoItem INTEGER = 0; -- Para procurar campo foreign key int (NFPRODUTOITEM)   
   -------------------
   -- Campos da tabela
   -------------------
@@ -14404,15 +14800,14 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@icmCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('CSTICMS UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@icmCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('CSTICMS UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkImposto=IMP_CODNCM FROM IMPOSTO WHERE ((IMP_CSTICMS=@icmCodigoOld) AND (IMP_ENTSAI=@icmEntSaiOld));
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CST UTILIZADO EM IMPOSTO COM O NCM %s',15,1,@fkImposto);
+    SELECT TOP 1 @fkNfProdutoItem=NFPI_LANCTO FROM NFPRODUTOITEM WHERE ((NFPI_CSTICMS=@icmCodigoOld) AND (NFPI_ENTSAI=@icmEntSaiOld));
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CST UTILIZADO NO LANCAMENTO %i',15,1,@fkNfProdutoItem);
     --
     --
     DELETE FROM dbo.CSTICMS WHERE ((ICM_CODIGO=@icmCodigoOld) AND (ICM_ENTSAI=@icmEntSaiOld));
@@ -14776,9 +15171,9 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkImposto VARCHAR(10)        -- Para procurar campo foreign key str (IMPOSTO)   
+  DECLARE @fkNfProdutoItem INTEGER = 0; -- Para procurar campo foreign key int (NFPRODUTOITEM)   
   -------------------
   -- Campos da tabela
   -------------------
@@ -14830,15 +15225,14 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@ipiCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('CSTIPI UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@ipiCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('CSTIPI UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkImposto=IMP_CODNCM FROM IMPOSTO WHERE ((IMP_CSTIpi=@ipiCodigoOld) AND (IMP_ENTSAI=@ipiEntSaiOld));
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CST UTILIZADO EM IMPOSTO COM O NCM %s',15,1,@fkImposto);
+    SELECT TOP 1 @fkNfProdutoItem=NFPI_LANCTO FROM NFPRODUTOITEM WHERE ((NFPI_CSTIPI=@ipiCodigoOld) AND (NFPI_ENTSAI=@ipiEntSaiOld));
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CST UTILIZADO NO LANCAMENTO %i',15,1,@fkNfProdutoItem);
     --
     --
     DELETE FROM dbo.CSTIPI WHERE ((IPI_CODIGO=@ipiCodigoOld) AND (IPI_ENTSAI=@ipiEntSaiOld));
@@ -15200,9 +15594,9 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkImposto VARCHAR(10)        -- Para procurar campo foreign key str (IMPOSTO)   
+  DECLARE @fkNfProdutoItem INTEGER = 0; -- Para procurar campo foreign key int (NFPRODUTOITEM)   
   -------------------
   -- Campos da tabela
   -------------------
@@ -15254,15 +15648,14 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@pisCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('CSTPIS UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@pisCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('CSTPIS UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkImposto=IMP_CODNCM FROM IMPOSTO WHERE ((IMP_CSTPIS=@pisCodigoOld) AND (IMP_ENTSAI=@pisEntSaiOld));
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CST UTILIZADO EM IMPOSTO COM O NCM %s',15,1,@fkImposto);
+    SELECT TOP 1 @fkNfProdutoItem=NFPI_LANCTO FROM NFPRODUTOITEM WHERE ((NFPI_CSTPIS=@pisCodigoOld) AND (NFPI_ENTSAI=@pisEntSaiOld));
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CST UTILIZADO NO LANCAMENTO %i',15,1,@fkNfProdutoItem);
     --
     --
     DELETE FROM dbo.CSTPIS WHERE ((PIS_CODIGO=@pisCodigoOld) AND (PIS_ENTSAI=@pisEntSaiOld));
@@ -15638,8 +16031,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -15694,15 +16085,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@snCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('CSTSIMPLES UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@snCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('CSTSIMPLES UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.CSTSIMPLES WHERE ((SN_CODIGO=@snCodigoOld) AND (SN_ENTSAI=@snEntSaiOld));
@@ -15996,8 +16380,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -16042,15 +16424,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@embCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('EMBALAGEM UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@embCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('EMBALAGEM UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.EMBALAGEM WHERE EMB_CODIGO=@embCodigoOld;
@@ -16152,14 +16527,6 @@ BEGIN
   SET NOCOUNT ON;
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   DECLARE @uiCnpj INTEGER      = 0;     -- Para procurar unique index
-  DECLARE @fkStrCdd VARCHAR(7) = 'OK';  -- Para procurar campo foreign key str (CIDADE)
-  DECLARE @fkStrLgr VARCHAR(5) = 'OK';  -- Para procurar campo foreign key str (LOGRADOURO)
-  DECLARE @fkStrEtf VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESATRIBFED)
-  DECLARE @fkStrEtp VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESATIPO)
-  DECLARE @fkStrErm VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESARAMO)
-  DECLARE @fkStrErt VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESAREGTRIB)
-  DECLARE @fkIntUsr INTEGER = 0 ;       -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntUp INTEGER = 0 ;        -- Para procurar campo foreign key int (USUARIOPERFIL)
   -------------------
   -- Campos da tabela
   -------------------
@@ -16248,7 +16615,8 @@ BEGIN
     ,@empSmtpHostNew          = dbo.fncTranslate(i.EMP_SMTPHOST,30)
     ,@empSmtpPortNew          = dbo.fncTranslate(i.EMP_SMTPPORT,4)
     ,@empCertPathNew          = dbo.fncTranslate(i.EMP_CERTPATH,100)
-    ,@empCertSenhaNew         = dbo.fncTranslate(i.EMP_CERTSENHA,20)
+    --,@empCertSenhaNew         = dbo.fncTranslate(i.EMP_CERTSENHA,20)
+    ,@empCertSenhaNew         = i.EMP_CERTSENHA
     ,@empCertValidadeNew      = i.EMP_CERTVALIDADE
     ,@empProdHomolNew         = dbo.fncTranslate(i.EMP_PRODHOMOL,1)
     ,@empContingenciaNew      = dbo.fncTranslate(i.EMP_CONTINGENCIA,1)
@@ -16381,7 +16749,7 @@ BEGIN
     ------------------------------------
     -- Toda empresa nasce com uma filial
     ------------------------------------
-    DECLARE @codFll INTEGER=((IDENT_CURRENT('EMPRESA')*1000)+IDENT_CURRENT('EMPRESA'));
+    DECLARE @codFll INTEGER=((IDENT_CURRENT('EMPRESA')*1000)+1);
     INSERT INTO FILIAL(
       FLL_CODIGO
       ,FLL_NOME
@@ -16418,6 +16786,77 @@ BEGIN
       ,@empRegNew               -- FLL_REG
       ,@empCodUsrNew            -- FLL_CODUSR
     );      
+    --------------------------------------------------------------------
+    -- Toda empresa nasce com dois bancos( FundoFixo e ExtraFinanceiro )
+    --------------------------------------------------------------------
+    INSERT INTO dbo.VBANCO(
+      BNC_NOME
+      ,BNC_CODFVR
+      ,BNC_ENTRAFLUXO
+      ,BNC_CODBST
+      ,BNC_PADRAOFLUXO
+      ,BNC_CODBCD
+      ,BNC_AGENCIA
+      ,BNC_AGENCIADV
+      ,BNC_CONTA
+      ,BNC_CONTADV
+      ,BNC_CNAB      
+      ,BNC_SALDO
+      ,BNC_CODEMP
+      ,BNC_ATIVO
+      ,BNC_REG
+      ,BNC_CODUSR) VALUES(
+      CONCAT('EXTRA FINANCEIRO ',@empApelidoNew)  -- BNC_NOME
+      ,1                                          -- BNC_CODFVR
+      ,'N'                                        -- BNC_ENTRAFLUXO
+      ,'EF'                                       -- BNC_CODBST
+      ,'N'                                        -- BNC_PADRAOFLUXO
+      ,'000'                                      -- BNC_CODBCD
+      ,CONCAT('EF00',IDENT_CURRENT('EMPRESA'))    -- BNC_AGENCIA
+      ,'0'                                        -- BNC_AGENCIADV
+      ,CONCAT('EF00',IDENT_CURRENT('EMPRESA'))    -- BNC_CONTA
+      ,'0'                                        -- BNC_CONTADV
+      ,'N'                                        -- BNC_CNAB
+      ,0                                          -- BNC_CONTADV
+      ,IDENT_CURRENT('EMPRESA')                   -- BNC_CODEMP
+      ,'S'                                        -- BNC_ATIVO
+      ,'P'                                        -- BNC_REG
+      ,2                                          -- BNC_CODUSR ( Usuario SISTEMA para pular TRIGGER )
+    );
+    INSERT INTO dbo.VBANCO(
+      BNC_NOME
+      ,BNC_CODFVR
+      ,BNC_ENTRAFLUXO
+      ,BNC_CODBST
+      ,BNC_PADRAOFLUXO
+      ,BNC_CODBCD
+      ,BNC_AGENCIA
+      ,BNC_AGENCIADV
+      ,BNC_CONTA
+      ,BNC_CONTADV
+      ,BNC_CNAB      
+      ,BNC_SALDO
+      ,BNC_CODEMP
+      ,BNC_ATIVO
+      ,BNC_REG
+      ,BNC_CODUSR) VALUES(
+      CONCAT('FUNDO FIXO ',@empApelidoNew)        -- BNC_NOME
+      ,2                                          -- BNC_CODFVR
+      ,'N'                                        -- BNC_ENTRAFLUXO
+      ,'FF'                                       -- BNC_CODBST
+      ,'N'                                        -- BNC_PADRAOFLUXO
+      ,'000'                                      -- BNC_CODBCD
+      ,CONCAT('FF00',IDENT_CURRENT('EMPRESA'))    -- BNC_AGENCIA
+      ,'0'                                        -- BNC_AGENCIADV
+      ,CONCAT('FF00',IDENT_CURRENT('EMPRESA'))    -- BNC_CONTA
+      ,'0'                                        -- BNC_CONTADV
+      ,'N'                                        -- BNC_CNAB
+      ,0                                          -- BNC_CONTADV
+      ,IDENT_CURRENT('EMPRESA')                   -- BNC_CODEMP
+      ,'S'                                        -- BNC_ATIVO
+      ,'P'                                        -- BNC_REG
+      ,2                                          -- BNC_CODUSR ( Usuario SISTEMA para pular TRIGGER )
+    );
     -- Gravando LOG
     INSERT INTO dbo.BKPEMPRESA(
       EMP_ACAO
@@ -16585,14 +17024,6 @@ BEGIN
   SET NOCOUNT ON;  
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   DECLARE @uiCnpj INTEGER      = 0;     -- Para procurar unique index
-  DECLARE @fkStrCdd VARCHAR(7) = 'OK';  -- Para procurar campo foreign key str (CIDADE)
-  DECLARE @fkStrLgr VARCHAR(5) = 'OK';  -- Para procurar campo foreign key str (LOGRADOURO)
-  DECLARE @fkStrEtf VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESATRIBFED)
-  DECLARE @fkStrEtp VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESATIPO)
-  DECLARE @fkStrErm VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESARAMO)
-  DECLARE @fkStrErt VARCHAR(3) = 'OK';  -- Para procurar campo foreign key str (EMPRESAREGTRIB)
-  DECLARE @fkIntUsr INTEGER = 0 ;       -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntUp INTEGER = 0 ;        -- Para procurar campo foreign key int (USUARIOPERFIL)
   -----------------------
   -- Campos NEW da tabela
   -----------------------
@@ -16677,11 +17108,13 @@ BEGIN
     ,@empCodErtNew            = dbo.fncTranslate(i.EMP_CODERT,3)
     ,@ertNomeNew              = COALESCE(ERT.ERT_NOME,'ERRO')
     ,@empSmtpUserNameNew      = dbo.fncTranslate(i.EMP_SMTPUSERNAME,60)
-    ,@empSmtpPasswordNew      = dbo.fncTranslate(i.EMP_SMTPPASSWORD,30)
+    --,@empSmtpPasswordNew      = dbo.fncTranslate(i.EMP_SMTPPASSWORD,30)
+    ,@empSmtpPasswordNew      = i.EMP_SMTPPASSWORD
     ,@empSmtpHostNew          = dbo.fncTranslate(i.EMP_SMTPHOST,30)
     ,@empSmtpPortNew          = dbo.fncTranslate(i.EMP_SMTPPORT,4)
     ,@empCertPathNew          = dbo.fncTranslate(i.EMP_CERTPATH,100)
-    ,@empCertSenhaNew         = dbo.fncTranslate(i.EMP_CERTSENHA,20)
+    --,@empCertSenhaNew         = dbo.fncTranslate(i.EMP_CERTSENHA,20)
+    ,@empCertSenhaNew         = i.EMP_CERTSENHA
     ,@empCertValidadeNew      = i.EMP_CERTVALIDADE
     ,@empProdHomolNew         = dbo.fncTranslate(i.EMP_PRODHOMOL,1)
     ,@empContingenciaNew      = dbo.fncTranslate(i.EMP_CONTINGENCIA,1)
@@ -18531,8 +18964,6 @@ BEGIN
   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
-  --DECLARE @uiNome VARCHAR(20) = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -18642,7 +19073,6 @@ INSTEAD OF UPDATE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70);         -- Buscando retorno de erro para funcao
   -----------------------
   -- Campos NEW da tabela
@@ -18768,8 +19198,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -18816,15 +19244,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@emaCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('EMAIL UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@emaCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('EMAIL UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.EMAIL WHERE EMA_CODIGO=@emaCodigoOld;
@@ -19301,14 +19722,6 @@ BEGIN
   DECLARE @erroNew VARCHAR(70)  = 'OK'; -- Buscando retorno de erro para funcao
   DECLARE @uiCodigo INTEGER     = 0;     -- Para procurar unique index    
   DECLARE @uiCnpj INTEGER       = 0;     -- Para procurar unique index  
-  DECLARE @fkStrEmp VARCHAR(15) = 'OK'; -- Para procurar campo foreign key str (EMPRESA)
-  DECLARE @fkStrCdd VARCHAR(7)  = 'OK'; -- Para procurar campo foreign key str (CIDADE)
-  DECLARE @fkStrCtg VARCHAR(3)  = 'OK'; -- Para procurar campo foreign key str (CATEGORIA)
-  DECLARE @fkStrLgr VARCHAR(5)  = 'OK'; -- Para procurar campo foreign key str (LOGRADOURO)
-  DECLARE @fkIntUsr INTEGER     = 0;    -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkStrUsr VARCHAR(15) = 'OK'; -- Para procurar campo foreign key str (USUARIO)
-  DECLARE @fkStrUp VARCHAR(1)   = 'OK'; -- Para procurar campo foreign key str (USUARIOPERFIL)
-  DECLARE @fkIntUp INTEGER      = 0;    -- Para procurar campo foreign key int (USUARIOPERFIL)
   -------------------
   -- Campos da tabela
   -------------------
@@ -19427,8 +19840,11 @@ BEGIN
     DECLARE @seekConta VARCHAR(15)= NULL;
     DECLARE @intConta INTEGER     = 2;
     WHILE( @intConta<9999 ) BEGIN
-      SET @fvrCtaAtivoNew   = CONCAT('1.01.05.02.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4));
-      SET @fvrCtaPassivoNew = CONCAT('2.01.01.01.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4))
+      --SET @fvrCtaAtivoNew   = CONCAT('1.01.05.02.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4));
+      SET @fvrCtaAtivoNew   = CONCAT('1.1.2.01.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4));
+      --SET @fvrCtaPassivoNew = CONCAT('2.01.01.01.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4))
+      SET @fvrCtaPassivoNew = CONCAT('2.1.1.01.',RIGHT('0000' + CAST(@intConta AS VARCHAR(4)),4))
+      
       SET @seekConta        = NULL;
       SELECT @seekConta=COALESCE(CC_CODIGO,NULL) FROM CONTACONTABIL WHERE CC_CODIGO=@fvrCtaAtivoNew;
       IF( @seekConta IS NULL ) BEGIN
@@ -19765,14 +20181,6 @@ BEGIN
   SET NOCOUNT ON;  
   DECLARE @erroNew VARCHAR(70)  = 'OK'; -- Buscando retorno de erro para funcao
   DECLARE @uiCnpj INTEGER       = 0;    -- Para procurar unique index  
-  DECLARE @fkStrEmp VARCHAR(15) = 'OK'; -- Para procurar campo foreign key str (EMPRESA)
-  DECLARE @fkStrCdd VARCHAR(7)  = 'OK'; -- Para procurar campo foreign key str (CIDADE)
-  DECLARE @fkStrCtg VARCHAR(3)  = 'OK'; -- Para procurar campo foreign key str (CATEGORIA)
-  DECLARE @fkStrLgr VARCHAR(5)  = 'OK'; -- Para procurar campo foreign key str (LOGRADOURO)
-  DECLARE @fkIntUsr INTEGER     = 0;    -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkStrUsr VARCHAR(15) = 'OK'; -- Para procurar campo foreign key str (USUARIO)
-  DECLARE @fkStrUp VARCHAR(1)   = 'OK'; -- Para procurar campo foreign key str (USUARIOPERFIL)
-  DECLARE @fkIntUp INTEGER      = 0;    -- Para procurar campo foreign key int (USUARIOPERFIL)
   -----------------------
   -- Campos NEW da tabela
   -----------------------
@@ -20077,7 +20485,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
   DECLARE @fkIntCntt INTEGER = 0; -- Para procurar campo foreign key int (CONTRATO) 
   DECLARE @fkIntCnte INTEGER = 0; -- Para procurar campo foreign key int (CONTRATOENDERECO) 
   DECLARE @fkIntBnc INTEGER = 0;  -- Para procurar campo foreign key int (BANCO)   
@@ -20918,8 +21325,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -20970,15 +21375,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@frdCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('FERIADO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@frdCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('FERIADO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.FERIADO WHERE ((FRD_CODIGO=@frdCodigoOld) AND (FRD_CODEMP=@frdCodEmpOld));
@@ -21461,8 +21859,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -21531,15 +21927,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@fllCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('FILIAL UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@fllCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('FILIAL UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.FILIAL WHERE ((FLL_CODIGO=@fllCodigoOld) AND (FLL_CODEMP=@fllCodEmpOld));
@@ -21847,8 +22236,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -21893,15 +22280,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@fcCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('FORMACOBRANCA UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@fcCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('FORMACOBRANCA UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.FORMACOBRANCA WHERE FC_CODIGO=@fcCodigoOld;
@@ -21970,7 +22350,6 @@ BEGIN
   -------------------
   -- Campos da tabela
   -------------------
-  --DECLARE @gfCodigoNew INTEGER;
   DECLARE @gfNomeNew VARCHAR(40);
   DECLARE @gfAtivoNew VARCHAR(1);
   DECLARE @gfRegNew VARCHAR(1);
@@ -22333,7 +22712,6 @@ BEGIN
   -------------------
   -- Campos da tabela
   -------------------
-  --DECLARE @gmCodigoNew INTEGER;
   DECLARE @gmCodFbrNew INTEGER;
   DECLARE @fvrApelidoNew VARCHAR(15);  
   DECLARE @gmNomeNew VARCHAR(30);
@@ -22347,9 +22725,9 @@ BEGIN
   DECLARE @gmVendaNew VARCHAR(1);
   DECLARE @gmLocacaoNew VARCHAR(1);  
   DECLARE @gmContratoNew VARCHAR(1);
-  DECLARE @gmGpObrigatorioNew VARCHAR(70);
+  DECLARE @gmGpObrigatorioNew VARCHAR(40);
   DECLARE @gmGmObrigatorioNew VARCHAR(70);  
-  DECLARE @gmGpAceitoNew VARCHAR(70);
+  DECLARE @gmGpAceitoNew VARCHAR(40);
   DECLARE @gmGmAceitoNew VARCHAR(70);    
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);
@@ -22636,9 +23014,9 @@ BEGIN
   DECLARE @gmVendaNew VARCHAR(1);
   DECLARE @gmLocacaoNew VARCHAR(1);    
   DECLARE @gmContratoNew VARCHAR(1);
-  DECLARE @gmGpObrigatorioNew VARCHAR(70);
+  DECLARE @gmGpObrigatorioNew VARCHAR(40);
   DECLARE @gmGmObrigatorioNew VARCHAR(70);  
-  DECLARE @gmGpAceitoNew VARCHAR(70);
+  DECLARE @gmGpAceitoNew VARCHAR(40);
   DECLARE @gmGmAceitoNew VARCHAR(70);  
   DECLARE @gmValorVistaNew NUMERIC(15,2);      
   DECLARE @gmValorPrazoNew NUMERIC(15,2);        
@@ -22668,7 +23046,7 @@ BEGIN
          ,@gmCodGpNew           = i.GM_CODGP
          ,@gpNomeNew            = COALESCE(GP.GP_NOME,'ERRO')
          ,@gmEstoqueNew         = i.GM_ESTOQUE
-         ,@gmEstoqueMinimoNew   = COALESCE(i.GM_ESTOQUEMINIMO,0) --@gmEstoqueMinimoNew   = i.GM_ESTOQUEMINIMO  --ANGELO KOKISO   Adição do Coalesce    
+         ,@gmEstoqueMinimoNew   = i.GM_ESTOQUEMINIMO         
          ,@gmEstoqueSucataNew   = i.GM_ESTOQUESUCATA
          ,@gmEstoqueAutoNew     = i.GM_ESTOQUEAUTO
          ,@gmNumSerieNew        = UPPER(i.GM_NUMSERIE)
@@ -23048,15 +23426,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@gmCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('GRUPOMODELO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@gmCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('GRUPOMODELO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.GRUPOMODELO WHERE GM_CODIGO=@gmCodigoOld AND GM_CODFBR=@gmCodFbrOld;
@@ -23952,7 +24323,6 @@ AS
 BEGIN
   SET NOCOUNT ON;  
   DECLARE @fkIntFbr INTEGER = 0;  -- Para procurar campo foreign key int (FABRICANTE)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -24065,7 +24435,7 @@ BEGIN
   -- CTG_NOME       | SEL    |    |    | VC(20) NN          | Campo relacionado (CATEGORIA) 
   -- IMP_ENTSAI     | PK/CC  |    |    | VC(1) NN           |  
   -- IMP_CODNO      | PK/SEL |    |    | VC(2) NN           | Campo relacionado (NATUREZAOPERACAO)
-  -- NO_NOME        | SEL    |    |    | VC(30) NN          | Campo relacionado (NATUREZAOPERACAO)    
+  -- NO_NOME        | SEL    |    |    | VC(60) NN          | Campo relacionado (NATUREZAOPERACAO)    
   -- IMP_CFOP       | SEL    |    |    | VC(5) NN           | Campo relacionado (CFOP)      
   -- CFO_NOME       | SEL    |    |    | VC(30) NN          | Campo relacionado (CFOP)       
   -- IMP_CSTICMS    | SEL    |    |    | VC(3) NN           | Campo relacionado (CSTICMS)       
@@ -24098,8 +24468,6 @@ BEGIN
   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo VARCHAR(3) = 'OK';  -- Para procurar unique index
-  --DECLARE @uiNome VARCHAR(20) = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -24114,7 +24482,7 @@ BEGIN
   DECLARE @ctgNomeNew VARCHAR(20);
   DECLARE @impEntSaiNew VARCHAR(1);
   DECLARE @impCodNoNew VARCHAR(2);
-  DECLARE @noNomeNew VARCHAR(30);
+  DECLARE @noNomeNew VARCHAR(60);
   DECLARE @impCfopNew VARCHAR(5);
   DECLARE @cfoNomeNew VARCHAR(30);
   DECLARE @impCstIcmsNew VARCHAR(3);
@@ -24187,11 +24555,10 @@ BEGIN
     LEFT OUTER JOIN NCM NCM ON i.IMP_CODNCM=NCM.NCM_CODIGO AND NCM.NCM_ATIVO='S'
     LEFT OUTER JOIN CATEGORIA CTG ON i.IMP_CODCTG=CTG.CTG_CODIGO AND CTG.CTG_ATIVO='S'
     LEFT OUTER JOIN NATUREZAOPERACAO NO ON i.IMP_CODNO=NO.NO_CODIGO AND NO.NO_ATIVO='S'
-    LEFT OUTER JOIN CFOP CFO ON i.IMP_CFOP=CFO.CFO_CODIGO AND CFO.CFO_ATIVO='S'
+    LEFT OUTER JOIN CFOP CFO ON i.IMP_CFOP=CFO.CFO_CODIGO AND i.IMP_ENTSAI=CFO.CFO_ENTSAI AND CFO.CFO_ATIVO='S'
     LEFT OUTER JOIN CSTICMS ICM ON i.IMP_CSTICMS=ICM.ICM_CODIGO AND ICM.ICM_ATIVO='S'
     LEFT OUTER JOIN CSTIPI IPI ON i.IMP_CSTIPI=IPI.IPI_CODIGO AND IPI.IPI_ATIVO='S'
     LEFT OUTER JOIN CSTPIS PIS ON i.IMP_CSTPIS=PIS.PIS_CODIGO AND PIS.PIS_ATIVO='S'
-    --LEFT OUTER JOIN CSTCOFINS PIS ON i.IMP_CSTPIS=PIS.PIS_CODIGO AND PIS_ATIVO='S'
     LEFT OUTER JOIN FILIAL FLL ON i.IMP_CODFLL=FLL.FLL_CODIGO AND FLL.FLL_ATIVO='S'
     LEFT OUTER JOIN EMPRESA EMP ON i.IMP_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN USUARIO USR ON i.IMP_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
@@ -24367,7 +24734,7 @@ BEGIN
   DECLARE @ctgNomeNew VARCHAR(20);
   DECLARE @impEntSaiNew VARCHAR(1);
   DECLARE @impCodNoNew VARCHAR(2);
-  DECLARE @noNomeNew VARCHAR(30);
+  DECLARE @noNomeNew VARCHAR(60);
   DECLARE @impCfopNew VARCHAR(5);
   DECLARE @cfoNomeNew VARCHAR(30);
   DECLARE @impCstIcmsNew VARCHAR(3);
@@ -24659,8 +25026,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -24739,15 +25104,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@impCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('IMPOSTO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@impCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('IMPOSTO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.IMPOSTO WHERE ((IMP_UFDE=@impUfDeOld) AND (IMP_UFPARA=@impUfParaOld) AND (IMP_CODNCM=@impCodNcmOld) AND (IMP_CODCTG=@impCodCtgOld) 
@@ -25072,7 +25430,6 @@ BEGIN
   DECLARE @fkIntEmp INTEGER = 0; -- Para procurar campo foreign key int (EMPRESA)
   DECLARE @fkIntFll INTEGER = 0; -- Para procurar campo foreign key int (FILIAL)
   DECLARE @fkIntFvr INTEGER = 0; -- Para procurar campo foreign key int (FAVORECIDO)
-  --DECLARE @fkIntTrn INTEGER = 0; -- Para procurar campo foreign key int (TRANSPORTADORA)
   DECLARE @erroOld VARCHAR(70);  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -25419,8 +25776,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -25465,15 +25820,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@moeCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('MOEDA UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@moeCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('MOEDA UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.MOEDA WHERE MOE_CODIGO=@moeCodigoOld;
@@ -25530,6 +25878,8 @@ BEGIN
   --                                                     | 2- NFe Complementar
   --                                                     | 3- NFe Ajuste
   --                                                     | 4- Devolucao/Retorno
+  -- NO_CODPTP      | SEL |    |    | VC(2) NN           | Codigo relacionado (PAGARTIPO)
+  -- NO_CODPT       | SEL |    |    | INT NN             | Codigo relacionado (PADRAOTITULO)  
   -- NO_ATIVO       | CC  |    |    | VC(1) NN           | S|N     Se o registro pode ser usado em tabelas auxiliares
   -- NO_REG         | FNC |    |    | VC(1) NN           | P|A|S   P=Publico  A=Administrador S=Sistema
   -- NO_CODUSR      | OK  |    |    | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
@@ -25552,7 +25902,11 @@ BEGIN
   DECLARE @noCodigoNew VARCHAR(2);
   DECLARE @noNomeNew VARCHAR(30);
   DECLARE @noFinNfeNew VARCHAR(1);  
+  DECLARE @noCodPtpNew VARCHAR(2);  
+  DECLARE @ptpNomeNew VARCHAR(60);  
   DECLARE @noAtivoNew VARCHAR(1);
+  DECLARE @noCodPtNew INTEGER;  
+  DECLARE @ptNomeNew VARCHAR(25);
   DECLARE @noRegNew VARCHAR(1);
   DECLARE @noCodUsrNew INTEGER;
   DECLARE @usrApelidoNew VARCHAR(15);
@@ -25562,17 +25916,23 @@ BEGIN
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
-  SELECT @noCodigoNew   = dbo.fncTranslate(i.NO_CODIGO,2)
-         ,@noNomeNew    = dbo.fncTranslate(i.NO_NOME,30)
-         ,@noFinNfeNew  = UPPER(i.NO_FINNFE)         
-         ,@noAtivoNew   = UPPER(i.NO_ATIVO)
-         ,@noRegNew     = UPPER(i.NO_REG)
-         ,@noCodUsrNew  = i.NO_CODUSR         
-         ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
-         ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')
-         ,@upD14New      = UP.UP_D14
-         ,@upD31New      = UP.UP_D31
+  SELECT @noCodigoNew     = dbo.fncTranslate(i.NO_CODIGO,2)
+         ,@noNomeNew      = dbo.fncTranslate(i.NO_NOME,30)
+         ,@noFinNfeNew    = UPPER(i.NO_FINNFE)         
+         ,@noCodPtpNew    = UPPER(i.NO_CODPTP)         
+         ,@ptpNomeNew     = COALESCE(PTP.PTP_NOME,'ERRO')
+         ,@noCodPtNew     = i.NO_CODPT
+         ,@ptNomeNew      = COALESCE(PT.PT_NOME,'ERRO')
+         ,@noAtivoNew     = UPPER(i.NO_ATIVO)
+         ,@noRegNew       = UPPER(i.NO_REG)
+         ,@noCodUsrNew    = i.NO_CODUSR         
+         ,@usrApelidoNew  = COALESCE(USR.USR_APELIDO,'ERRO')
+         ,@usrAdmPubNew   = COALESCE(USR.USR_ADMPUB,'P')
+         ,@upD14New       = UP.UP_D14
+         ,@upD31New       = UP.UP_D31
     FROM inserted i
+    LEFT OUTER JOIN PADRAOTITULO PT ON i.NO_CODPT=PT.PT_CODIGO AND PT.PT_ATIVO='S'        
+    LEFT OUTER JOIN PAGARTIPO PTP ON i.NO_CODPTP=PTP.PTP_CODIGO AND PTP.PTP_ATIVO='S'    
     LEFT OUTER JOIN USUARIO USR ON i.NO_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
@@ -25581,6 +25941,10 @@ BEGIN
     -----------------------------
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@noCodUsrNew);
+    IF( @ptNomeNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO OPERACAO PADRAO %i PARA ESTE REGISTRO',15,1,@noCodPtNew);
+    IF( @ptpNomeNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO PAGAR_TIPO %s PARA ESTE REGISTRO',15,1,@noCodPtpNew);
     -------------------------------------------------------------
     -- Checando se o usuario tem direito de cadastro nesta tabela
     -------------------------------------------------------------
@@ -25611,12 +25975,16 @@ BEGIN
       NO_CODIGO
       ,NO_NOME
       ,NO_FINNFE            
+      ,NO_CODPTP      
+      ,NO_CODPT      
       ,NO_ATIVO
       ,NO_REG
       ,NO_CODUSR) VALUES(
       @noCodigoNew   -- NO_CODIGO
       ,@noNomeNew    -- NO_NOME
-      ,@noFinNfeNew  -- NO_FINNFE      
+      ,@noFinNfeNew  -- NO_FINNFE
+      ,@noCodPtpNew  -- NO_CODPTP
+      ,@noCodPtNew   -- NO_CODPT      
       ,@noAtivoNew   -- NO_ATIVO
       ,@noRegNew     -- NO_REG
       ,@noCodUsrNew  -- NO_CODUSR
@@ -25627,6 +25995,8 @@ BEGIN
       ,NO_CODIGO
       ,NO_NOME
       ,NO_FINNFE      
+      ,NO_CODPTP
+      ,NO_CODPT      
       ,NO_ATIVO
       ,NO_REG
       ,NO_CODUSR) VALUES(
@@ -25634,6 +26004,8 @@ BEGIN
       ,@noCodigoNew            -- NO_CODIGO
       ,@noNomeNew              -- NO_NOME
       ,@noFinNfeNew            -- NO_FINNFE      
+      ,@noCodPtpNew            -- NO_CODPTP
+      ,@noCodPtNew             -- NO_CODPT
       ,@noAtivoNew             -- NO_ATIVO
       ,@noRegNew               -- NO_REG
       ,@noCodUsrNew            -- NO_CODUSR
@@ -25662,6 +26034,10 @@ BEGIN
   DECLARE @noCodigoNew VARCHAR(2);
   DECLARE @noNomeNew VARCHAR(30);
   DECLARE @noFinNfeNew VARCHAR(1);    
+  DECLARE @noCodPtpNew VARCHAR(2); 
+  DECLARE @ptpNomeNew VARCHAR(25);  
+  DECLARE @noCodPtNew INTEGER;  
+  DECLARE @ptNomeNew VARCHAR(60);  
   DECLARE @noAtivoNew VARCHAR(1);
   DECLARE @noRegNew VARCHAR(1);
   DECLARE @noCodUsrNew INTEGER;
@@ -25675,6 +26051,10 @@ BEGIN
   SELECT @noCodigoNew   = i.NO_CODIGO
          ,@noNomeNew    = dbo.fncTranslate(i.NO_NOME,30)
          ,@noFinNfeNew  = UPPER(i.NO_FINNFE)                  
+         ,@noCodPtpNew  = UPPER(i.NO_CODPTP)         
+         ,@ptpNomeNew   = COALESCE(PTP.PTP_NOME,'ERRO')         
+         ,@noCodPtNew   = i.NO_CODPT
+         ,@ptNomeNew    = COALESCE(PT.PT_NOME,'ERRO')
          ,@noAtivoNew   = UPPER(i.NO_ATIVO)
          ,@noRegNew     = UPPER(i.NO_REG)
          ,@noCodUsrNew  = i.NO_CODUSR         
@@ -25683,6 +26063,8 @@ BEGIN
          ,@upD14New      = UP.UP_D14
          ,@upD31New      = UP.UP_D31
     FROM inserted i
+    LEFT OUTER JOIN PADRAOTITULO PT ON i.NO_CODPT=PT.PT_CODIGO AND PT.PT_ATIVO='S'            
+    LEFT OUTER JOIN PAGARTIPO PTP ON i.NO_CODPTP=PTP.PTP_CODIGO AND PTP.PTP_ATIVO='S'        
     LEFT OUTER JOIN USUARIO USR ON i.NO_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
@@ -25691,6 +26073,10 @@ BEGIN
     -----------------------------
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@noCodUsrNew);
+    IF( @ptNomeNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO OPERACAO PADRAO %i PARA ESTE REGISTRO',15,1,@noCodPtNew);
+    IF( @ptpNomeNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO PAGAR_TIPO %s PARA ESTE REGISTRO',15,1,@noCodPtpNew);
     -------------------------------------------------------------
     -- Checando se o usuario tem direito de cadastro nesta tabela
     -------------------------------------------------------------
@@ -25703,12 +26089,16 @@ BEGIN
     DECLARE @noCodigoOld VARCHAR(2);
     DECLARE @noNomeOld VARCHAR(30);
     DECLARE @noFinNfeOld VARCHAR(1);    
+    DECLARE @noCodPtpOld VARCHAR(2);      
+    DECLARE @noCodPtOld INTEGER;      
     DECLARE @noAtivoOld VARCHAR(1);
     DECLARE @noRegOld VARCHAR(1);
     DECLARE @noCodUsrOld INTEGER;
     SELECT @noCodigoOld   = d.NO_CODIGO
            ,@noNomeOld    = d.NO_NOME
            ,@noFinNfeOld  = d.NO_FINNFE
+           ,@noCodPtpOld  = d.NO_CODPTP
+           ,@noCodPtOld   = d.NO_CODPT           
            ,@noAtivoOld   = d.NO_ATIVO
            ,@noRegOld     = d.NO_REG
            ,@noCodUsrOld  = d.NO_CODUSR         
@@ -25737,18 +26127,22 @@ BEGIN
     --  
     UPDATE dbo.NATUREZAOPERACAO
        SET NO_NOME   = @noNomeNew
-          ,NO_FINNFE = @noFinNfeNew       
+          ,NO_FINNFE = @noFinNfeNew
+          ,NO_CODPTP = @noCodPtpNew
+          ,NO_CODPT  = @noCodPtNew          
           ,NO_ATIVO  = @noAtivoNew
           ,NO_REG    = @noRegNew
           ,NO_CODUSR = @noCodUsrNew
     WHERE NO_CODIGO  = @noCodigoNew;     
     -- Gravando LOG
-    IF( (@noNomeOld<>@noNomeNew) OR (@noFinNfeOld<>@noFinNfeNew) OR (@noAtivoOld<>@noAtivoNew) OR (@noRegOld<>@noRegNew) ) BEGIN
+    IF( (@noNomeOld<>@noNomeNew) OR (@noFinNfeOld<>@noFinNfeNew) OR (@noCodPtOld<>@noCodPtNew) OR (@noAtivoOld<>@noAtivoNew) OR (@noRegOld<>@noRegNew) ) BEGIN
       INSERT INTO dbo.BKPNATUREZAOPERACAO(
         NO_ACAO
         ,NO_CODIGO
         ,NO_NOME
         ,NO_FINNFE        
+        ,NO_CODPTP        
+        ,NO_CODPT        
         ,NO_ATIVO
         ,NO_REG
         ,NO_CODUSR) VALUES(
@@ -25756,6 +26150,8 @@ BEGIN
         ,@noCodigoNew  -- NO_CODIGO
         ,@noNomeNew    -- NO_NOME
         ,@noFinNfeNew  -- NO_FINNFE        
+        ,@noCodPtpNew  -- NO_CODPTP
+        ,@noCodPtNew   -- NO_CODPT
         ,@noAtivoNew   -- NO_ATIVO
         ,@noRegNew     -- NO_REG
         ,@noCodUsrNew  -- NO_CODUSR
@@ -25777,15 +26173,17 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
-  DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkNfProduto INTEGER = 0; -- Para procurar campo foreign key int (NFPRODUTO) 
+  DECLARE @fkImposto VARCHAR(10)    -- Para procurar campo foreign key str (IMPOSTO) 
+  DECLARE @erroOld VARCHAR(70);     -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
   -------------------
   DECLARE @noCodigoOld VARCHAR(2);
   DECLARE @noNomeOld VARCHAR(30);
   DECLARE @noFinNfeOld VARCHAR(1);  
+  DECLARE @noCodPtpOld VARCHAR(2);      
+  DECLARE @noCodPtOld INTEGER;        
   DECLARE @noAtivoOld VARCHAR(1);
   DECLARE @noRegOld VARCHAR(1);
   DECLARE @noCodUsrOld INTEGER;
@@ -25798,6 +26196,8 @@ BEGIN
   SELECT @noCodigoOld   = d.NO_CODIGO
          ,@noNomeOld    = d.NO_NOME
          ,@noFinNfeOld  = d.NO_FINNFE
+         ,@noCodPtpOld  = d.NO_CODPTP         
+         ,@noCodPtOld   = d.NO_CODPT                    
          ,@noAtivoOld   = d.NO_ATIVO
          ,@noRegOld     = d.NO_REG
          ,@noCodUsrOld  = d.NO_CODUSR         
@@ -25825,15 +26225,15 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK IMP_CODNO(IMPOSTO)
+    --                 NFP_CODNO(NFPRODUTO)
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@noCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('NATUREZAOPERACAO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@noCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('NATUREZAOPERACAO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkImposto=IMP_CODNCM FROM IMPOSTO WHERE IMP_CODNO=@noCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('NATUREZAOPERACAO UTILIZADO EM IMPOSTO COM O NCM %s',15,1,@fkImposto);
+    SELECT TOP 1 @fkNfProduto=NFP_NUMNF FROM NFPRODUTO WHERE NFP_CODNO=@noCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('NATUREZAOPERACAO UTILIZADO NA NF %i',15,1,@fkNfProduto);
     --
     --
     DELETE FROM dbo.NATUREZAOPERACAO WHERE NO_CODIGO=@noCodigoOld;
@@ -25842,14 +26242,18 @@ BEGIN
       NO_ACAO
       ,NO_CODIGO
       ,NO_NOME
-      ,NO_FINNFE      
+      ,NO_FINNFE     
+      ,NO_CODPTP
+      ,NO_CODPT      
       ,NO_ATIVO
       ,NO_REG
       ,NO_CODUSR) VALUES(
       'E'              -- NO_ACAO
       ,@noCodigoOld    -- NO_CODIGO
       ,@noNomeOld      -- NO_NOME
-      ,@noFinNfeOld    -- NO_FINNFE      
+      ,@noFinNfeOld    -- NO_FINNFE
+      ,@noCodPtpOld    -- NO_CODPTP      
+      ,@noCodPtOld     -- NO_CODPT
       ,@noAtivoOld     -- NO_ATIVO
       ,@noRegOld       -- NO_REG
       ,@noCodUsrOld    -- NO_CODUSR
@@ -26119,8 +26523,8 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
+  DECLARE @fkImposto VARCHAR(10)    -- Para procurar campo foreign key str (IMPOSTO)   
+  DECLARE @fkProduto VARCHAR(15)    -- Para procurar campo foreign key str (PRODUTO)     
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -26165,15 +26569,15 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK IMP_CODNCM
+    --                 PRD_CODNCM     
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@ncmCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('NCM UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@ncmCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('NCM UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkImposto=IMP_CODNCM FROM IMPOSTO WHERE IMP_CODNCM=@ncmCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('NCM UTILIZADO NA TABELA DE IMPOSTO',15,1);
+    SELECT TOP 1 @fkProduto=PRD_CODIGO FROM PRODUTO WHERE PRD_CODNCM=@ncmCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('NCM UTILIZADO NO PRODUTO %s',15,1,@fkProduto);
     --
     --
     DELETE FROM dbo.NCM WHERE NCM_CODIGO=@ncmCodigoOld;
@@ -26481,15 +26885,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@opeCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('OPERADORA UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@opeCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('OPERADORA UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.OPERADORA WHERE (OPE_CODFVR=@opeCodFvrOld);
@@ -26552,7 +26949,6 @@ BEGIN
   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
   DECLARE @uiNome VARCHAR(40) = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
@@ -26667,7 +27063,6 @@ INSTEAD OF UPDATE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70);         -- Buscando retorno de erro para funcao
   -----------------------
   -- Campos NEW da tabela
@@ -26795,8 +27190,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -26843,15 +27236,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@pdrCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('PADRAO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@pdrCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('PADRAO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.PADRAO WHERE PDR_CODIGO=@pdrCodigoOld;
@@ -26920,7 +27306,6 @@ BEGIN
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
   DECLARE @uiCodPdr INTEGER     = 0;        -- Para procurar unique index
-  --DECLARE @uiNome VARCHAR(40)   = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70)  = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -27042,7 +27427,6 @@ INSTEAD OF UPDATE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70);         -- Buscando retorno de erro para funcao
   -----------------------
   -- Campos NEW da tabela
@@ -27166,8 +27550,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -27212,15 +27594,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@pgCodPdrOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('PADRAOGRUPO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@pgCodPdrOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('PADRAOGRUPO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.PADRAOGRUPO WHERE ((PG_CODPDR=@pgCodPdrOld) AND (PG_CODPTP=@pgCodPtpOld));     
@@ -27293,7 +27668,6 @@ BEGIN
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
   DECLARE @uiCodigo INTEGER = 0;        -- Para procurar unique index
-  --DECLARE @uiNome VARCHAR(20) = 'OK';   -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -27632,9 +28006,9 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
-  DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @erroOld VARCHAR(70);     -- Buscando retorno de erro para funcao
+  DECLARE @fkPagar INTEGER = 0;     -- Para procurar campo foreign key int (PAGAR) 
+  DECLARE @fkNatOperacao VARCHAR(2) -- Para procurar campo foreign key str (NATUREZAOPERACAO) 
   -------------------
   -- Campos da tabela
   -------------------
@@ -27689,16 +28063,16 @@ BEGIN
     SET @erroOld=dbo.fncCampoRegExc( @usrAdmPubOld,@ptRegOld );
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
-    --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
-    --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@ptCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('PADRAOTITULO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@ptCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('PADRAOTITULO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    ---------------------------------------------
+    --   Checando a FK NO_CODPT(NATUREZAOPERACAO)
+    --                 PGR_CODPT(PAGAR)
+    ---------------------------------------------
+    SELECT TOP 1 @fkNatOperacao=NO_CODIGO FROM NATUREZAOPERACAO WHERE NO_CODPT=@ptCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('OPERACAO UTILIZADO EM NATUREZA OPERACAO COM O CODIGO %s',15,1,@fkNatOperacao);
+    SELECT TOP 1 @fkPagar=PGR_LANCTO FROM PAGAR WHERE PGR_CODPT=@ptCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('OPERACAO UTILIZADO NO FINANCEIRO COM O LANCTO %i',15,1,@fkPagar);
     --
     --
     DELETE FROM dbo.PADRAOTITULO WHERE PT_CODIGO=@ptCodigoOld;
@@ -27939,7 +28313,7 @@ BEGIN
          ,@pgrVlrCsllNew     = COALESCE(i.PGR_VLRCSLL,0)
          ,@pgrCodCcNew       = i.PGR_CODCC
          ,@pgrCodSnfNew      = COALESCE(i.PGR_CODSNF,0)
-         ,@snfEntSaiNew      = SNF.SNF_ENTSAI
+         ,@snfEntSaiNew      = COALESCE(SNF.SNF_ENTSAI,'*')
          ,@pgrAprNew         = UPPER(COALESCE(i.PGR_APR,'S'))
          ,@pgrCodEmpNew      = i.PGR_CODEMP
          ,@pgrCodFllNew      = i.PGR_CODFLL
@@ -27948,7 +28322,7 @@ BEGIN
          ,@pgrCodCnttNew     = COALESCE(i.PGR_CODCNTT,0)
          ,@pgrVerDireitoNew  = i.PGR_VERDIREITO
          ,@pgrCodCmpNew      = i.PGR_CODCMP
-         ,@cmpFechamentoNew  = COALESCE(CMP.CMP_FECHAMENTO,'ERRO')
+         ,@cmpFechamentoNew  = COALESCE(CMP.CMP_FECHAMENTO,'*')
          ,@pgrRegNew         = UPPER(COALESCE(i.PGR_REG,'P'))
          ,@pgrCodUsrNew      = i.PGR_CODUSR
          ,@usrApelidoNew     = COALESCE(USR.USR_APELIDO,'ERRO')
@@ -28011,10 +28385,10 @@ BEGIN
       IF( @pgrCodSnfNew=0 )
         RAISERROR('NAO LOCALIZADO OPERACAO PADRAO %i PARA ESTE REGISTRO',15,1,@pgrCodPtNew);            
     END  
-    IF( @cmpFechamentoNew='ERRO' )
+    IF( @cmpFechamentoNew='*' )
       RAISERROR('NAO LOCALIZADO COMPETENCIA %i PARA ESTE REGISTRO',15,1,@pgrCodCmpNew);            
     IF( @pgrCodSnfNew>0 ) BEGIN  
-      IF( @snfEntSaiNew='ERRO' )
+      IF( @snfEntSaiNew='*' )
         RAISERROR('NAO LOCALIZADO SERIENF PADRAO %i PARA ESTE REGISTRO',15,1,@pgrCodSnfNew);                
     END    
     IF( @fllApelidoNew='ERRO' )
@@ -28092,7 +28466,37 @@ BEGIN
     -- Aqui naum pode ter o PGR_VLRBAIXA( Usado para desmembramento e baixa parcial )
     ------------------------------------------------------------------
     SET @pgrVlrLiquidoNew=((@pgrVlrParcelaNew-@pgrVlrDescontoNew+@pgrVlrMultaNew)-(@pgrVlrRetencaoNew+@pgrVlrPisNew+@pgrVlrCofinsNew+@pgrVlrCsllNew));
-    --  
+    --------------------
+    -- Se tiver contrato
+    --------------------    
+    IF( @pgrCodCnttNew>0 ) BEGIN
+      DECLARE @cnttCodFvr INTEGER;
+      DECLARE @cnttDesFvr VARCHAR(20);
+      DECLARE @cnttLanctoIni INTEGER;
+      DECLARE @cnttLanctoFim INTEGER;
+      SELECT @cnttCodFvr=CNTT_CODFVR,@cnttDesFvr=FVR.FVR_APELIDO,@cnttLanctoIni=CNTT_LANCTOINI,@cnttLanctoFim=CNTT_LANCTOFIM
+        FROM CONTRATO 
+        LEFT OUTER JOIN FAVORECIDO FVR ON CNTT_CODFVR=FVR.FVR_CODIGO
+       WHERE ((CNTT_CODIGO=@pgrCodCnttNew) AND (CNTT_ATIVO='S'));
+      IF( @@RowCount=0 )  
+        RAISERROR('NAO LOCALIZADO CONTRATO %i PARA ESTE REGISTRO',15,1,@pgrCodCnttNew);
+      IF( @cnttCodFvr<>@pgrCodFvrNew )  
+        RAISERROR('FAVORECIDO DO CONTRATO %s DIVERGE DO INFORMADO NO FINANCEIRO %s',15,1,@cnttDesFvr,@fvrApelidoNew);
+      --------------------------------------------------------------------------------------------  
+      -- Atualizando o lanctoIni/lanctoFim para facilitar select de todos os tituls de um contrato
+      --------------------------------------------------------------------------------------------  
+      IF( (@cnttLanctoIni=0) AND (@cnttLanctoFim=0)  ) BEGIN
+        SET @cnttLanctoIni=@pgrLanctoNew;
+        SET @cnttLanctoFim=@pgrLanctoNew;
+      END ELSE BEGIN
+        SET @cnttLanctoFim=@pgrLanctoNew;
+      END
+      UPDATE CONTRATO SET CNTT_LANCTOINI=@cnttLanctoIni,CNTT_LANCTOFIM=@cnttLanctoFim WHERE CNTT_CODIGO=@pgrCodCnttNew;
+      --  
+      --  
+    END
+    --
+    --
     INSERT INTO dbo.PAGAR( 
       PGR_LANCTO
       ,PGR_BLOQUEADO
@@ -28211,7 +28615,93 @@ BEGIN
         END 
       END  
     END
-    --  
+    ------
+    -- Log
+    ------  
+    INSERT INTO dbo.BKPPAGAR(
+      PGR_ACAO
+      ,PGR_LANCTO
+      ,PGR_BLOQUEADO
+      ,PGR_CHEQUE
+      ,PGR_CODBNC
+      ,PGR_CODFVR
+      ,PGR_CODFC
+      ,PGR_CODTD
+      ,PGR_VENCTO
+      ,PGR_DATAPAGA
+      ,PGR_DOCTO
+      ,PGR_DTDOCTO
+      ,PGR_CODPTT
+      ,PGR_MASTER
+      ,PGR_OBSERVACAO
+      ,PGR_PARCELA
+      ,PGR_CODPTP
+      ,PGR_INDICE
+      ,PGR_CODPT
+      ,PGR_VLREVENTO
+      ,PGR_VLRPARCELA
+      ,PGR_VLRDESCONTO
+      ,PGR_VLRMULTA
+      ,PGR_VLRBAIXA
+      ,PGR_VLRRETENCAO
+      ,PGR_VLRPIS
+      ,PGR_VLRCOFINS
+      ,PGR_VLRCSLL
+      ,PGR_VLRLIQUIDO
+      ,PGR_CODCC
+      ,PGR_CODSNF
+      ,PGR_DTMOVTO
+      ,PGR_APR
+      ,PGR_CODEMP
+      ,PGR_CODFLL
+      ,PGR_LOTECNAB
+      ,PGR_VERDIREITO
+      ,PGR_CODCNTT
+      ,PGR_CODCMP
+      ,PGR_REG
+      ,PGR_CODUSR) VALUES(
+      'I'                       -- PGR_ACAO                         
+      ,@pgrLanctoNew            -- PGR_LANCTO
+      ,@pgrBloqueadoNew         -- PGR_BLOQUEADO
+      ,@pgrChequeNew            -- PGR_CHEQUE
+      ,@pgrCodBncNew            -- PGR_CODBNC
+      ,@pgrCodFvrNew            -- PGR_CODFVR
+      ,@pgrCodFcNew             -- PGR_CODFC
+      ,@pgrCodTdNew             -- PGR_CODTD
+      ,@pgrVenctoNew            -- PGR_VENCTO
+      ,@pgrDataPagaNew          -- PGR_DATAPAGA
+      ,@pgrDoctoNew             -- PGR_DOCTO
+      ,@pgrDtDoctoNew           -- PGR_DTDOCTO
+      ,@pgrCodPttNew            -- PGR_CODPTT
+      ,@pgrMasterNew            -- PGR_MASTER
+      ,@pgrObservacaoNew        -- PGR_OBSERVACAO
+      ,@pmParcela               -- PGR_PARCELA
+      ,@pgrCodPtpNew            -- PGR_CODPTP
+      ,@pgrIndiceNew            -- PGR_INDICE
+      ,@pgrCodPtNew             -- PGR_CODPT
+      ,@pgrVlrEventoNew         -- PGR_VLREVENTO
+      ,@pgrVlrParcelaNew        -- PGR_VLRPARCELA
+      ,@pgrVlrDescontoNew       -- PGR_VLRDESCONTO
+      ,@pgrVlrMultaNew          -- PGR_VLRMULTA
+      ,0                        -- PGR_VLRBAIXA
+      ,@pgrVlrRetencaoNew       -- PGR_VLRRETENCAO
+      ,@pgrVlrPisNew            -- PGR_VLRPIS
+      ,@pgrVlrCofinsNew         -- PGR_VLRCOFINS
+      ,@pgrVlrCsllNew           -- PGR_VLRCSLL
+      ,@pgrVlrLiquidoNew        -- PGR_VLRLIQUIDO
+      ,@pgrCodCcNew             -- PGR_CODCC
+      ,@pgrCodSnfNew            -- PGR_CODSNF
+      ,GETDATE()                -- PGR_DTMOVTO
+      ,@pgrAprNew               -- PGR_APR
+      ,@pgrCodEmpNew            -- PGR_CODEMP
+      ,@pgrCodFllNew            -- PGR_CODFLL
+      ,@pgrLoteCnabNew          -- PGR_LOTECNAB
+      ,@pgrVerDireitoNew        -- PGR_VERDIREITO
+      ,@pgrCodCnttNew           -- PGR_CODCNTT
+      ,@pgrCodCmpNew            -- PGR_CODCMP
+      ,@pgrRegNew               -- PGR_REG
+      ,@pgrCodUsrNew            -- PGR_CODUSR
+    );  
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -28280,6 +28770,7 @@ BEGIN
   DECLARE @pgrVlrCsllNew NUMERIC(15,2);
   DECLARE @pgrCodCcNew VARCHAR(15);
   DECLARE @pgrCodSnfNew INTEGER;
+  DECLARE @pgrDtMovtoNew DATE;  
   DECLARE @snfEntSaiNew VARCHAR(1);
   DECLARE @pgrAprNew VARCHAR(1);
   DECLARE @pgrCodEmpNew INTEGER;
@@ -28345,7 +28836,8 @@ BEGIN
          ,@pgrVlrCsllNew     = i.PGR_VLRCSLL
          ,@pgrCodCcNew       = i.PGR_CODCC
          ,@pgrCodSnfNew      = i.PGR_CODSNF
-         ,@snfEntSaiNew      = SNF.SNF_ENTSAI
+         ,@pgrDtMovtoNew     = i.PGR_DTMOVTO 
+         ,@snfEntSaiNew      = COALESCE(SNF.SNF_ENTSAI,'*')
          ,@pgrAprNew         = UPPER(i.PGR_APR)
          ,@pgrCodEmpNew      = i.PGR_CODEMP
          ,@pgrCodFllNew      = i.PGR_CODFLL
@@ -28355,7 +28847,7 @@ BEGIN
          ,@pgrVerDireitoNew  = i.PGR_VERDIREITO
          ,@pgrCodCmpNew      = i.PGR_CODCMP
          ,@pgrCodAltNew      = i.PGR_CODALT         
-         ,@cmpFechamentoNew  = COALESCE(CMP.CMP_FECHAMENTO,'ERRO')
+         ,@cmpFechamentoNew  = COALESCE(CMP.CMP_FECHAMENTO,'*')
          ,@pgrRegNew         = UPPER(i.PGR_REG)
          ,@pgrCodUsrNew      = i.PGR_CODUSR
          ,@usrApelidoNew     = COALESCE(USR.USR_APELIDO,'ERRO')
@@ -28402,10 +28894,10 @@ BEGIN
       IF( @pgrCodSnfNew=0 )
         RAISERROR('NAO LOCALIZADO OPERACAO PADRAO %i PARA ESTE REGISTRO',15,1,@pgrCodPtNew);            
     END  
-    IF( @cmpFechamentoNew='ERRO' )
+    IF( @cmpFechamentoNew='*' )
       RAISERROR('NAO LOCALIZADO COMPETENCIA %i PARA ESTE REGISTRO',15,1,@pgrCodCmpNew);            
     IF( @pgrCodSnfNew>0 ) BEGIN  
-      IF( @snfEntSaiNew='ERRO' )
+      IF( @snfEntSaiNew='*' )
         RAISERROR('NAO LOCALIZADO SERIENF PADRAO %i PARA ESTE REGISTRO',15,1,@pgrCodSnfNew);                
     END    
     IF( @fllApelidoNew='ERRO' )
@@ -28468,6 +28960,7 @@ BEGIN
     DECLARE @pgrVlrCsllOld NUMERIC(15,2);
     DECLARE @pgrCodCcOld VARCHAR(15);
     DECLARE @pgrCodSnfOld INTEGER;
+    DECLARE @pgrDtMovtoOld DATE;
     DECLARE @pgrAprOld VARCHAR(1);
     DECLARE @pgrCodEmpOld INTEGER;
     DECLARE @pgrCodFllOld INTEGER;
@@ -28504,6 +28997,7 @@ BEGIN
            ,@pgrVlrCsllOld     = d.PGR_VLRCSLL
            ,@pgrCodCcOld       = d.PGR_CODCC
            ,@pgrCodSnfOld      = d.PGR_CODSNF             -- Campo naum pode ser alterado
+           ,@pgrDtMovtoOld     = d.PGR_DTMOVTO            -- Campo naum pode ser alterado
            ,@pgrAprOld         = d.PGR_APR
            ,@pgrCodEmpOld      = d.PGR_CODEMP             -- Campo naum pode ser alterado
            ,@pgrCodFllOld      = d.PGR_CODFLL             -- Campo naum pode ser alterado
@@ -28519,6 +29013,8 @@ BEGIN
       RAISERROR('CAMPO LANCTO NAO PODE SER ALTERADO',15,1);  
     IF( @pgrMasterOld<>@pgrMasterNew )
       RAISERROR('CAMPO MASTER NAO PODE SER ALTERADO',15,1);  
+    IF( @pgrRegOld='S' )
+      RAISERROR('REGISTRO DO SISTEMA NAO PODE SER ALTERADO',15,1);  
     -----------------------------------------------------------------------------------------  
     -- O campo titulo soh pode ser alterado se existir uma baixa parcial ou um desmembramento
     -----------------------------------------------------------------------------------------  
@@ -28538,6 +29034,8 @@ BEGIN
       RAISERROR('CAMPO EMPRESA NAO PODE SER ALTERADO',15,1);  
     IF( @pgrCodFllOld<>@pgrCodFllNew )
       RAISERROR('CAMPO FILIAL NAO PODE SER ALTERADO',15,1);  
+    IF( @pgrDtMovtoOld<>@pgrDtMovtoNew )
+      RAISERROR('CAMPO DATA MOVTO NAO PODE SER ALTERADO',15,1);  
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Olhar todos, Old pode ser "S"
     ------------------------------------------------------------------
@@ -28603,7 +29101,8 @@ BEGIN
     -- Atualizando o valor PGR_VLRLIQUIDO
     -- Aqui tem o PGR_VLRBAIXA( Usado para desmembramento e baixa parcial )
     ------------------------------------------------------------------
-    SET @pgrVlrLiquidoNew=((@pgrVlrParcelaNew-@pgrVlrDescontoNew+@pgrVlrMultaNew-@pgrVlrBaixaNew)-(@pgrVlrRetencaoNew+@pgrVlrPisNew+@pgrVlrCofinsNew+@pgrVlrCsllNew));
+    SET @pgrVlrLiquidoNew=((@pgrVlrParcelaNew-(@pgrVlrDescontoOld+@pgrVlrDescontoNew)+
+                                              (@pgrVlrMultaOld+@pgrVlrMultaNew)-@pgrVlrBaixaNew)-(@pgrVlrRetencaoNew+@pgrVlrPisNew+@pgrVlrCofinsNew+@pgrVlrCsllNew));
     --  
     --  
     UPDATE dbo.PAGAR
@@ -28621,8 +29120,8 @@ BEGIN
            ,PGR_PARCELA     = @pgrParcelaNew
            ,PGR_CODPTP      = @pgrCodPtpNew
            ,PGR_VLRBAIXA    = (@pgrVlrBaixaOld+@pgrVlrBaixaNew)
-           ,PGR_VLRDESCONTO = @pgrVlrDescontoNew
-           ,PGR_VLRMULTA    = @pgrVlrMultaNew
+           ,PGR_VLRDESCONTO = (@pgrVlrDescontoOld+@pgrVlrDescontoNew)
+           ,PGR_VLRMULTA    = (@pgrVlrMultaOld+@pgrVlrMultaNew)
            ,PGR_VLRRETENCAO = @pgrVlrRetencaoNew
            ,PGR_VLRPIS      = @pgrVlrPisNew
            ,PGR_VLRCOFINS   = @pgrVlrCofinsNew
@@ -28777,8 +29276,130 @@ BEGIN
         END 
       END  
     END
-    --
-    --
+    ------
+    -- Log
+    ------
+    IF( (@pgrLanctoOld<>@pgrLanctoNew) OR  
+        (@pgrBloqueadoOld<>@pgrBloqueadoNew) OR   
+        (@pgrChequeOld<>@pgrChequeNew) OR      
+        (@pgrCodBncOld<>@pgrCodBncNew) OR      
+        (@pgrCodFvrOld<>@pgrCodFvrNew) OR      
+        (@pgrCodFcOld<>@pgrCodFcNew) OR       
+        (@pgrCodTdOld<>@pgrCodTdNew) OR       
+        (@pgrVenctoOld<>@pgrVenctoNew) OR      
+        (@pgrDoctoOld<>@pgrDoctoNew) OR       
+        (@pgrDtDoctoOld<>@pgrDtDoctoNew) OR     
+        (@pgrCodPttOld<>@pgrCodPttNew) OR      
+        (@pgrMasterOld<>@pgrMasterNew) OR      
+        (@pgrObservacaoOld<>@pgrObservacaoNew) OR  
+        (@pgrParcelaOld<>@pgrParcelaNew) OR     
+        (@pgrCodPtpOld<>@pgrCodPtpNew) OR      
+        (@pgrCodPtOld<>@pgrCodPtNew) OR       
+        (@pgrVlrDescontoOld<>@pgrVlrDescontoNew) OR 
+        (@pgrVlrEventoOld<>@pgrVlrEventoNew) OR   
+        (@pgrVlrParcelaOld<>@pgrVlrParcelaNew) OR  
+        (@pgrVlrBaixaOld<>@pgrVlrBaixaNew) OR    
+        (@pgrVlrMultaOld<>@pgrVlrMultaNew) OR    
+        (@pgrVlrRetencaoOld<>@pgrVlrRetencaoNew) OR 
+        (@pgrVlrPisOld<>@pgrVlrPisNew) OR      
+        (@pgrVlrCofinsOld<>@pgrVlrCofinsNew) OR   
+        (@pgrVlrCsllOld<>@pgrVlrCsllNew) OR     
+        (@pgrCodCcOld<>@pgrCodCcNew) OR       
+        (@pgrCodSnfOld<>@pgrCodSnfNew) OR      
+        (@pgrAprOld<>@pgrAprNew) OR
+        (@pgrCodEmpOld<>@pgrCodEmpNew) OR      
+        (@pgrCodFllOld<>@pgrCodFllNew) OR      
+        (@pgrLoteCnabOld<>@pgrLoteCnabNew) OR    
+        (@pgrCodCnttOld<>@pgrCodCnttNew) OR     
+        (@pgrCodCmpOld<>@pgrCodCmpNew) OR      
+        (@pgrRegOld<>@pgrRegNew) OR
+        ((@pgrDataPagaOld IS NULL) And (@pgrDataPagaNew IS NOT NULL) OR (@pgrDataPagaOld IS NOT NULL) And (@pgrDataPagaNew IS NULL)) ) BEGIN
+        
+      INSERT INTO dbo.BKPPAGAR(
+        PGR_ACAO
+        ,PGR_LANCTO
+        ,PGR_BLOQUEADO
+        ,PGR_CHEQUE
+        ,PGR_CODBNC
+        ,PGR_CODFVR
+        ,PGR_CODFC
+        ,PGR_CODTD
+        ,PGR_VENCTO
+        ,PGR_DATAPAGA
+        ,PGR_DOCTO
+        ,PGR_DTDOCTO
+        ,PGR_CODPTT
+        ,PGR_MASTER
+        ,PGR_OBSERVACAO
+        ,PGR_PARCELA
+        ,PGR_CODPTP
+        ,PGR_INDICE
+        ,PGR_CODPT
+        ,PGR_VLREVENTO
+        ,PGR_VLRPARCELA
+        ,PGR_VLRDESCONTO
+        ,PGR_VLRMULTA
+        ,PGR_VLRBAIXA
+        ,PGR_VLRRETENCAO
+        ,PGR_VLRPIS
+        ,PGR_VLRCOFINS
+        ,PGR_VLRCSLL
+        ,PGR_VLRLIQUIDO
+        ,PGR_CODCC
+        ,PGR_CODSNF
+        ,PGR_DTMOVTO
+        ,PGR_APR
+        ,PGR_CODEMP
+        ,PGR_CODFLL
+        ,PGR_LOTECNAB
+        ,PGR_VERDIREITO
+        ,PGR_CODCNTT
+        ,PGR_CODCMP
+        ,PGR_REG
+        ,PGR_CODUSR) VALUES(
+        'A'                       -- PGR_ACAO
+        ,@pgrLanctoNew            -- PGR_LANCTO
+        ,@pgrBloqueadoNew         -- PGR_BLOQUEADO
+        ,@pgrChequeNew            -- PGR_CHEQUE
+        ,@pgrCodBncNew            -- PGR_CODBNC
+        ,@pgrCodFvrNew            -- PGR_CODFVR
+        ,@pgrCodFcNew             -- PGR_CODFC
+        ,@pgrCodTdNew             -- PGR_CODTD
+        ,@pgrVenctoNew            -- PGR_VENCTO
+        ,@pgrDataPagaNew          -- PGR_DATAPAGA
+        ,@pgrDoctoNew             -- PGR_DOCTO
+        ,@pgrDtDoctoNew           -- PGR_DTDOCTO
+        ,@pgrCodPttNew            -- PGR_CODPTT
+        ,@pgrMasterNew            -- PGR_MASTER
+        ,@pgrObservacaoNew        -- PGR_OBSERVACAO
+        ,@pgrParcelaNew           -- PGR_PARCELA
+        ,@pgrCodPtpNew            -- PGR_CODPTP
+        ,@pgrIndiceNew            -- PGR_INDICE
+        ,@pgrCodPtNew             -- PGR_CODPT
+        ,@pgrVlrEventoNew         -- PGR_VLREVENTO        
+        ,@pgrVlrParcelaNew        -- PGR_VLRPARCELA
+        ,@pgrVlrDescontoNew       -- PGR_VLRDESCONTO
+        ,@pgrVlrMultaNew          -- PGR_VLRMULTA
+        ,@pgrVlrBaixaNew          -- PGR_VLRBAIXA
+        ,@pgrVlrRetencaoNew       -- PGR_VLRRETENCAO
+        ,@pgrVlrPisNew            -- PGR_VLRPIS
+        ,@pgrVlrCofinsNew         -- PGR_VLRCOFINS
+        ,@pgrVlrCsllNew           -- PGR_VLRCSLL
+        ,@pgrVlrLiquidoNew        -- PGR_VLRLIQUIDO
+        ,@pgrCodCcNew             -- PGR_CODCC
+        ,@pgrCodSnfNew            -- PGR_CODSNF
+        ,@pgrDtMovtoNew           -- PGR_DTMOVTO
+        ,@pgrAprNew               -- PGR_APR
+        ,@pgrCodEmpNew            -- PGR_CODEMP
+        ,@pgrCodFllNew            -- PGR_CODFLL
+        ,@pgrLoteCnabNew          -- PGR_LOTECNAB
+        ,@pgrVerDireitoNew        -- PGR_VERDIREITO
+        ,@pgrCodCnttNew           -- PGR_CODCNTT
+        ,@pgrCodCmpNew            -- PGR_CODCMP
+        ,@pgrRegNew               -- PGR_REG
+        ,@pgrCodUsrNew            -- PGR_CODUSR
+      );  
+    END    
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -29135,10 +29756,10 @@ BEGIN
     --                 ERR_CODPTP(CNABERRO)
     --------------------------------------
     SELECT TOP 1 @fkIntPg=COALESCE(PG_CODPDR,0) FROM PADRAOGRUPO WHERE PG_CODPTP=@ptpCodigoOld;
-    IF( @fkIntPg > 0 )
+    IF( @@ROWCOUNT>0 )
       RAISERROR('TIPO UTILIZADO EM PADRAO GRUPO %i',15,1,@fkIntPg);
     SELECT TOP 1 @fkStrErr=COALESCE(ERR_CODBCD,NULL) FROM CNABERRO WHERE ERR_CODPTP=@ptpCodigoOld;
-    IF( @fkStrErr IS NOT NULL )
+    IF( @@ROWCOUNT>0 )
       RAISERROR('TIPO UTILIZADO EM CNAB_ERRO %s',15,1,@fkStrErr);
     --
     --
@@ -30615,8 +31236,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);     -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -30665,15 +31284,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@peiCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('PONTOESTOQUEIND UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@peiCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('PONTOESTOQUEIND UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.PONTOESTOQUEIND WHERE ((PEI_CODFVR=@peiCodFvrOld) AND (PEI_CODPE=@peiCodPeOld));
@@ -30728,8 +31340,6 @@ BEGIN
   -- CAMPO          |INS  |UPD |DEL | TIPO               | Obs
   -- ---------------|-----|----|----|--------------------|----------------------------------------------------------
   -- PRD_CODIGO     | PK  |    |    | VC(15) NN          |
-  -- PRD_CODEMP     | PK  |    |    | INT NN             | Campo relacionado (EMPRESA)  
-  -- EMP_APELIDO    | SEL |    |    | VC(15) NN          | Campo relacionado (EMPRESA)     
   -- PRD_NOME       |     |    |    | VC(60) NN          |
   -- PRD_CODNCM     | SEL |    |    | VC(10) NN          | Campo relacionado (NCM)   
   -- NCM_NOME       | SEL |    |    | VC(60) NN          | Campo relacionado (ESTADO)   
@@ -30748,6 +31358,9 @@ BEGIN
   -- PRD_CODBARRAS  |     |    |    | VC(20)             |
   -- PRD_PESOBRUTO  |     |    |    | NUM(15,4) NN       |
   -- PRD_PESOLIQUIDO|     |    |    | NUM(15,4) NN       |
+  -- PRD_ENTRADA    | CC  |    |    | VC(1) NN           | S|N     Se pode ter NF de compra
+  -- PRD_SAIDA      | CC  |    |    | VC(1) NN           | S|N     Se pode ter NF de venda
+  -- PRD_CODNCMIMP  | SEL |    |    | VC(10) NN          | Campo relacionado (NCM) para calcular imposto juntando "n" ncms a tabela imposto olha para este campo
   -- PRD_ATIVO      | CC  |    |    | VC(1) NN           | S|N     Se o registro pode ser usado em tabelas auxiliares
   -- PRD_REG        | FNC |    |    | VC(1) NN           | P|A|S   P=Publico  A=Administrador S=Sistema
   -- PRD_CODUSR     | OK  |    |    | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
@@ -30764,8 +31377,6 @@ BEGIN
   -- Campos da tabela
   -------------------
   DECLARE @prdCodigoNew VARCHAR(15);          -- PRD_CODIGO
-  DECLARE @prdCodEmpNew INTEGER;              -- PRD_CODEMP
-  DECLARE @empApelidoNew VARCHAR(15);         -- EMP_APELIDO
   DECLARE @prdNomeNew VARCHAR(60);            -- PRD_NOME
   DECLARE @prdCodNcmNew VARCHAR(10);          -- PRD_CODNCM
   DECLARE @ncmNomeNew VARCHAR(60);            -- NCM_NOME
@@ -30784,6 +31395,10 @@ BEGIN
   DECLARE @prdCodBarrasNew VARCHAR(20);       -- PRD_CODBARRAS
   DECLARE @prdPesoBrutoNew NUMERIC(15,4);     -- PRD_PESOBRUTO
   DECLARE @prdPesoLiquidoNew NUMERIC(15,4);   -- PRD_PESOLIQUIDO
+  DECLARE @prdEntradaNew VARCHAR(1);          -- PRD_ENTRADA
+  DECLARE @prdSaidaNew VARCHAR(1);            -- PRD_ENTRADA  
+  DECLARE @prdCodNcmImpNew VARCHAR(10);       -- PRD_CODNCMIMP  
+  DECLARE @ncmNomeImpNew VARCHAR(60);         -- NCM_NOME  
   DECLARE @prdAtivoNew VARCHAR(1);            -- PRD_ATIVO
   DECLARE @prdRegNew VARCHAR(1);              -- PRD_REG
   DECLARE @prdCodUsrNew INTEGER;              -- PRD_CODUSR
@@ -30795,8 +31410,6 @@ BEGIN
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
   SELECT @prdCodigoNew        = dbo.fncTranslate(i.PRD_CODIGO,15)
-         ,@prdCodEmpNew       = i.PRD_CODEMP
-         ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@prdNomeNew         = dbo.fncTranslate(i.PRD_NOME,60)
          ,@prdCodNcmNew       = dbo.fncTranslate(i.PRD_CODNCM,10)
          ,@ncmNomeNew         = COALESCE(NCM.NCM_NOME,'ERRO')
@@ -30815,6 +31428,10 @@ BEGIN
          ,@prdCodBarrasNew    = dbo.fncTranslate(i.PRD_CODBARRAS,20)
          ,@prdPesoBrutoNew    = i.PRD_PESOBRUTO
          ,@prdPesoLiquidoNew  = i.PRD_PESOLIQUIDO
+         ,@prdEntradaNew      = UPPER(i.PRD_ENTRADA)         
+         ,@prdSaidaNew        = UPPER(i.PRD_SAIDA)               
+         ,@prdCodNcmImpNew    = dbo.fncTranslate(i.PRD_CODNCMIMP,10)         
+         ,@ncmNomeImpNew      = COALESCE(NCMIMP.NCM_NOME,'ERRO')         
          ,@prdAtivoNew        = UPPER(i.PRD_ATIVO)
          ,@prdRegNew          = UPPER(i.PRD_REG)
          ,@prdCodUsrNew       = i.PRD_CODUSR
@@ -30823,8 +31440,8 @@ BEGIN
          ,@upD09New           = UP.UP_D09
          ,@upD31New           = UP.UP_D31
     FROM inserted i
-    LEFT OUTER JOIN EMPRESA EMP ON i.PRD_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN NCM NCM ON i.PRD_CODNCM=NCM.NCM_CODIGO AND NCM.NCM_ATIVO='S'
+    LEFT OUTER JOIN NCM NCMIMP ON i.PRD_CODNCMIMP=NCMIMP.NCM_CODIGO AND NCMIMP.NCM_ATIVO='S'    
     LEFT OUTER JOIN CSTIPI IPI ON i.PRD_CSTIPI=IPI.IPI_CODIGO AND IPI.IPI_ATIVO='S'
     LEFT OUTER JOIN EMBALAGEM EMB ON i.PRD_CODEMB=EMB.EMB_CODIGO AND EMB.EMB_ATIVO='S'
     LEFT OUTER JOIN PRODUTOORIGEM PO ON i.PRD_CODPO=PO.PO_CODIGO AND PO.PO_ATIVO='S'
@@ -30834,10 +31451,10 @@ BEGIN
     -----------------------------
     -- VERIFICANDO A FOREIGN KEYs
     -----------------------------
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@prdCodEmpNew);
     IF( @ncmNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO NCM %s PARA ESTE REGISTRO',15,1,@prdCodNcmNew);
+    IF( @ncmNomeImpNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO NCM_IMPOSTO %s PARA ESTE REGISTRO',15,1,@prdCodNcmImpNew);
     IF( @ipiNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO CODIGO IPI %s PARA ESTE REGISTRO',15,1,@prdCstIpiNew);
     IF( @embNomeNew='ERRO' )
@@ -30859,7 +31476,6 @@ BEGIN
     --  
     INSERT INTO dbo.PRODUTO( 
       PRD_CODIGO
-      ,PRD_CODEMP
       ,PRD_NOME
       ,PRD_CODNCM
       ,PRD_ST
@@ -30874,11 +31490,13 @@ BEGIN
       ,PRD_CODBARRAS
       ,PRD_PESOBRUTO
       ,PRD_PESOLIQUIDO
+      ,PRD_ENTRADA         
+      ,PRD_SAIDA                  
+      ,PRD_CODNCMIMP            
       ,PRD_ATIVO
       ,PRD_REG
       ,PRD_CODUSR) VALUES(
       @prdCodigoNew         -- PRD_CODIGO                                       
-      ,@prdCodEmpNew        -- PRD_CODEMP
       ,@prdNomeNew          -- PRD_NOME
       ,@prdCodNcmNew        -- PRD_CODNCM
       ,@prdStNew            -- PRD_ST
@@ -30893,6 +31511,9 @@ BEGIN
       ,@prdCodBarrasNew     -- PRD_CODBARRAS
       ,@prdPesoBrutoNew     -- PRD_PESOBRUTO
       ,@prdPesoLiquidoNew   -- PRD_PESOLIQUIDO
+      ,@prdEntradaNew       -- PRD_ENTRADA         
+      ,@prdSaidaNew         -- PRD_SAIDA 
+      ,@prdCodNcmImpNew     -- PRD_CODNCMIMP      
       ,@prdAtivoNew         -- PRD_ATIVO
       ,@prdRegNew           -- PRD_REG
       ,@prdCodUsrNew        -- PRD_CODUSR
@@ -30901,7 +31522,6 @@ BEGIN
     INSERT INTO dbo.BKPPRODUTO( 
       PRD_ACAO    
       ,PRD_CODIGO
-      ,PRD_CODEMP
       ,PRD_NOME
       ,PRD_CODNCM
       ,PRD_ST
@@ -30916,12 +31536,14 @@ BEGIN
       ,PRD_CODBARRAS
       ,PRD_PESOBRUTO
       ,PRD_PESOLIQUIDO
+      ,PRD_ENTRADA         
+      ,PRD_SAIDA   
+      ,PRD_CODNCMIMP            
       ,PRD_ATIVO
       ,PRD_REG
       ,PRD_CODUSR) VALUES(
       'I'
       ,@prdCodigoNew        -- PRD_CODIGO
-      ,@prdCodEmpNew        -- PRD_CODEMP
       ,@prdNomeNew          -- PRD_NOME
       ,@prdCodNcmNew        -- PRD_CODNCM
       ,@prdStNew            -- PRD_ST
@@ -30936,6 +31558,9 @@ BEGIN
       ,@prdCodBarrasNew     -- PRD_CODBARRAS
       ,@prdPesoBrutoNew     -- PRD_PESOBRUTO
       ,@prdPesoLiquidoNew   -- PRD_PESOLIQUIDO
+      ,@prdEntradaNew       -- PRD_ENTRADA         
+      ,@prdSaidaNew         -- PRD_SAIDA                  
+      ,@prdCodNcmImpNew     -- PRD_CODNCMIMP            
       ,@prdAtivoNew         -- PRD_ATIVO
       ,@prdRegNew           -- PRD_REG
       ,@prdCodUsrNew        -- PRD_CODUSR
@@ -30961,8 +31586,6 @@ BEGIN
   -- Campos NEW da tabela
   -----------------------
   DECLARE @prdCodigoNew VARCHAR(15);          -- PRD_CODIGO
-  DECLARE @prdCodEmpNew INTEGER;              -- PRD_CODEMP
-  DECLARE @empApelidoNew VARCHAR(15);         -- EMP_APELIDO
   DECLARE @prdNomeNew VARCHAR(60);            -- PRD_NOME
   DECLARE @prdCodNcmNew VARCHAR(10);          -- PRD_CODNCM
   DECLARE @ncmNomeNew VARCHAR(60);            -- NCM_NOME
@@ -30981,6 +31604,10 @@ BEGIN
   DECLARE @prdCodBarrasNew VARCHAR(20);       -- PRD_CODBARRAS
   DECLARE @prdPesoBrutoNew NUMERIC(15,4);     -- PRD_PESOBRUTO
   DECLARE @prdPesoLiquidoNew NUMERIC(15,4);   -- PRD_PESOLIQUIDO
+  DECLARE @prdEntradaNew VARCHAR(1);
+  DECLARE @prdSaidaNew VARCHAR(1);
+  DECLARE @prdCodNcmImpNew VARCHAR(10);       -- PRD_CODNCM
+  DECLARE @ncmNomeImpNew VARCHAR(60);         -- NCM_NOME  
   DECLARE @prdAtivoNew VARCHAR(1);            -- PRD_ATIVO
   DECLARE @prdRegNew VARCHAR(1);              -- PRD_REG
   DECLARE @prdCodUsrNew INTEGER;              -- PRD_CODUSR
@@ -30992,8 +31619,6 @@ BEGIN
   -- Buscando os campos NEW para checagem antes do insert
   -------------------------------------------------------
   SELECT @prdCodigoNew        = dbo.fncTranslate(i.PRD_CODIGO,15)
-         ,@prdCodEmpNew       = i.PRD_CODEMP
-         ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@prdNomeNew         = dbo.fncTranslate(i.PRD_NOME,60)
          ,@prdCodNcmNew       = dbo.fncTranslate(i.PRD_CODNCM,10)
          ,@ncmNomeNew         = COALESCE(NCM.NCM_NOME,'ERRO')
@@ -31012,6 +31637,10 @@ BEGIN
          ,@prdCodBarrasNew    = dbo.fncTranslate(i.PRD_CODBARRAS,20)
          ,@prdPesoBrutoNew    = i.PRD_PESOBRUTO
          ,@prdPesoLiquidoNew  = i.PRD_PESOLIQUIDO
+         ,@prdEntradaNew      = UPPER(i.PRD_ENTRADA)         
+         ,@prdSaidaNew        = UPPER(i.PRD_SAIDA)                  
+         ,@prdCodNcmImpNew    = dbo.fncTranslate(i.PRD_CODNCMIMP,10)
+         ,@ncmNomeImpNew      = COALESCE(NCMIMP.NCM_NOME,'ERRO')
          ,@prdAtivoNew        = UPPER(i.PRD_ATIVO)
          ,@prdRegNew          = UPPER(i.PRD_REG)
          ,@prdCodUsrNew       = i.PRD_CODUSR
@@ -31020,8 +31649,8 @@ BEGIN
          ,@upD09New           = UP.UP_D09
          ,@upD31New           = UP.UP_D31
     FROM inserted i
-    LEFT OUTER JOIN EMPRESA EMP ON i.PRD_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN NCM NCM ON i.PRD_CODNCM=NCM.NCM_CODIGO AND NCM.NCM_ATIVO='S'
+    LEFT OUTER JOIN NCM NCMIMP ON i.PRD_CODNCMIMP=NCMIMP.NCM_CODIGO AND NCMIMP.NCM_ATIVO='S'        
     LEFT OUTER JOIN CSTIPI IPI ON i.PRD_CSTIPI=IPI.IPI_CODIGO AND IPI.IPI_ATIVO='S'
     LEFT OUTER JOIN EMBALAGEM EMB ON i.PRD_CODEMB=EMB.EMB_CODIGO AND EMB.EMB_ATIVO='S'
     LEFT OUTER JOIN PRODUTOORIGEM PO ON i.PRD_CODPO=PO.PO_CODIGO AND PO.PO_ATIVO='S'
@@ -31034,10 +31663,10 @@ BEGIN
     -----------------------------
     -- VERIFICANDO A FOREIGN KEYs
     -----------------------------
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@prdCodEmpNew);
     IF( @ncmNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO NCM %s PARA ESTE REGISTRO',15,1,@prdCodNcmNew);
+    IF( @ncmNomeImpNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO NCM_IMPOSTO %s PARA ESTE REGISTRO',15,1,@prdCodNcmImpNew);
     IF( @ipiNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO CODIGO IPI %s PARA ESTE REGISTRO',15,1,@prdCstIpiNew);
     IF( @embNomeNew='ERRO' )
@@ -31056,7 +31685,6 @@ BEGIN
     -- Campos OLD da tabela
     ------------------------------------------------------------------------------------
     DECLARE @prdCodigoOld VARCHAR(15);          
-    DECLARE @prdCodEmpOld INTEGER;              
     DECLARE @prdNomeOld VARCHAR(60);            
     DECLARE @prdCodNcmOld VARCHAR(10);          
     DECLARE @prdStOld VARCHAR(1);               
@@ -31071,12 +31699,14 @@ BEGIN
     DECLARE @prdCodBarrasOld VARCHAR(20);       
     DECLARE @prdPesoBrutoOld NUMERIC(15,4);     
     DECLARE @prdPesoLiquidoOld NUMERIC(15,4);   
+    DECLARE @prdEntradaOld VARCHAR(1);
+    DECLARE @prdSaidaOld VARCHAR(1);
+    DECLARE @prdCodNcmImpOld VARCHAR(10);    
     DECLARE @prdAtivoOld VARCHAR(1);            
     DECLARE @prdRegOld VARCHAR(1);              
     DECLARE @prdCodUsrOld INTEGER;              
 
     SELECT @prdCodigoOld        = d.PRD_CODIGO
-           ,@prdCodEmpOld       = d.PRD_CODEMP
            ,@prdNomeOld         = d.PRD_NOME
            ,@prdCodNcmOld       = d.PRD_CODNCM
            ,@prdStOld           = d.PRD_ST
@@ -31091,17 +31721,18 @@ BEGIN
            ,@prdCodBarrasOld    = d.PRD_CODBARRAS
            ,@prdPesoBrutoOld    = d.PRD_PESOBRUTO
            ,@prdPesoLiquidoOld  = d.PRD_PESOLIQUIDO
+           ,@prdEntradaOld      = d.PRD_ENTRADA         
+           ,@prdSaidaOld        = d.PRD_SAIDA 
+           ,@prdCodNcmImpOld    = d.PRD_CODNCMIMP           
            ,@prdAtivoOld        = d.PRD_ATIVO
            ,@prdRegOld          = d.PRD_REG
            ,@prdCodUsrOld       = d.PRD_CODUSR
-      FROM PRODUTO d WHERE ((d.PRD_CODIGO=@prdCodigoNew) AND (d.PRD_CODEMP=@prdCodEmpNew));  
+      FROM PRODUTO d WHERE d.PRD_CODIGO=@prdCodigoNew;  
     ---------------------------------------------------------------------
     -- Primary Key nao pode ser alterada
     ---------------------------------------------------------------------
     IF( @prdCodigoOld<>@prdCodigoNew )
       RAISERROR('CAMPO CODIGO NAO PODE SER ALTERADO',15,1);  
-    IF( @prdCodEmpOld<>@prdCodEmpNew )
-      RAISERROR('CAMPO EMPRESA NAO PODE SER ALTERADO',15,1);  
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Olhar todos, Old pode ser "S"
     ------------------------------------------------------------------
@@ -31126,20 +31757,23 @@ BEGIN
            ,PRD_CODBARRAS   = @prdCodBarrasNew
            ,PRD_PESOBRUTO   = @prdPesoBrutoNew
            ,PRD_PESOLIQUIDO = @prdPesoLiquidoNew
+           ,PRD_ENTRADA     = @prdEntradaNew           
+           ,PRD_SAIDA       = @prdSaidaNew 
+           ,PRD_CODNCMIMP   = @prdCodNcmImpNew           
            ,PRD_ATIVO       = @prdAtivoNew
            ,PRD_REG         = @prdRegNew
            ,PRD_CODUSR      = @prdCodUsrNew
-      WHERE ((PRD_CODIGO=@prdCodigoNew) AND (PRD_CODEMP=@prdCodEmpNew));      
+      WHERE PRD_CODIGO=@prdCodigoNew;      
     -- Gravando LOG
     IF( (@prdNomeOld<>@prdNomeNew) OR (@prdCodNcmOld<>@prdCodNcmNew) OR (@prdStOld<>@prdStNew) OR (@prdAliqIcmsOld<>@prdAliqIcmsNew) 
     OR (@prdReducaoBcOld<>@prdReducaoBcNew) OR (@prdIpiOld<> @prdIpiNew) OR (@prdAliqIpiOld<> @prdAliqIpiNew) OR (@prdCstIpiOld<>@prdCstIpiNew) 
     OR (@prdCodEmbOld<>@prdCodEmbNew) OR (@prdVlrVendaOld<>@prdVlrVendaNew) OR (@prdCodPoOld<> @prdCodPoNew) OR (@prdCodBarrasOld<> @prdCodBarrasNew) 
-    OR (@prdPesoBrutoOld<> @prdPesoBrutoNew) OR (@prdPesoLiquidoOld<> @prdPesoLiquidoNew) OR (@prdAtivoOld<> @prdAtivoNew) OR (@prdRegOld<> @prdRegNew) 
+    OR (@prdPesoBrutoOld<> @prdPesoBrutoNew) OR (@prdPesoLiquidoOld<> @prdPesoLiquidoNew) OR (@prdEntradaOld<>@prdEntradaNew) OR (@prdSaidaOld<>@prdSaidaNew)
+    OR (@prdCodNcmImpOld<>@prdCodNcmImpNew) OR (@prdAtivoOld<> @prdAtivoNew) OR (@prdRegOld<> @prdRegNew) 
     OR (@prdCodUsrOld<>@prdCodUsrNew) ) BEGIN
       INSERT INTO dbo.BKPPRODUTO( 
         PRD_ACAO    
         ,PRD_CODIGO
-        ,PRD_CODEMP
         ,PRD_NOME
         ,PRD_CODNCM
         ,PRD_ST
@@ -31154,12 +31788,14 @@ BEGIN
         ,PRD_CODBARRAS
         ,PRD_PESOBRUTO
         ,PRD_PESOLIQUIDO
+        ,PRD_ENTRADA         
+        ,PRD_SAIDA        
+        ,PRD_CODNCMIMP              
         ,PRD_ATIVO
         ,PRD_REG
         ,PRD_CODUSR) VALUES(
         'A'
         ,@prdCodigoNew        -- PRD_CODIGO
-        ,@prdCodEmpNew        -- PRD_CODEMP
         ,@prdNomeNew          -- PRD_NOME
         ,@prdCodNcmNew        -- PRD_CODNCM
         ,@prdStNew            -- PRD_ST
@@ -31174,6 +31810,9 @@ BEGIN
         ,@prdCodBarrasNew     -- PRD_CODBARRAS
         ,@prdPesoBrutoNew     -- PRD_PESOBRUTO
         ,@prdPesoLiquidoNew   -- PRD_PESOLIQUIDO
+        ,@prdEntradaNew       -- PRD_ENTRADA         
+        ,@prdSaidaNew         -- PRD_SAIDA                  
+        ,@prdCodNcmImpNew     -- PRD_CODNCMIMP              
         ,@prdAtivoNew         -- PRD_ATIVO
         ,@prdRegNew           -- PRD_REG
         ,@prdCodUsrNew        -- PRD_CODUSR
@@ -31195,12 +31834,12 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @erroOld VARCHAR(70);         -- Buscando retorno de erro para funcao
+  DECLARE @fkNfProdutoItem INTEGER = 0; -- Para procurar campo foreign key int (NFPRODUTOITEM)   
   -------------------
   -- Campos da tabela
   -------------------
   DECLARE @prdCodigoOld VARCHAR(15);          
-  DECLARE @prdCodEmpOld INTEGER;              
   DECLARE @prdNomeOld VARCHAR(60);            
   DECLARE @prdCodNcmOld VARCHAR(10);          
   DECLARE @prdStOld VARCHAR(1);               
@@ -31215,6 +31854,9 @@ BEGIN
   DECLARE @prdCodBarrasOld VARCHAR(20);       
   DECLARE @prdPesoBrutoOld NUMERIC(15,4);     
   DECLARE @prdPesoLiquidoOld NUMERIC(15,4);   
+  DECLARE @prdEntradaOld VARCHAR(1);
+  DECLARE @prdSaidaOld VARCHAR(1);
+  DECLARE @prdCodNcmImpOld VARCHAR(10);      
   DECLARE @prdAtivoOld VARCHAR(1);            
   DECLARE @prdRegOld VARCHAR(1);              
   DECLARE @prdCodUsrOld INTEGER;              
@@ -31225,7 +31867,6 @@ BEGIN
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
   SELECT @prdCodigoOld        = d.PRD_CODIGO
-         ,@prdCodEmpOld       = d.PRD_CODEMP
          ,@prdNomeOld         = d.PRD_NOME
          ,@prdCodNcmOld       = d.PRD_CODNCM
          ,@prdStOld           = d.PRD_ST
@@ -31240,6 +31881,9 @@ BEGIN
          ,@prdCodBarrasOld    = d.PRD_CODBARRAS
          ,@prdPesoBrutoOld    = d.PRD_PESOBRUTO
          ,@prdPesoLiquidoOld  = d.PRD_PESOLIQUIDO
+         ,@prdEntradaOld      = d.PRD_ENTRADA         
+         ,@prdSaidaOld        = d.PRD_SAIDA                  
+         ,@prdCodNcmImpOld    = d.PRD_CODNCMIMP                    
          ,@prdAtivoOld        = d.PRD_ATIVO
          ,@prdRegOld          = d.PRD_REG
          ,@prdCodUsrOld       = d.PRD_CODUSR
@@ -31267,23 +31911,18 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@vndCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('VENDEDOR UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@vndCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('VENDEDOR UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkNfProdutoItem=NFPI_LANCTO FROM NFPRODUTOITEM WHERE (NFPI_CODPRD=@prdCodigoOld)
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('PRODUTO UTILIZADO NO LANCAMENTO %i',15,1,@fkNfProdutoItem);
     --
     --
-    DELETE FROM dbo.PRODUTO WHERE ((PRD_CODIGO=@prdCodigoOld) AND (PRD_CODEMP=@prdCodEmpOld));
+    DELETE FROM dbo.PRODUTO WHERE PRD_CODIGO=@prdCodigoOld;
     -- Gravando LOG
     INSERT INTO dbo.BKPPRODUTO( 
       PRD_ACAO    
       ,PRD_CODIGO
-      ,PRD_CODEMP
       ,PRD_NOME
       ,PRD_CODNCM
       ,PRD_ST
@@ -31298,12 +31937,14 @@ BEGIN
       ,PRD_CODBARRAS
       ,PRD_PESOBRUTO
       ,PRD_PESOLIQUIDO
+      ,PRD_ENTRADA         
+      ,PRD_SAIDA                  
+      ,PRD_CODNCMIMP            
       ,PRD_ATIVO
       ,PRD_REG
       ,PRD_CODUSR) VALUES(
       'E'
       ,@prdCodigoOld        -- PRD_CODIGO
-      ,@prdCodEmpOld        -- PRD_CODEMP
       ,@prdNomeOld          -- PRD_NOME
       ,@prdCodNcmOld        -- PRD_CODNCM
       ,@prdStOld            -- PRD_ST
@@ -31318,6 +31959,9 @@ BEGIN
       ,@prdCodBarrasOld     -- PRD_CODBARRAS
       ,@prdPesoBrutoOld     -- PRD_PESOBRUTO
       ,@prdPesoLiquidoOld   -- PRD_PESOLIQUIDO
+      ,@prdEntradaOld       -- PRD_ENTRADA         
+      ,@prdSaidaOld         -- PRD_SAIDA                  
+      ,@prdCodNcmImpOld     -- PRD_CODNCMIMP            
       ,@prdAtivoOld         -- PRD_ATIVO
       ,@prdRegOld           -- PRD_REG
       ,@prdCodUsrOld        -- PRD_CODUSR
@@ -31331,6 +31975,15 @@ BEGIN
     RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
     RETURN;
   END CATCH
+END
+GO
+CREATE TRIGGER dbo.TRGBKPPRODUTO_BUD ON dbo.BKPPRODUTO
+INSTEAD OF UPDATE,DELETE 
+AS 
+BEGIN
+  -- Nenhum registro da tabela BKP pode ser alterado ou excluido
+  SET NOCOUNT ON;    
+  RAISERROR('REGISTRO NAO PODE SER ALTERADO/EXCLUIDO', 16, 10);
 END
 -------------------------------------------------------------------------------------
 --                       G R U P O M O D E L O P R O D U T O                       --
@@ -31409,7 +32062,6 @@ BEGIN
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @upD35New INTEGER;
-  --DECLARE @upD31New INTEGER;
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
@@ -32243,8 +32895,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -32289,15 +32939,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@poCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('PRODUTOORIGEM UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@poCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('PRODUTOORIGEM UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.PRODUTOORIGEM WHERE PO_CODIGO=@poCodigoOld;
@@ -32581,8 +33224,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -32627,15 +33268,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@qcCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('QUALIFICACAOCONT UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@qcCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('QUALIFICACAOCONT UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.QUALIFICACAOCONT WHERE QC_CODIGO=@qcCodigoOld;
@@ -33185,9 +33819,7 @@ BEGIN
   -- SNF_ENTSAI     | CC  |    |    | VC(1) NN           |    
   -- SNF_CODTD      | SEL |    |    | VC(3) NN           | Campo relacionado (TIPODOCUMENTO)   
   -- TD_NOME        | SEL |    |    | VC(20) NN          | Campo relacionado (TIPODOCUMENTO)      
-  -- SNF_INFORMARNF | CC  |    |    | VC(1) NN           |    
-  -- SNF_NFINICIO   |     |    |    | INT NN             |
-  -- SNF_NFFIM      |     |    |    | INT NN             |   
+  -- SNF_NFPROXIMA  |     |    |    | INT NN             |
   -- SNF_IDF        |     |    |    | VC(20) NN          |   
   -- SNF_MODELO     |     |    |    | VC(5) NN           | 
   -- SNF_INDICE     |     |    |    | VC(12) NN          | Facilitador(SNF_ENTSAI+SNF_CODTD+SNF_CODFLL+SNF_ATIVO) Naum pode ter dois ativos  
@@ -33218,12 +33850,10 @@ BEGIN
   DECLARE @snfEntSaiNew VARCHAR(1);
   DECLARE @snfCodTdNew VARCHAR(3);
   DECLARE @tdNomeNew VARCHAR(20);
-  DECLARE @snfInformarNfNew VARCHAR(1);
-  DECLARE @snfNfInicioNew INTEGER;
-  DECLARE @snfNfFimNew INTEGER;
+  DECLARE @snfNfProximaNew INTEGER;
   DECLARE @snfIdfNew VARCHAR(20);
   DECLARE @snfModeloNew VARCHAR(5);
-  DECLARE @snfIndiceNew VARCHAR(12);
+  DECLARE @snfIndiceNew VARCHAR(15);
   DECLARE @snfLivroNew VARCHAR(1);  
   DECLARE @snfEnvioNew VARCHAR(1);    
   DECLARE @snfCodFllNew INTEGER;
@@ -33245,9 +33875,7 @@ BEGIN
          ,@snfEntSaiNew     = UPPER(i.SNF_ENTSAI)
          ,@snfCodTdNew      = UPPER(i.SNF_CODTD)
          ,@tdNomeNew        = COALESCE(TD.TD_NOME,'ERRO')
-         ,@snfInformarNfNew = UPPER(i.SNF_INFORMARNF)
-         ,@snfNfInicioNew   = i.SNF_NFINICIO
-         ,@snfNfFimNew      = i.SNF_NFFIM
+         ,@snfNfProximaNew  = i.SNF_NFPROXIMA
          ,@snfIdfNew        = dbo.fncTranslate(i.SNF_IDF,20)
          ,@snfModeloNew     = dbo.fncTranslate(i.SNF_MODELO,5)
          ,@snfLivroNew      = UPPER(i.SNF_LIVRO)
@@ -33273,7 +33901,7 @@ BEGIN
     ---------------------------------------------------------------------------------------------------------------------------
     -- O CAMPO INDICE NAO PERMITE DOIS REGISTROS ATIVOS( SNF_ATIVO ) PARA OS CAMPOS (SNF_ENTSAI+SNF_CODTD+SNF_CODFLL+SNF_ATIVO)
     ---------------------------------------------------------------------------------------------------------------------------
-    SET @snfIndiceNew=CONCAT(@snfEntSaiNew,@snfCodTdNew,CAST(@snfCodFllNew AS VARCHAR(5)),@snfAtivoNew);
+    SET @snfIndiceNew=CONCAT(@snfEntSaiNew,@snfCodTdNew,CAST(@snfCodFllNew AS VARCHAR(5)),@snfAtivoNew,@snfSerieNew);
     SELECT @uiCodigoNew=COALESCE(SNF_CODIGO,NULL) FROM SERIENF WHERE SNF_INDICE=@snfIndiceNew;
     IF( @uiCodigoNew IS NOT NULL )
       RAISERROR('JA EXISTE O TALONARIO CODIGO %i PARA ESTA FILIAL/TIPO DOCUMENTO',15,1,@uiCodigoNew);
@@ -33293,25 +33921,6 @@ BEGIN
     -------------------------------------------------------------
     IF( @upD22New<2 )
       RAISERROR('USUARIO %s NAO POSSUI DIREITO 22 PARA INCLUIR NA TABELA SERIENF',15,1,@usrApelidoNew);
-    ---------------------------------------------------------------------
-    -- Campo NOME deve ser unico da tabela
-    ---------------------------------------------------------------------
-    --SELECT @uiCodigo=COALESCE(SNF_CODIGO,0) FROM SERIENF WHERE SNF_NOME=@snfNomeNew;
-    --IF( @uiCodigo <> 0 )
-    --  RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA SERIENF COM CODIGO %i',15,1,@uiCodigo);
-    ---------------------------------------------------------------------
-    -- Verificando a chave primaria quando nao for identity
-    ---------------------------------------------------------------------
-    --SELECT @uiNome=COALESCE(SNF_NOME,'OK') FROM SERIENF WHERE SNF_CODIGO=@snfCodigoNew;
-    --IF( @uiNome IS NOT NULL ) BEGIN
-    --  IF( @uiNome <> 'OK' )
-    --    RAISERROR('CODIGO JA CADASTRADO NA TABELA SERIENF %s',15,1,@uiNome);
-    --END  
-    ------------------------------------------------------------------
-    -- NF tem que ter a logica inicial sempre menor ou igual a final
-    ------------------------------------------------------------------
-    IF( @snfNfInicioNew<@snfNfFimNew )
-      RAISERROR('NF INICIAL %i NAO PODE SER MAIOR QUE A NF FINAL %i',15,1,@snfNfInicioNew,@snfNfFimNew);    
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Soh olhar se for diferente de "P"
     ------------------------------------------------------------------
@@ -33325,9 +33934,7 @@ BEGIN
       SNF_SERIE
       ,SNF_ENTSAI
       ,SNF_CODTD
-      ,SNF_INFORMARNF
-      ,SNF_NFINICIO
-      ,SNF_NFFIM
+      ,SNF_NFPROXIMA
       ,SNF_IDF
       ,SNF_MODELO
       ,SNF_INDICE      
@@ -33341,9 +33948,7 @@ BEGIN
       @snfSerieNew        -- SNF_SERIE
       ,@snfEntSaiNew      -- SNF_ENTSAI
       ,@snfCodTdNew       -- SNF_CODTD
-      ,@snfInformarNfNew  -- SNF_INFORMARNF
-      ,@snfNfInicioNew    -- SNF_NFINICIO
-      ,@snfNfFimNew       -- SNF_NFFIM
+      ,@snfNfProximaNew   -- SNF_NFPROXIMA
       ,@snfIdfNew         -- SNF_IDF
       ,@snfModeloNew      -- SNF_MODELO
       ,@snfIndiceNew      -- SNF_INDICE
@@ -33362,9 +33967,7 @@ BEGIN
       ,SNF_SERIE
       ,SNF_ENTSAI
       ,SNF_CODTD
-      ,SNF_INFORMARNF
-      ,SNF_NFINICIO
-      ,SNF_NFFIM
+      ,SNF_NFPROXIMA
       ,SNF_IDF
       ,SNF_MODELO
       ,SNF_INDICE      
@@ -33380,9 +33983,7 @@ BEGIN
       ,@snfSerieNew             -- SNF_SERIE
       ,@snfEntSaiNew            -- SNF_ENTSAI
       ,@snfCodTdNew             -- SNF_CODTD
-      ,@snfInformarNfNew        -- SNF_INFORMARNF
-      ,@snfNfInicioNew          -- SNF_NFINICIO
-      ,@snfNfFimNew             -- SNF_NFFIM
+      ,@snfNfProximaNew         -- SNF_NFPROXIMA
       ,@snfIdfNew               -- SNF_IDF
       ,@snfModeloNew            -- SNF_MODELO
       ,@snfIndiceNew            -- SNF_INDICE
@@ -33420,12 +34021,10 @@ BEGIN
   DECLARE @snfEntSaiNew VARCHAR(1);
   DECLARE @snfCodTdNew VARCHAR(3);
   DECLARE @tdNomeNew VARCHAR(20);
-  DECLARE @snfInformarNfNew VARCHAR(1);
-  DECLARE @snfNfInicioNew INTEGER;
-  DECLARE @snfNfFimNew INTEGER;
+  DECLARE @snfNfProximaNew INTEGER;
   DECLARE @snfIdfNew VARCHAR(20);
   DECLARE @snfModeloNew VARCHAR(5);
-  DECLARE @snfIndiceNew VARCHAR(12);
+  DECLARE @snfIndiceNew VARCHAR(15);
   DECLARE @snfLivroNew VARCHAR(1);  
   DECLARE @snfEnvioNew VARCHAR(1);    
   DECLARE @snfCodFllNew INTEGER;
@@ -33447,9 +34046,7 @@ BEGIN
          ,@snfEntSaiNew     = UPPER(i.SNF_ENTSAI)
          ,@snfCodTdNew      = UPPER(i.SNF_CODTD)
          ,@tdNomeNew        = COALESCE(TD.TD_NOME,'ERRO')
-         ,@snfInformarNfNew = UPPER(i.SNF_INFORMARNF)
-         ,@snfNfInicioNew   = i.SNF_NFINICIO
-         ,@snfNfFimNew      = i.SNF_NFFIM
+         ,@snfNfProximaNew  = i.SNF_NFPROXIMA
          ,@snfIdfNew        = dbo.fncTranslate(i.SNF_IDF,20)
          ,@snfModeloNew     = dbo.fncTranslate(i.SNF_MODELO,5)
          ,@snfLivroNew      = UPPER(i.SNF_LIVRO)
@@ -33497,9 +34094,7 @@ BEGIN
     DECLARE @snfEntSaiOld VARCHAR(1);
     DECLARE @snfCodTdOld VARCHAR(3);
     DECLARE @tdNomeOld VARCHAR(20);
-    DECLARE @snfInformarNfOld VARCHAR(1);
-    DECLARE @snfNfInicioOld INTEGER;
-    DECLARE @snfNfFimOld INTEGER;
+    DECLARE @snfNfProximaOld INTEGER;
     DECLARE @snfIdfOld VARCHAR(20);
     DECLARE @snfModeloOld VARCHAR(5);
     DECLARE @snfLivroOld VARCHAR(1);  
@@ -33515,9 +34110,7 @@ BEGIN
            ,@snfSerieOld      = d.SNF_SERIE
            ,@snfEntSaiOld     = d.SNF_ENTSAI
            ,@snfCodTdOld      = d.SNF_CODTD
-           ,@snfInformarNfOld = d.SNF_INFORMARNF
-           ,@snfNfInicioOld   = d.SNF_NFINICIO
-           ,@snfNfFimOld      = d.SNF_NFFIM
+           ,@snfNfProximaOld  = d.SNF_NFPROXIMA
            ,@snfIdfOld        = d.SNF_IDF
            ,@snfModeloOld     = d.SNF_MODELO
            ,@snfLivroOld      = d.SNF_LIVRO
@@ -33543,14 +34136,6 @@ BEGIN
       RAISERROR('CAMPO SERIE NAO PODE SER ALTERADO',15,1);     
     IF( @snfCodTdOld<>@snfCodTdNew )  
       RAISERROR('CAMPO TIPO_DOCTO NAO PODE SER ALTERADO',15,1);     
-    ---------------------------------------------------------------------
-    -- Campo NOME deve ser unico da tabela
-    ---------------------------------------------------------------------
-    --IF( @snfNomeOld<>@snfNomeNew ) BEGIN
-    --  SELECT @uiCodigo=COALESCE(SNF_CODIGO,0) FROM SERIENF WHERE SNF_NOME=@snfNomeNew;
-    --  IF( @uiCodigo <> 0 )
-    --    RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA SERIENF COM CODIGO %i',15,1,@uiCodigo);
-    --END   
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Olhar todos, Old pode ser "S"
     ------------------------------------------------------------------
@@ -33563,7 +34148,7 @@ BEGIN
     -- O CAMPO INDICE NAO PERMITE DOIS REGISTROS ATIVOS( SNF_ATIVO ) PARA OS CAMPOS (SNF_ENTSAI+SNF_CODTD+SNF_CODFLL+SNF_ATIVO)
     -- AQUI SOH INTERESSA SE O CAMPO ATIVO ESTAVA 'N' E VIROU 'S'
     ---------------------------------------------------------------------------------------------------------------------------
-    SET @snfIndiceNew=CONCAT(@snfEntSaiNew,@snfCodTdNew,CAST(@snfCodFllNew AS VARCHAR(5)),@snfAtivoNew);
+    SET @snfIndiceNew=CONCAT(@snfEntSaiNew,@snfCodTdNew,CAST(@snfCodFllNew AS VARCHAR(5)),@snfAtivoNew,@snfSerieNew);
     IF( (@snfAtivoOld<>@snfAtivoNew) AND (@snfAtivoNew='S') ) BEGIN
       SELECT @uiCodigoNew=COALESCE(SNF_CODIGO,NULL) FROM SERIENF WHERE SNF_INDICE=@snfIndiceNew;
       IF( @uiCodigoNew IS NOT NULL )
@@ -33571,12 +34156,7 @@ BEGIN
     END
     --  
     UPDATE dbo.SERIENF
-       SET --SNF_SERIE       = @snfSerieNew
-           --,SNF_ENTSAI     = @snfEntSaiNew
-           --,SNF_CODTD      = @snfCodTdNew
-           SNF_INFORMARNF  = @snfInformarNfNew
-           ,SNF_NFINICIO   = @snfNfInicioNew
-           ,SNF_NFFIM      = @snfNfFimNew
+       SET SNF_NFPROXIMA  = @snfNfProximaNew
            ,SNF_IDF        = @snfIdfNew
            ,SNF_MODELO     = @snfModeloNew
            ,SNF_INDICE     = @snfIndiceNew
@@ -33587,8 +34167,8 @@ BEGIN
            ,SNF_CODUSR     = @snfCodUsrNew
     WHERE SNF_CODIGO=@snfCodigoNew;     
     -- Gravando LOG
-    IF( (@snfSerieOld<>@snfSerieNew) OR (@snfEntSaiOld<>@snfEntSaiNew) OR (@snfCodTdOld<>@snfCodTdNew) OR (@snfInformarNfOld<>@snfInformarNfNew) 
-     OR (@snfNfInicioOld<>@snfNfInicioNew) OR (@snfNfFimOld<>@snfNfFimNew) OR (@snfIdfOld<>@snfIdfNew) OR (@snfModeloOld<>@snfModeloNew) 
+    IF( (@snfSerieOld<>@snfSerieNew) OR (@snfEntSaiOld<>@snfEntSaiNew) OR (@snfCodTdOld<>@snfCodTdNew)
+     OR (@snfNfProximaOld<>@snfNfProximaNew) OR (@snfIdfOld<>@snfIdfNew) OR (@snfModeloOld<>@snfModeloNew)
      OR (@snfLivroOld<>@snfLivroNew) OR (@snfEnvioOld<>@snfEnvioNew) OR (@snfAtivoOld<>@snfAtivoNew) OR (@snfRegOld<>@snfRegNew) ) BEGIN
       INSERT INTO dbo.BKPSERIENF(
         SNF_ACAO
@@ -33596,9 +34176,7 @@ BEGIN
         ,SNF_SERIE
         ,SNF_ENTSAI
         ,SNF_CODTD
-        ,SNF_INFORMARNF
-        ,SNF_NFINICIO
-        ,SNF_NFFIM
+        ,SNF_NFPROXIMA
         ,SNF_IDF
         ,SNF_MODELO
         ,SNF_INDICE        
@@ -33614,9 +34192,7 @@ BEGIN
         ,@snfSerieNew             -- SNF_SERIE
         ,@snfEntSaiNew            -- SNF_ENTSAI
         ,@snfCodTdNew             -- SNF_CODTD
-        ,@snfInformarNfNew        -- SNF_INFORMARNF
-        ,@snfNfInicioNew          -- SNF_NFINICIO
-        ,@snfNfFimNew             -- SNF_NFFIM
+        ,@snfNfProximaNew         -- SNF_NFPROXIMA
         ,@snfIdfNew               -- SNF_IDF
         ,@snfModeloNew            -- SNF_MODELO
         ,@snfIndiceNew            -- SNF_INDICE
@@ -33645,8 +34221,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -33656,12 +34230,10 @@ BEGIN
   DECLARE @snfEntSaiOld VARCHAR(1);
   DECLARE @snfCodTdOld VARCHAR(3);
   DECLARE @tdNomeOld VARCHAR(20);
-  DECLARE @snfInformarNfOld VARCHAR(1);
-  DECLARE @snfNfInicioOld INTEGER;
-  DECLARE @snfNfFimOld INTEGER;
+  DECLARE @snfNfProximaOld INTEGER;
   DECLARE @snfIdfOld VARCHAR(20);
   DECLARE @snfModeloOld VARCHAR(5);
-  DECLARE @snfIndiceOld VARCHAR(12);
+  DECLARE @snfIndiceOld VARCHAR(15);
   DECLARE @snfLivroOld VARCHAR(1);  
   DECLARE @snfEnvioOld VARCHAR(1);    
   DECLARE @snfCodFllOld INTEGER;      
@@ -33680,9 +34252,7 @@ BEGIN
          ,@snfSerieOld      = d.SNF_SERIE
          ,@snfEntSaiOld     = d.SNF_ENTSAI
          ,@snfCodTdOld      = d.SNF_CODTD
-         ,@snfInformarNfOld = d.SNF_INFORMARNF
-         ,@snfNfInicioOld   = d.SNF_NFINICIO
-         ,@snfNfFimOld      = d.SNF_NFFIM
+         ,@snfNfProximaOld  = d.SNF_NFPROXIMA
          ,@snfIdfOld        = d.SNF_IDF
          ,@snfModeloOld     = d.SNF_MODELO
          ,@snfIndiceOld     = d.SNF_INDICE
@@ -33717,15 +34287,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@snfCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('SERIENF UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@snfCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('SERIENF UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.SERIENF WHERE SNF_CODIGO=@snfCodigoOld;
@@ -33736,9 +34299,9 @@ BEGIN
       ,SNF_SERIE
       ,SNF_ENTSAI
       ,SNF_CODTD
-      ,SNF_INFORMARNF
-      ,SNF_NFINICIO
-      ,SNF_NFFIM
+      --,SNF_INFORMARNF
+      ,SNF_NFPROXIMA
+      --,SNF_NFFIM
       ,SNF_IDF
       ,SNF_MODELO
       ,SNF_INDICE      
@@ -33754,9 +34317,9 @@ BEGIN
       ,@snfSerieOld             -- SNF_SERIE
       ,@snfEntSaiOld            -- SNF_ENTSAI
       ,@snfCodTdOld             -- SNF_CODTD
-      ,@snfInformarNfOld        -- SNF_INFORMARNF
-      ,@snfNfInicioOld          -- SNF_NFINICIO
-      ,@snfNfFimOld             -- SNF_NFFIM
+      --,@snfInformarNfOld        -- SNF_INFORMARNF
+      ,@snfNfProximaOld         -- SNF_NFPROXIMA
+      --,@snfNfFimOld             -- SNF_NFFIM
       ,@snfIdfOld               -- SNF_IDF
       ,@snfModeloOld            -- SNF_MODELO
       ,@snfIndiceOld            -- SNF_INDICE
@@ -33814,8 +34377,8 @@ BEGIN
   -- SRV_CSLL         | CC  |    |    | VC(1) NN         |      
   -- SRV_CSLLALIQ     |     |    |    | NUM(6,2) NN      |      
   -- SRV_ISS          | CC  |    |    | VC(1) NN         |      
-  -- SRV_CODCC        | SEL |    |    | VC(15) NN        | Campo relacionado (CONTAGERENCIAL)
-  -- CC_NOME          | SEL |    |    | VC(40) NN        | Campo relacionado (CONTAGERENCIAL)   
+  -- **SRV_CODCC        | SEL |    |    | VC(15) NN        | Campo relacionado (CONTAGERENCIAL)
+  -- **CC_NOME          | SEL |    |    | VC(40) NN        | Campo relacionado (CONTAGERENCIAL)   
   -- SRV_CODSPR       | SEL |    |    | VC(10) NN        | Campo relacionado (SERVICOPREFEITURA)
   -- SPR_NOME         | SEL |    |    | VC(60) NN        | Campo relacionado (SERVICOPREFEITURA)   
   -- SRV_CODPRD       |     |    |    | VC(15)           | Codigo do produto se existir
@@ -33823,6 +34386,7 @@ BEGIN
   -- EMP_APELIDO      | SEL |    |    | VC(15) NN        | Campo relacionado (EMPRESA)     
   -- SRV_PODEVENDA    | CC  |    |    | VC(1) NN         | S|N     Se pode entrar no pedido quando este for venda/locacao
   -- SRV_PODELOCACAO  | CC  |    |    | VC(1) NN         | S|N     Se pode entrar no pedido quando este for venda/locacao  
+  -- SRV_CODPT        | SEL |    |    | INT NN           | Codigo relacionado (PADRAOTITULO)    
   -- SRV_ATIVO        | CC  |    |    | VC(1) NN         | S|N     Se o registro pode ser usado em tabelas auxiliares
   -- SRV_REG          | FNC |    |    | VC(1) NN         | P|A|S   P=Publico  A=Administrador S=Sistema
   -- SRV_CODUSR       | OK  |    |    | INT NN           | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
@@ -33855,15 +34419,16 @@ BEGIN
   DECLARE @srvCsllNew VARCHAR(1);
   DECLARE @srvCsllAliqNew NUMERIC(6,2);
   DECLARE @srvIssNew VARCHAR(1);
-  DECLARE @srvCodCcNew VARCHAR(15);
-  DECLARE @ccNomeNew VARCHAR(40);
+  --DECLARE @srvCodCcNew VARCHAR(15);
+  --DECLARE @ccNomeNew VARCHAR(40);
   DECLARE @srvCodSprNew VARCHAR(10);
   DECLARE @sprNomeNew VARCHAR(60);
-  --DECLARE @srvCodPrdNew VARCHAR(15);
   DECLARE @srvCodEmpNew  INTEGER;
   DECLARE @empApelidoNew VARCHAR(15);
   DECLARE @srvPodeVendaNew VARCHAR(1);  
-  DECLARE @srvPodeLocacaoNew VARCHAR(1);    
+  DECLARE @srvPodeLocacaoNew VARCHAR(1); 
+  DECLARE @srvCodPtNew INTEGER;  
+  DECLARE @ptNomeNew VARCHAR(25);
   DECLARE @srvAtivoNew VARCHAR(1);
   DECLARE @srvRegNew VARCHAR(1);
   DECLARE @srvCodUsrNew INTEGER;
@@ -33891,11 +34456,12 @@ BEGIN
          ,@srvIssNew          = UPPER(i.SRV_ISS)
          ,@srvCodSprNew       = dbo.fncTranslate(i.SRV_CODSPR,10)
          ,@sprNomeNew         = COALESCE(SPR.SPR_NOME,'ERRO')
-         --,@srvCodPrdNew       = dbo.fncTranslate(i.SRV_CODPRD,15)
          ,@srvCodEmpNew       = i.SRV_CODEMP
          ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@srvPodeVendaNew    = UPPER(i.SRV_PODEVENDA)
          ,@srvPodeLocacaoNew  = UPPER(i.SRV_PODELOCACAO)
+         ,@srvCodPtNew        = i.SRV_CODPT
+         ,@ptNomeNew          = COALESCE(PT.PT_NOME,'ERRO')
          ,@srvAtivoNew        = UPPER(i.SRV_ATIVO)
          ,@srvRegNew          = UPPER(i.SRV_REG)
          ,@srvCodUsrNew       = i.SRV_CODUSR         
@@ -33904,6 +34470,7 @@ BEGIN
          ,@upD04New           = UP.UP_D04
          ,@upD31New           = UP.UP_D31
     FROM inserted i
+    LEFT OUTER JOIN PADRAOTITULO PT ON i.SRV_CODPT=PT.PT_CODIGO AND PT.PT_ATIVO='S'            
     LEFT OUTER JOIN EMPRESA EMP ON i.SRV_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'        
     LEFT OUTER JOIN SERVICOPREFEITURA SPR ON i.SRV_CODSPR=SPR.SPR_CODIGO AND SPR.SPR_ATIVO='S'        
     LEFT OUTER JOIN USUARIO USR ON i.SRV_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
@@ -33918,6 +34485,8 @@ BEGIN
       RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@srvCodEmpNew);      
     IF( @sprNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO SERVICO PREFEITURA %s PARA ESTE REGISTRO',15,1,@srvCodSprNew);      
+    IF( @ptNomeNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO OPERACAO PADRAO %i PARA ESTE REGISTRO',15,1,@srvCodPtNew);
     -------------------------------------------------------------
     -- Checando se o usuario tem direito de cadastro nesta tabela
     -------------------------------------------------------------
@@ -33926,7 +34495,7 @@ BEGIN
     ---------------------------------------------------------------------
     -- Campo NOME deve ser unico da tabela
     ---------------------------------------------------------------------
-    SELECT @uiCodigo=COALESCE(SRV_CODIGO,0) FROM SERVICO WHERE SRV_NOME=@srvNomeNew;
+    SELECT @uiCodigo=COALESCE(SRV_CODIGO,0) FROM SERVICO WHERE ((SRV_NOME=@srvNomeNew) AND (SRV_CODEMP=@srvCodEmpNew));
     IF( @uiCodigo <> 0 )
       RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA SERVICO COM CODIGO %i',15,1,@uiCodigo);
     ---------------------------------------------------------------------
@@ -33948,6 +34517,7 @@ BEGIN
     -----------------------------------------------------------------
     --  Aqui vou cadastrar a conta contabil para servico
     -----------------------------------------------------------------
+    /*
     DECLARE @seekConta VARCHAR(15)= NULL;
     DECLARE @intConta INTEGER     = 2;
     WHILE( @intConta<9999 ) BEGIN
@@ -34032,6 +34602,7 @@ BEGIN
       END
       SET @intConta=(@intConta+1);  
     END
+    */
     --  
     --
     INSERT INTO dbo.SERVICO( 
@@ -34049,12 +34620,13 @@ BEGIN
       ,SRV_CSLL
       ,SRV_CSLLALIQ
       ,SRV_ISS
-      ,SRV_CODCC
+      --,SRV_CODCC
       ,SRV_CODSPR
       ,SRV_CODPRD
       ,SRV_CODEMP
       ,SRV_PODEVENDA
       ,SRV_PODELOCACAO
+      ,SRV_CODPT      
       ,SRV_ATIVO
       ,SRV_REG
       ,SRV_CODUSR) VALUES(
@@ -34072,12 +34644,13 @@ BEGIN
       ,@srvCsllNew          -- SRV_CSLL
       ,@srvCsllAliqNew      -- SRV_CSLLALIQ
       ,@srvIssNew           -- SRV_ISS
-      ,@srvCodCcNew         -- SRV_CODCC
+      --,@srvCodCcNew         -- SRV_CODCC
       ,@srvCodSprNew        -- SRV_CODSPR
       ,'NSA'                -- SRV_CODPRD
       ,@srvCodEmpNew        -- SRV_CODEMP
       ,@srvPodeVendaNew     -- SRV_PODEVENDA
       ,@srvPodeLocacaoNew   -- SRV_PODELOCACAO
+      ,@srvCodPtNew         -- SRV_CODPT
       ,@srvAtivoNew         -- SRV_ATIVO
       ,@srvRegNew           -- SRV_REG
       ,@srvCodUsrNew        -- SRV_CODUSR
@@ -34100,12 +34673,13 @@ BEGIN
       ,SRV_CSLL
       ,SRV_CSLLALIQ
       ,SRV_ISS
-      ,SRV_CODCC
+      --,SRV_CODCC
       ,SRV_CODSPR
       ,SRV_CODPRD
       ,SRV_CODEMP
       ,SRV_PODEVENDA
       ,SRV_PODELOCACAO
+      ,SRV_CODPT
       ,SRV_ATIVO
       ,SRV_REG
       ,SRV_CODUSR) VALUES(
@@ -34125,12 +34699,13 @@ BEGIN
       ,@srvCsllNew                -- SRV_CSLL
       ,@srvCsllAliqNew            -- SRV_CSLLALIQ
       ,@srvIssNew                 -- SRV_ISS
-      ,@srvCodCcNew               -- SRV_CODCC
+      --,@srvCodCcNew               -- SRV_CODCC
       ,@srvCodSprNew              -- SRV_CODSPR
       ,'NSA'                      -- SRV_CODPRD
       ,@srvCodEmpNew              -- SRV_CODEMP
       ,@srvPodeVendaNew           -- SRV_PODEVENDA
       ,@srvPodeLocacaoNew         -- SRV_PODELOCACAO
+      ,@srvCodPtNew               -- SRV_CODPT
       ,@srvAtivoNew               -- SRV_ATIVO
       ,@srvRegNew                 -- SRV_REG
       ,@srvCodUsrNew              -- SRV_CODUSR
@@ -34171,14 +34746,15 @@ BEGIN
   DECLARE @srvCsllNew VARCHAR(1);
   DECLARE @srvCsllAliqNew NUMERIC(6,2);
   DECLARE @srvIssNew VARCHAR(1);
-  DECLARE @srvCodCcNew VARCHAR(15);
+  --DECLARE @srvCodCcNew VARCHAR(15);
   DECLARE @srvCodSprNew VARCHAR(10);
   DECLARE @sprNomeNew VARCHAR(60);
-  --DECLARE @srvCodPrdNew VARCHAR(15);
   DECLARE @srvCodEmpNew  INTEGER;
   DECLARE @empApelidoNew VARCHAR(15);
   DECLARE @srvPodeVendaNew VARCHAR(1);  
   DECLARE @srvPodeLocacaoNew VARCHAR(1);    
+  DECLARE @srvCodPtNew INTEGER;  
+  DECLARE @ptNomeNew VARCHAR(25);
   DECLARE @srvAtivoNew VARCHAR(1);
   DECLARE @srvRegNew VARCHAR(1);
   DECLARE @srvCodUsrNew INTEGER;
@@ -34204,7 +34780,7 @@ BEGIN
          ,@srvCsllNew         = UPPER(i.SRV_CSLL)
          ,@srvCsllAliqNew     = i.SRV_CSLLALIQ
          ,@srvIssNew          = UPPER(i.SRV_ISS)
-         ,@srvCodCcNew        = i.SRV_CODCC
+         --,@srvCodCcNew        = i.SRV_CODCC
          ,@srvCodSprNew       = dbo.fncTranslate(i.SRV_CODSPR,10)
          ,@sprNomeNew         = COALESCE(SPR.SPR_NOME,'ERRO')
          --,@srvCodPrdNew       = dbo.fncTranslate(i.SRV_CODPRD,15)
@@ -34212,6 +34788,8 @@ BEGIN
          ,@empApelidoNew      = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@srvPodeVendaNew    = UPPER(i.SRV_PODEVENDA)
          ,@srvPodeLocacaoNew  = UPPER(i.SRV_PODELOCACAO)
+         ,@srvCodPtNew        = i.SRV_CODPT
+         ,@ptNomeNew          = COALESCE(PT.PT_NOME,'ERRO')
          ,@srvAtivoNew        = UPPER(i.SRV_ATIVO)
          ,@srvRegNew          = UPPER(i.SRV_REG)
          ,@srvCodUsrNew       = i.SRV_CODUSR         
@@ -34220,6 +34798,7 @@ BEGIN
          ,@upD04New           = UP.UP_D04
          ,@upD31New           = UP.UP_D31
     FROM inserted i
+    LEFT OUTER JOIN PADRAOTITULO PT ON i.SRV_CODPT=PT.PT_CODIGO AND PT.PT_ATIVO='S'    
     LEFT OUTER JOIN EMPRESA EMP ON i.SRV_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'        
     LEFT OUTER JOIN SERVICOPREFEITURA SPR ON i.SRV_CODSPR=SPR.SPR_CODIGO AND SPR.SPR_ATIVO='S'        
     LEFT OUTER JOIN USUARIO USR ON i.SRV_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
@@ -34234,6 +34813,8 @@ BEGIN
       RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@srvCodEmpNew);      
     IF( @sprNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO SERVICO PREFEITURA %s PARA ESTE REGISTRO',15,1,@srvCodSprNew);      
+    IF( @ptNomeNew='ERRO' )
+      RAISERROR('NAO LOCALIZADO OPERACAO PADRAO %i PARA ESTE REGISTRO',15,1,@srvCodPtNew);
     -------------------------------------------------------------
     -- Checando se o usuario tem direito de cadastro nesta tabela
     -------------------------------------------------------------
@@ -34258,12 +34839,12 @@ BEGIN
     DECLARE @srvCsllOld VARCHAR(1);
     DECLARE @srvCsllAliqOld NUMERIC(6,2);
     DECLARE @srvIssOld VARCHAR(1);
-    DECLARE @srvCodCcOld VARCHAR(15);
+    --DECLARE @srvCodCcOld VARCHAR(15);
     DECLARE @srvCodSprOld VARCHAR(10);
-    --DECLARE @srvCodPrdOld VARCHAR(15);
     DECLARE @srvCodEmpOld  INTEGER;
     DECLARE @srvPodeVendaOld VARCHAR(1);  
-    DECLARE @srvPodeLocacaoOld VARCHAR(1);    
+    DECLARE @srvPodeLocacaoOld VARCHAR(1); 
+    DECLARE @srvCodPtOld INTEGER;  
     DECLARE @srvAtivoOld VARCHAR(1);
     DECLARE @srvRegOld VARCHAR(1);
     DECLARE @srvCodUsrOld INTEGER;
@@ -34283,12 +34864,13 @@ BEGIN
            ,@srvCsllOld         = d.SRV_CSLL
            ,@srvCsllAliqOld     = d.SRV_CSLLALIQ
            ,@srvIssOld          = d.SRV_ISS
-           ,@srvCodCcOld        = d.SRV_CODCC
+           --,@srvCodCcOld        = d.SRV_CODCC
            ,@srvCodSprOld       = d.SRV_CODSPR
            --,@srvCodPrdOld       = d.SRV_CODPRD
            ,@srvCodEmpOld       = d.SRV_CODEMP
            ,@srvPodeVendaOld    = d.SRV_PODEVENDA
            ,@srvPodeLocacaoOld  = d.SRV_PODELOCACAO
+           ,@srvCodPtOld        = d.SRV_CODPT
            ,@srvAtivoOld        = d.SRV_ATIVO
            ,@srvRegOld          = d.SRV_REG
            ,@srvCodUsrOld       = d.SRV_CODUSR         
@@ -34300,14 +34882,13 @@ BEGIN
       RAISERROR('CAMPO CODIGO NAO PODE SER ALTERADO',15,1);  
     IF( @srvCodEmpOld<>@srvCodEmpNew )
       RAISERROR('CAMPO EMPRESA NAO PODE SER ALTERADO',15,1);  
-    IF( @srvCodCcOld<>@srvCodCcNew )
-      RAISERROR('CAMPO CONTABIL NAO PODE SER ALTERADO',15,1);  
-      
+    --IF( @srvCodCcOld<>@srvCodCcNew )
+    --  RAISERROR('CAMPO CONTABIL NAO PODE SER ALTERADO',15,1);  
     ---------------------------------------------------------------------
     -- Campo NOME deve ser unico da tabela
     ---------------------------------------------------------------------
     IF( @srvNomeOld<>@srvNomeNew ) BEGIN
-      SELECT @uiCodigo=COALESCE(SRV_CODIGO,0) FROM SERVICO WHERE SRV_NOME=@srvNomeNew;
+      SELECT @uiCodigo=COALESCE(SRV_CODIGO,0) FROM SERVICO WHERE ((SRV_NOME=@srvNomeNew) AND (SRV_CODEMP=@srvCodEmpNew));
       IF( @uiCodigo <> 0 )
         RAISERROR('DESCRITIVO JA CADASTRADO NA TABELA SERVICO COM CODIGO %i',15,1,@uiCodigo);
     END   
@@ -34340,6 +34921,7 @@ BEGIN
            ,SRV_ATIVO        = @srvAtivoNew
            ,SRV_PODEVENDA    = @srvPodeVendaNew  
            ,SRV_PODELOCACAO  = @srvPodeLocacaoNew
+           ,SRV_CODPT        = @srvCodPtNew
            ,SRV_REG          = @srvRegNew
            ,SRV_CODUSR       = @srvCodUsrNew
     WHERE SRV_CODIGO=@srvCodigoNew;     
@@ -34348,7 +34930,7 @@ BEGIN
      OR (@srvInssBaseCalcOld<>@srvInssBaseCalcNew) OR (@srvIrrfOld<>@srvIrrfNew) OR (@srvIrrfAliqOld<>@srvIrrfAliqNew) 
      OR (@srvPisOld<>@srvPisNew) OR (@srvPisAliqOld<>@srvPisAliqNew) OR (@srvCofinsOld<>@srvCofinsNew) OR (@srvCofinsAliqOld<>@srvCofinsAliqNew) 
      OR (@srvCsllOld<>@srvCsllNew) OR (@srvCsllAliqOld<>@srvCsllAliqNew) OR (@srvIssOld<>@srvIssNew) OR (@srvCodSprOld<>@srvCodSprNew) 
-     OR (@srvPodeVendaOld<>@srvPodeVendaNew) OR (@srvPodeLocacaoOld<>@srvPodeLocacaoNew)
+     OR (@srvPodeVendaOld<>@srvPodeVendaNew) OR (@srvPodeLocacaoOld<>@srvPodeLocacaoNew) OR (@srvCodPtOld<>@srvCodPtNew)
      OR (@srvAtivoOld<>@srvAtivoNew) OR (@srvRegOld<>@srvRegNew) ) BEGIN
       INSERT INTO dbo.BKPSERVICO(
         SRV_ACAO
@@ -34367,12 +34949,13 @@ BEGIN
         ,SRV_CSLL
         ,SRV_CSLLALIQ
         ,SRV_ISS
-        ,SRV_CODCC
+        --,SRV_CODCC
         ,SRV_CODSPR
         ,SRV_CODPRD
         ,SRV_CODEMP
         ,SRV_PODEVENDA
         ,SRV_PODELOCACAO
+        ,SRV_CODPT
         ,SRV_ATIVO
         ,SRV_REG
         ,SRV_CODUSR) VALUES(
@@ -34392,12 +34975,13 @@ BEGIN
         ,@srvCsllNew                -- SRV_CSLL
         ,@srvCsllAliqNew            -- SRV_CSLLALIQ
         ,@srvIssNew                 -- SRV_ISS
-        ,@srvCodCcNew               -- SRV_CODCC
+        --,@srvCodCcNew               -- SRV_CODCC
         ,@srvCodSprNew              -- SRV_CODSPR
         ,'NSA'                      -- SRV_CODPRD
         ,@srvCodEmpNew              -- SRV_CODEMP
         ,@srvPodeVendaNew           -- SRV_PODEVENDA
         ,@srvPodeLocacaoNew         -- SRV_PODELOCACAO
+        ,@srvCodPtNew               -- SRV_CODPT
         ,@srvAtivoNew               -- SRV_ATIVO
         ,@srvRegNew                 -- SRV_REG
         ,@srvCodUsrNew              -- SRV_CODUSR
@@ -34419,8 +35003,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -34440,12 +35022,12 @@ BEGIN
   DECLARE @srvCsllOld VARCHAR(1);
   DECLARE @srvCsllAliqOld NUMERIC(6,2);
   DECLARE @srvIssOld VARCHAR(1);
-  DECLARE @srvCodCcOld VARCHAR(15);
+  --DECLARE @srvCodCcOld VARCHAR(15);
   DECLARE @srvCodSprOld VARCHAR(10);
-  --DECLARE @srvCodPrdOld VARCHAR(15);
   DECLARE @srvCodEmpOld  INTEGER;
   DECLARE @srvPodeVendaOld VARCHAR(1);  
-  DECLARE @srvPodeLocacaoOld VARCHAR(1);    
+  DECLARE @srvPodeLocacaoOld VARCHAR(1); 
+  DECLARE @srvCodPtOld INTEGER;    
   DECLARE @srvAtivoOld VARCHAR(1);
   DECLARE @srvRegOld VARCHAR(1);
   DECLARE @srvCodUsrOld INTEGER;
@@ -34470,12 +35052,13 @@ BEGIN
          ,@srvCsllOld         = d.SRV_CSLL
          ,@srvCsllAliqOld     = d.SRV_CSLLALIQ
          ,@srvIssOld          = d.SRV_ISS
-         ,@srvCodCcOld        = d.SRV_CODCC
+         --,@srvCodCcOld        = d.SRV_CODCC
          ,@srvCodSprOld       = d.SRV_CODSPR
          --,@srvCodPrdOld       = d.SRV_CODPRD
          ,@srvCodEmpOld       = d.SRV_CODEMP
          ,@srvPodeVendaOld    = d.SRV_PODEVENDA
          ,@srvPodeLocacaoOld  = d.SRV_PODELOCACAO
+         ,@srvCodPtOld        = d.SRV_CODPT         
          ,@srvAtivoOld        = d.SRV_ATIVO
          ,@srvRegOld          = d.SRV_REG
          ,@srvCodUsrOld       = d.SRV_CODUSR         
@@ -34503,15 +35086,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@srvCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('SERVICO UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@srvCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('SERVICO UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.SERVICO WHERE SRV_CODIGO=@srvCodigoOld;
@@ -34533,12 +35109,13 @@ BEGIN
       ,SRV_CSLL
       ,SRV_CSLLALIQ
       ,SRV_ISS
-      ,SRV_CODCC
+      --,SRV_CODCC
       ,SRV_CODSPR
       ,SRV_CODPRD
       ,SRV_CODEMP
       ,SRV_PODEVENDA
       ,SRV_PODELOCACAO
+      ,SRV_CODPT      
       ,SRV_ATIVO
       ,SRV_REG
       ,SRV_CODUSR) VALUES(
@@ -34558,12 +35135,13 @@ BEGIN
       ,@srvCsllOld                -- SRV_CSLL
       ,@srvCsllAliqOld            -- SRV_CSLLALIQ
       ,@srvIssOld                 -- SRV_ISS
-      ,@srvCodCcOld               -- SRV_CODCC
+      --,@srvCodCcOld               -- SRV_CODCC
       ,@srvCodSprOld              -- SRV_CODSPR
       ,'NSA'                      -- SRV_CODPRD
       ,@srvCodEmpOld              -- SRV_CODEMP
       ,@srvPodeVendaOld           -- SRV_PODEVENDA
       ,@srvPodeLocacaoOld         -- SRV_PODELOCACAO
+      ,@srvCodPtOld               -- SRV_CODPT      
       ,@srvAtivoOld               -- SRV_ATIVO
       ,@srvRegOld                 -- SRV_REG
       ,@srvCodUsrOld              -- SRV_CODUSR
@@ -35252,9 +35830,8 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  DECLARE @fkIntUsr INTEGER = 0;         -- Para procurar campo foreign key int (USUARIO)
-  DECLARE @fkStrBln VARCHAR(15) = 'OK';  -- Para procurar campo foreign key str (BALANCO) 
   DECLARE @erroOld VARCHAR(70);          -- Buscando retorno de erro para funcao
+  DECLARE @fkBalanco VARCHAR(15);        -- Buscando a FK(BALANCO)
   -------------------
   -- Campos da tabela
   -------------------
@@ -35300,9 +35877,9 @@ BEGIN
     --------------------------------------
     --   Checando a FK BLN_CODSPD(BALANCO)
     --------------------------------------
-    SELECT TOP 1 @fkStrBln=COALESCE(BLN_CODIGO,'OK') FROM BALANCO WHERE BLN_CODSPD=@spdCodigoOld;
-    IF( @fkStrBln <> 'OK' )
-      RAISERROR('CODIGO UTILIZADO NA CONTA BALANCO %s',15,1,@fkStrBln);
+    SELECT TOP 1 @fkBalanco=COALESCE(BLN_CODIGO,'OK') FROM BALANCO WHERE BLN_CODSPD=@spdCodigoOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('CODIGO UTILIZADO NA CONTA BALANCO %s',15,1,@fkBalanco);
     --
     DELETE FROM dbo.SPED WHERE SPD_CODIGO=@spdCodigoOld;
     -- Gravando LOG
@@ -35709,7 +36286,6 @@ BEGIN
   -- ---------------|---------|----|----|--------------------|----------------------------------------------------------
   -- TRN_CODFVR     | SEL/PK  |    |    | INT                | Campo relacionado (FAVORECIDO)
   -- FVR_NOME       | SEL     |    |    | VC(60)             | Campo relacionado (FAVORECIDO)
-  -- TRN_CODEMP     | PK      |    |    | INT                | Codigo da empresa
   -- TRN_ATIVO      | CC      |    |    | VC(1) NN           | S|N     Se o registro pode ser usado em tabelas auxiliares
   -- TRN_REG        | FNC     |    |    | VC(1) NN           | P|A|S   P=Publico  A=Administrador S=Sistema
   -- TRN_CODUSR     | OK      |    |    | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
@@ -35728,8 +36304,6 @@ BEGIN
   -------------------
   DECLARE @trnCodFvrNew INTEGER;
   DECLARE @fvrNomeNew VARCHAR(60);
-  DECLARE @trnCodEmpNew INTEGER;
-  DECLARE @empApelidoNew VARCHAR(15);
   DECLARE @trnAtivoNew VARCHAR(1);
   DECLARE @trnRegNew VARCHAR(1);
   DECLARE @trnCodUsrNew INTEGER;
@@ -35742,8 +36316,6 @@ BEGIN
   ---------------------------------------------------
   SELECT @trnCodFvrNew   = i.TRN_CODFVR
          ,@fvrNomeNew    = COALESCE(FVR.FVR_NOME,'ERRO')
-         ,@trnCodEmpNew  = i.TRN_CODEMP
-         ,@empApelidoNew = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@trnAtivoNew   = UPPER(i.TRN_ATIVO)
          ,@trnRegNew     = UPPER(i.TRN_REG)
          ,@trnCodUsrNew  = i.TRN_CODUSR         
@@ -35753,15 +36325,12 @@ BEGIN
          ,@upD31New      = UP.UP_D31
     FROM inserted i
     LEFT OUTER JOIN FAVORECIDO FVR ON i.TRN_CODFVR=FVR.FVR_CODIGO AND FVR.FVR_ATIVO='S'
-    LEFT OUTER JOIN EMPRESA EMP ON i.TRN_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN USUARIO USR ON i.TRN_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
     -----------------------------
     -- VERIFICANDO A FOREIGN KEYs
     -----------------------------
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@trnCodEmpNew);
     IF( @fvrNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO FAVORECIDO %i PARA ESTE REGISTRO',15,1,@trnCodFvrNew);
     IF( @usrApelidoNew='ERRO' )
@@ -35774,7 +36343,7 @@ BEGIN
     ---------------------------------------------------------------------
     -- Verificando a chave primaria quando nao for identity
     ---------------------------------------------------------------------
-    SELECT @uiCodigo=COALESCE(TRN_CODFVR,0) FROM TRANSPORTADORA WHERE ((TRN_CODFVR=@trnCodFvrNew) AND (TRN_CODEMP=@trnCodEmpNew));
+    SELECT @uiCodigo=COALESCE(TRN_CODFVR,0) FROM TRANSPORTADORA WHERE TRN_CODFVR=@trnCodFvrNew;
     IF( @uicODIGO <> 0 )
       RAISERROR('CODIGO JA CADASTRADO NA TABELA TRANSPORTADORA %s',15,1,@fvrNomeNew);
     ------------------------------------------------------------------
@@ -35788,12 +36357,10 @@ BEGIN
     --  
     INSERT INTO dbo.TRANSPORTADORA( 
       TRN_CODFVR
-      ,TRN_CODEMP
       ,TRN_ATIVO
       ,TRN_REG
       ,TRN_CODUSR) VALUES(
       @trnCodFvrNew   -- TRN_CODFVR
-      ,@trnCodEmpNew  -- TRN_CODEMP
       ,@trnAtivoNew   -- TRN_ATIVO
       ,@trnRegNew     -- TRN_REG
       ,@trnCodUsrNew  -- TRN_CODUSR
@@ -35802,13 +36369,11 @@ BEGIN
     INSERT INTO dbo.BKPTRANSPORTADORA(
       TRN_ACAO
       ,TRN_CODFVR
-      ,TRN_CODEMP
       ,TRN_ATIVO
       ,TRN_REG
       ,TRN_CODUSR) VALUES(
       'I'                         -- TRN_ACAO
       ,@trnCodFvrNew              -- TRN_CODFVR
-      ,@trnCodEmpNew              -- TRN_CODEMP
       ,@trnAtivoNew               -- TRN_ATIVO
       ,@trnRegNew                 -- TRN_REG
       ,@trnCodUsrNew              -- TRN_CODUSR
@@ -35836,8 +36401,6 @@ BEGIN
   -----------------------
   DECLARE @trnCodFvrNew INTEGER;
   DECLARE @fvrNomeNew VARCHAR(60);
-  DECLARE @trnCodEmpNew INTEGER;  
-  DECLARE @empApelidoNew VARCHAR(15);  
   DECLARE @trnAtivoNew VARCHAR(1);
   DECLARE @trnRegNew VARCHAR(1);
   DECLARE @trnCodUsrNew INTEGER;
@@ -35850,8 +36413,6 @@ BEGIN
   -------------------------------------------------------
   SELECT @trnCodFvrNew   = i.TRN_CODFVR
          ,@fvrNomeNew    = COALESCE(FVR.FVR_NOME,'ERRO')
-         ,@trnCodEmpNew  = i.TRN_CODEMP
-         ,@empApelidoNew = COALESCE(EMP.EMP_APELIDO,'ERRO')
          ,@trnAtivoNew   = UPPER(i.TRN_ATIVO)
          ,@trnRegNew     = UPPER(i.TRN_REG)
          ,@trnCodUsrNew  = i.TRN_CODUSR         
@@ -35861,15 +36422,12 @@ BEGIN
          ,@upD31New      = UP.UP_D31
     FROM inserted i
     LEFT OUTER JOIN FAVORECIDO FVR ON i.TRN_CODFVR=FVR.FVR_CODIGO AND FVR.FVR_ATIVO='S'
-    LEFT OUTER JOIN EMPRESA EMP ON i.TRN_CODEMP=EMP.EMP_CODIGO AND EMP.EMP_ATIVO='S'
     LEFT OUTER JOIN USUARIO USR ON i.TRN_CODUSR=USR.USR_CODIGO AND USR.USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
   BEGIN TRY    
     -----------------------------
     -- VERIFICANDO A FOREIGN KEYs
     -----------------------------
-    IF( @empApelidoNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO EMPRESA %i PARA ESTE REGISTRO',15,1,@trnCodEmpNew);
     IF( @fvrNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO FAVORECIDO %i PARA ESTE REGISTRO',15,1,@trnCodFvrNew);
     IF( @usrApelidoNew='ERRO' )
@@ -35884,23 +36442,19 @@ BEGIN
     -- Campos OLD da tabela
     ------------------------------------------------------------------------------------
     DECLARE @trnCodFvrOld INTEGER;
-    DECLARE @trnCodEmpOld INTEGER;
     DECLARE @trnAtivoOld VARCHAR(1);
     DECLARE @trnRegOld VARCHAR(1);
     DECLARE @trnCodUsrOld INTEGER;
     SELECT @trnCodFvrOld   = d.TRN_CODFVR
-           ,@trnCodEmpOld  = d.TRN_CODEMP
            ,@trnAtivoOld   = d.TRN_ATIVO
            ,@trnRegOld     = d.TRN_REG
            ,@trnCodUsrOld  = d.TRN_CODUSR         
-      FROM TRANSPORTADORA d WHERE ((d.TRN_CODFVR=@trnCodFvrNew) AND (d.TRN_CODEMP=@trnCodEmpNew));  
+      FROM TRANSPORTADORA d WHERE d.TRN_CODFVR=@trnCodFvrNew;  
     ---------------------------------------------------------------------
     -- Primary Key nao pode ser alterada
     ---------------------------------------------------------------------
     IF( @trnCodFvrOld<>@trnCodFvrNew )
       RAISERROR('CAMPO CODIGO NAO PODE SER ALTERADO',15,1);  
-    IF( @trnCodEmpOld<>@trnCodEmpNew )
-      RAISERROR('CAMPO EMPRESA NAO PODE SER ALTERADO',15,1);  
     ------------------------------------------------------------------
     -- Verificando o campo USR_REG - Olhar todos, Old pode ser "S"
     ------------------------------------------------------------------
@@ -35920,13 +36474,11 @@ BEGIN
       INSERT INTO dbo.BKPTRANSPORTADORA(
         TRN_ACAO
         ,TRN_CODFVR
-        ,TRN_CODEMP
         ,TRN_ATIVO
         ,TRN_REG
         ,TRN_CODUSR) VALUES(
         'A'                         -- TRN_ACAO
         ,@trnCodFvrNew              -- TRN_CODFVR
-        ,@trnCodEmpNew              -- TRN_CODEMP
         ,@trnAtivoNew               -- TRN_ATIVO
         ,@trnRegNew                 -- TRN_REG
         ,@trnCodUsrNew              -- TRN_CODUSR
@@ -35948,14 +36500,12 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
+  DECLARE @fkNfProduto INTEGER;   -- Buscando a FK(NFPRODUTO)
   -------------------
   -- Campos da tabela
   -------------------
   DECLARE @trnCodFvrOld INTEGER;
-  DECLARE @trnCodEmpOld INTEGER;
   DECLARE @trnAtivoOld VARCHAR(1);
   DECLARE @trnRegOld VARCHAR(1);
   DECLARE @trnCodUsrOld INTEGER;
@@ -35966,7 +36516,6 @@ BEGIN
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
   SELECT @trnCodFvrOld   = d.TRN_CODFVR
-         ,@trnCodEmpOld  = d.TRN_CODEMP
          ,@trnAtivoOld   = d.TRN_ATIVO
          ,@trnRegOld     = d.TRN_REG
          ,@trnCodUsrOld  = d.TRN_CODUSR         
@@ -35994,29 +36543,23 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@trnCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('TRANSPORTADORA UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@trnCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('TRANSPORTADORA UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
+    SELECT TOP 1 @fkNfProduto=NFP_NUMNF FROM NFPRODUTO WHERE NFP_CODTRN=@trnCodFvrOld;
+    IF( @@ROWCOUNT>0 )
+      RAISERROR('TRANSPORTADORA UTILIZADO NA NF %i',15,1,@fkNfProduto);
     --
     --
-    DELETE FROM dbo.TRANSPORTADORA WHERE ((TRN_CODFVR=@trnCodFvrOld) AND (TRN_CODEMP=@trnCodEmpOld));
+    DELETE FROM dbo.TRANSPORTADORA WHERE TRN_CODFVR=@trnCodFvrOld;
     -- Gravando LOG
     INSERT INTO dbo.BKPTRANSPORTADORA(
       TRN_ACAO
       ,TRN_CODFVR
-      ,TRN_CODEMP
       ,TRN_ATIVO
       ,TRN_REG
       ,TRN_CODUSR) VALUES(
       'E'                         -- TRN_ACAO
       ,@trnCodFvrOld              -- TRN_CODFVR
-      ,@trnCodEmpOld              -- TRN_CODEMP
       ,@trnAtivoOld               -- TRN_ATIVO
       ,@trnRegOld                 -- TRN_REG
       ,@trnCodUsrOld              -- TRN_CODUSR
@@ -36193,11 +36736,11 @@ BEGIN
     ----------------------------------------------------------------------------
     IF( @usrApelidoNew='ADMIN' ) BEGIN
       INSERT INTO dbo.USUARIOPERFIL(
-        UP_NOME 
+        UP_NOME	
         ,UP_D01,UP_D02,UP_D03,UP_D04,UP_D05,UP_D06,UP_D07,UP_D08,UP_D09,UP_D10,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
         ,UP_D21,UP_D22,UP_D23,UP_D24,UP_D25,UP_D26,UP_D27,UP_D28,UP_D29,UP_D30,UP_D31,UP_D32,UP_D33,UP_D34,UP_D35,UP_D36,UP_D37,UP_D38,UP_D39,UP_D40
         ,UP_D41,UP_D42,UP_D43,UP_D44,UP_D45,UP_D46,UP_D47,UP_D48,UP_D49,UP_D50
-        ,UP_ATIVO 
+        ,UP_ATIVO	
         ,UP_REG
         ,UP_CODUSR) VALUES(
         'ADMINIST'   
@@ -36211,11 +36754,11 @@ BEGIN
       INSERT INTO dbo.BKPUSUARIOPERFIL(
         UP_ACAO
         ,UP_CODIGO
-        ,UP_NOME  
+        ,UP_NOME	
         ,UP_D01,UP_D02,UP_D03,UP_D04,UP_D05,UP_D06,UP_D07,UP_D08,UP_D09,UP_D10,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
         ,UP_D21,UP_D22,UP_D23,UP_D24,UP_D25,UP_D26,UP_D27,UP_D28,UP_D29,UP_D30,UP_D31,UP_D32,UP_D33,UP_D34,UP_D35,UP_D36,UP_D37,UP_D38,UP_D39,UP_D40
         ,UP_D41,UP_D42,UP_D43,UP_D44,UP_D45,UP_D46,UP_D47,UP_D48,UP_D49,UP_D50
-        ,UP_ATIVO 
+        ,UP_ATIVO	
         ,UP_REG
         ,UP_CODUSR) VALUES(
         'I'
@@ -37352,7 +37895,7 @@ BEGIN
   DECLARE @vclCodVtpNew VARCHAR(3);
   DECLARE @vtpNomeNew VARCHAR(20);
   DECLARE @vclCodVmdNew INTEGER;
-  DECLARE @vmdNomeNew VARCHAR(30); --@vmdNomeNew VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
+  DECLARE @vmdNomeNew VARCHAR(20);
   DECLARE @vclAnoNew INTEGER;  
   DECLARE @vclAtivoNew VARCHAR(1);
   DECLARE @vclRegNew VARCHAR(1);
@@ -37399,7 +37942,7 @@ BEGIN
     IF( @vtpNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO TIPO %s PARA ESTE REGISTRO',15,1,@vclCodVtpNew);        
     IF( @vmdNomeNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO MODELO %i PARA ESTE REGISTRO',15,1,@vclCodVmdNew);  --ANGELO KOKISO - MUDNAÇA PARA VARIAVEL INTEIRO.   
+      RAISERROR('NAO LOCALIZADO MODELO %s PARA ESTE REGISTRO',15,1,@vclCodVmdNew);        
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@vclCodUsrNew);
     -------------------------------------------------------------
@@ -37494,7 +38037,7 @@ BEGIN
   DECLARE @vclCodVtpNew VARCHAR(3);
   DECLARE @vtpNomeNew VARCHAR(20);
   DECLARE @vclCodVmdNew INTEGER;
-  DECLARE @vmdNomeNew VARCHAR(30); --@vmdNomeNew VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
+  DECLARE @vmdNomeNew VARCHAR(20);
   DECLARE @vclAnoNew INTEGER;    
   DECLARE @vclCodCnttNew INTEGER;    
   DECLARE @vclAtivoNew VARCHAR(1);
@@ -37543,7 +38086,7 @@ BEGIN
     IF( @vtpNomeNew='ERRO' )
       RAISERROR('NAO LOCALIZADO TIPO %s PARA ESTE REGISTRO',15,1,@vclCodVtpNew);        
     IF( @vmdNomeNew='ERRO' )
-      RAISERROR('NAO LOCALIZADO MODELO %i PARA ESTE REGISTRO',15,1,@vclCodVmdNew);        
+      RAISERROR('NAO LOCALIZADO MODELO %s PARA ESTE REGISTRO',15,1,@vclCodVmdNew);        
     IF( @usrApelidoNew='ERRO' )
       RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@vclCodUsrNew);
     -------------------------------------------------------------
@@ -37648,8 +38191,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntAml INTEGER = 0;  -- Para procurar campo foreign key int (VEICULOLOTE)
-  --DECLARE @fkIntAmp INTEGER = 0;  -- Para procurar campo foreign key int (VEICULOPRODUTO)  
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -38445,14 +38986,12 @@ BEGIN
   -- [OK]=Checado no trigger   [CC]=Check constraint  [SEL]=Select  [FNC]=function  [DEF]=default
   -- ---------------------------------------------------------------------------------------------------------------      
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo INTEGER    = 0;     -- Para procurar unique index
-  --DECLARE @uiNome VARCHAR(20)  = 'OK';  -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70) = 'OK';  -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
   -------------------
   DECLARE @vmdCodigoNew INTEGER;
-  DECLARE @vmdNomeNew VARCHAR(30); --@vmdNomeNew VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
+  DECLARE @vmdNomeNew VARCHAR(20);
   DECLARE @vmdCodVfbNew VARCHAR(3);
   DECLARE @vfbNomeNew VARCHAR(20);
   DECLARE @vmdAtivoNew VARCHAR(1);
@@ -38559,13 +39098,12 @@ INSTEAD OF UPDATE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @uiCodigo VARCHAR(6) = 'OK';  -- Para procurar unique index
   DECLARE @erroNew VARCHAR(70);         -- Buscando retorno de erro para funcao
   -----------------------
   -- Campos NEW da tabela
   -----------------------
   DECLARE @vmdCodigoNew INTEGER;
-  DECLARE @vmdNomeNew VARCHAR(30); --@vmdNomeNew VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
+  DECLARE @vmdNomeNew VARCHAR(20);
   DECLARE @vmdCodVfbNew VARCHAR(3);
   DECLARE @vfbNomeNew VARCHAR(20);
   DECLARE @vmdAtivoNew VARCHAR(1);
@@ -38611,7 +39149,7 @@ BEGIN
     -- Campos OLD da tabela
     ------------------------------------------------------------------------------------
     DECLARE @vmdCodigoOld INTEGER;
-    DECLARE @vmdNomeOld VARCHAR(30); --@vmdNomeOld VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
+    DECLARE @vmdNomeOld VARCHAR(20);
     DECLARE @vmdCodVfbOld VARCHAR(3);    
     DECLARE @vmdAtivoOld VARCHAR(1);
     DECLARE @vmdRegOld VARCHAR(1);
@@ -38688,13 +39226,12 @@ AS
 BEGIN
   SET NOCOUNT ON;  
   DECLARE @fkCodVcl VARCHAR(10);  -- Para procurar campo foreign key str (VEICULO) 
-  --DECLARE @fkCodTc VARCHAR(3);    -- Para procurar campo foreign key str (PGRTIPOCARROCERIA) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
   -------------------
   DECLARE @vmdCodigoOld INTEGER;
-  DECLARE @vmdNomeOld VARCHAR(30); --@vmdNomeOld VARCHAR(20); --Angelo Kokiso mudança de range de 20 para 30
+  DECLARE @vmdNomeOld VARCHAR(20);
   DECLARE @vmdCodVfbOld VARCHAR(3);    
   DECLARE @vmdAtivoOld VARCHAR(1);
   DECLARE @vmdRegOld VARCHAR(1);
@@ -39398,8 +39935,6 @@ INSTEAD OF DELETE
 AS
 BEGIN
   SET NOCOUNT ON;  
-  --DECLARE @fkIntUsr INTEGER = 0;  -- Para procurar campo foreign key int (USUARIO)
-  --DECLARE @fkIntCnt INTEGER = 0;  -- Para procurar campo foreign key int (CONTATO) 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
   -------------------
   -- Campos da tabela
@@ -39446,15 +39981,8 @@ BEGIN
     IF( @erroOld != 'OK' )
       RAISERROR(@erroOld,15,1);
     --------------------------------------
-    --   Checando a FK CNT_CODCRG(CONTATO)
-    --                 USR_CODCRG(USUARIO)
+    --   Checando a FK 
     --------------------------------------
-    --SELECT TOP 1 @fkIntUsr=COALESCE(USR_CODIGO,0) FROM USUARIO WHERE USR_CODCRG=@vndCodigoOld;
-    --IF( @fkIntUsr > 0 )
-    --  RAISERROR('VENDEDOR UTILIZADO NO USUARIO %i',15,1,@fkIntUsr);
-    --SELECT TOP 1 @fkIntCnt=COALESCE(CNT_CODIGO,0) FROM CONTATO WHERE CNT_CODCRG=@vndCodigoOld;
-    --IF( @fkIntCnt > 0 )
-    --  RAISERROR('VENDEDOR UTILIZADO NO USUARIO %i',15,1,@fkIntCnt);
     --
     --
     DELETE FROM dbo.VENDEDOR WHERE ((VND_CODFVR=@vndCodFvrOld) AND (VND_CODEMP=@vndCodEmpOld));
@@ -39500,27 +40028,27 @@ END
 GO
 -- USUARIO 1 e 2 NATIVOS DO SISTEMA
 INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(1,'00000000001','ADMIN','1','ADM','admin@trac.com.br','ADMIN123','S','A','A','N',2);
-INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(2,'00000000000','SISTEMA','1','GRN','sistema@trac.com.br','SISTEMA123','S','S','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(3,'21535390808','MARCIA','1','GRN','marcia@trac.com.br','PEDRO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(4,'30901069817','PEDRO','1','GRN','pedro@trac.com.br','PAULO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(5,'05272388804','PAULO','1','GRN','paulo@trac.com.br','PAULO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(6,'05272388801','ORLANDO','1','GRN','orlando@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(7,'05272388810','ACIR','1','VND','acir@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(8,'05272388811','AETATIS','1','VND','aetatis@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(9,'05272388812','AGILETREND','1','VND','agiltrend@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(10,'05272388813','AGNES','1','VND','agnes@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(11,'05272388814','AINTER','1','VND','ainter@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(12,'05272388815','ANDRE','1','VND','andre@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(13,'05272388816','ANIERI','1','VND','anieri@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(14,'05272388817','ASCENTY','1','VND','ascenty@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(15,'05272388818','AUGUSTO','1','VND','augusto@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(16,'05272388819','DOMICILI','1','VND','domicili@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(17,'05272388820','EDGAR','1','VND','edgar@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(18,'05272388821','WYLESS','1','VND','wyless@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(19,'05272388822','YURI','1','VND','yuri@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(20,'05272388823','VENETO','1','VND','veneto@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(21,'05272388824','VOSTTRO','1','VND','vostro@trac.com.br','ORLANDO123','S','A','A','N',2);
--- INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(22,'05272388825','FABIO','1','VND','fabio@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(2,'00000000000','SISTEMA','1','GRN','sistema@trac.com.br','MARCIA123','S','S','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(3,'21535390808','MARCIA','1','GRN','marcia@trac.com.br','PEDRO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(4,'30901069817','PEDRO','1','GRN','pedro@trac.com.br','PAULO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(5,'05272388804','PAULO','1','GRN','paulo@trac.com.br','PAULO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(6,'05272388801','ORLANDO','1','GRN','orlando@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(7,'05272388810','ACIR','1','VND','acir@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(8,'05272388811','AETATIS','1','VND','aetatis@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(9,'05272388812','AGILETREND','1','VND','agiltrend@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(10,'05272388813','AGNES','1','VND','agnes@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(11,'05272388814','AINTER','1','VND','ainter@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(12,'05272388815','ANDRE','1','VND','andre@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(13,'05272388816','ANIERI','1','VND','anieri@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(14,'05272388817','ASCENTY','1','VND','ascenty@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(15,'05272388818','AUGUSTO','1','VND','augusto@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(16,'05272388819','DOMICILI','1','VND','domicili@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(17,'05272388820','EDGAR','1','VND','edgar@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(18,'05272388821','WYLESS','1','VND','wyless@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(19,'05272388822','YURI','1','VND','yuri@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(20,'05272388823','VENETO','1','VND','veneto@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(21,'05272388824','VOSTTRO','1','VND','vostro@trac.com.br','ORLANDO123','S','A','A','N',2);
+INSERT INTO VUSUARIO(USR_CODIGO,USR_CPF,USR_APELIDO,USR_CODUP,USR_CODCRG,USR_EMAIL,USR_SENHA,USR_ATIVO,USR_REG,USR_ADMPUB,USR_FECHAMENTO,USR_CODUSR) VALUES(22,'05272388825','FABIO','1','VND','fabio@trac.com.br','ORLANDO123','S','A','A','N',2);
 GO
 INSERT INTO dbo.VCARGO(CRG_CODIGO,CRG_NOME,CRG_ATIVO ,CRG_REG ,CRG_CODUSR) VALUES('ADM','ADMINISTRADOR'  ,'S'       ,'P'     ,1);  
 INSERT INTO dbo.VCARGO(CRG_CODIGO,CRG_NOME,CRG_ATIVO ,CRG_REG ,CRG_CODUSR) VALUES('CNT','CONTADOR'       ,'S'       ,'P'     ,1);   
@@ -39545,43 +40073,34 @@ FROM USUARIO
 GO
 INSERT INTO dbo.VPAIS( PAI_CODIGO,PAI_NOME,PAI_DDI,PAI_ATIVO ,PAI_REG ,PAI_CODUSR) VALUES(1058,'brasil'   ,55,'s','p',1);   
 INSERT INTO dbo.VPAIS( PAI_CODIGO,PAI_NOME,PAI_DDI,PAI_ATIVO ,PAI_REG ,PAI_CODUSR) VALUES(1060,'colombia' ,57,'s','p',1);
--- ADIÇÃO DE NOVOS LOGRADOUROS NO SETUP INICIAL
 GO
-INSERT INTO VLOGRADOURO  VALUES ( 'AG','AGENCIA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'AL','ALAMEDA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'ANEL','ANEL','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'AP','APARTAMENTO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'AREA','AREA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'AV','AVENIDA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'BC','BECO SEM SAIDA MESMO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'BL','BLOCO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'CAM','CAMINHO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'CMPS','CAMPUS','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'CPT','CAPITAO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'DER','DEPARTAMENTO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'ESCD','ESCADINHA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'EST','ESTACAO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'ETR','ESTRADA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'FAZ','FAZENDA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'FORT','FORTALEZA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'GL','GALERIA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'KM','QUILOMETRO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'LD','LADEIRA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'LGO','LARGO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'NSA','NAO SE APLICA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'PCA','PRACA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'PR','PRAIA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'PRQ','PARQUE','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'QD','QUADRA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'QNF','BRASILIA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'QTA','QUINTA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'ROD','RODOVIA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'RUA','RUA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'SQD','SUPER QUADRA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'TRV','TRAVESSA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'VD','VIADUTO','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'VIA','VIA','S','P',1 );
-INSERT INTO VLOGRADOURO  VALUES ( 'VL','VILA','S','P',1 );
+INSERT INTO VLOGRADOURO VALUES('AER','AEROPORTO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('AL','ALAMEDA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('AP','APARTAMENTO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('AV','AVENIDA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('BC','BECO SEM SAIDA MESMO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('BL','BLOCO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('CAM','CAMINHO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('ESCD','ESCADINHA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('EST','ESTACAO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('ETR','ESTRADA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('FAZ','FAZENDA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('FORT','FORTALEZA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('GL','GALERIA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('LD','LADEIRA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('LGO','LARGO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('PCA','PRACA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('PRQ','PARQUE','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('PR','PRAIA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('QD','QUADRA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('KM','QUILOMETRO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('QTA','QUINTA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('ROD','RODOVIA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('RUA','RUA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('SQD','SUPER QUADRA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('TRV','TRAVESSA','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('VD','VIADUTO','S','P',1)
+INSERT INTO VLOGRADOURO VALUES('VL','VILA','S','P',1)
 GO
 INSERT INTO dbo.VREGIAO( REG_CODIGO  ,REG_NOME         ,REG_CODPAI,REG_ATIVO ,REG_REG ,REG_CODUSR) VALUES(
                         'NO'        ,'NORTE'          ,1058,'s'       ,'p'     ,1);   
@@ -41934,7 +42453,6 @@ INSERT INTO VCIDADE VALUES('3108305','BORDA DA MATA','MG','35','0.00000000','0.0
 INSERT INTO VCIDADE VALUES('3108404','BOTELHOS','MG','35','0.00000000','0.00000000','S','P',1);
 INSERT INTO VCIDADE VALUES('3108503','BOTUMIRIM','MG','38','0.00000000','0.00000000','S','P',1);
 INSERT INTO VCIDADE VALUES('3108552','BRASILANDIA DE MINAS','MG','38','0.00000000','0.00000000','S','P',1);
-INSERT INTO VCIDADE VALUES('5300108','BRASILIA','DF','61','0.00000000','0.00000000','S','P',1); -- ANGELO KOKISO ADIÇÃO DA CIDADE DE BRASÍLIA 
 INSERT INTO VCIDADE VALUES('3108602','BRASILIA DE MINAS','MG','38','0.00000000','0.00000000','S','P',1);
 INSERT INTO VCIDADE VALUES('3108701','BRAS PIRES','MG','32','0.00000000','0.00000000','S','P',1);
 INSERT INTO VCIDADE VALUES('3108800','BRAUNAS','MG','33','0.00000000','0.00000000','S','P',1);
@@ -45210,6 +45728,8 @@ INSERT INTO VEMPRESAREGTRIB VALUES('1','SIMPLES NAC'                            
 INSERT INTO VEMPRESAREGTRIB VALUES('2','SIMPLES NAC EXCESSO SUBLIME RECEITA BRUTA','S','P',1);
 INSERT INTO VEMPRESAREGTRIB VALUES('3','REGIME NORMAL'                            ,'S','P',1);
 GO
+INSERT INTO VCFOP(CFO_CODIGO,CFO_NOME,CFO_ENTSAI,CFO_RELCOMPRA,CFO_RELVENDA,CFO_ATIVO,CFO_REG,CFO_CODUSR) VALUES('1.101','COMPRA PARA INDUSTRIALIZACAO','E','S','S','S','P',1);
+INSERT INTO VCFOP(CFO_CODIGO,CFO_NOME,CFO_ENTSAI,CFO_RELCOMPRA,CFO_RELVENDA,CFO_ATIVO,CFO_REG,CFO_CODUSR) VALUES('1.102','COMPRA PARA COMERCIALIZACAO','E','S','S','S','P',1);
 INSERT INTO VCFOP(CFO_CODIGO,CFO_NOME,CFO_ENTSAI,CFO_RELCOMPRA,CFO_RELVENDA,CFO_ATIVO,CFO_REG,CFO_CODUSR) VALUES('5.102','VENDA DE MERC ADQ DE TERC DENTRO ESTADO','S','S','S','S','P',1);
 INSERT INTO VCFOP(CFO_CODIGO,CFO_NOME,CFO_ENTSAI,CFO_RELCOMPRA,CFO_RELVENDA,CFO_ATIVO,CFO_REG,CFO_CODUSR) VALUES('6.102','VENDA ADQ DE TERC DENTRO ESTADO','S','S','S','S','P',1);
 GO
@@ -45224,11 +45744,12 @@ INSERT INTO VCATEGORIA(CTG_CODIGO,CTG_NOME,CTG_FISJUR,CTG_ATIVO,CTG_REG,CTG_CODU
 INSERT INTO VCATEGORIA(CTG_CODIGO,CTG_NOME,CTG_FISJUR,CTG_ATIVO,CTG_REG,CTG_CODUSR) VALUES('SIM','SIMPLES'            ,'J'  ,'S','P',1);
 INSERT INTO VCATEGORIA(CTG_CODIGO,CTG_NOME,CTG_FISJUR,CTG_ATIVO,CTG_REG,CTG_CODUSR) VALUES('ZFM','ZONA FRANCA MANAUS' ,'J'  ,'S','P',1);
 GO
-INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('0.00.0000','NAO INFORMADO' ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('1.01.0001','CLIENTE'       ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('1.01.0002','BANCO'         ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('2.01.0001','FORNECEDOR'    ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('5.01.0001','RECEITA SERVICO'    ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('0.00.0000','NAO INFORMADO'   ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('1.01.0001','CLIENTE'         ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('1.01.0002','BANCO'           ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('1.01.0003','BANCO EXTRA'     ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('2.01.0001','FORNECEDOR'      ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VCONTARESUMO(CTR_CODIGO,CTR_NOME,CTR_ATIVO,CTR_REG,CTR_CODUSR) VALUES('5.01.0001','RECEITA SERVICO' ,'S'  ,'S'  ,1);
 GO
 
 /*
@@ -45286,15 +45807,15 @@ INSERT INTO dbo.VSPED(SPD_CODIGO,SPD_NOME,SPD_ATIVO ,SPD_REG ,SPD_CODUSR) VALUES
 INSERT INTO dbo.VSPED(SPD_CODIGO,SPD_NOME,SPD_ATIVO ,SPD_REG ,SPD_CODUSR) VALUES('05','CONTA DE COMPENSACAO'  ,'S'  ,'S'  ,1);
 INSERT INTO dbo.VSPED(SPD_CODIGO,SPD_NOME,SPD_ATIVO ,SPD_REG ,SPD_CODUSR) VALUES('09','OUTRAS'                ,'S'  ,'S'  ,1);
 GO
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('000','NAO SE APLICA'                 ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('036','BANCO BRADESCO BBI SA'         ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('745','BANCO CITIBANK SA'             ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('001','BANCO DO BRASIL SA'            ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('389','BANCO MERCANTIL DO BRASIL SA'  ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('623','BANCO PANAMERICANO SA'         ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('033','BANCO SANTANDER SA'            ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('341','ITAU UNIBANCO SA'              ,'S'  ,'S'  ,1);
-INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('237','BANCO BRADESCO SA'             ,'S'  ,'S'  ,1);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('000','NAO SE APLICA'                 ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('036','BANCO BRADESCO BBI SA'         ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('745','BANCO CITIBANK SA'             ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('001','BANCO DO BRASIL SA'            ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('389','BANCO MERCANTIL DO BRASIL SA'  ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('623','BANCO PANAMERICANO SA'         ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('033','BANCO SANTANDER SA'            ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('341','ITAU UNIBANCO SA'              ,'S'  ,'S'  ,2);
+INSERT INTO dbo.VBANCOCODIGO(BCD_CODIGO,BCD_NOME,BCD_ATIVO ,BCD_REG ,BCD_CODUSR) VALUES('237','BANCO BRADESCO SA'             ,'S'  ,'S'  ,2);
 GO
 INSERT INTO dbo.VBANCOSTATUS(BST_CODIGO,BST_NOME,BST_ATIVO ,BST_REG ,BST_CODUSR) VALUES('BCO','BANCO'            ,'S'  ,'S'  ,1);
 INSERT INTO dbo.VBANCOSTATUS(BST_CODIGO,BST_NOME,BST_ATIVO ,BST_REG ,BST_CODUSR) VALUES('FF','FUNDOFIXO'         ,'S'  ,'S'  ,1);
@@ -45337,16 +45858,6 @@ INSERT INTO dbo.VFORMACOBRANCA(FC_CODIGO,FC_NOME,FC_ATIVO ,FC_REG ,FC_CODUSR) VA
 GO
 INSERT INTO dbo.VMOEDA(MOE_CODIGO,MOE_NOME,MOE_ATIVO,MOE_REG,MOE_CODUSR) VALUES('R$','REAL'   ,'S'  ,'P'  ,1);
 INSERT INTO dbo.VMOEDA(MOE_CODIGO,MOE_NOME,MOE_ATIVO,MOE_REG,MOE_CODUSR) VALUES('US$','DOLAR' ,'S'  ,'P'  ,1);
-GO
-INSERT INTO VNATUREZAOPERACAO VALUES('1','VENDA'                  ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('2','DEVOLUCAO'              ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('3','TRANSFERENCIA'          ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('4','VENDA DE ATIVO'         ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('5','BRINDE'                 ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('6','DEMONSTRACAO'           ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('7','REMESSA PARA CONSERTO'  ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('8','COMPLEMENTO ICMS'       ,'1','S','S',1);
-INSERT INTO VNATUREZAOPERACAO VALUES('9','NF AJUSTE'              ,'1','S','S',1);
 GO
 INSERT INTO VNCM VALUES('3404.90.29','CERA LIQUIDA'                             ,'S','P',1);
 INSERT INTO VNCM VALUES('3405.40.00','SABOES, AGENTES ORGANICOS DE SUPERFICIE'  ,'S','P',1);
@@ -45456,6 +45967,7 @@ INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) 
 INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('37','VIAGENS'                 ,'S'  ,'P'  ,1);
 INSERT INTO dbo.VGRUPOFAVORECIDO(GF_CODIGO,GF_NOME,GF_ATIVO ,GF_REG ,GF_CODUSR) VALUES('38','ADVOGADOS'               ,'S'  ,'P'  ,1);
 GO
+/*
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.'              ,'ATIVO'                                    ,'**','S','P',1);
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.01.'           ,'CIRCULANTE'                               ,'**','S','P',1);
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.01.01.'        ,'DISPONIBILIDADES'                         ,'**','S','P',1);
@@ -45724,6 +46236,430 @@ INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.01.01.03.0010' ,'COMISSOES REPRESENTANTES'               ,'00','S','P',1);
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.01.01.03.0011' ,'CANCELAMENTO DE VENDAS/SERVICOS'        ,'00','S','P',1);
 INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.01.01.03.0012' ,'DEVOLUCAO DE VENDAS'                    ,'00','S','P',1);
+*/
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.0.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.0.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.0.0.00.0000','ATIVO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.0.00.0000','ATIVO CIRCULANTE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.00.0000','DISPONIVEL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.01.0000','CAIXA GERAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.01.0001','CAIXA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.01.0002','CHEQUES EM COBRANCA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.02.0000','BANCOS CONTA MOVIMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.03.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.03.0000','APLICACOES FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.03.0001','APLIC BANCO BRADESCO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.03.0002','APLICACAO FIC FI DI ESPECIAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.03.0003','BANCO C/ APLICACAO FINANCEIRA CDB','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.03.0004','TITULOS DE CAPITALICAO - BRADESCO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.06.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.06.0000','OUTROS DEBITOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.07.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.07.0000','IMPOSTOS A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.07.0001','I.R.R.F A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.07.0002','INSS A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.1.07.0003','IMPOSTOS A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.2.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.2.00.0000','CONTAS A RECEBER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.2.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.2.01.0000','CLIENTES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.2.01.0001','DUPLICATAS A RECEBER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.00.0000','ESTOQUES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.01.0000','ESTOQUE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.01.0001','ESTOQUE DE MERCADORIA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.01.0002','I.C.M.S S/COMPRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.01.0003','DEVOLUCOES DE COMPRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.3.01.0004','FRETES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.00.0000','CREDITOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.01.0000','OUTROS CREDITOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.01.0001','ADIANTAMENTO A FUNCIONARIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.01.0002','ADIANTAMENTO DE FERIAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.01.0003','ADIANTAMENTO DE 13º SALARIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.01.0004','EMPRESTIMOS A TERCEIROS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.02.0000','IMPOSTOS E CONTRIBUICOES A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.02.0001','I.R.R.F. A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.02.0002','ICMS A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.1.4.02.0003','INSS A RECUPERAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.0.00.0000','NAO CIRCULANTE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.1.00.0000','REALIZAVEL A LONGO PRAZO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.00.0000','INVESTIMENTOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.01.0000','INVESTIMENTOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.01.0001','CONSORCIO BRADESCO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.2.01.0002','CONSORCIO BANCO ITAU','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.00.0000','IMOBILIZADO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.01.0000','BENS IMOVEIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0000','BENS MOVEIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0001','EQUIPAMENTOS DE INFORMATICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0002','EQUIPAMENTOS ELETRONICOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0003','MOVEIS E UTENSILIOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0004','MAQUINA E EQUIPAMENTOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0005','BMW 320 I SPORT ACTIVE BRANCO ALPINO 17','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0006','HONDA HRV','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0007','FIAT PALIO 2016','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0008','KWID ZEN 1.0 RENAULT 2018/2019','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0009','FIAT PALIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0010','LAND ROUVER DISCORRY','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.02.0011','LAND ROUVER DISCORRY 2017','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.10.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.10.0000','(-) DEPR.AMORT. E QUOTAS DE EXAUSTAO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.10.0001','(-) DEPRECIACOES DE MOVEIS E UTENSILIOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.10.0002','(-) DEPRECIACOES EQUIPAMENTOS ELETRONICO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.3.10.0003','(-) DEPRECIACAO DE MAQUINAS E EQUIPAMEN','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.4.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.4.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.4.00.0000','INTANGIVEL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.4.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.4.01.0000','INTANGIVEL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('1.5.4.01.0001','MARCAS E PATENTES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.0.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.0.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.0.0.00.0000','PASSIVO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.0.00.0000','PASSIVO CIRCULANTE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.1.00.0000','EXIGIVEL A CURTO PRAZO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.1.01.0000','FORNECEDORES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.1.01.0001','FORNECEDORES DIVERSOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.00.0000','OBRIGACOES FISCAIS E TRABALHISTAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0000','OBRIGACOES FISCAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0005','ICMS A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0006','I.R.R.F. A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0007','SIMPLES A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0008','PIS A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0009','COFINS A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0010','IRPJ A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0011','CSSL  A  RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0012','ISS A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.01.0013','PIS,COFINS E CSLL A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0000','OBRIGACOES TRABALHISTAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0001','I.N.S.S. A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0002','F.G.T.S. A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0003','CONTRIBUICAO CONFEDERATIVA A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0004','CONTRIBUICAO SINDICAL A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0005','CONTRIBUICAO ASSISTENCIAL A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0006','FERIAS A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0007','RESCISAO DE CONTRATO DE TRABALHO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0008','RESCISAO DE CONTRATO DE TRABALHO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.2.02.0009','RESCISAO DE CONTRATO DE TRABALHO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.00.0000','REMUNERACOES A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.01.0000','REMUNERACOES A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.01.0001','SALARIOS E ORDENADOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.3.01.0002','PRO-LABORE A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.00.0000','CONTAS A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.01.0000','CONTAS A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.01.0001','PENSAO ALIMENTICIA A PAGAR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.01.0002','FRETES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.4.01.0003','CONTA CORRENTE DE SÓCIOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.00.0000','CREDORES DIVERSOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.0000','CREDORES DIVERSOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.0001','ADIANTAMENTO DE CLIENTES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.0002','PARCELAMENTO ICMS - PEP 20012139-1','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.0003','PARCELAMENTO SIMPLES NACIONAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.0004','KWID ZEN 1.0 RENAULT 2018/2019','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.1.5.01.0005','(-) JUROS LAND ROUVER DISCORRY 2017','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.0.00.0000','NAO CIRCULANTE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.00.0000','OBRIGACOES A LONGO PRAZO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.01.0000','EMPRESTIMOS DE TERCEIROS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.01.0001','BNDS PSI- FINAME 3034536','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.01.0002','BMW 320 I SPORT ACTIVE BRANCO ALPINO 17','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.2.1.01.0003','(-) JUROS BMW 320 I SPORT ACTIVE BRANCO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.0.00.0000','PATRIMONIO LIQUIDO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.00.0000','CAPITAL REALIZADO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.01.0000','CAPITAL SUBS. DE DOMICILIADOS E RES.PAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.01.0001','CAPITAL SUBSCRITO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.01.0002','LEONARDO LUIS BRESSANIN','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.01.0003','IVAN PAULO BRESSANIN','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.1.01.0004','ANTONIO EDGAR BRESSANIM JUNIOR','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.00.0000','RESERVAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0000','RESERVAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0001','RESERVAS DE CAPITAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0002','RESERVAS DE REAVALIACAO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0003','RESERVAS DE LUCROS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0004','LUCROS ACUM. E/OU SALDO A DISPOSICAO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0005','LUCRO DOS EXERCICIOS ANTERIORES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0006','RESULTADO DO ECXERCICIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0089','(-) LUCROS E DIVIDENDOS DISTRIBUIDOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.01.0090','CONTA DE ZERAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0000','OUTRAS CONTAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0001','LUCROS ACUM. E/OU SALDO A DISPOSICAO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0002','(-) PREJUIZO ACUMULADO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0003','RESULTADO DO EXERCICIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0004','LUCRO DOS EXERCICIOS ANTERIORES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0005','RESULTADO DO 1º TRIMESTRE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0006','RESULTADO DO 2º TRIMESTRE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0007','RESULTADO DO 3º TRIMESTRE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0008','RESULTADO DO 4º TRIMESTRE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.3.2.03.0090','CONTA DE ZERAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.0.00.0000','CONTA DE ZERAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.1.00.0000','CONTA DE ZERAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.1.01.0000','CONTA DE ZERAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('2.4.1.01.0001','CONTA DE ZERAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.0.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.0.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.0.0.00.0000','DESPESAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.0.00.0000','DESPESAS OPERACIONAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.00.0000','DESPESAS OPERACIONAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0000','IMPOSTOS, TAXAS E TRIBUTOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0001','I.R.P.J.','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0002','CONTRIBUICAO SOCIAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0003','CONTRIBUICAO SINDICAL PATRONAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0004','CONTRIBUICAO CONFEDERATIVA PATRONAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0005','I.P.T.U.','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0006','IMPOSTOS MUNICIPAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0007','IMPOSTOS E TAXAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0008','CONTRIBUICAO ASSISTENCIAL PATRONAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0009','PIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0010','COFINS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0011','I.P.V.A','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.01.0012','I.C.M.S SUBSTITUICAO TRIBUATARIA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0000','DESPESAS ADMINISTRATIVAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0001','ASSISTENCIA CONTABIL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0002','ALUGUEIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0003','CONSUMO DE AGUA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0004','CONSUMO DE ENERGIA ELETRICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0005','CONSUMO DE TELEFONES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0006','IMPRESSOS E MATERIAL DE ESCRITÓRIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0007','MATERIAL DE USO E CONSUMO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0008','ASSINATURAS DE JORNAIS E REVISTAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0009','ANUNCIOS E PUBLICIDADES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0010','DONATIVOS E BRINDES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0011','RETIRADA DE PRO-LABORE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0012','SERVICOS PRESTADOS POR PESSOA JURIDICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0013','CORREIOS E TELEGRAFOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0014','CONSERVACAO DE MANUTENCAO DE VEICULOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0015','CONSERVACAO DE MANUTENCAO DE IMÓVEIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0016','SEGUROS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0017','DESPESAS COM CONSÓRCIOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0018','ASSOCIACAO DE CLASSE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0019','EVENTOS E CONFRATERNIZACOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0020','DESPESAS DIVERSAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0021','COMBUSTIVEIS E LUBRIFICANTES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0022','DESPESAS COM INFORMATICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0023','MATERIAL DE LIMPEZA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0024','FOTOCÓPIAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0025','LANCHES E REFEICOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0026','VIAGENS E ESTADIAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0027','PROPAGANDA E PUBLICIDADES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0028','BENS DE VALORES REDUZIDOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0029','LOCACAO DE BENS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0030','SERVICOS PRESTADOS POR PESSOA FISICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0031','LUCRO DISTRIBUIDO NO EXERCICIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0032','I.C.M.S SUBSTITUICAO TRIBUATARIA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.02.0033','CUSTAS JUDICIAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0000','DESPESAS COM PESSOAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0001','SALARIOS E ORDENADOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0002','FERIAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0003','13º SALARIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0004','HORAS EXTRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0005','AVISO PREVIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0006','INDENIZACOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0007','COMISSOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0008','ASSISTENCIA MEDICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0009','VALE TRANSPORTE','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0010','CESTA BASICA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0011','I.N.S.S.','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0012','F.G.T.S.','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0013','CONTRIBUICAO CONFEDERATIVA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0014','CONTRIBUICAO SINDICAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0015','CONTRIBUICAO ASSISTENCIAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.03.0016','RESCISAO DE CONTRATO DE TRABALHO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.0000','DESPESAS FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.0001','ENCARGOS, TARIFAS E DESP. BANCARIAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.0002','JUROS PAGOS E INCORRIDOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.0003','MULTAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.0004','JUROS PAGOS A FORNECEDORES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.04.0005','DESCONTOS CONCEDIDOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.10.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.10.0000','DESPESAS NAO DEDUTIVEIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('3.1.1.10.0001','MULTAS E INFRACOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.0.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.0.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.0.0.00.0000','RECEITAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.0.00.0000','RECEITAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.00.0000','RECEITAS OPERACIONAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.01.0000','VENDAS DE MERCADORIAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.01.0001','VENDAS DE MERCADORIAS A VISTA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.01.0002','VENDAS DE MERCADORIAS A PRAZO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.01.0003','PRESTACAO DE SERVICOS A VISTA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.1.01.0004','ALUGUEL DE EQUIPAMENTOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.00.0000','(-) DEDUCOES DE VENDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0000','(-) DEDUCOES DE VENDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0001','ICMS A RECOLHER','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0002','PIS FATURAMENTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0003','COFINS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0004','DEVOLUCAO DE VENDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0005','SIMPLES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.2.01.0006','ISS RETIRO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.00.0000','RECEITAS FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.01.0000','RECEITAS FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.01.0001','RENDIMENTOS DE APLICACAO FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.01.0002','DESCONTOS OBTIDOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.01.0003','JUROS RECEBIDOS OU AUFERIDOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.01.0004','RECEITAS DIVERSAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.02.0000','OUTRAS RECEITAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.02.0001','VENDAS DE IMOBILIZADO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('4.1.3.02.0002','BONIFICACOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.0.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.0.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.0.0.00.0000','CUSTO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.0.00.0000','CUSTO DAS MERCADORIAS VENDIDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.1.00.0000','CUSTO DAS MERCADORIAS VENDIDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.1.01.0000','CUSTO DAS MERCADORIAS VENDIDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.1.1.01.0001','CUSTO DAS MERCADORIAS VENDIDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.0.00.0000','RESULTADO DO EXERCICIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.9.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.9.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.9.00.0000','RESULTADO DO EXERCICIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.9.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.9.01.0000','RESULTADO DO EXERCICIO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('5.9.9.01.0001','RESULTADO DO EXERCICIO ATUAL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.0.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.0.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.0.0.00.0000','CONTAS DE RESULTADO','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.0.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.0.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.0.00.0000','CONTA DE RESULTADO 2 NIVEL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.00.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.00.0000','CONTA DE RESULTADO 3 NIVEL','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.01.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.01.0000','RECEITAS BRUTAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.02.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.02.0000','DEDUCOES','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.03.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.03.0000','CUSTOS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.04.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.04.0000','DESPESAS COM VENDAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.05.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.05.0000','DESPESAS FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.06.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.06.0000','RECEITAS FINANCEIRAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.07.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.07.0000','DESPESAS ADMINISTRATIVAS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.08.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.08.0000','DESPESAS GERAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.09.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.09.0000','OUTRAS DESPESAS OPERACIONAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.10.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.10.0000','RECEITAS NAO OPERACIONAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.11.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.11.0000','DESPESAS NAO OPERACIONAIS','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.12.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.12.0000','CORRECAO MONETARIA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.13.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.13.0000','IMPOSTO DE RENDA','00','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.14.','...','**','S','P',1);
+INSERT INTO VBALANCO(BLN_CODIGO,BLN_NOME,BLN_CODSPD,BLN_ATIVO,BLN_REG,BLN_CODUSR) VALUES('6.1.1.14.0000','CONTRIBUICAO SOCIAL','00','S','P',1);
 GO
 INSERT INTO VPAGARTIPO VALUES('CP','CONTAS A PAGAR'        ,-1 ,'S','S','S','S',1);
 INSERT INTO VPAGARTIPO VALUES('CR','CONTAS A RECEBER'      ,1  ,'S','S','S','S',1);
@@ -45854,18 +46790,19 @@ INSERT INTO VCNABRETORNO(CR_CODIGO,CR_CODBCD,CR_NOME,CR_EXECUTA,CR_ATIVO,CR_REG,
 INSERT INTO VCNABRETORNO(CR_CODIGO,CR_CODBCD,CR_NOME,CR_EXECUTA,CR_ATIVO,CR_REG,CR_CODUSR) VALUES('72'  ,'341'  ,'BAIXA POR CC'                   ,'BAI'  ,'S','P',1);
 INSERT INTO VCNABRETORNO(CR_CODIGO,CR_CODBCD,CR_NOME,CR_EXECUTA,CR_ATIVO,CR_REG,CR_CODUSR) VALUES('73'  ,'341'  ,'COBRANCA SIMPLES'               ,'REC'  ,'S','P',1);
 GO
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201801,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201802,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201803,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201804,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201805,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201806,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201807,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201808,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201809,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201810,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201811,1,'N','S','P',1);
-INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201812,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201901,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201902,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201903,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201904,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201905,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201906,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201907,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201908,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201909,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201910,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201911,1,'N','S','P',1);
+INSERT INTO VCOMPETENCIA(CMP_CODIGO,CMP_CODEMP,CMP_FECHAMENTO,CMP_ATIVO,CMP_REG,CMP_CODUSR) VALUES(201912,1,'N','S','P',1);
+/*
 GO
 INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('1','COMPRA BENS'                 ,'L','S','S',1);
 INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('2','COMPRA MATERIAIS'            ,'L','S','S',1);
@@ -45957,7 +46894,6 @@ INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VA
 INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('22','MP'  ,'S','S',1);      
 INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('23','CP'  ,'S','S',1);
 INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('24','CR'  ,'S','S',1);
-
 GO
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(1,'GASTOS COM EVENTOS'                               ,'NFP','BOL','D','4.01.01.01.0038','22','S','P',1);
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(2,'GASTOS COM MARCAS E PATENTES'                     ,'NFP','BOL','D','4.01.01.01.0041','22','S','P',1);
@@ -46181,7 +47117,7 @@ INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(218,'GASTOS VEIC EXCETO MANUT/COMPRA/LOCACAO'        ,'NFP','BOL','D','4.01.01.01.0021','16','S','P',1);
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(219,'GASTOS COMBUSTIVEL'                             ,'NFP','BOL','D','4.01.01.01.0044','16','S','P',1);
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(220,'GASTOS PEDAGIOS'                                ,'NFP','BOL','D','4.01.01.01.0045','16','S','P',1);
-INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(221,'RATEIO DIVERSOS'                                     ,'NFP','BOL','D','4.01.01.01.0045','12','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(221,'RATEIO DIVERSOS'                                ,'NFP','BOL','D','4.01.01.01.0045','12','S','P',1);
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(222,'VENDA'                                          ,'NFP','BOL','D','5.01.01.02.0002','20','S','P',1);
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(223,'DEVOL'                                          ,'NFP','BOL','D','5.01.01.02.0002','20','S','P',1);
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(224,'TRANSFERENCIA'                                  ,'NFP','BOL','D','5.01.01.02.0002','20','S','P',1);
@@ -46218,83 +47154,201 @@ INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(255,'DEVOL ADTOTO FORNECEDORES'                      ,'REC','DEP','C','1.01.05.01.0001','19','S','P',1);  
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(258,'TRANSFERENCIA DEBITO'                           ,'TEC','TRA','D','1.03.01.08.0010','23','S','P',1);  
 INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(259,'TRANSFERENCIA CREDITO'                          ,'TEC','TRA','C','1.03.01.08.0010','24','S','P',1);  
+*/
+GO
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('1','COMPRA BENS'                 ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('1' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('1' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('1' ,'MP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('2','COMPRA MATERIAIS'            ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('2' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('2' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('2' ,'MP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('3','CONCESSIONARIAS'             ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('3' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('3' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('3' ,'MP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('4','EMPRESTIMOS EFETUADO'        ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('4' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('4' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('4' ,'MP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('5','EMPRESTIMOS TOMADOS'         ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('5' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('5' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('5' ,'MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('6','ENTRADAS'                    ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('6' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('6' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('6' ,'MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('7','FUNCIONARIOS'                ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('7' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('7' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('7' ,'MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('8','GUIA RECOLHIMENTO'           ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('8' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('8' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('8' ,'MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('9','JUDICIAS'                    ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('9' ,'CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('9' ,'PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('9' ,'MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('10','LEASING/LOCACAO'            ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('10','CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('10','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('10','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('11','OCUPACAO'                   ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('11','CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('11','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('11','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('12','OUTRAS'                     ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('12','CP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('12','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('12','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('13','SINDICATOS'                 ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('13','CP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('13','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('13','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('14','SOCIOS'                     ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('14','CP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('14','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('14','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('15','TERCEIROS'                  ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('15','CP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('15','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('15','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('16','TRANSPORTE'                 ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('16','CP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('16','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('16','MP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('17','EMPRESTIMOS EFETUADO'       ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('17','CR'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('17','PR'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('17','MR'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('18','EMPRESTIMOS TOMADOS'        ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('18','CR'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('18','PR'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('18','MR'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('19','SAIDAS'                     ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('19','CR'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('19','PR'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('19','MR'  ,'S','S',1); 
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('20','NF VENDA PRODUTO'           ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('20','CR'  ,'S','S',1); 
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('21','TARIFA BANCARIA'            ,'N','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('21','CP'  ,'S','S',1); 
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('21','CR'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('22','COMERCIAIS'                 ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('22','CP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('22','PP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('22','MP'  ,'S','S',1);      
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('23','TRANSFERENCIA DEBITO'       ,'T','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('23','CP'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('24','TRANSFERENCIA CEDITO'       ,'T','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('24','CR'  ,'S','S',1);
+INSERT INTO dbo.VPADRAO(PDR_CODIGO,PDR_NOME,PDR_CODPTT,PDR_ATIVO ,PDR_REG ,PDR_CODUSR) VALUES('25','NF VENDA SERVICO'           ,'L','S','S',1);
+INSERT INTO dbo.VPADRAOGRUPO(PG_CODPDR,PG_CODPTP,PG_ATIVO ,PG_REG ,PG_CODUSR) VALUES('25','CR'  ,'S','S',1); 
+GO
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(1,'VENDA NFS','NFS','BOL','C','4.1.1.01.0003','25','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(2,'VENDA NFP','NFP','BOL','C','4.1.1.01.0001','20','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(3,'GASTOS COM EVENTOS','NFP','BOL','D','3.1.1.02.0007','6','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(4,'DESPESA CPMF'                                   ,'TAR','DC' ,'D','3.1.1.04.0001','21','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(5,'DESPESA TARIFAS MENSAIS'                        ,'TAR','DC' ,'D','3.1.1.04.0001','21','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(6,'JUROS RECEBIDO OUTRAS OPERACOES'                ,'TAR','CC' ,'C','3.1.1.04.0001','21','S','P',1);
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(7,'TRANSFERENCIA DEBITO'                           ,'TEC','TRA','D','3.1.1.04.0001','23','S','P',1);  
+INSERT INTO VPADRAOTITULO(PT_CODIGO,PT_NOME,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC,PT_CODPDR,PT_ATIVO,PT_REG,PT_CODUSR) VALUES(8,'TRANSFERENCIA CREDITO'                          ,'TEC','TRA','C','3.1.1.04.0001','24','S','P',1);  
+GO
+INSERT INTO VNATUREZAOPERACAO VALUES('1','VENDA'                  ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('2','DEVOLUCAO'              ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('3','TRANSFERENCIA'          ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('4','VENDA DE ATIVO'         ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('5','BRINDE'                 ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('6','DEMONSTRACAO'           ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('7','REMESSA PARA CONSERTO'  ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('8','COMPLEMENTO ICMS'       ,'1','CR',2,'S','S',1);
+INSERT INTO VNATUREZAOPERACAO VALUES('9','NF AJUSTE'              ,'1','CR',2,'S','S',1);
 GO
 UPDATE VUSUARIO SET USR_SENHA='ADMIN123',USR_PRIMEIROACESSO='N' WHERE USR_CODIGO=1;  
 UPDATE VUSUARIO SET USR_SENHA='MARCIA123' ,USR_PRIMEIROACESSO='N' WHERE USR_CODIGO=2;  
 UPDATE VUSUARIO SET USR_SENHA='PEDRO123' ,USR_PRIMEIROACESSO='N' WHERE USR_CODIGO=3;  
 UPDATE VUSUARIO SET USR_SENHA='PAULO123' ,USR_PRIMEIROACESSO='N' WHERE USR_CODIGO=4;  
 GO
+-- Estes dois saum obrigatorios no cadastro de empresa
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(1,'LANCTO EXTRA FINANCEIRO' ,'EXTRA'      ,'ITANHAEM','00000000000000','14074050','3543402','2019-04-16','J','NSA','O MESMO','ITANHAEM','1636158571','NSA','1.01.05.02.0069','2.01.01.01.0069','NSA','totaltrac@google.com.br','SIM','EXTRA','NSA','2389','RUA','1','1','0.00000000','0.00000000','S','S',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(2,'FUNDO FIXO DE CAIXA'     ,'FUNDOFIXO'  ,'ITANHAEM','00000000000001','14074050','3543402','2019-04-16','J','NSA','O MESMO','ITANHAEM','1636158571','NSA','1.01.05.02.0069','2.01.01.01.0069','NSA','totaltrac@google.com.br','SIM','FUNDOFIXO','NSA','2389','RUA','1','1','0.00000000','0.00000000','S','S',1);
+--
 INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(65,'TOTAL TRAC LOC E MONIT RAT LTDA ME','TRACLOC','ITANHAEM','14247359000172','14074050','3543402','2019-04-16','J','NSA','O MESMO','ITANHAEM','1636158571','582969571','1.01.05.02.0066','2.01.01.01.0066','NSA','totaltrac@google.com.br','SIM','TRACLOC','NSA','2389','RUA','1','1','0.00000000','0.00000000','S','P',1);
 INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(66,'TOTAL TRAC COM MANUT RAT LTDA ME','TRACCOM','ITANHAEM','09399075000161','14074050','3543402','2019-04-16','J','NSA','O MESMO','ITANHAEM','1636158571','582784478','1.01.05.02.0067','2.01.01.01.0067','NSA','totaltrac@google.com.br','SIM','TRACCOM','NSA','2389','RUA','1','1','0.00000000','0.00000000','S','P',1);
 INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(67,'TOTAL TRAC FRANCHINSING EIRELI ME','TRACFRAN','ITANHAEM','28111791000146','14074050','3543402','2019-04-16','J','NSA','O MESMO','ITANHAEM','1636158571','NSA','1.01.05.02.0068','2.01.01.01.0068','NSA','totaltrac@google.com.br','SIM','TRACFRAN','NSA','2389','RUA','1','1','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(68,'LANCTO EXTRA FINANCEIRO','EXTRA','ITANHAEM','00000000000000','14074050','3543402','2019-04-16','J','NSA','O MESMO','ITANHAEM','1636158571','NSA','1.01.05.02.0069','2.01.01.01.0069','NSA','totaltrac@google.com.br','SIM','EXTRA','NSA','2389','RUA','1','1','0.00000000','0.00000000','S','S',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(2,'VOCE TREINAMENTO E DESENVOLVIMENTO EM RECURSOS HUMAN','VOCE','BAIRRO','10452425000195','03116000','3550308','2019-03-25','J','NSA','SEM CONTATO','R DO ORATORIO','29808844','NSA','1.01.05.02.0003','2.01.01.01.0003','NSA','nsa','SIM','VOCE','SEM COMPLEMENTO','1606','RUA','3','4','-23.56084000','-46.59321000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(3,'4TAKES INDUSTRIA COMERCIO SERVICOS E PARTICIPACOES LTDA','4TAKES','BAIRRO','18502792000168','04310060','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PEDRO SEVERINO JUNIOR','29808844','NSA','1.01.05.02.0004','2.01.01.01.0004','NSA','financeiro@4takes.com.br','SIM','4TAKES','SEM COMPLEMENTO','366','RUA','5','6','-23.63173000','-46.64353000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(4,'A S INFORMATICA LTDA  EPP','ASINFORMATICA','BAIRRO','62931548000102','04055000','3550308','2019-03-25','J','NSA','SEM CONTATO','R FAGUNDES DIAS','29808844','NSA','1.01.05.02.0005','2.01.01.01.0005','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','411','RUA','7','8','-23.61719000','-46.64121000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(5,'A. MELLAGI FILHO ME','MELLAGI','BAIRRO','07585353000140','01419000','3550308','2019-03-25','J','NSA','SEM CONTATO','SANTOS CONJ 605','29808844','NSA','1.01.05.02.0006','2.01.01.01.0006','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','211','RUA','9','10','-23.55919000','-46.66100000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(6,'ACIR DOS SANTOS 15191217845','ACIRME','BAIRRO','24394036000165','06140000','3550308','2019-03-25','J','NSA','SEM CONTATO','R AGOSTINHO NAVARRO','29808844','NSA','1.01.05.02.0007','2.01.01.01.0007','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','971','RUA','11','12','-23.57727990','-46.79899000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(7,'AETATIS SECURITIZADORA','AETATIS','BAIRRO','02808481000191','04543011','3550308','2019-03-25','J','NSA','SEM CONTATO','PRESIDENTE JUSCELINO KUBITSCHEK 4O ANDAR','29808844','NSA','1.01.05.02.0008','2.01.01.01.0008','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','50','RUA','13','14','-23.58758000','-46.67475000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(8,'AGILETREND SOFTWARE E SERVICOS LTDA','AGILTREND','BAIRRO','12417636000112','04547005','3550308','2019-03-25','J','NSA','SEM CONTATO','GOMES DE CARVALHO','29808844','NSA','1.01.05.02.0009','2.01.01.01.0009','NSA','thais@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1356','RUA','15','16','-23.59504000','-46.68947000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(9,'AGNES CARDOSO DE OLIVEIRA','AGNESCARDOSO','BAIRRO','13248105000106','06660020','3550308','2019-03-25','J','NSA','SEM CONTATO','CESAR BERTOZZI','29808844','NSA','1.01.05.02.0010','2.01.01.01.0010','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','08','RUA','17','18','-23.54711000','-46.94933000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(10,'AGNES CARDOSO DE OLIVEIRA 18551978802','AGNESPJ','BAIRRO','27663105000187','06660020','3550308','2019-03-25','J','NSA','SEM CONTATO','R CESAR BERTOZZI','29808844','NSA','1.01.05.02.0011','2.01.01.01.0011','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','8','RUA','19','20','-23.54711000','-46.94933000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(11,'AINTER BA COMERCIO DE EQUIPAMENTOS - EIRELI - ME','AINTERBA','BAIRRO','21196477000164','45658464','3550308','2019-03-25','J','NSA','SEM CONTATO','R C DT INDUSTRIAL','29808844','NSA','1.01.05.02.0012','2.01.01.01.0012','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','SN','RUA','21','22','-14.83081000','-39.02674000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(12,'ALLIS SOLUCOES INTELIGENTES S.A','ALLIS','BAIRRO','08219000000199','01311000','3550308','2019-03-25','J','NSA','SEM CONTATO','BRIGADEIRO FARIA LIMA','29808844','NSA','1.01.05.02.0013','2.01.01.01.0013','NSA','fiscal@allis.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1355','RUA','23','24','-23.56488990','-46.65246000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(13,'ALTERE SECURITIZADORA','ALTERE','BAIRRO','02783423000150','04543000','3550308','2019-03-25','J','NSA','SEM CONTATO','PRESIDENTE JUSCELINO KUBITSCHEK','29808844','NSA','1.01.05.02.0014','2.01.01.01.0014','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','50','AV','25','26','-23.58512297','-46.67134873','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(14,'AMAZON SERVICOS DE VAREJO DO BRASIL LTDA.','AMAZON','BAIRRO','15436940000103','04543000','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PRESIDENTE JUSCELINO KUBITSCHEK','29808844','NSA','1.01.05.02.0015','2.01.01.01.0015','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2041','RUA','27','28','-23.59036950','-46.69065062','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(15,'ANDRE ALVES DOS SANTOS','ANDRECARETTE','BAIRRO','17332721864','06716155','3550308','2019-03-25','J','NSA','SEM CONTATO','ESTRADA DO CAPUAVA','29808844','NSA','1.01.05.02.0016','2.01.01.01.0016','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2333','RUA','29','30','-23.60082000','-46.89695000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(16,'ANGELA M O VIEIRA','ANGELAVIEIRA','BAIRRO','07921895743','04004012','3550308','2019-03-25','J','NSA','SEM CONTATO','CARLOS STEINEN','29808844','NSA','1.01.05.02.0017','2.01.01.01.0017','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','412','RUA','31','32','-23.57629020','-46.64774800','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(17,'ANIERI SCHMID E NATACCI SOCIEDADE DE ADVOGADOS','ASN','BAIRRO','17823046000103','01402000','3550308','2019-03-25','J','NSA','SEM CONTATO','BRIGADEIRO LUIS ANTONIO','29808844','NSA','1.01.05.02.0018','2.01.01.01.0018','NSA','acir@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','2504','RUA','33','34','-23.56997000','-46.65125000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(18,'APPLE COMPUTER BRASIL LTDA','APPLEBRASIL','BAIRRO','00623904000335','13213086','3550308','2019-03-25','J','NSA','SEM CONTATO','ROD VICE PREFEITO HERMENEGILDO TONOLLI','29808844','NSA','1.01.05.02.0019','2.01.01.01.0019','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1500','RUA','35','36','-23.17634000','-46.98245000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(19,'ARTES GRAFICAS NOBRE LTDA ME','ARTESGRAFICA','BAIRRO','01716716000152','01324001','3550308','2019-03-25','J','NSA','SEM CONTATO','MAJOR DIOGO','29808844','NSA','1.01.05.02.0020','2.01.01.01.0020','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','223','RUA','37','34','-23.55735000','-46.64279000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(20,'ASCENTY DATA CENTERS E TELECOMUNICACOES S/A','ASCENTY','BAIRRO','13743550000223','13069320','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PIERRE SIMON DE LAPLACE','29808844','NSA','1.01.05.02.0021','2.01.01.01.0021','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1211','RUA','35','32','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(21,'ASTHI COMERCIAL LTDA - ME','ASTHI','BAIRRO','58840380000152','05419000','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PEDROSO DE MORAIS','29808844','NSA','1.01.05.02.0022','2.01.01.01.0022','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','351','RUA','33','30','-23.56707000','-46.68913000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(22,'ATERA INFORMATICA LTDA','ATERA','BAIRRO','39040597000133','04210061','3550308','2019-03-25','J','NSA','SEM CONTATO','R OLIVEIRA ALVES','29808844','NSA','1.01.05.02.0023','2.01.01.01.0023','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','147','RUA','31','28','-23.58581000','-46.60756000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(23,'AUGUSTO DE MIRANDA EMPREENDIMENTOS E PARTICIPACOES LTDA','AUGUSTODEMIRAND','BAIRRO','17205057000120','05424010','3550308','2019-03-25','J','NSA','SEM CONTATO','R PAES LEME','29808844','NSA','1.01.05.02.0024','2.01.01.01.0024','NSA','carla.teixeira@inkorporadora.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','524','RUA','29','26','-23.56769000','-46.69878000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(24,'AUSTRALIAN CENTRE VIAGENS E TURISMO LTDA - ME','AUSCENTRE','BAIRRO','05950757000160','04561000','3550308','2019-03-25','J','NSA','SEM CONTATO','GUARARAPES','29808844','NSA','1.01.05.02.0025','2.01.01.01.0025','NSA','financeiro3@australiancentre.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','622','RUA','27','24','-23.60383000','-46.69136000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(25,'AXIL CLOUD SERVICOS DE TECNOLOGIA DA INFORMACAO LTDA.','AXIL','BAIRRO','27331387000115','13069320','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PIERRE SIMON DE LAPLACE','29808844','NSA','1.01.05.02.0026','2.01.01.01.0026','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1211','RUA','25','22','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(26,'AXISMED  GESTAO PREVENTIVA DE SAUDE','AXISMED','BAIRRO','04453459000100','04794000','3550308','2019-03-25','J','NSA','SEM CONTATO','AVENIDA DAS NACOES UNIDAS BL 2  18 ANDAR','29808844','NSA','1.01.05.02.0027','2.01.01.01.0027','NSA','silvia.goncalves@axismed.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','13797','RUA','23','20','-23.61933000','-46.70011000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(27,'AZ MOTO EXPRESSO LTDA - ME','AZMOTOEXPRESS','BAIRRO','07107849000108','04020040','3550308','2019-03-25','J','NSA','SEM CONTATO','R CORONEL LISBOA','29808844','NSA','1.01.05.02.0028','2.01.01.01.0028','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','475','RUA','21','18','-23.59486000','-46.63972000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(28,'B2W COMPANHIA DIGITAL','SHOPTIME','BAIRRO','00776574001390','23575450','3550308','2019-03-25','J','NSA','SEM CONTATO','EST DA LAMA PRETA','29808844','NSA','1.01.05.02.0029','2.01.01.01.0029','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2705','RUA','19','16','-22.86958000','-43.64625000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(29,'B2W COMPANHIA DIGITAL','AMERICANASCOM','BAIRRO','00776574000741','06696000','3550308','2019-03-25','J','NSA','SEM CONTATO','R ESTRADA DOS ALPES','29808844','NSA','1.01.05.02.0030','2.01.01.01.0030','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','555','RUA','17','14','-23.51822000','-46.95647000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(30,'DIGITAL DESIGN GRAF LTDA - ME','DIGITALDESIGN','BAIRRO','09436416000121','04104001','3550308','2019-03-25','J','NSA','SEM CONTATO','R CORREIA DIAS','29808844','NSA','1.01.05.02.0031','2.01.01.01.0031','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','282','RUA','15','12','-23.57670990','-46.64215000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(31,'DIGITALTEK BPO SOFTWARE LTDA','DIGITALTEK','BAIRRO','11403927000199','04730000','3550308','2019-03-25','J','NSA','SEM CONTATO','R DOUTOR RUBENS GOMES BUENO','29808844','NSA','1.01.05.02.0032','2.01.01.01.0032','NSA','financeiro@tecfort.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','157','RUA','13','10','-23.64174000','-46.72011000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(32,'DOC SOLUTION INFORMATICA','DOCSOLUTION','BAIRRO','07870005000114','04730000','3550308','2019-03-25','J','NSA','SEM CONTATO','DOUTOR RUBENS GOMES BUENO','29808844','NSA','1.01.05.02.0033','2.01.01.01.0033','NSA','carina@docsolution.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','155','RUA','11','8','-23.64174000','-46.72011000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(33,'DOMICILI INDUSTRIA E COMERCIO DE ALIMENTOS LTDA','DOMICILI','BAIRRO','02668458000149','07112100','3550308','2019-03-25','J','NSA','SEM CONTATO','R JOSE CAMPANELLA','29808844','NSA','1.01.05.02.0034','2.01.01.01.0034','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','380','RUA','9','6','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(34,'DPI3 - COMERCIAL E TECNOLOGIA EM INFORMATICA LTDA. - EPP','DPI3','BAIRRO','07031356000131','04730010','3550308','2019-03-25','J','NSA','SEM CONTATO','R VERAVA','29808844','NSA','1.01.05.02.0035','2.01.01.01.0035','NSA','contasapagar@dpi3.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','90','RUA','7','4','-23.64365000','-46.71980000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(35,'E-COMMERCE APPLICATION STORE INTERMEDIACAO DE NEGOCIOS LTDA.','VTEXSTORE','BAIRRO','18672088000153','04548005','3550308','2019-03-25','J','NSA','SEM CONTATO','AV DR. CARDOSO DE MELO','29808844','NSA','1.01.05.02.0036','2.01.01.01.0036','NSA','contasapagar@vtex.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1.750','RUA','5','2','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(36,'E-FLOWS PARTICIPACOES LTDA. - ME','EFLOWS','BAIRRO','10570267000178','06710700','3550308','2019-03-25','J','NSA','SEM CONTATO','R ADIB AUADA','29808844','NSA','1.01.05.02.0037','2.01.01.01.0037','NSA','luiz.fernandes@eflows.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','35','RUA','3','4','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(37,'EAS INFORMATICA E SERVICOS LTDA','EAS','BAIRRO','02083170000102','04730000','3550308','2019-03-25','J','NSA','SEM CONTATO','DR. RUBENS GOMES BUENO','29808844','NSA','1.01.05.02.0038','2.01.01.01.0038','NSA','financeiro3@easservice.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','155','RUA','5','6','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(38,'EBM - DISTRIBUICAO E LOGISTICA LTDA','EBMDISTRIBUICAO','BAIRRO','11705549000602','08141550','3550308','2019-03-25','J','NSA','SEM CONTATO','AV BANDEIRA DOS CATAGUAZES','29808844','NSA','1.01.05.02.0039','2.01.01.01.0039','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','203','RUA','7','8','-23.50673000','-46.39021000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(39,'ECCO DO BRASIL INFORMATICA E ELETRONICOS LTDA.','ECCODOBRASIL','BAIRRO','05827094000867','13069320','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PIERRE SIMON DE LAPLACE','29808844','NSA','1.01.05.02.0040','2.01.01.01.0040','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','901','RUA','9','10','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(40,'EDGAR OLIVEIRA GIARDINA 35846072801','GIARDINADESIGN','BAIRRO','24694839000135','08420318','3550308','2019-03-25','J','NSA','SEM CONTATO','R SANTA RITA DA ESTRELA','29808844','NSA','1.01.05.02.0041','2.01.01.01.0041','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','67','RUA','11','12','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(41,'EFFORTI COMERCIO E SERVICOS DE TECNOLOGIA DA INFORMATICA LTD','EFFORT','BAIRRO','12603127000184','04547005','3550308','2019-03-25','J','NSA','SEM CONTATO','GOMES DE CARVALHO','29808844','NSA','1.01.05.02.0042','2.01.01.01.0042','NSA','thais@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1356','RUA','13','14','-23.59504000','-46.68947000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(42,'ELETRICA COMERCIAL ANDRA LTDA','ANDRA','BAIRRO','47674429000209','01207001','3550308','2019-03-25','J','NSA','SEM CONTATO','R SANTA IFIGENIA','29808844','NSA','1.01.05.02.0043','2.01.01.01.0043','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','517','RUA','15','16','-23.53808000','-46.63943000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(43,'WYLESS TELECOMUNICACOES LTDA','WYLESSTELECOM','BAIRRO','24492478000144','04715002','3550308','2019-03-25','J','NSA','SEM CONTATO','R AMERICO BRASILIENSE','29808844','NSA','1.01.05.02.0044','2.01.01.01.0044','NSA','kbrazil@korewireless.com','SIM','TOTALTRAC','SEM COMPLEMENTO','1490','RUA','17','18','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(44,'WYLESS TM DATA BRASIL PROCESSAMENTO DE DADOS LTDA','TMDATA','BAIRRO','04077333000170','05690050','3550308','2019-03-25','J','NSA','SEM CONTATO','R MINISTRO NELSON HUNGRIA','29808844','NSA','1.01.05.02.0045','2.01.01.01.0045','NSA','kbrazil@korewireless.com','SIM','TOTALTRAC','SEM COMPLEMENTO','239','RUA','19','20','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(45,'YURI DE OLIVEIRA PORTO BONFIM 39900513851','DATACLIMA1','BAIRRO','22884667000137','04208050','3550308','2019-03-25','J','NSA','SEM CONTATO','R SILVA BUENO','29808844','NSA','1.01.05.02.0046','2.01.01.01.0046','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','519','RUA','21','22','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(46,'ZIMBA EMPREENDIMENTOS IMOBILIARIOS LTDA.','ZIMBAEMPREEN','BAIRRO','11992668000189','04511001','3550308','2019-03-25','J','NSA','SEM CONTATO','R AFONSO BRAZ','29808844','NSA','1.01.05.02.0047','2.01.01.01.0047','NSA','samantha@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','644','RUA','23','24','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(47,'ZIMBA GESTORA DE RECURSOS LTDA.','ZIMBAGESTORA','BAIRRO','19477265000103','06454040','3550308','2019-03-25','J','NSA','SEM CONTATO','AL MAMORE','29808844','NSA','1.01.05.02.0048','2.01.01.01.0048','NSA','samantha@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','503','RUA','25','26','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(48,'ZURICH MINAS BRASIL SEGUROS S.A.','ZURICH','BAIRRO','17197385000121','30112021','3550308','2019-03-25','J','NSA','SEM CONTATO','AV GETULIO VARGAS','29808844','NSA','1.01.05.02.0049','2.01.01.01.0049','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1420','RUA','27','28','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(49,'ASTER SECURITIZADORA S.A','ASTERSECURIT','BAIRRO','10608405000160','04543011','3550308','2019-03-25','J','NSA','SEM CONTATO','PRESIDENTE JUSCELINO KUBITSCHEK','29808844','NSA','1.01.05.02.0050','2.01.01.01.0050','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','50','RUA','29','30','-23.58758000','-46.67475000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(50,'W4 MOGI MIRIM EXPEDITO EMPREENDIMENTO IMOBILIARIO LTDA','W4MMEXPEDITO','BAIRRO','14429447000195','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0051','2.01.01.01.0051','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','31','28','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(51,'W4 PRESIDENTE PRUDENTE MARCONDES EMPREENDIMENTO IMOBILIARIO','W4PPMARCONDE','BAIRRO','14429650000161','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0052','2.01.01.01.0052','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','33','26','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(52,'W4 RIBEIRAO PRETO ANHANGUERA EMPREENDIMENTO IMOBILIARIO LTDA','W4RPANHANGUE','BAIRRO','14429496000128','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0053','2.01.01.01.0053','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','35','24','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(53,'W4 RIBEIRAO PRETO BANANAL EMPREENDIMENTO IMOBILIARIO LTDA','W4RPBANANAL','BAIRRO','14429118000144','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0054','2.01.01.01.0054','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','37','22','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(54,'WCS CONSULTORIA E AUDITORIA TRIBUTARIA EIRELI','WELLINGTONPJ','BAIRRO','27515541000109','04475460','3550308','2019-03-25','J','NSA','SEM CONTATO','R HALEVY','29808844','NSA','1.01.05.02.0055','2.01.01.01.0055','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','92','RUA','35','20','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(55,'VENETO TELECOMUNICACOES LTDA','VIVOSTACRUZ','BAIRRO','03418924004864','04036100','3550308','2019-03-25','J','NSA','SEM CONTATO','R DOMINGOS DE MORAIS','29808844','NSA','1.01.05.02.0056','2.01.01.01.0056','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2.564','RUA','33','18','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(56,'VIA VAREJO S/A','CASASBAHIASA','BAIRRO','33041260101270','04036100','3550308','2019-03-25','J','NSA','SEM CONTATO','R DOMINGOS DE MORAIS','29808844','NSA','1.01.05.02.0057','2.01.01.01.0057','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2564','RUA','31','16','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(57,'VINHO EM FOCO COMERCIO DE BEBIDAS LTDA - ME','VINHOEMFOCO','BAIRRO','22540484000102','01327000','3550308','2019-03-25','J','NSA','SEM CONTATO','R TREZE DE MAIO','29808844','NSA','1.01.05.02.0058','2.01.01.01.0058','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','860','RUA','29','14','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(58,'VOSTTRO COMERCIO E SERVICO DE INFORMATICA E VIDEO LTDA - ME','VOSTTRO','BAIRRO','11619862000113','02996000','3550308','2019-03-25','J','NSA','SEM CONTATO','R ANTONIO DE CABEZON','29808844','NSA','1.01.05.02.0059','2.01.01.01.0059','NSA','alice@compactascanners.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','457','RUA','27','12','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(59,'VTEX - VITRINE TEXTIL LTDA','VTEX','BAIRRO','09212860000163','28990000','3550308','2019-03-25','J','NSA','SEM CONTATO','DOUTOR LUIZ JANUARIO, SALA 201','29808844','NSA','1.01.05.02.0060','2.01.01.01.0060','NSA','administrativo@vtex.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','406','RUA','25','10','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(60,'W.W.SPORTS IMPORTADORA,EXPORTADORA E COMERCIAL LTDA','WWSPORTS','BAIRRO','03248412000133','01451000','3550308','2019-03-25','J','NSA','SEM CONTATO','BRIGADEIRO FARIA LIMA','29808844','NSA','1.01.05.02.0061','2.01.01.01.0061','NSA','financeiro@wwsports.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','2152','RUA','23','8','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(61,'UBER DO BRASIL TECNOLOGIA LTDA.','UBER','BAIRRO','17895646000187','20091020','3550308','2019-03-25','J','NSA','SEM CONTATO','R CANDELARIA','29808844','NSA','1.01.05.02.0062','2.01.01.01.0062','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','65','RUA','21','6','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(62,'UBI PENHA BY ZIMBA SPE EMPREENDIMENTOS IMOBILIARIOS LTDA','UBIPENHA','BAIRRO','22228077000156','04511001','3550308','2019-03-25','J','NSA','SEM CONTATO','R AFONSO BRAZ','29808844','NSA','1.01.05.02.0063','2.01.01.01.0063','NSA','samantha@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','644','RUA','19','4','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(63,'ORLANDO POLONIO','ORLANDO','SAUDE','05272388801','04055000','3550308','2019-03-25','J','NSA','NSA','FAGUNDES DIAS','24563323','NSA','1.01.05.02.0064','2.01.01.01.0064','NSA','nsa','NOR','ORLANDO','NSA','23','RUA','1','1','-23.61719000','-46.64121000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(64,'ORLANDO APARECIDO POLONIO','ORLANDAO','VALEIRA','22100100000133','20030187','3550308','2019-03-25','F','NSA','O MESMO','ANDORINHA','24563323','NSA','1.01.05.02.0065','2.01.01.01.0065','NSA','orlandopolonio@uol.com.br','SIM','ORLANDO','NSA','136','RUA','1','1','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(65,'CANAA PROD  DE HIGIENIZACAO E LIMP  LTDA ME','NEOLIMP','JD ANHANGUERA','19115081000101','14092040','3543402','2019-04-09','J','NSA','NSA','DOMINGOS PADOVAN','1630437032','797009705118','1.01.05.02.0066','2.01.01.01.0066','NSA','comercial@neolimprp.com.br','NOR','123','NSA','1352','RUA','1','1','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(66,'TELEFONICA BRASIL S A','VIVO','CID MONCOES','2558157000162','04571936','3550308','2019-04-09','J','NSA','NSA','ENGENHEIRO LUIZ CALORS BERRINI','016','108383949112','1.01.05.02.0067','2.01.01.01.0067','NSA','nsa','NOR','123','TELEFONICA BRASIL SA','1376','AV','1','1','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(67,'FABIO FERNANDES VITOR','FABIO F VITOR','JD DIVA T CARVALHO','34094684808','14079396','3543402','2019-04-09','J','NSA','NSA','TENENTE ROSANA RIBEIRO RESTINI','016','440704935','1.01.05.02.0068','2.01.01.01.0068','NSA','fbnandes@gmail.com','NOR','123','NSA','901','RUA','1','1','0.00000000','0.00000000','S','P',1);
--- INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(68,'PEDRAS BRAZIL DE ARARAQUARA COMERCIAL LTDA EPP','PEDRAS BRAZIL','PQ ALVORADA','5501562000132','14807150','3503208','2019-04-09','J','NSA','NSA','PADRE JOSE ANCHIETA','1633335253','181305100113','1.01.05.02.0069','2.01.01.01.0069','NSA','contato@bmeempilhadeiras.com.br','NOR','123','NSA','427','AV','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(2,'VOCE TREINAMENTO E DESENVOLVIMENTO EM RECURSOS HUMAN','VOCE','BAIRRO','10452425000195','03116000','3550308','2019-03-25','J','NSA','SEM CONTATO','R DO ORATORIO','29808844','NSA','1.01.05.02.0003','2.01.01.01.0003','NSA','nsa','SIM','VOCE','SEM COMPLEMENTO','1606','RUA','3','4','-23.56084000','-46.59321000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(3,'4TAKES INDUSTRIA COMERCIO SERVICOS E PARTICIPACOES LTDA','4TAKES','BAIRRO','18502792000168','04310060','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PEDRO SEVERINO JUNIOR','29808844','NSA','1.01.05.02.0004','2.01.01.01.0004','NSA','financeiro@4takes.com.br','SIM','4TAKES','SEM COMPLEMENTO','366','RUA','5','6','-23.63173000','-46.64353000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(4,'A S INFORMATICA LTDA  EPP','ASINFORMATICA','BAIRRO','62931548000102','04055000','3550308','2019-03-25','J','NSA','SEM CONTATO','R FAGUNDES DIAS','29808844','NSA','1.01.05.02.0005','2.01.01.01.0005','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','411','RUA','7','8','-23.61719000','-46.64121000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(5,'A. MELLAGI FILHO ME','MELLAGI','BAIRRO','07585353000140','01419000','3550308','2019-03-25','J','NSA','SEM CONTATO','SANTOS CONJ 605','29808844','NSA','1.01.05.02.0006','2.01.01.01.0006','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','211','RUA','9','10','-23.55919000','-46.66100000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(6,'ACIR DOS SANTOS 15191217845','ACIRME','BAIRRO','24394036000165','06140000','3550308','2019-03-25','J','NSA','SEM CONTATO','R AGOSTINHO NAVARRO','29808844','NSA','1.01.05.02.0007','2.01.01.01.0007','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','971','RUA','11','12','-23.57727990','-46.79899000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(7,'AETATIS SECURITIZADORA','AETATIS','BAIRRO','02808481000191','04543011','3550308','2019-03-25','J','NSA','SEM CONTATO','PRESIDENTE JUSCELINO KUBITSCHEK 4O ANDAR','29808844','NSA','1.01.05.02.0008','2.01.01.01.0008','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','50','RUA','13','14','-23.58758000','-46.67475000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(8,'AGILETREND SOFTWARE E SERVICOS LTDA','AGILTREND','BAIRRO','12417636000112','04547005','3550308','2019-03-25','J','NSA','SEM CONTATO','GOMES DE CARVALHO','29808844','NSA','1.01.05.02.0009','2.01.01.01.0009','NSA','thais@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1356','RUA','15','16','-23.59504000','-46.68947000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(9,'AGNES CARDOSO DE OLIVEIRA','AGNESCARDOSO','BAIRRO','13248105000106','06660020','3550308','2019-03-25','J','NSA','SEM CONTATO','CESAR BERTOZZI','29808844','NSA','1.01.05.02.0010','2.01.01.01.0010','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','08','RUA','17','18','-23.54711000','-46.94933000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(10,'AGNES CARDOSO DE OLIVEIRA 18551978802','AGNESPJ','BAIRRO','27663105000187','06660020','3550308','2019-03-25','J','NSA','SEM CONTATO','R CESAR BERTOZZI','29808844','NSA','1.01.05.02.0011','2.01.01.01.0011','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','8','RUA','19','20','-23.54711000','-46.94933000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(11,'AINTER BA COMERCIO DE EQUIPAMENTOS - EIRELI - ME','AINTERBA','BAIRRO','21196477000164','45658464','3550308','2019-03-25','J','NSA','SEM CONTATO','R C DT INDUSTRIAL','29808844','NSA','1.01.05.02.0012','2.01.01.01.0012','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','SN','RUA','21','22','-14.83081000','-39.02674000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(12,'ALLIS SOLUCOES INTELIGENTES S.A','ALLIS','BAIRRO','08219000000199','01311000','3550308','2019-03-25','J','NSA','SEM CONTATO','BRIGADEIRO FARIA LIMA','29808844','NSA','1.01.05.02.0013','2.01.01.01.0013','NSA','fiscal@allis.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1355','RUA','23','24','-23.56488990','-46.65246000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(13,'ALTERE SECURITIZADORA','ALTERE','BAIRRO','02783423000150','04543000','3550308','2019-03-25','J','NSA','SEM CONTATO','PRESIDENTE JUSCELINO KUBITSCHEK','29808844','NSA','1.01.05.02.0014','2.01.01.01.0014','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','50','AV','25','26','-23.58512297','-46.67134873','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(14,'AMAZON SERVICOS DE VAREJO DO BRASIL LTDA.','AMAZON','BAIRRO','15436940000103','04543000','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PRESIDENTE JUSCELINO KUBITSCHEK','29808844','NSA','1.01.05.02.0015','2.01.01.01.0015','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2041','RUA','27','28','-23.59036950','-46.69065062','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(15,'ANDRE ALVES DOS SANTOS','ANDRECARETTE','BAIRRO','17332721864','06716155','3550308','2019-03-25','J','NSA','SEM CONTATO','ESTRADA DO CAPUAVA','29808844','NSA','1.01.05.02.0016','2.01.01.01.0016','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2333','RUA','29','30','-23.60082000','-46.89695000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(16,'ANGELA M O VIEIRA','ANGELAVIEIRA','BAIRRO','07921895743','04004012','3550308','2019-03-25','J','NSA','SEM CONTATO','CARLOS STEINEN','29808844','NSA','1.01.05.02.0017','2.01.01.01.0017','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','412','RUA','31','32','-23.57629020','-46.64774800','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(17,'ANIERI SCHMID E NATACCI SOCIEDADE DE ADVOGADOS','ASN','BAIRRO','17823046000103','01402000','3550308','2019-03-25','J','NSA','SEM CONTATO','BRIGADEIRO LUIS ANTONIO','29808844','NSA','1.01.05.02.0018','2.01.01.01.0018','NSA','acir@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','2504','RUA','33','34','-23.56997000','-46.65125000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(18,'APPLE COMPUTER BRASIL LTDA','APPLEBRASIL','BAIRRO','00623904000335','13213086','3550308','2019-03-25','J','NSA','SEM CONTATO','ROD VICE PREFEITO HERMENEGILDO TONOLLI','29808844','NSA','1.01.05.02.0019','2.01.01.01.0019','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1500','RUA','35','36','-23.17634000','-46.98245000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(19,'ARTES GRAFICAS NOBRE LTDA ME','ARTESGRAFICA','BAIRRO','01716716000152','01324001','3550308','2019-03-25','J','NSA','SEM CONTATO','MAJOR DIOGO','29808844','NSA','1.01.05.02.0020','2.01.01.01.0020','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','223','RUA','37','34','-23.55735000','-46.64279000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(20,'ASCENTY DATA CENTERS E TELECOMUNICACOES S/A','ASCENTY','BAIRRO','13743550000223','13069320','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PIERRE SIMON DE LAPLACE','29808844','NSA','1.01.05.02.0021','2.01.01.01.0021','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1211','RUA','35','32','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(21,'ASTHI COMERCIAL LTDA - ME','ASTHI','BAIRRO','58840380000152','05419000','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PEDROSO DE MORAIS','29808844','NSA','1.01.05.02.0022','2.01.01.01.0022','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','351','RUA','33','30','-23.56707000','-46.68913000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(22,'ATERA INFORMATICA LTDA','ATERA','BAIRRO','39040597000133','04210061','3550308','2019-03-25','J','NSA','SEM CONTATO','R OLIVEIRA ALVES','29808844','NSA','1.01.05.02.0023','2.01.01.01.0023','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','147','RUA','31','28','-23.58581000','-46.60756000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(23,'AUGUSTO DE MIRANDA EMPREENDIMENTOS E PARTICIPACOES LTDA','AUGUSTODEMIRAND','BAIRRO','17205057000120','05424010','3550308','2019-03-25','J','NSA','SEM CONTATO','R PAES LEME','29808844','NSA','1.01.05.02.0024','2.01.01.01.0024','NSA','carla.teixeira@inkorporadora.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','524','RUA','29','26','-23.56769000','-46.69878000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(24,'AUSTRALIAN CENTRE VIAGENS E TURISMO LTDA - ME','AUSCENTRE','BAIRRO','05950757000160','04561000','3550308','2019-03-25','J','NSA','SEM CONTATO','GUARARAPES','29808844','NSA','1.01.05.02.0025','2.01.01.01.0025','NSA','financeiro3@australiancentre.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','622','RUA','27','24','-23.60383000','-46.69136000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(25,'AXIL CLOUD SERVICOS DE TECNOLOGIA DA INFORMACAO LTDA.','AXIL','BAIRRO','27331387000115','13069320','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PIERRE SIMON DE LAPLACE','29808844','NSA','1.01.05.02.0026','2.01.01.01.0026','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1211','RUA','25','22','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(26,'AXISMED  GESTAO PREVENTIVA DE SAUDE','AXISMED','BAIRRO','04453459000100','04794000','3550308','2019-03-25','J','NSA','SEM CONTATO','AVENIDA DAS NACOES UNIDAS BL 2  18 ANDAR','29808844','NSA','1.01.05.02.0027','2.01.01.01.0027','NSA','silvia.goncalves@axismed.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','13797','RUA','23','20','-23.61933000','-46.70011000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(27,'AZ MOTO EXPRESSO LTDA - ME','AZMOTOEXPRESS','BAIRRO','07107849000108','04020040','3550308','2019-03-25','J','NSA','SEM CONTATO','R CORONEL LISBOA','29808844','NSA','1.01.05.02.0028','2.01.01.01.0028','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','475','RUA','21','18','-23.59486000','-46.63972000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(28,'B2W COMPANHIA DIGITAL','SHOPTIME','BAIRRO','00776574001390','23575450','3550308','2019-03-25','J','NSA','SEM CONTATO','EST DA LAMA PRETA','29808844','NSA','1.01.05.02.0029','2.01.01.01.0029','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2705','RUA','19','16','-22.86958000','-43.64625000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(29,'B2W COMPANHIA DIGITAL','AMERICANASCOM','BAIRRO','00776574000741','06696000','3550308','2019-03-25','J','NSA','SEM CONTATO','R ESTRADA DOS ALPES','29808844','NSA','1.01.05.02.0030','2.01.01.01.0030','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','555','RUA','17','14','-23.51822000','-46.95647000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(30,'DIGITAL DESIGN GRAF LTDA - ME','DIGITALDESIGN','BAIRRO','09436416000121','04104001','3550308','2019-03-25','J','NSA','SEM CONTATO','R CORREIA DIAS','29808844','NSA','1.01.05.02.0031','2.01.01.01.0031','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','282','RUA','15','12','-23.57670990','-46.64215000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(31,'DIGITALTEK BPO SOFTWARE LTDA','DIGITALTEK','BAIRRO','11403927000199','04730000','3550308','2019-03-25','J','NSA','SEM CONTATO','R DOUTOR RUBENS GOMES BUENO','29808844','NSA','1.01.05.02.0032','2.01.01.01.0032','NSA','financeiro@tecfort.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','157','RUA','13','10','-23.64174000','-46.72011000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(32,'DOC SOLUTION INFORMATICA','DOCSOLUTION','BAIRRO','07870005000114','04730000','3550308','2019-03-25','J','NSA','SEM CONTATO','DOUTOR RUBENS GOMES BUENO','29808844','NSA','1.01.05.02.0033','2.01.01.01.0033','NSA','carina@docsolution.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','155','RUA','11','8','-23.64174000','-46.72011000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(33,'DOMICILI INDUSTRIA E COMERCIO DE ALIMENTOS LTDA','DOMICILI','BAIRRO','02668458000149','07112100','3550308','2019-03-25','J','NSA','SEM CONTATO','R JOSE CAMPANELLA','29808844','NSA','1.01.05.02.0034','2.01.01.01.0034','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','380','RUA','9','6','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(34,'DPI3 - COMERCIAL E TECNOLOGIA EM INFORMATICA LTDA. - EPP','DPI3','BAIRRO','07031356000131','04730010','3550308','2019-03-25','J','NSA','SEM CONTATO','R VERAVA','29808844','NSA','1.01.05.02.0035','2.01.01.01.0035','NSA','contasapagar@dpi3.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','90','RUA','7','4','-23.64365000','-46.71980000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(35,'E-COMMERCE APPLICATION STORE INTERMEDIACAO DE NEGOCIOS LTDA.','VTEXSTORE','BAIRRO','18672088000153','04548005','3550308','2019-03-25','J','NSA','SEM CONTATO','AV DR. CARDOSO DE MELO','29808844','NSA','1.01.05.02.0036','2.01.01.01.0036','NSA','contasapagar@vtex.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1.750','RUA','5','2','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(36,'E-FLOWS PARTICIPACOES LTDA. - ME','EFLOWS','BAIRRO','10570267000178','06710700','3550308','2019-03-25','J','NSA','SEM CONTATO','R ADIB AUADA','29808844','NSA','1.01.05.02.0037','2.01.01.01.0037','NSA','luiz.fernandes@eflows.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','35','RUA','3','4','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(37,'EAS INFORMATICA E SERVICOS LTDA','EAS','BAIRRO','02083170000102','04730000','3550308','2019-03-25','J','NSA','SEM CONTATO','DR. RUBENS GOMES BUENO','29808844','NSA','1.01.05.02.0038','2.01.01.01.0038','NSA','financeiro3@easservice.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','155','RUA','5','6','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(38,'EBM - DISTRIBUICAO E LOGISTICA LTDA','EBMDISTRIBUICAO','BAIRRO','11705549000602','08141550','3550308','2019-03-25','J','NSA','SEM CONTATO','AV BANDEIRA DOS CATAGUAZES','29808844','NSA','1.01.05.02.0039','2.01.01.01.0039','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','203','RUA','7','8','-23.50673000','-46.39021000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(39,'ECCO DO BRASIL INFORMATICA E ELETRONICOS LTDA.','ECCODOBRASIL','BAIRRO','05827094000867','13069320','3550308','2019-03-25','J','NSA','SEM CONTATO','AV PIERRE SIMON DE LAPLACE','29808844','NSA','1.01.05.02.0040','2.01.01.01.0040','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','901','RUA','9','10','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(40,'EDGAR OLIVEIRA GIARDINA 35846072801','GIARDINADESIGN','BAIRRO','24694839000135','08420318','3550308','2019-03-25','J','NSA','SEM CONTATO','R SANTA RITA DA ESTRELA','29808844','NSA','1.01.05.02.0041','2.01.01.01.0041','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','67','RUA','11','12','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(41,'EFFORTI COMERCIO E SERVICOS DE TECNOLOGIA DA INFORMATICA LTD','EFFORT','BAIRRO','12603127000184','04547005','3550308','2019-03-25','J','NSA','SEM CONTATO','GOMES DE CARVALHO','29808844','NSA','1.01.05.02.0042','2.01.01.01.0042','NSA','thais@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','1356','RUA','13','14','-23.59504000','-46.68947000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(42,'ELETRICA COMERCIAL ANDRA LTDA','ANDRA','BAIRRO','47674429000209','01207001','3550308','2019-03-25','J','NSA','SEM CONTATO','R SANTA IFIGENIA','29808844','NSA','1.01.05.02.0043','2.01.01.01.0043','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','517','RUA','15','16','-23.53808000','-46.63943000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(43,'WYLESS TELECOMUNICACOES LTDA','WYLESSTELECOM','BAIRRO','24492478000144','04715002','3550308','2019-03-25','J','NSA','SEM CONTATO','R AMERICO BRASILIENSE','29808844','NSA','1.01.05.02.0044','2.01.01.01.0044','NSA','kbrazil@korewireless.com','SIM','TOTALTRAC','SEM COMPLEMENTO','1490','RUA','17','18','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(44,'WYLESS TM DATA BRASIL PROCESSAMENTO DE DADOS LTDA','TMDATA','BAIRRO','04077333000170','05690050','3550308','2019-03-25','J','NSA','SEM CONTATO','R MINISTRO NELSON HUNGRIA','29808844','NSA','1.01.05.02.0045','2.01.01.01.0045','NSA','kbrazil@korewireless.com','SIM','TOTALTRAC','SEM COMPLEMENTO','239','RUA','19','20','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(45,'YURI DE OLIVEIRA PORTO BONFIM 39900513851','DATACLIMA1','BAIRRO','22884667000137','04208050','3550308','2019-03-25','J','NSA','SEM CONTATO','R SILVA BUENO','29808844','NSA','1.01.05.02.0046','2.01.01.01.0046','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','519','RUA','21','22','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(46,'ZIMBA EMPREENDIMENTOS IMOBILIARIOS LTDA.','ZIMBAEMPREEN','BAIRRO','11992668000189','04511001','3550308','2019-03-25','J','NSA','SEM CONTATO','R AFONSO BRAZ','29808844','NSA','1.01.05.02.0047','2.01.01.01.0047','NSA','samantha@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','644','RUA','23','24','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(47,'ZIMBA GESTORA DE RECURSOS LTDA.','ZIMBAGESTORA','BAIRRO','19477265000103','06454040','3550308','2019-03-25','J','NSA','SEM CONTATO','AL MAMORE','29808844','NSA','1.01.05.02.0048','2.01.01.01.0048','NSA','samantha@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','503','RUA','25','26','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(48,'ZURICH MINAS BRASIL SEGUROS S.A.','ZURICH','BAIRRO','17197385000121','30112021','3550308','2019-03-25','J','NSA','SEM CONTATO','AV GETULIO VARGAS','29808844','NSA','1.01.05.02.0049','2.01.01.01.0049','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','1420','RUA','27','28','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(49,'ASTER SECURITIZADORA S.A','ASTERSECURIT','BAIRRO','10608405000160','04543011','3550308','2019-03-25','J','NSA','SEM CONTATO','PRESIDENTE JUSCELINO KUBITSCHEK','29808844','NSA','1.01.05.02.0050','2.01.01.01.0050','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','50','RUA','29','30','-23.58758000','-46.67475000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(50,'W4 MOGI MIRIM EXPEDITO EMPREENDIMENTO IMOBILIARIO LTDA','W4MMEXPEDITO','BAIRRO','14429447000195','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0051','2.01.01.01.0051','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','31','28','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(51,'W4 PRESIDENTE PRUDENTE MARCONDES EMPREENDIMENTO IMOBILIARIO','W4PPMARCONDE','BAIRRO','14429650000161','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0052','2.01.01.01.0052','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','33','26','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(52,'W4 RIBEIRAO PRETO ANHANGUERA EMPREENDIMENTO IMOBILIARIO LTDA','W4RPANHANGUE','BAIRRO','14429496000128','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0053','2.01.01.01.0053','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','35','24','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(53,'W4 RIBEIRAO PRETO BANANAL EMPREENDIMENTO IMOBILIARIO LTDA','W4RPBANANAL','BAIRRO','14429118000144','04531004','3550308','2019-03-25','J','NSA','SEM CONTATO','PEDROSO ALVARENGA','29808844','NSA','1.01.05.02.0054','2.01.01.01.0054','NSA','lawrence.brown@w4cap.com','SIM','TOTALTRAC','SEM COMPLEMENTO','990','RUA','37','22','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(54,'WCS CONSULTORIA E AUDITORIA TRIBUTARIA EIRELI','WELLINGTONPJ','BAIRRO','27515541000109','04475460','3550308','2019-03-25','J','NSA','SEM CONTATO','R HALEVY','29808844','NSA','1.01.05.02.0055','2.01.01.01.0055','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','92','RUA','35','20','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(55,'VENETO TELECOMUNICACOES LTDA','VIVOSTACRUZ','BAIRRO','03418924004864','04036100','3550308','2019-03-25','J','NSA','SEM CONTATO','R DOMINGOS DE MORAIS','29808844','NSA','1.01.05.02.0056','2.01.01.01.0056','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2.564','RUA','33','18','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(56,'VIA VAREJO S/A','CASASBAHIASA','BAIRRO','33041260101270','04036100','3550308','2019-03-25','J','NSA','SEM CONTATO','R DOMINGOS DE MORAIS','29808844','NSA','1.01.05.02.0057','2.01.01.01.0057','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','2564','RUA','31','16','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(57,'VINHO EM FOCO COMERCIO DE BEBIDAS LTDA - ME','VINHOEMFOCO','BAIRRO','22540484000102','01327000','3550308','2019-03-25','J','NSA','SEM CONTATO','R TREZE DE MAIO','29808844','NSA','1.01.05.02.0058','2.01.01.01.0058','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','860','RUA','29','14','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(58,'VOSTTRO COMERCIO E SERVICO DE INFORMATICA E VIDEO LTDA - ME','VOSTTRO','BAIRRO','11619862000113','02996000','3550308','2019-03-25','J','NSA','SEM CONTATO','R ANTONIO DE CABEZON','29808844','NSA','1.01.05.02.0059','2.01.01.01.0059','NSA','alice@compactascanners.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','457','RUA','27','12','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(59,'VTEX - VITRINE TEXTIL LTDA','VTEX','BAIRRO','09212860000163','28990000','3550308','2019-03-25','J','NSA','SEM CONTATO','DOUTOR LUIZ JANUARIO, SALA 201','29808844','NSA','1.01.05.02.0060','2.01.01.01.0060','NSA','administrativo@vtex.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','406','RUA','25','10','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(60,'W.W.SPORTS IMPORTADORA,EXPORTADORA E COMERCIAL LTDA','WWSPORTS','BAIRRO','03248412000133','01451000','3550308','2019-03-25','J','NSA','SEM CONTATO','BRIGADEIRO FARIA LIMA','29808844','NSA','1.01.05.02.0061','2.01.01.01.0061','NSA','financeiro@wwsports.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','2152','RUA','23','8','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(61,'UBER DO BRASIL TECNOLOGIA LTDA.','UBER','BAIRRO','17895646000187','20091020','3550308','2019-03-25','J','NSA','SEM CONTATO','R CANDELARIA','29808844','NSA','1.01.05.02.0062','2.01.01.01.0062','NSA','nsa','SIM','TOTALTRAC','SEM COMPLEMENTO','65','RUA','21','6','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(62,'UBI PENHA BY ZIMBA SPE EMPREENDIMENTOS IMOBILIARIOS LTDA','UBIPENHA','BAIRRO','22228077000156','04511001','3550308','2019-03-25','J','NSA','SEM CONTATO','R AFONSO BRAZ','29808844','NSA','1.01.05.02.0063','2.01.01.01.0063','NSA','samantha@bissystem.com.br','SIM','TOTALTRAC','SEM COMPLEMENTO','644','RUA','19','4','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(63,'ORLANDO POLONIO','ORLANDO','SAUDE','05272388801','04055000','3550308','2019-03-25','J','NSA','NSA','FAGUNDES DIAS','24563323','NSA','1.01.05.02.0064','2.01.01.01.0064','NSA','nsa','NOR','ORLANDO','NSA','23','RUA','1','1','-23.61719000','-46.64121000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(64,'ORLANDO APARECIDO POLONIO','ORLANDAO','VALEIRA','22100100000133','20030187','3550308','2019-03-25','F','NSA','O MESMO','ANDORINHA','24563323','NSA','1.01.05.02.0065','2.01.01.01.0065','NSA','orlandopolonio@uol.com.br','SIM','ORLANDO','NSA','136','RUA','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(65,'CANAA PROD  DE HIGIENIZACAO E LIMP  LTDA ME','NEOLIMP','JD ANHANGUERA','19115081000101','14092040','3543402','2019-04-09','J','NSA','NSA','DOMINGOS PADOVAN','1630437032','797009705118','1.01.05.02.0066','2.01.01.01.0066','NSA','comercial@neolimprp.com.br','NOR','123','NSA','1352','RUA','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(66,'TELEFONICA BRASIL S A','VIVO','CID MONCOES','2558157000162','04571936','3550308','2019-04-09','J','NSA','NSA','ENGENHEIRO LUIZ CALORS BERRINI','016','108383949112','1.01.05.02.0067','2.01.01.01.0067','NSA','nsa','NOR','123','TELEFONICA BRASIL SA','1376','AV','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(67,'FABIO FERNANDES VITOR','FABIO F VITOR','JD DIVA T CARVALHO','34094684808','14079396','3543402','2019-04-09','J','NSA','NSA','TENENTE ROSANA RIBEIRO RESTINI','016','440704935','1.01.05.02.0068','2.01.01.01.0068','NSA','fbnandes@gmail.com','NOR','123','NSA','901','RUA','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(68,'PEDRAS BRAZIL DE ARARAQUARA COMERCIAL LTDA EPP','PEDRAS BRAZIL','PQ ALVORADA','5501562000132','14807150','3503208','2019-04-09','J','NSA','NSA','PADRE JOSE ANCHIETA','1633335253','181305100113','1.01.05.02.0069','2.01.01.01.0069','NSA','contato@bmeempilhadeiras.com.br','NOR','123','NSA','427','AV','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(68,'BANCO ITAU SA','ITAU','PQ ALVORADA','5501562000188','14807150','3503208','2019-04-09','J','NSA','NSA','PADRE JOSE ANCHIETA','1633335253','181305100113','1.01.05.02.0069','2.01.01.01.0069','NSA','contato@bmeempilhadeiras.com.br','NOR','123','NSA','427','AV','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(68,'BANCO BRADESCO SA','BRADESCO','PQ ALVORADA','5501562000189','14807150','3503208','2019-04-09','J','NSA','NSA','PADRE JOSE ANCHIETA','1633335253','181305100113','1.01.05.02.0069','2.01.01.01.0069','NSA','contato@bmeempilhadeiras.com.br','NOR','123','NSA','427','AV','1','1','0.00000000','0.00000000','S','P',1);
+INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES(68,'BANCO SANTANDER SA','SANTANDER','PQ ALVORADA','5501562000190','14807150','3503208','2019-04-09','J','NSA','NSA','PADRE JOSE ANCHIETA','1633335253','181305100113','1.01.05.02.0069','2.01.01.01.0069','NSA','contato@bmeempilhadeiras.com.br','NOR','123','NSA','427','AV','1','1','0.00000000','0.00000000','S','P',1);
 /*
 --insfavorecido
 SELECT 'INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_CNPJCPF,FVR_CEP,FVR_CODCDD,FVR_DTCADASTRO,FVR_FISJUR,FVR_INSMUNIC,FVR_CONTATO,FVR_ENDERECO,FVR_FONE,FVR_INS,FVR_CTAATIVO,FVR_CTAPASSIVO,FVR_CADMUNIC,FVR_EMAIL,FVR_CODCTG,FVR_SENHA,FVR_COMPLEMENTO,FVR_NUMERO,FVR_CODLGR,FVR_GFCP,FVR_GFCR,FVR_LATITUDE,FVR_LONGITUDE,FVR_ATIVO,FVR_REG,FVR_CODUSR) VALUES('
@@ -46329,64 +47383,6 @@ SELECT 'INSERT INTO VFAVORECIDO(FVR_CODIGO,FVR_NOME,FVR_APELIDO,FVR_BAIRRO,FVR_C
 +''','''+CAST(FVR_REG AS VARCHAR(1))
 +''',1);'
 FROM FAVORECIDO
-
-INSERT INTO VFAVORECIDO(
-FVR_CODIGO
-,FVR_NOME
-,FVR_APELIDO
-,FVR_BAIRRO
-,FVR_CNPJCPF
-,FVR_CEP
-,FVR_CODCDD
-,FVR_FISJUR
-,FVR_INSMUNIC
-,FVR_CONTATO
-,FVR_ENDERECO
-,FVR_FONE
-,FVR_INS
-,FVR_CADMUNIC
-,FVR_EMAIL
-,FVR_CODCTG
-,FVR_SENHA
-,FVR_COMPLEMENTO
-,FVR_NUMERO
-,FVR_CODLGR
-,FVR_GFCP
-,FVR_GFCR
-,FVR_LATITUDE
-,FVR_LONGITUDE
-,FVR_ATIVO
-,FVR_REG
-,FVR_CODUSR
-) VALUES(
-1                                                         -- FVR_CODIGO                                                       
-,'TOTAL TRAC LOC E MONIT RAT LTDA ME'                     -- FVR_NOME
-,'TRACLOC'                                                -- FVR_APELIDO
-,'ITANHAEM'                                               -- FVR_BAIRRO
-,'14247359000172'                                         -- FVR_CNPJCPF
-,'14074050'                                               -- FVR_CEP
-,'3543402'                                                -- FVR_CODCDD
-,'J'                                                      -- FVR_FISJUR
-,'NSA'                                                    -- FVR_INSMUNIC
-,'O MESMO'                                                -- FVR_CONTATO
-,'ITANHAEM'                                               -- FVR_ENDERECO
-,'1636158571'                                             -- FVR_FONE
-,'582969571'                                              -- FVR_INS
-,'NSA'                                                    -- FVR_CADMUNIC
-,'totaltrac@google.com.br'                                -- FVR_EMAIL
-,'SIM'                                                    -- FVR_CODCTG
-,'TRACLOC'                                                -- FVR_SENHA
-,'NSA'                                                    -- FVR_COMPLEMENTO
-,'2389'                                                   -- FVR_NUMERO
-,'RUA'                                                    -- FVR_CODLGR
-,'1'                                                      -- FVR_GFCP
-,'2'                                                      -- FVR_GFCR
-,'0.00000000'                                             -- FVR_LATITUDE
-,'0.00000000'                                             -- FVR_LONGITUDE
-,'S'                                                      -- FVR_ATIVO
-,'P'                                                      -- FVR_REG
-,1                                                        -- FVR_CODUSR
-);
 */
 
 
@@ -46396,128 +47392,94 @@ GO
 UPDATE VFAVORECIDO SET FVR_GFCP=01,FVR_GFCR=02 WHERE FVR_CODIGO=1;
 UPDATE VFAVORECIDO SET FVR_GFCP=03,FVR_GFCR=04 WHERE FVR_CODIGO=2;
 UPDATE VFAVORECIDO SET FVR_GFCP=05,FVR_GFCR=06 WHERE FVR_CODIGO=3;
--- UPDATE VFAVORECIDO SET FVR_GFCP=07,FVR_GFCR=08 WHERE FVR_CODIGO=4;
--- UPDATE VFAVORECIDO SET FVR_GFCP=09,FVR_GFCR=10 WHERE FVR_CODIGO=5;
--- UPDATE VFAVORECIDO SET FVR_GFCP=11,FVR_GFCR=12 WHERE FVR_CODIGO=6;
--- UPDATE VFAVORECIDO SET FVR_GFCP=13,FVR_GFCR=14 WHERE FVR_CODIGO=7;
--- UPDATE VFAVORECIDO SET FVR_GFCP=15,FVR_GFCR=16 WHERE FVR_CODIGO=8;
--- UPDATE VFAVORECIDO SET FVR_GFCP=17,FVR_GFCR=18 WHERE FVR_CODIGO=9;
--- UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=20 WHERE FVR_CODIGO=10;
--- UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=22 WHERE FVR_CODIGO=11;
--- UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=24 WHERE FVR_CODIGO=12;
--- UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=26 WHERE FVR_CODIGO=13;
--- UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=28 WHERE FVR_CODIGO=14;
--- UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=30 WHERE FVR_CODIGO=15;
--- UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=32 WHERE FVR_CODIGO=16;
--- UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=34 WHERE FVR_CODIGO=17;
--- UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=36 WHERE FVR_CODIGO=18;
--- UPDATE VFAVORECIDO SET FVR_GFCP=37,FVR_GFCR=34 WHERE FVR_CODIGO=19;
--- UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=32 WHERE FVR_CODIGO=20;
--- UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=30 WHERE FVR_CODIGO=21;
--- UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=28 WHERE FVR_CODIGO=22;
--- UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=26 WHERE FVR_CODIGO=23;
--- UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=24 WHERE FVR_CODIGO=24;
--- UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=22 WHERE FVR_CODIGO=25;
--- UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=20 WHERE FVR_CODIGO=26;
--- UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=18 WHERE FVR_CODIGO=27;
--- UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=16 WHERE FVR_CODIGO=28;
--- UPDATE VFAVORECIDO SET FVR_GFCP=17,FVR_GFCR=14 WHERE FVR_CODIGO=29;
--- UPDATE VFAVORECIDO SET FVR_GFCP=15,FVR_GFCR=12 WHERE FVR_CODIGO=30;
--- UPDATE VFAVORECIDO SET FVR_GFCP=13,FVR_GFCR=10 WHERE FVR_CODIGO=31;
--- UPDATE VFAVORECIDO SET FVR_GFCP=11,FVR_GFCR=08 WHERE FVR_CODIGO=32;
--- UPDATE VFAVORECIDO SET FVR_GFCP=09,FVR_GFCR=06 WHERE FVR_CODIGO=33;
--- UPDATE VFAVORECIDO SET FVR_GFCP=07,FVR_GFCR=04 WHERE FVR_CODIGO=34;
--- UPDATE VFAVORECIDO SET FVR_GFCP=05,FVR_GFCR=02 WHERE FVR_CODIGO=35;
--- UPDATE VFAVORECIDO SET FVR_GFCP=03,FVR_GFCR=04 WHERE FVR_CODIGO=36;
--- UPDATE VFAVORECIDO SET FVR_GFCP=05,FVR_GFCR=06 WHERE FVR_CODIGO=37;
--- UPDATE VFAVORECIDO SET FVR_GFCP=07,FVR_GFCR=08 WHERE FVR_CODIGO=38;
--- UPDATE VFAVORECIDO SET FVR_GFCP=09,FVR_GFCR=10 WHERE FVR_CODIGO=39;
--- UPDATE VFAVORECIDO SET FVR_GFCP=11,FVR_GFCR=12 WHERE FVR_CODIGO=40;
--- UPDATE VFAVORECIDO SET FVR_GFCP=13,FVR_GFCR=14 WHERE FVR_CODIGO=41;
--- UPDATE VFAVORECIDO SET FVR_GFCP=15,FVR_GFCR=16 WHERE FVR_CODIGO=42;
--- UPDATE VFAVORECIDO SET FVR_GFCP=17,FVR_GFCR=18 WHERE FVR_CODIGO=43;
--- UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=20 WHERE FVR_CODIGO=44;
--- UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=22 WHERE FVR_CODIGO=45;
--- UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=24 WHERE FVR_CODIGO=46;
--- UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=26 WHERE FVR_CODIGO=47;
--- UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=28 WHERE FVR_CODIGO=48;
--- UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=30 WHERE FVR_CODIGO=49;
--- UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=28 WHERE FVR_CODIGO=50;
--- UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=26 WHERE FVR_CODIGO=51;
--- UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=24 WHERE FVR_CODIGO=52;
--- UPDATE VFAVORECIDO SET FVR_GFCP=37,FVR_GFCR=22 WHERE FVR_CODIGO=53;
--- UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=20 WHERE FVR_CODIGO=54;
--- UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=18 WHERE FVR_CODIGO=55;
--- UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=16 WHERE FVR_CODIGO=56;
--- UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=14 WHERE FVR_CODIGO=57;
--- UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=12 WHERE FVR_CODIGO=58;
--- UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=10 WHERE FVR_CODIGO=59;
--- UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=08 WHERE FVR_CODIGO=60;
--- UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=06 WHERE FVR_CODIGO=61;
--- UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=04 WHERE FVR_CODIGO=62;
+UPDATE VFAVORECIDO SET FVR_GFCP=07,FVR_GFCR=08 WHERE FVR_CODIGO=4;
+UPDATE VFAVORECIDO SET FVR_GFCP=09,FVR_GFCR=10 WHERE FVR_CODIGO=5;
+UPDATE VFAVORECIDO SET FVR_GFCP=11,FVR_GFCR=12 WHERE FVR_CODIGO=6;
+UPDATE VFAVORECIDO SET FVR_GFCP=13,FVR_GFCR=14 WHERE FVR_CODIGO=7;
+UPDATE VFAVORECIDO SET FVR_GFCP=15,FVR_GFCR=16 WHERE FVR_CODIGO=8;
+UPDATE VFAVORECIDO SET FVR_GFCP=17,FVR_GFCR=18 WHERE FVR_CODIGO=9;
+UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=20 WHERE FVR_CODIGO=10;
+UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=22 WHERE FVR_CODIGO=11;
+UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=24 WHERE FVR_CODIGO=12;
+UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=26 WHERE FVR_CODIGO=13;
+UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=28 WHERE FVR_CODIGO=14;
+UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=30 WHERE FVR_CODIGO=15;
+UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=32 WHERE FVR_CODIGO=16;
+UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=34 WHERE FVR_CODIGO=17;
+UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=36 WHERE FVR_CODIGO=18;
+UPDATE VFAVORECIDO SET FVR_GFCP=37,FVR_GFCR=34 WHERE FVR_CODIGO=19;
+UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=32 WHERE FVR_CODIGO=20;
+UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=30 WHERE FVR_CODIGO=21;
+UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=28 WHERE FVR_CODIGO=22;
+UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=26 WHERE FVR_CODIGO=23;
+UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=24 WHERE FVR_CODIGO=24;
+UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=22 WHERE FVR_CODIGO=25;
+UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=20 WHERE FVR_CODIGO=26;
+UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=18 WHERE FVR_CODIGO=27;
+UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=16 WHERE FVR_CODIGO=28;
+UPDATE VFAVORECIDO SET FVR_GFCP=17,FVR_GFCR=14 WHERE FVR_CODIGO=29;
+UPDATE VFAVORECIDO SET FVR_GFCP=15,FVR_GFCR=12 WHERE FVR_CODIGO=30;
+UPDATE VFAVORECIDO SET FVR_GFCP=13,FVR_GFCR=10 WHERE FVR_CODIGO=31;
+UPDATE VFAVORECIDO SET FVR_GFCP=11,FVR_GFCR=08 WHERE FVR_CODIGO=32;
+UPDATE VFAVORECIDO SET FVR_GFCP=09,FVR_GFCR=06 WHERE FVR_CODIGO=33;
+UPDATE VFAVORECIDO SET FVR_GFCP=07,FVR_GFCR=04 WHERE FVR_CODIGO=34;
+UPDATE VFAVORECIDO SET FVR_GFCP=05,FVR_GFCR=02 WHERE FVR_CODIGO=35;
+UPDATE VFAVORECIDO SET FVR_GFCP=03,FVR_GFCR=04 WHERE FVR_CODIGO=36;
+UPDATE VFAVORECIDO SET FVR_GFCP=05,FVR_GFCR=06 WHERE FVR_CODIGO=37;
+UPDATE VFAVORECIDO SET FVR_GFCP=07,FVR_GFCR=08 WHERE FVR_CODIGO=38;
+UPDATE VFAVORECIDO SET FVR_GFCP=09,FVR_GFCR=10 WHERE FVR_CODIGO=39;
+UPDATE VFAVORECIDO SET FVR_GFCP=11,FVR_GFCR=12 WHERE FVR_CODIGO=40;
+UPDATE VFAVORECIDO SET FVR_GFCP=13,FVR_GFCR=14 WHERE FVR_CODIGO=41;
+UPDATE VFAVORECIDO SET FVR_GFCP=15,FVR_GFCR=16 WHERE FVR_CODIGO=42;
+UPDATE VFAVORECIDO SET FVR_GFCP=17,FVR_GFCR=18 WHERE FVR_CODIGO=43;
+UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=20 WHERE FVR_CODIGO=44;
+UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=22 WHERE FVR_CODIGO=45;
+UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=24 WHERE FVR_CODIGO=46;
+UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=26 WHERE FVR_CODIGO=47;
+UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=28 WHERE FVR_CODIGO=48;
+UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=30 WHERE FVR_CODIGO=49;
+UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=28 WHERE FVR_CODIGO=50;
+UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=26 WHERE FVR_CODIGO=51;
+UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=24 WHERE FVR_CODIGO=52;
+UPDATE VFAVORECIDO SET FVR_GFCP=37,FVR_GFCR=22 WHERE FVR_CODIGO=53;
+UPDATE VFAVORECIDO SET FVR_GFCP=35,FVR_GFCR=20 WHERE FVR_CODIGO=54;
+UPDATE VFAVORECIDO SET FVR_GFCP=33,FVR_GFCR=18 WHERE FVR_CODIGO=55;
+UPDATE VFAVORECIDO SET FVR_GFCP=31,FVR_GFCR=16 WHERE FVR_CODIGO=56;
+UPDATE VFAVORECIDO SET FVR_GFCP=29,FVR_GFCR=14 WHERE FVR_CODIGO=57;
+UPDATE VFAVORECIDO SET FVR_GFCP=27,FVR_GFCR=12 WHERE FVR_CODIGO=58;
+UPDATE VFAVORECIDO SET FVR_GFCP=25,FVR_GFCR=10 WHERE FVR_CODIGO=59;
+UPDATE VFAVORECIDO SET FVR_GFCP=23,FVR_GFCR=08 WHERE FVR_CODIGO=60;
+UPDATE VFAVORECIDO SET FVR_GFCP=21,FVR_GFCR=06 WHERE FVR_CODIGO=61;
+UPDATE VFAVORECIDO SET FVR_GFCP=19,FVR_GFCR=04 WHERE FVR_CODIGO=62;
 GO
-INSERT INTO VBANCO(BNC_CODIGO
-  ,BNC_CODEMP
-  ,BNC_NOME
-  ,BNC_CODFVR
-  ,BNC_ENTRAFLUXO
-  ,BNC_CODBST
-  ,BNC_PADRAOFLUXO
-  ,BNC_CODBCD
-  ,BNC_AGENCIA
-  ,BNC_AGENCIADV
-  ,BNC_CONTA
-  ,BNC_CONTADV
-  ,BNC_ATIVO
-  ,BNC_REG
-  ,BNC_CODUSR) VALUES(
-  1             -- BNC_CODIGO
-  ,1            -- BNC_CODEMP
-  ,'ITAU-31906' -- BNC_NOME
-  ,1            -- BNC_CODFVR
-  ,'S'          -- BNC_ENTRAFLUXO
-  ,'BCO'        -- BNC_CODBST
-  ,'S'          -- BNC_PADRAOFLUXO
-  ,'341'        -- BNC_CODBCD
-  ,'0593'       -- BNC_AGENCIA
-  ,'0'          -- BNC_AGENCIADV
-  ,'31906'      -- BNC_CONTA
-  ,'4'          -- BNC_CONTADV
-  ,'S'          -- BNC_ATIVO
-  ,'P'          -- BNC_REG
-  ,1);
-GO  
--- INSERT INTO VBANCO(BNC_CODIGO
---   ,BNC_CODEMP
---   ,BNC_NOME
---   ,BNC_CODFVR
---   ,BNC_ENTRAFLUXO
---   ,BNC_CODBST
---   ,BNC_PADRAOFLUXO
---   ,BNC_CODBCD
---   ,BNC_AGENCIA
---   ,BNC_AGENCIADV
---   ,BNC_CONTA
---   ,BNC_CONTADV
---   ,BNC_ATIVO
---   ,BNC_REG
---   ,BNC_CODUSR) VALUES(
---   2             -- BNC_CODIGO
---   ,1            -- BNC_CODEMP
---   ,'BRADESCO'   -- BNC_NOME
---   ,37           -- BNC_CODFVR
---   ,'S'          -- BNC_ENTRAFLUXO
---   ,'BCO'        -- BNC_CODBST
---   ,'N'          -- BNC_PADRAOFLUXO
---   ,'237'        -- BNC_CODBCD
---   ,'342'        -- BNC_AGENCIA
---   ,'1'          -- BNC_AGENCIADV
---   ,'600'        -- BNC_CONTA
---   ,'1'          -- BNC_CONTADV
---   ,'S'          -- BNC_ATIVO
---   ,'P'          -- BNC_REG
---   ,1);
--- GO
+INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES(1,'1','ITAU 31906','1','S','BCO','S','341','0593','0','31906','4','S','0.00','S','P',1);
+INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES(2,'1','BRADESCO','37','S','BCO','N','237','342','1','600','1','S','0.00','S','P',1);
+INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES(3,'2','ITAU 40800','1','S','BCO','S','341','0593','0','40800','4','S','0.00','S','P',1);
+INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES(4,'2','SANTANDER','1','S','BCO','N','033','90','0','33400','4','S','0.00','S','P',1);
+INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES(5,'3','ITAU 30300','1','S','BCO','S','341','0593','0','33800','4','S','0.00','S','P',1);
+INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES(6,'3','SANTANDER','1','S','BCO','N','033','90','0','33400','4','S','0.00','S','P',1);
+/*
+SELECT 'INSERT INTO VBANCO(BNC_CODIGO,BNC_CODEMP,BNC_NOME,BNC_CODFVR,BNC_ENTRAFLUXO,BNC_CODBST,BNC_PADRAOFLUXO,BNC_CODBCD,BNC_AGENCIA,BNC_AGENCIADV,BNC_CONTA,BNC_CONTADV,BNC_CNAB,BNC_SALDO,BNC_ATIVO,BNC_REG,BNC_CODUSR) VALUES('
++''+CAST(BNC_CODIGO AS VARCHAR(10))
++','''+CAST(BNC_CODEMP AS VARCHAR(20))
++''','''+CAST(BNC_NOME AS VARCHAR(60))
++''','''+CAST(BNC_CODFVR AS VARCHAR(20))
++''','''+CAST(BNC_ENTRAFLUXO AS VARCHAR(20))
++''','''+CAST(BNC_CODBST AS VARCHAR(20))
++''','''+CAST(BNC_PADRAOFLUXO AS VARCHAR(20))
++''','''+CAST(BNC_CODBCD AS VARCHAR(20))
++''','''+CAST(BNC_AGENCIA AS VARCHAR(20))
++''','''+CAST(BNC_AGENCIADV AS VARCHAR(20))
++''','''+CAST(BNC_CONTA AS VARCHAR(20))
++''','''+CAST(BNC_CONTADV AS VARCHAR(20))
++''','''+CAST(BNC_CNAB AS VARCHAR(20))
++''','''+CAST(BNC_SALDO AS VARCHAR(20))
++''','''+CAST(BNC_ATIVO AS VARCHAR(20))
++''','''+CAST(BNC_REG AS VARCHAR(20))
++''',1);'
+FROM BANCO
+*/
+GO
 INSERT INTO VCNABERRO VALUES('341','CR','0303','NAO FOI POSSIVEL ATRIBUIR A AGENCIA PELO CEP OU CEP INVALIDO ','R','S','P',1)
 INSERT INTO VCNABERRO VALUES('341','CR','0304','SIGLA DO ESTADO INVALIDA','R','S','P',1)
 INSERT INTO VCNABERRO VALUES('341','CR','0305','PRAZO DA OPERACAO MENOR QUE PRAZO MINIMO OU MAIOR QUE O MAXIMO','R','S','P',1)
@@ -46637,30 +47599,30 @@ INSERT INTO VCNABERRO VALUES('341','CR','1510','VLR DO TITULO FAZ PARTE DE GARAN
 INSERT INTO VCNABERRO VALUES('341','CR','1511','PAGO ATRAVES DO SISPAG POR CREDITO EM C/C E NAO BAIXADO','R','S','P',1)
 INSERT INTO VCNABERRO VALUES('341','CR','1816','ABATIMENTO/ALTERACAO DO VLR DO TITULO OU SOLICITACAO DE BAIXA BLOQUEADOS','R','S','P',1)
 GO
--- INSERT INTO VVENDEDOR VALUES(1,1,3,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(2,1,4,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(3,1,5,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(4,1,6,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(9,1,7,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(10,1,8,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(11,1,9,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(14,1,11,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(20,1,13,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(36,1,16,'S','P',1);
--- INSERT INTO VVENDEDOR VALUES(43,1,17,'S','P',1);
--- GO
--- INSERT INTO VOPERADORA VALUES(1,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(2,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(3,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(4,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(5,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(6,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(7,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(8,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(9,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(10,'S','P',1);
--- INSERT INTO VOPERADORA VALUES(11,'S','P',1);
--- GO
+INSERT INTO VVENDEDOR VALUES(1,1,3,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(2,1,4,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(3,1,5,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(4,1,6,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(9,1,7,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(10,1,8,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(11,1,9,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(14,1,11,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(20,1,13,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(36,1,16,'S','P',1);
+INSERT INTO VVENDEDOR VALUES(43,1,17,'S','P',1);
+GO
+INSERT INTO VOPERADORA VALUES(1,'S','P',1);
+INSERT INTO VOPERADORA VALUES(2,'S','P',1);
+INSERT INTO VOPERADORA VALUES(3,'S','P',1);
+INSERT INTO VOPERADORA VALUES(4,'S','P',1);
+INSERT INTO VOPERADORA VALUES(5,'S','P',1);
+INSERT INTO VOPERADORA VALUES(6,'S','P',1);
+INSERT INTO VOPERADORA VALUES(7,'S','P',1);
+INSERT INTO VOPERADORA VALUES(8,'S','P',1);
+INSERT INTO VOPERADORA VALUES(9,'S','P',1);
+INSERT INTO VOPERADORA VALUES(10,'S','P',1);
+INSERT INTO VOPERADORA VALUES(11,'S','P',1);
+GO
 INSERT INTO dbo.VPONTOESTOQUE(PE_CODIGO,PE_NOME,PE_SUCATA,PE_ATIVO ,PE_REG ,PE_CODUSR) VALUES('AUT','AUTO'         ,'N','S'  ,'S'  ,1);
 INSERT INTO dbo.VPONTOESTOQUE(PE_CODIGO,PE_NOME,PE_SUCATA,PE_ATIVO ,PE_REG ,PE_CODUSR) VALUES('CRD','CREDENCIADO'  ,'N','S'  ,'P'  ,1);
 INSERT INTO dbo.VPONTOESTOQUE(PE_CODIGO,PE_NOME,PE_SUCATA,PE_ATIVO ,PE_REG ,PE_CODUSR) VALUES('CLN','CLIENTE'      ,'N','S'  ,'P'  ,1);
@@ -46704,43 +47666,43 @@ SELECT 'INSERT INTO VGRUPOPRODUTO VALUES('
 +''',1);'
 FROM GRUPOPRODUTO
 */
--- GO
--- INSERT INTO VFABRICANTE VALUES(7,'FTI','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(8,'ABD','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(11,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(11,'CHP','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(12,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(12,'RST','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(13,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(13,'RST','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(14,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(14,'RST','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(15,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(16,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(17,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(18,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(19,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(20,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(21,'CHC','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(35,'PRT','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(55,'SRN','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(43,'AJM','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(56,'SRN','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(57,'SRN','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(58,'SRN','S','P',1);
--- INSERT INTO VFABRICANTE VALUES(59,'SRN','S','P',1);
--- GO
--- INSERT INTO VTRANSPORTADORA VALUES(1,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(2,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(3,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(4,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(5,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(6,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(7,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(8,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(9,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(10,1,'S','P',1);
--- INSERT INTO VTRANSPORTADORA VALUES(11,1,'S','P',1);
+GO
+INSERT INTO VFABRICANTE VALUES(7,'FTI','S','P',1);
+INSERT INTO VFABRICANTE VALUES(8,'ABD','S','P',1);
+INSERT INTO VFABRICANTE VALUES(11,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(11,'CHP','S','P',1);
+INSERT INTO VFABRICANTE VALUES(12,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(12,'RST','S','P',1);
+INSERT INTO VFABRICANTE VALUES(13,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(13,'RST','S','P',1);
+INSERT INTO VFABRICANTE VALUES(14,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(14,'RST','S','P',1);
+INSERT INTO VFABRICANTE VALUES(15,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(16,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(17,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(18,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(19,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(20,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(21,'CHC','S','P',1);
+INSERT INTO VFABRICANTE VALUES(35,'PRT','S','P',1);
+INSERT INTO VFABRICANTE VALUES(55,'SRN','S','P',1);
+INSERT INTO VFABRICANTE VALUES(43,'AJM','S','P',1);
+INSERT INTO VFABRICANTE VALUES(56,'SRN','S','P',1);
+INSERT INTO VFABRICANTE VALUES(57,'SRN','S','P',1);
+INSERT INTO VFABRICANTE VALUES(58,'SRN','S','P',1);
+INSERT INTO VFABRICANTE VALUES(59,'SRN','S','P',1);
+GO
+INSERT INTO VTRANSPORTADORA VALUES(1,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(2,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(3,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(4,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(5,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(6,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(7,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(8,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(9,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(10,'S','P',1);
+INSERT INTO VTRANSPORTADORA VALUES(11,'S','P',1);
 GO
 INSERT INTO VFERIADO VALUES('2018-03-28',1,'MEU ANIVERSARIO',1,1,'S','P',1);
 INSERT INTO VFERIADO VALUES('2018-12-25',1,'NATAL',1,1,'S','P',1);
@@ -46751,27 +47713,45 @@ SELECT 'INSERT INTO VSERIENF VALUES('
 +','''+CAST(SNF_SERIE AS VARCHAR(20))
 +''','''+CAST(SNF_ENTSAI AS VARCHAR(1))
 +''','''+CAST(SNF_CODTD AS VARCHAR(20))
-+''','''+CAST(SNF_INFORMARNF AS VARCHAR(1))
-+''','+CAST(SNF_NFINICIO AS VARCHAR(20))
-+','+CAST(SNF_NFFIM AS VARCHAR(20))
++''','+CAST(SNF_NFPROXIMA AS VARCHAR(20))
 +','''+CAST(SNF_IDF AS VARCHAR(20))
 +''','''+CAST(SNF_MODELO AS VARCHAR(20))
 +''','''+CAST(SNF_INDICE AS VARCHAR(20))
 +''','''+CAST(SNF_LIVRO AS VARCHAR(20))
 +''','''+CAST(SNF_ENVIO AS VARCHAR(20))
 +''','+CAST(SNF_CODFLL AS VARCHAR(20))
-+''','+CAST(SNF_CODEMP AS VARCHAR(20))
++','+CAST(SNF_CODEMP AS VARCHAR(20))
 +','''+CAST(SNF_ATIVO AS VARCHAR(1))
 +''','''+CAST(SNF_REG AS VARCHAR(1))
 +''',1);'
 FROM SERIENF
 */
-INSERT INTO VSERIENF VALUES(1,'01','E','NFS','N',1,1,'21222','55','indice','S','P',1001,1,'S','P',1);
-INSERT INTO VSERIENF VALUES(2,'01','S','NFS','N',1,1,'21222','55','indice','S','P',1001,1,'S','P',1);
-INSERT INTO VSERIENF VALUES(3,'01','E','NFP','N',1,1,'21222','55','indice','S','P',1001,1,'S','P',1);
-INSERT INTO VSERIENF VALUES(4,'01','S','NFP','N',1,1,'21222','55','indice','S','P',1001,1,'S','P',1);
-INSERT INTO VSERIENF VALUES(5,'01','S','RPS','N',1,1,'21222','55','indice','S','P',1001,1,'S','P',1);
-INSERT INTO VSERIENF VALUES(5,'01','S','REC','N',1,1,'21222','55','indice','S','P',1001,1,'S','P',1);
+/*
+INSERT INTO VSERIENF VALUES(1,'01','E','NFS','N',1,1000,'21222','55','ENFS1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(2,'01','S','NFS','N',1,2000,'21222','55','SNFS1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(3,'01','E','NFP','N',1,1000,'21222','55','ENFP1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(4,'01','S','NFP','N',1,500,'21222','55','SNFP1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(5,'01','S','RPS','N',1,200,'21222','55','SRPS1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(6,'01','S','REC','N',1,200,'21222','55','SREC1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(7,'01','E','NFS','N',1,1000,'21222','55','ENFS2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(8,'01','S','NFS','N',1,1000,'21222','55','SNFS2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(9,'01','E','NFP','N',1,400,'21222','55','ENFP2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(10,'01','S','NFP','N',1,250,'21222','55','SNFP2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(11,'01','S','RPS','N',3,130,'21222','55','SRPS2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(12,'01','S','REC','N',5,20,'21222','55','SREC2001S','S','P',2001,2,'S','P',1);
+*/
+INSERT INTO VSERIENF VALUES(1,'01','E','NFS',1,'21222','55','ENFS1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(2,'01','S','NFS',1,'21222','55','SNFS1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(3,'01','E','NFP',1,'21222','55','ENFP1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(4,'01','S','NFP',1,'21222','55','SNFP1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(5,'01','S','RPS',1,'21222','55','SRPS1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(6,'01','S','REC',1,'21222','55','SREC1001S','S','P',1001,1,'S','P',1);
+INSERT INTO VSERIENF VALUES(7,'01','E','NFS',1,'21222','55','ENFS2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(8,'01','S','NFS',1,'21222','55','SNFS2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(9,'01','E','NFP',1,'21222','55','ENFP2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(10,'01','S','NFP',2,'21222','55','SNFP2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(11,'01','S','RPS',3,'21222','55','SRPS2001S','S','P',2001,2,'S','P',1);
+INSERT INTO VSERIENF VALUES(12,'01','S','REC',5,'21222','55','SREC2001S','S','P',2001,2,'S','P',1);
 GO
 INSERT INTO GENERATOR VALUES('PAGAR',0);
 INSERT INTO GENERATOR VALUES('GRUPOMODELOPRODUTO',578);
@@ -46787,9 +47767,76 @@ INSERT INTO VSERVICOPREFEITURA VALUES('2805','3543402','SERV BI','FED2805',5.00,
 INSERT INTO VSERVICOPREFEITURA VALUES('2805','3550308','SERV BI','FED2805',5.00,'S','S','P',1);
 
 GO
-INSERT INTO VSERVICO VALUES(1,'SERV DE COMUNICACAO' ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','5.01.01.01.0002','2803','NSA','1','S','S','S','P',1);
-INSERT INTO VSERVICO VALUES(2,'SERV DE ATIVACAO'    ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','5.01.01.01.0004','2803','NSA','1','S','S','S','P',1);
-INSERT INTO VSERVICO VALUES(3,'SERV DE BI'          ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','5.01.01.01.0003','2804','NSA','1','S','N','S','P',1);
+/*
+INSERT INTO VSERVICO VALUES(1,'SERV DE COMUNICACAO' ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2803','NSA','1','S','S',208,'S','P',1);
+INSERT INTO VSERVICO VALUES(2,'SERV DE ATIVACAO'    ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2803','NSA','1','S','S',208,'S','P',1);
+INSERT INTO VSERVICO VALUES(3,'SERV DE BI'          ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2804','NSA','1','S','N',208,'S','P',1);
+INSERT INTO VSERVICO VALUES(1,'SERV DE COMUNICACAO' ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2803','NSA','2','S','S',208,'S','P',1);
+INSERT INTO VSERVICO VALUES(2,'SERV DE ATIVACAO'    ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2803','NSA','2','S','S',208,'S','P',1);
+INSERT INTO VSERVICO VALUES(3,'SERV DE BI'          ,'S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2804','NSA','2','S','N',208,'S','P',1);
+*/
+INSERT INTO VSERVICO VALUES(1,'SERV DE COMUNICACAO','S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2803','NSA','1','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(2,'SERV DE ATIVACAO','S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2803','NSA','1','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(3,'SERV DE BI','S','S','5.00','100.00','S','3.00','S','1.65','S','3.00','S','0.65','S','2804','NSA','1','S','N','1','S','P',1);
+INSERT INTO VSERVICO VALUES(4,'BUSINESS INTELLIGENCE BI','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','1.00','S','2805','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(5,'CHIP MULTIOPERADORA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','1.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(6,'CONTROLE DE JORNADA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(7,'JOY ASSISTENTE 24H CAMINHAO 1000KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(8,'JOY ASSISTENTE 24H CAMINHAO 200KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(9,'JOY ASSISTENTE 24H CAMINHAO 400KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(10,'JOY ASSISTENTE 24H CAMINHAO 600KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(11,'JOY ASSISTENTE 24H CARRO 1000KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','N','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(12,'JOY ASSISTENTE 24H CARRO 200KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(13,'JOY ASSISTENTE 24H CARRO 400KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(14,'JOY ASSISTENTE 24H CARRO 600KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(15,'JOY ASSISTENTE 24H MOTO 1000KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(16,'JOY ASSISTENTE 24H MOTO 200KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(17,'JOY ASSISTENTE 24H MOTO 400KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(18,'JOY ASSISTENTE 24H MOTO 600KM','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(19,'JOY CARRO RESERVA 07 DIAS','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(20,'JOY CARRO RESERVA 15 DIAS','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(21,'JOY CARRO RESERVA 30 DIAS','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(22,'JOY VIDRO CAMINHAO BASICO','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(23,'JOY VIDRO CAMINHAO COMPLETO','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(24,'JOY VIDRO CARRO IMPORTADO BASICO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(25,'JOY VIDRO CARRO IMPORTADO COMPLETO','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(26,'JOY VIDRO CARRO IMPORTADO COMPLETO PLUS','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(27,'JOY VIDRO CARRO NACIONAL BASICO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(28,'JOY VIDRO CARRO NACIONAL COMPLETO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(29,'JOY VIDRO COMPLETO BASICO','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(30,'JOY VIDRO VAN BASICO','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(31,'JOY VIDRO VAN COMPLETO','E','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(32,'KIT AUTONOMIA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(33,'MENSALIDADE ISCA SATELITAL','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(34,'MENSALIDADE TOTAL AUTO','S','S','10.00','0.00','S','10.00','N','0.00','S','5.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(35,'MENSALIDADE TOTAL AUTO ID','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(36,'MENSALIDADE TOTAL BACKUP','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(37,'MENSALIDADE TOTAL BETONEIRA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(38,'MENSALIDADE TOTAL BUS','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(39,'MENSALIDADE TOTAL CARRETA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(40,'MENSALIDADE TOTAL CARRETA RF','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(41,'MENSALIDADE TOTAL EASY','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(42,'MENSALIDADE TOTAL ESCUTA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(43,'MENSALIDADE TOTAL GUINCHO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(44,'MENSALIDADE TOTAL HIBRIDO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(45,'MENSALIDADE TOTAL ISCA DESCARTAVEL','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(46,'MENSALIDADE TOTAL ISCA RF RETORNAVEL','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(47,'MENSALIDADE TOTAL JAMMER DETECTION','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(48,'MENSALIDADE TOTAL JAMMER DETECTION INTEL','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(49,'MENSALIDADE TOTAL LOGISTICA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(50,'MENSALIDADE TOTAL LONG LIFE','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(51,'MENSALIDADE TOTAL MAQUINA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(52,'MENSALIDADE TOTAL MOTO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(53,'MENSALIDADE TOTAL PORTATIL','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(55,'MENSALIDADE TOTAL RF BACKUP','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(56,'MENSALIDADE TOTAL SATELITAL','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(57,'MENSALIDADE TOTAL TELEMETRIA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(58,'MENSALIDADE TOTAL TEMPERATURA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(59,'MODULO MANUTENCAO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(60,'MONITORAMENTO DE ALERTAS CENTRAL 24 HORA','S','S','10.00','0.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(61,'MONITRIP','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','S','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(62,'INSTALACAO','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','10.00','S','2803','NSA','2','N','S','1','S','P',1);
+INSERT INTO VSERVICO VALUES(63,'ATIVACAO ISCA','S','S','10.00','10.00','S','10.00','S','10.00','S','10.00','S','1.00','S','2803','NSA','2','S','S','1','S','P',1);
 /*
 SELECT 'INSERT INTO VSERVICO VALUES('
 +''+CAST(SRV_CODIGO AS VARCHAR(10))
@@ -46807,79 +47854,70 @@ SELECT 'INSERT INTO VSERVICO VALUES('
 +''','''+CAST(SRV_CSLL AS VARCHAR(1))
 +''','''+CAST(SRV_CSLLALIQ AS VARCHAR(10))
 +''','''+CAST(SRV_ISS AS VARCHAR(1))
-+''','''+CAST(SRV_CODCC AS VARCHAR(15))
 +''','''+CAST(SRV_CODSPR AS VARCHAR(10))
 +''','''+CAST(SRV_CODPRD AS VARCHAR(15))
 +''','''+CAST(SRV_CODEMP AS VARCHAR(10))
 +''','''+CAST(SRV_PODEVENDA AS VARCHAR(1))
 +''','''+CAST(SRV_PODELOCACAO AS VARCHAR(1))
++''','''+CAST(SRV_CODPT AS VARCHAR(10))
 +''','''+CAST(SRV_ATIVO AS VARCHAR(1))
 +''','''+CAST(SRV_REG AS VARCHAR(1))
 +''',1);'
 FROM SERVICO
 */
 GO
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'1','1','0.00','180000.00','6.0000','0.0000','0.0000','0.0000','0.0000','4.0000','0.0000','0.0000','2.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'2','1','180000.01','360000.00','8.2100','0.0000','0.0000','1.4200','0.0000','4.0000','0.0000','0.0000','2.7900','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'3','1','360000.01','540000.00','10.2600','0.4800','0.4300','1.4300','0.3500','4.0700','0.0000','0.0000','3.5000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'4','1','540000.01','720000.00','11.3100','0.5300','0.5300','1.5600','0.3800','4.4700','0.0000','0.0000','3.8400','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'5','1','720000.01','900000.00','11.4000','0.5300','0.5200','1.5800','0.3800','4.5200','0.0000','0.0000','3.8700','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'6','1','900000.01','1080000.00','12.4200','0.5700','0.5700','1.7300','0.4000','4.9200','0.0000','0.0000','4.2300','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'7','1','1080000.01','1260000.00','12.5400','0.5900','0.5600','1.7400','0.4200','4.9700','0.0000','0.0000','4.2600','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'8','1','1260000.01','1440000.00','12.6800','0.5900','0.5700','1.7600','0.4200','5.0300','0.0000','0.0000','4.3100','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'9','1','1440000.01','1620000.00','13.5500','0.6300','0.6100','1.8800','0.4500','5.3700','0.0000','0.0000','4.6100','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'10','1','1620000.01','1800000.00','13.6800','0.6300','0.6400','1.8900','0.4500','5.4200','0.0000','0.0000','4.6500','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'11','1','1800000.01','1980000.00','14.9300','0.6900','0.6900','2.0700','0.5000','5.9800','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'12','1','1980000.01','2160000.00','15.0600','0.6900','0.6900','2.0900','0.5000','6.0900','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'13','1','2160000.01','2340000.00','15.2000','0.7100','0.7000','2.1000','0.5000','6.1900','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'14','1','2340000.01','2520000.00','15.3500','0.7100','0.7000','2.1300','0.5100','6.3000','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'15','1','2520000.01','2700000.00','15.4800','0.7200','0.7000','2.1500','0.5100','6.4000','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'16','1','2700000.01','2880000.00','16.8500','0.7800','0.7600','2.3400','0.5600','7.4100','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'17','1','2880000.01','3060000.00','16.9800','0.7800','0.7800','2.3600','0.5600','7.5000','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'18','1','3060000.01','3240000.00','17.1300','0.8000','0.7900','2.3700','0.5700','7.6000','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'19','1','3240000.01','3420000.00','17.2700','0.8000','0.7900','2.4000','0.5700','7.7100','0.0000','0.0000','5.0000','P',1)
-INSERT INTO VALIQUOTASIMPLES VALUES(3,'20','1','3420000.01','3600000.00','17.4200','0.8100','0.7900','2.4200','0.5700','7.8300','0.0000','2.8800','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'1','0.00','180000.00','6.0000','0.0000','0.0000','0.0000','0.0000','4.0000','0.0000','0.0000','2.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'2','180000.01','360000.00','8.2100','0.0000','0.0000','1.4200','0.0000','4.0000','0.0000','0.0000','2.7900','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'3','360000.01','540000.00','10.2600','0.4800','0.4300','1.4300','0.3500','4.0700','0.0000','0.0000','3.5000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'4','540000.01','720000.00','11.3100','0.5300','0.5300','1.5600','0.3800','4.4700','0.0000','0.0000','3.8400','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'5','720000.01','900000.00','11.4000','0.5300','0.5200','1.5800','0.3800','4.5200','0.0000','0.0000','3.8700','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'6','900000.01','1080000.00','12.4200','0.5700','0.5700','1.7300','0.4000','4.9200','0.0000','0.0000','4.2300','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'7','1080000.01','1260000.00','12.5400','0.5900','0.5600','1.7400','0.4200','4.9700','0.0000','0.0000','4.2600','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'8','1260000.01','1440000.00','12.6800','0.5900','0.5700','1.7600','0.4200','5.0300','0.0000','0.0000','4.3100','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'9','1440000.01','1620000.00','13.5500','0.6300','0.6100','1.8800','0.4500','5.3700','0.0000','0.0000','4.6100','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'10','1620000.01','1800000.00','13.6800','0.6300','0.6400','1.8900','0.4500','5.4200','0.0000','0.0000','4.6500','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'11','1800000.01','1980000.00','14.9300','0.6900','0.6900','2.0700','0.5000','5.9800','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'12','1980000.01','2160000.00','15.0600','0.6900','0.6900','2.0900','0.5000','6.0900','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'13','2160000.01','2340000.00','15.2000','0.7100','0.7000','2.1000','0.5000','6.1900','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'14','2340000.01','2520000.00','15.3500','0.7100','0.7000','2.1300','0.5100','6.3000','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'15','2520000.01','2700000.00','15.4800','0.7200','0.7000','2.1500','0.5100','6.4000','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'16','2700000.01','2880000.00','16.8500','0.7800','0.7600','2.3400','0.5600','7.4100','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'17','2880000.01','3060000.00','16.9800','0.7800','0.7800','2.3600','0.5600','7.5000','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'18','3060000.01','3240000.00','17.1300','0.8000','0.7900','2.3700','0.5700','7.6000','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'19','3240000.01','3420000.00','17.2700','0.8000','0.7900','2.4000','0.5700','7.7100','0.0000','0.0000','5.0000','P',1)
+INSERT INTO VALIQUOTASIMPLES VALUES(3,'20','3420000.01','3600000.00','17.4200','0.8100','0.7900','2.4200','0.5700','7.8300','0.0000','2.8800','5.0000','P',1)
 GO
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201801,'1','0.00','0.00','0.0000','201701','201712','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201802,'1','0.00','0.00','0.0000','201702','201801','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201803,'1','0.00','0.00','0.0000','201703','201802','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201804,'1','0.00','0.00','0.0000','201704','201803','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201805,'1','0.00','0.00','0.0000','201705','201804','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201806,'1','0.00','0.00','0.0000','201706','201805','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201807,'1','0.00','0.00','0.0000','201707','201806','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201808,'1','0.00','0.00','0.0000','201708','201807','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201809,'1','0.00','0.00','0.0000','201709','201808','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201810,'1','0.00','0.00','0.0000','201710','201809','0','0','0','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201811,'1','0.00','164671.34','2.0000','201711','201810','1','3','1','P',1)
-INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201812,'1','0.00','0.00','0.0000','201712','201811','0','0','0','P',1)
 INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201901,'1','0.00','0.00','0.0000','201801','201812','0','0','0','P',1)
 INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201902,'1','0.00','0.00','0.0000','201802','201901','0','0','0','P',1)
 INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201903,'1','0.00','0.00','0.0000','201803','201902','0','0','0','P',1)
+INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201906,'2','0.00','164671.34','2.0000','201711','201810','1','3','1','P',1)
+INSERT INTO FECHAMESSIMPLES(FMS_CODMES,FMS_CODEMP,FMS_VLRMES,FMS_VLRACUMULADO,FMS_ALIQUOTA,FMS_MESINI,FMS_MESFIN,FMS_ATUALIZAR,FMS_ANEXO,FMS_ITEM,FMS_REG,FMS_CODUSR) VALUES(201907,'2','0.00','164671.34','2.0000','201711','201810','1','3','1','P',1)
+
 GO
--- INSERT INTO VGRUPOMODELO VALUES(1,15,'CHICOTE ST300HD','CHC','14','0','0','0','N','N','N','N','S','N','N','NSA','NSA','NSA','NSA','10.60','12.60','10.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(2,11,'CHICOTE ANTI JAMMER KARITEC','CHC','69','0','0','0','N','N','N','N','S','N','N','NSA','NSA','NSA','NSA','12.50','14.50','12.50','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(3,12,'CHICOTE ANTI JAMMER SMART CAR','CHC','69','0','0','0','N','N','N','N','S','N','N','NSA','NSA','NSA','NSA','1.30','5.30','1.30','0.00','0.00','0.00','0.00','0.00','0.00','0.00','278-9','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(4,15,'CHIP TMDATA VIVO','CHP','34','0','0','0','S','S','S','S','N','N','S','NSA','NSA','NSA','NSA','2.60','4.60','2.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(5,11,'CHIP TMDATA CLARO','CHP','19','0','0','0','S','S','S','S','N','N','S','NSA','NSA','NSA','NSA','3.60','5.60','3.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(6,14,'RASTREADOR ST310U','RST','34','0','0','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','4.60','6.60','4.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(7,13,'RASTREADOR ST300HD','RST','34','0','0','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','5.60','7.60','5.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(8,12,'RASTREADOR 0003','RST','34','0','0','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','6.60','8.60','6.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(9,35,'PORTATIL AZUL','PRT','34','0','0','0','S','S','N','N','S','N','N','NSA','NSA','NSA','NSA','7.60','9.60','7.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(10,56,'SIRENE DO TIMAO','SRN','34','0','0','0','S','N','N','N','S','N','N','NSA','NSA','NSA','NSA','8.60','10.60','8.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(11,8,'ABRACADEIRA 25CM','ABD','49','0','0','0','N','N','N','N','N','N','N','NSA','NSA','NSA','NSA','11.60','15.18','11.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(12,8,'ABRACADEIRA 50CM','ABD','29','0','0','0','N','N','N','N','N','N','N','NSA','NSA','NSA','NSA','12.10','16.20','12.10','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(13,7,'FITA ISO','FTI','29','12','0','0','N','N','N','N','N','N','N','NSA','NSA','NSA','NSA','13.20','17.22','13.20','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(14,43,'ANTIJAMMER','AJM','18','0','1','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','14.30','18.24','14.30','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(15,43,'ANTENA VERMELHA','AJM','65','0','0','0','S','S','S','S','S','S','S','NSA','NSA','NSA','NSA','15.40','19.26','15.40','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(16,0,'AUTO','AUT','8','0','0','0','N','N','N','N','S','S','S','ABD_CHP_FTI_RST','11_5_4_13_8_7_6','ATN_CHC_FSV_PTR_RLP','2_3_1','16.50','20.28','16.50','21.00','21.00','15.00','15.00','16.00','20.00','20.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(17,0,'AUTO COM ANTIJAMMER','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD_AJM_CHC_CHP_FTI_RST','11_14_2_3_1_5_13_8_7_6','SRN','10','17.60','21.30','17.60','17.00','17.30','17.50','17.60','0.00','17.70','17.90','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(18,0,'AUTO COM BUZZER','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD_BZR_CHP_RST','17_18_23_7_6_10_8','ATN_CHC_FSV_FTI_PTR_RLP','5_2_3_1_11_19_21_22','18.70','22.32','18.70','18.00','18.00','18.50','18.60','0.00','18.70','18.90','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(19,0,'TELEMETRIA','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD_CHC_CHP_FSV_FTI_IRF_PTR_RLP_RST_SLC','17_18_3_1_7_6_25_19_26_21_22_9_24','BZR','23','19.80','23.52','19.80','19.00','19.00','19.50','19.60','0.00','19.70','19.90','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(20,0,'(COM BLOQUEIO ELETRONICO)','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD','11_12','NSA','23','20.90','24.62','20.90','20.00','20.00','20.50','20.60','0.00','20.70','20.90','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(21,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(22,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(23,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
--- INSERT INTO VGRUPOMODELO VALUES(24,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(1,15,'CHICOTE ST300HD','CHC','14','0','0','0','N','N','N','N','S','N','N','NSA','NSA','NSA','NSA','10.60','12.60','10.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(2,11,'CHICOTE ANTI JAMMER KARITEC','CHC','69','0','0','0','N','N','N','N','S','N','N','NSA','NSA','NSA','NSA','12.50','14.50','12.50','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(3,12,'CHICOTE ANTI JAMMER SMART CAR','CHC','69','0','0','0','N','N','N','N','S','N','N','NSA','NSA','NSA','NSA','1.30','5.30','1.30','0.00','0.00','0.00','0.00','0.00','0.00','0.00','278-9','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(4,15,'CHIP TMDATA VIVO','CHP','34','0','0','0','S','S','S','S','N','N','S','NSA','NSA','NSA','NSA','2.60','4.60','2.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(5,11,'CHIP TMDATA CLARO','CHP','19','0','0','0','S','S','S','S','N','N','S','NSA','NSA','NSA','NSA','3.60','5.60','3.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(6,14,'RASTREADOR ST310U','RST','34','0','0','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','4.60','6.60','4.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(7,13,'RASTREADOR ST300HD','RST','34','0','0','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','5.60','7.60','5.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(8,12,'RASTREADOR 0003','RST','34','0','0','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','6.60','8.60','6.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(9,35,'PORTATIL AZUL','PRT','34','0','0','0','S','S','N','N','S','N','N','NSA','NSA','NSA','NSA','7.60','9.60','7.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(10,56,'SIRENE DO TIMAO','SRN','34','0','0','0','S','N','N','N','S','N','N','NSA','NSA','NSA','NSA','8.60','10.60','8.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(11,8,'ABRACADEIRA 25CM','ABD','49','0','0','0','N','N','N','N','N','N','N','NSA','NSA','NSA','NSA','11.60','15.18','11.60','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(12,8,'ABRACADEIRA 50CM','ABD','29','0','0','0','N','N','N','N','N','N','N','NSA','NSA','NSA','NSA','12.10','16.20','12.10','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(13,7,'FITA ISO','FTI','29','12','0','0','N','N','N','N','N','N','N','NSA','NSA','NSA','NSA','13.20','17.22','13.20','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(14,43,'ANTIJAMMER','AJM','18','0','1','0','S','N','N','N','N','N','N','NSA','NSA','NSA','NSA','14.30','18.24','14.30','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(15,43,'ANTENA VERMELHA','AJM','65','0','0','0','S','S','S','S','S','S','S','NSA','NSA','NSA','NSA','15.40','19.26','15.40','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(16,0,'AUTO','AUT','8','0','0','0','N','N','N','N','S','S','S','ABD_CHP_FTI_RST','11_5_4_13_8_7_6','ATN_CHC_FSV_PTR_RLP','2_3_1','16.50','20.28','16.50','21.00','21.00','15.00','15.00','16.00','20.00','20.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(17,0,'AUTO COM ANTIJAMMER','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD_AJM_CHC_CHP_FTI_RST','11_14_2_3_1_5_13_8_7_6','SRN','10','17.60','21.30','17.60','17.00','17.30','17.50','17.60','0.00','17.70','17.90','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(18,0,'AUTO COM BUZZER','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD_BZR_CHP_RST','17_18_23_7_6_10_8','ATN_CHC_FSV_FTI_PTR_RLP','5_2_3_1_11_19_21_22','18.70','22.32','18.70','18.00','18.00','18.50','18.60','0.00','18.70','18.90','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(19,0,'TELEMETRIA','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD_CHC_CHP_FSV_FTI_IRF_PTR_RLP_RST_SLC','17_18_3_1_7_6_25_19_26_21_22_9_24','BZR','23','19.80','23.52','19.80','19.00','19.00','19.50','19.60','0.00','19.70','19.90','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(20,0,'(COM BLOQUEIO ELETRONICO)','AUT','0','0','0','0','N','N','N','N','S','S','N','ABD','11_12','NSA','23','20.90','24.62','20.90','20.00','20.00','20.50','20.60','0.00','20.70','20.90','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(21,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(22,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(23,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
+INSERT INTO VGRUPOMODELO VALUES(24,14,'NADA A DECLARAR','CHC','0','0','0','0','S','N','N','N','S','S','N','NSA','NSA','NSA','NSA','20.00','25.00','20.00','0.00','0.00','0.00','0.00','0.00','0.00','0.00','NSA','S','P',1);
 /*
 --insgrupomodelo
 SELECT 'INSERT INTO VGRUPOMODELO VALUES('
@@ -46919,61 +47957,125 @@ SELECT 'INSERT INTO VGRUPOMODELO VALUES('
 FROM GRUPOMODELO
 */
 GO
-INSERT INTO VPRODUTO(PRD_CODIGO,PRD_CODEMP,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0001','1','PRODUTO 01.01.0001','3404.90.29','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','P','1')
-INSERT INTO VPRODUTO(PRD_CODIGO,PRD_CODEMP,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0002','1','PRODUTO 01.01.0002','3405.40.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','P','1')
-INSERT INTO VPRODUTO(PRD_CODIGO,PRD_CODEMP,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0003','1','PRODUTO 01.01.0003','3819.00.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','P','1')
-INSERT INTO VPRODUTO(PRD_CODIGO,PRD_CODEMP,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0004','1','PRODUTO 01.01.0004','3820.00.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','P','1')
-INSERT INTO VPRODUTO(PRD_CODIGO,PRD_CODEMP,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0005','1','PRODUTO 01.01.0005','3824.90.29','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0001','PRODUTO 01.01.0001','3404.90.29','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3404.90.29','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0002','PRODUTO 01.01.0002','3405.40.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3405.40.00','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0003','PRODUTO 01.01.0003','3819.00.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3819.00.00','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0004','PRODUTO 01.01.0004','3820.00.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3820.00.00','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.01.0005','PRODUTO 01.01.0005','3824.90.29','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3824.90.29','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.02.0001','PRODUTO 01.02.0001','3404.90.29','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3404.90.29','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.02.0002','PRODUTO 01.02.0002','3405.40.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3405.40.00','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.02.0003','PRODUTO 01.02.0003','3819.00.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3819.00.00','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.02.0004','PRODUTO 01.02.0004','3820.00.00','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3820.00.00','S','P','1')
+INSERT INTO VPRODUTO(PRD_CODIGO,PRD_NOME,PRD_CODNCM,PRD_ST,PRD_ALIQICMS,PRD_REDUCAOBC,PRD_IPI,PRD_ALIQIPI,PRD_CSTIPI,PRD_CODEMB,PRD_VLRVENDA,PRD_CODPO,PRD_CODBARRAS,PRD_PESOBRUTO,PRD_PESOLIQUIDO,PRD_ENTRADA,PRD_SAIDA,PRD_CODNCMIMP,PRD_ATIVO,PRD_REG,PRD_CODUSR) VALUES('01.02.0005','PRODUTO 01.02.0005','3824.90.29','N','18','0','N','0','52','PCT','100','0','200100100','2','1','S','S','3824.90.29','S','P','1')
 GO
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(1,'CLN','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(1,'EST','NSA','0','S','S',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(1,'SUC','NSA','0','S','S',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(2,'CRD','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(3,'INS','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(4,'CLN','NSA','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(4,'MNT','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(6,'CLN','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(7,'TRC','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(8,'CLN','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(9,'CRD','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(10,'INS','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(11,'MNT','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(14,'TRC','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(15,'CLN','RUI','5','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(16,'CRD','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(17,'INS','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(18,'MNT','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(21,'TRC','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(22,'CLN','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(23,'CRD','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(24,'INS','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(25,'MNT','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(28,'TRC','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(29,'CLN','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(30,'CRD','RAZ','4','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(31,'INS','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(32,'MNT','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(35,'TRC','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(36,'CLN','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(37,'CRD','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(38,'INS','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(39,'MNT','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(42,'TRC','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(43,'CLN','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(44,'CRD','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(44,'TRC','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(45,'INS','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(46,'MNT','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(49,'TRC','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(50,'CLN','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(51,'CRD','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(52,'INS','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(53,'MNT','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(56,'TRC','OTI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(57,'CLN','RAZ','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(58,'CRD','RUI','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(59,'INS','BOM','0','S','P',1);
--- INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(60,'MNT','OTI','0','S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3404.90.29','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3404.90.29','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3404.90.29','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3404.90.29','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3404.90.29','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3404.90.29','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3405.40.00','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3405.40.00','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3405.40.00','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3405.40.00','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3405.40.00','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3405.40.00','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3819.00.00','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3819.00.00','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3819.00.00','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3819.00.00','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3819.00.00','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3819.00.00','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3820.00.00','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3820.00.00','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3820.00.00','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3820.00.00','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3820.00.00','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3820.00.00','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3824.90.29','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3824.90.29','IND','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3824.90.29','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3824.90.29','NOR','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3824.90.29','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',1,1001,'S','P',1);
+INSERT INTO VIMPOSTO VALUES('SP','SP','3824.90.29','SIM','S','1','5.102','41','18.00','0.0000','04',10.00,'67',0.65,'67',1.65,0.00,'N',2,2001,'S','P',1);
+/*
+--insimposto
+SELECT 'INSERT INTO VIMPOSTO VALUES('
++''''+CAST(IMP_UFDE AS VARCHAR(3))
++''','''+CAST(IMP_UFPARA AS VARCHAR(3))
++''','''+CAST(IMP_CODNCM AS VARCHAR(10))
++''','''+CAST(IMP_CODCTG AS VARCHAR(10))
++''','''+CAST(IMP_ENTSAI AS VARCHAR(10))
++''','''+CAST(IMP_CODNO AS VARCHAR(10))
++''','''+CAST(IMP_CFOP AS VARCHAR(10))
++''','''+CAST(IMP_CSTICMS AS VARCHAR(10))
++''','''+CAST(IMP_ALIQICMS AS VARCHAR(10))
++''','''+CAST(IMP_REDUCAOBC AS VARCHAR(10))
++''','''+CAST(IMP_CSTIPI AS VARCHAR(10))
++''','+CAST(IMP_ALIQIPI AS VARCHAR(10))
++','''+CAST(IMP_CSTPIS AS VARCHAR(10))
++''','+CAST(IMP_ALIQPIS AS VARCHAR(10))
++','''+CAST(IMP_CSTCOFINS AS VARCHAR(10))
++''','+CAST(IMP_ALIQCOFINS AS VARCHAR(10))
++','+CAST(IMP_ALIQST AS VARCHAR(10))
++','''+CAST(IMP_ALTERANFP AS VARCHAR(10))
++''','+CAST(IMP_CODEMP AS VARCHAR(10))
++','+CAST(IMP_CODFLL AS VARCHAR(10))
++','''+CAST(IMP_ATIVO AS VARCHAR(10))
++''','''+CAST(IMP_REG AS VARCHAR(10))
++''',1);'
+FROM IMPOSTO
+*/
+GO
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(1,'CLN','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(1,'EST','NSA','0','S','S',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(1,'SUC','NSA','0','S','S',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(2,'CRD','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(3,'INS','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(4,'CLN','NSA','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(4,'MNT','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(6,'CLN','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(7,'TRC','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(8,'CLN','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(9,'CRD','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(10,'INS','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(11,'MNT','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(14,'TRC','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(15,'CLN','RUI','5','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(16,'CRD','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(17,'INS','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(18,'MNT','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(21,'TRC','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(22,'CLN','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(23,'CRD','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(24,'INS','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(25,'MNT','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(28,'TRC','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(29,'CLN','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(30,'CRD','RAZ','4','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(31,'INS','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(32,'MNT','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(35,'TRC','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(36,'CLN','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(37,'CRD','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(38,'INS','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(39,'MNT','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(42,'TRC','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(43,'CLN','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(44,'CRD','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(44,'TRC','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(45,'INS','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(46,'MNT','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(49,'TRC','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(50,'CLN','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(51,'CRD','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(52,'INS','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(53,'MNT','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(56,'TRC','OTI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(57,'CLN','RAZ','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(58,'CRD','RUI','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(59,'INS','BOM','0','S','P',1);
+INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES(60,'MNT','OTI','0','S','P',1);
 /*
 SELECT 'INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,PEI_ATIVO,PEI_REG,PEI_CODUSR) VALUES('
 +''+CAST(PEI_CODFVR AS VARCHAR(10))
@@ -46985,573 +48087,592 @@ SELECT 'INSERT INTO VPONTOESTOQUEIND(PEI_CODFVR,PEI_CODPE,PEI_STATUS,PEI_CODLGN,
 +''',1);'
 FROM PONTOESTOQUEIND
 */
--- GO
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(1,'0','11','ABD','EST','1','8','568','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(2,'0','11','ABD','EST','1','8','569','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(3,'0','11','ABD','EST','1','8','567','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(4,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(5,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(6,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(7,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(8,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(9,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(10,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(11,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(12,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(13,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(14,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(15,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(16,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(17,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(18,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(19,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(20,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(21,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(22,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(23,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(24,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(25,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(26,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(27,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(28,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(29,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(30,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(31,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(32,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(33,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(34,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(35,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(36,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(37,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(38,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(39,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(40,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(41,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(42,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(43,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(44,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(45,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(46,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(47,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(48,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(49,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(50,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(51,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(52,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(53,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(54,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(55,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(56,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(57,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(58,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(59,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(60,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(61,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(62,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(63,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(64,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(65,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(66,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(67,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(68,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(69,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(70,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(71,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(72,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(73,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(74,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(75,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(76,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(77,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(78,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(79,'0','15','AJM','EST','1','43','0','53578088','54451509','VIVO','134182','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(80,'0','15','AJM','EST','1','43','0','17888935','18762356','VIVO','135370','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(81,'0','15','AJM','EST','1','43','0','39204142','40077563','VIVO','136558','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(82,'0','15','AJM','EST','1','43','0','16234787','17108208','VIVO','137746','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(83,'0','15','AJM','EST','1','43','0','50659977','51533398','VIVO','138934','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(84,'0','15','AJM','EST','1','43','0','21605721','22479142','VIVO','140122','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(85,'0','15','AJM','EST','1','43','0','51938187','52811608','VIVO','141310','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(86,'0','15','AJM','EST','1','43','0','28122465','28995886','VIVO','168632','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(87,'0','15','AJM','EST','1','43','0','36535360','37408781','VIVO','251091','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(88,'0','15','AJM','EST','1','43','0','43023869','43897290','VIVO','267634','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(89,'0','15','AJM','EST','1','43','0','46949277','47822698','VIVO','188046','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(90,'0','15','AJM','EST','1','43','0','30852829','31726250','VIVO','233779','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(91,'0','15','AJM','EST','1','43','0','20779320','21652741','VIVO','369857','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(92,'0','15','AJM','EST','1','43','0','27574117','28447538','VIVO','458704','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(93,'0','15','AJM','EST','1','43','0','33558251','34431672','VIVO','401424','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(94,'0','15','AJM','EST','1','43','0','35415424','36288845','VIVO','3665771','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(95,'0','15','AJM','EST','1','43','0','32845841','33719262','VIVO','13235804','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(96,'0','15','AJM','EST','1','43','0','25024190','25897611','VIVO','13036840','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(97,'0','15','AJM','EST','1','43','0','19471220','20344641','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(98,'0','15','AJM','EST','1','43','0','58222606','59096027','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(99,'0','15','AJM','EST','1','43','0','34473411','35346832','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(100,'0','15','AJM','EST','1','43','0','37961095','38834516','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(101,'0','15','AJM','EST','1','43','0','61401552','62274973','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(102,'0','15','AJM','EST','1','43','0','23159805','24033226','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(103,'0','15','AJM','EST','1','43','0','60109865','60983286','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(104,'0','15','AJM','EST','1','43','0','53323169','54196590','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(105,'0','15','AJM','EST','1','43','0','30802753','31676174','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(106,'0','15','AJM','EST','1','43','0','44729642','45603063','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(107,'0','15','AJM','EST','1','43','0','24851072','25724493','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(108,'0','15','AJM','EST','1','43','0','29197982','30071403','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(109,'0','15','AJM','EST','1','43','0','39325227','40198648','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(110,'0','15','AJM','EST','1','43','0','50804653','51678074','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(111,'0','15','AJM','EST','1','43','0','26899075','27772496','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(112,'0','15','AJM','EST','1','43','0','29023073','29896494','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(113,'0','15','AJM','EST','1','43','0','35061174','35934595','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(114,'0','15','AJM','EST','1','43','0','31986601','32860022','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(115,'0','15','AJM','EST','1','43','0','54689011','55562432','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(116,'0','15','AJM','EST','1','43','0','28161686','29035107','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(117,'0','15','AJM','EST','1','43','0','33035062','33908483','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(118,'0','15','AJM','EST','1','43','0','55260117','56133538','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(119,'0','15','AJM','EST','1','43','0','38556549','39429970','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(120,'0','15','AJM','EST','1','43','0','28859630','29733051','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(121,'0','15','AJM','EST','1','43','0','42332667','43206088','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(122,'0','15','AJM','EST','1','43','0','48157621','49031042','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(123,'0','15','AJM','EST','1','43','0','25058426','25931847','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(124,'0','15','AJM','EST','1','43','0','22140614','23014035','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(125,'0','15','AJM','EST','1','43','0','48731606','49605027','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(126,'0','15','AJM','EST','1','43','0','60670244','61543665','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(127,'0','15','AJM','EST','1','43','0','33036728','33910149','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(128,'0','15','AJM','EST','1','43','0','35470143','36343564','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(129,'0','15','AJM','EST','1','43','0','52307740','53181161','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(130,'0','15','AJM','EST','1','43','0','38732927','39606348','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(131,'0','15','AJM','EST','1','43','0','22845992','23719413','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(132,'0','15','AJM','EST','1','43','0','18293889','19167310','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(133,'0','15','AJM','EST','1','43','0','57153158','58026579','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(134,'0','15','AJM','EST','1','43','0','60452730','61326151','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(135,'0','15','AJM','EST','1','43','0','41401738','42275159','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(136,'0','15','AJM','EST','1','43','0','17222481','18095902','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(137,'0','15','AJM','EST','1','43','0','18746179','19619600','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(138,'0','15','AJM','EST','1','43','0','19315518','20188939','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(139,'0','15','AJM','EST','1','43','0','31201606','32075027','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(140,'0','15','AJM','EST','1','43','0','23233771','24107192','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(141,'0','15','AJM','EST','1','43','0','40781592','41655013','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(142,'0','15','AJM','EST','1','43','0','35682575','36555996','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(143,'0','15','AJM','EST','1','43','0','61239155','62112576','VIVO','79397','200200','3','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(144,'0','14','AJM','EST','1','43','0','48640173','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(145,'0','14','AJM','EST','1','43','0','63287356','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(146,'0','14','AJM','EST','1','43','0','77517675','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(147,'0','14','AJM','EST','1','43','0','74410267','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(148,'0','14','AJM','EST','1','43','0','28099683','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(149,'0','14','AJM','EST','1','43','0','40511295','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(150,'0','14','AJM','EST','1','43','0','51996542','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(151,'0','14','AJM','EST','1','43','0','62436353','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(152,'0','14','AJM','EST','1','43','0','63525566','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(153,'0','14','AJM','EST','1','43','0','72278133','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(154,'0','14','AJM','EST','1','43','0','21684102','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(155,'0','14','AJM','EST','1','43','0','38522692','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(156,'0','14','AJM','EST','1','43','0','31945110','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(157,'0','14','AJM','EST','1','43','0','37076134','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(158,'0','14','AJM','EST','1','43','0','22356753','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(159,'0','14','AJM','EST','1','43','0','51679328','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(160,'0','14','AJM','EST','1','43','0','30539854','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(161,'0','14','AJM','EST','1','43','0','58329593','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(162,'0','14','AJM','EST','1','43','0','42638019','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(163,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(164,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(165,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(166,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(167,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(168,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(169,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(170,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(171,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(172,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(173,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(174,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(175,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(176,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(177,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(178,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(179,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(180,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(181,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(182,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(183,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(184,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(185,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(186,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(187,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(188,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(189,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(190,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(191,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(192,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(193,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(194,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(195,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(196,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(197,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(198,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(199,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(200,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(201,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(202,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(203,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(204,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(205,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(206,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(207,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(208,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(209,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(210,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(211,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(212,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(213,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(214,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(215,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(216,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(217,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(218,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(219,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(220,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(221,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(222,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(223,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(224,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(225,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(226,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(227,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(228,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(229,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(230,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(231,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(232,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(233,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(234,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(235,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(236,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(237,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(238,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(239,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(240,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(241,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(242,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(243,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(244,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(245,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(246,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(247,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(248,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(249,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(250,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(251,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(252,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(253,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(254,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(255,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(256,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(257,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(258,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(259,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(260,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(261,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(262,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(263,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(264,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(265,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(266,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(267,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(268,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(269,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(270,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(271,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(272,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(273,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(274,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(275,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(276,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(277,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(278,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(279,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(280,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(281,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(282,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(283,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(284,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(285,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(286,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(287,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(288,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(289,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(290,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(291,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(292,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(293,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(294,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(295,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(296,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(297,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(298,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(299,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(300,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(301,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(302,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(303,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(304,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(305,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(306,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(307,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(308,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(309,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(310,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(311,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(312,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(313,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(314,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(315,'0','5','CHP','EST','1','11','568','58933364','33950947','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(316,'0','5','CHP','EST','1','11','569','46372661','23570817','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(317,'0','5','CHP','EST','1','11','0','57902040','33206384','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(318,'0','5','CHP','EST','1','11','0','40318423','58421212','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(319,'0','5','CHP','EST','1','11','567','23500076','60397845','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(320,'0','5','CHP','EST','1','11','0','58041793','34849995','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(321,'0','5','CHP','EST','1','11','0','53760419','46008816','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(322,'0','5','CHP','EST','1','11','0','16590316','54300978','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(323,'0','5','CHP','EST','1','11','0','47091606','54029721','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(324,'0','5','CHP','EST','1','11','0','40820025','23720793','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(325,'0','5','CHP','EST','1','11','0','61605857','57168043','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(326,'0','5','CHP','EST','1','11','0','22106013','20394565','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(327,'0','5','CHP','EST','1','11','0','49407229','56922602','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(328,'0','5','CHP','EST','1','11','0','37507169','49114566','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(329,'0','5','CHP','EST','1','11','0','37821275','58287622','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(330,'0','5','CHP','EST','1','11','0','23196601','30976158','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(331,'0','5','CHP','EST','1','11','0','17446293','55486794','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(332,'0','5','CHP','EST','1','11','0','55442826','60891834','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(333,'0','5','CHP','EST','1','11','0','54190926','48165874','VIVO','26412020','200','8','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(334,'0','4','CHP','EST','1','15','0','58933688','92884959','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(335,'0','4','CHP','EST','1','15','0','46372985','69944126','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(336,'0','4','CHP','EST','1','15','0','57902364','91109072','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(337,'0','4','CHP','EST','1','15','0','40318747','98740283','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(338,'0','4','CHP','EST','1','15','0','23500400','83898569','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(339,'0','4','CHP','EST','1','15','0','58042117','92892436','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(340,'0','4','CHP','EST','1','15','0','53760743','99769883','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(341,'0','4','CHP','EST','1','15','0','16590640','70891942','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(342,'0','4','CHP','EST','1','15','0','47091930','101121975','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(343,'0','4','CHP','EST','1','15','0','40820349','64541466','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(344,'0','4','CHP','EST','1','15','0','61606181','118774548','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(345,'0','4','CHP','EST','1','15','0','22106337','42501226','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(346,'0','4','CHP','EST','1','15','0','49407553','106330479','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(347,'0','4','CHP','EST','1','15','0','37507493','86622383','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(348,'0','4','CHP','EST','1','15','0','37821599','96109545','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(349,'0','4','CHP','EST','1','15','0','23196925','54173407','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(350,'0','4','CHP','EST','1','15','0','17446617','72933735','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(351,'0','4','CHP','EST','1','15','0','55443150','114376838','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(352,'0','4','CHP','EST','1','15','0','169819988','100564235','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(353,'0','4','CHP','EST','1','15','0','154755485','112096738','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(354,'0','4','CHP','EST','1','15','0','166291112','94513121','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(355,'0','4','CHP','EST','1','15','0','148707495','77694774','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(356,'0','4','CHP','EST','1','15','0','131889148','112236491','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(357,'0','4','CHP','EST','1','15','0','166430865','107955117','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(358,'0','4','CHP','EST','1','15','0','162149491','70785014','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(359,'0','4','CHP','EST','1','15','0','124979388','101286304','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(360,'0','4','CHP','EST','1','15','0','155480678','95014723','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(361,'0','4','CHP','EST','1','15','0','149209097','115800555','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(362,'0','4','CHP','EST','1','15','0','169994929','76300711','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(363,'0','4','CHP','EST','1','15','0','130495085','103601927','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(364,'0','4','CHP','EST','1','15','0','157796301','91701867','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(365,'0','4','CHP','EST','1','15','0','145896241','92015973','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(366,'0','4','CHP','EST','1','15','0','146210347','77391299','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(367,'0','4','CHP','EST','1','15','0','131585673','71640991','VIVO','26412020','200','9','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(368,'0','13','FTI','EST','1','7','568','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(369,'0','13','FTI','EST','1','7','569','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(370,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(371,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(372,'0','13','FTI','EST','1','7','567','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(373,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(374,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(375,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(376,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(377,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(378,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(379,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(380,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(381,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(382,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(383,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(384,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(385,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(386,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(387,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(388,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(389,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(390,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(391,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(392,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(393,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(394,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(395,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(396,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(397,'0','9','PRT','EST','1','35','0','151818647','268135758','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(398,'0','9','PRT','EST','1','35','0','116317111','265328547','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(399,'0','9','PRT','EST','1','35','0','149011436','288070466','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(400,'0','9','PRT','EST','1','35','0','139059030','246457999','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(401,'0','9','PRT','EST','1','35','0','107398969','258333522','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(402,'0','9','PRT','EST','1','35','0','150934553','304465179','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(403,'0','9','PRT','EST','1','35','0','153530626','241013208','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(404,'0','9','PRT','EST','1','35','0','87482582','235696487','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(405,'0','9','PRT','EST','1','35','0','148213905','253575720','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(406,'0','9','PRT','EST','1','35','0','105361815','285742544','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(407,'0','9','PRT','EST','1','35','0','180380729','244988292','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(408,'0','9','PRT','EST','1','35','0','64607563','220345595','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(409,'0','9','PRT','EST','1','35','0','155738032','279867908','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(410,'0','9','PRT','EST','1','35','0','124129876','258061020','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(411,'0','9','PRT','EST','1','35','0','133931144','211301476','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(412,'0','9','PRT','EST','1','35','0','77370332','167750684','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(413,'0','9','PRT','EST','1','35','0','90380352','260200340','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(414,'0','9','PRT','EST','1','35','0','169819988','440204211','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(415,'0','9','PRT','EST','1','35','0','270384223','537236446','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(416,'0','9','PRT','EST','1','35','0','266852223','527656456','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(417,'0','9','PRT','EST','1','35','0','260804233','487206502','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(418,'0','9','PRT','EST','1','35','0','226402269','470527908','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(419,'0','9','PRT','EST','1','35','0','244125639','518511621','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(420,'0','9','PRT','EST','1','35','0','274385982','507320487','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(421,'0','9','PRT','EST','1','35','0','232934505','459200197','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(422,'0','9','PRT','EST','1','35','0','226265692','476761093','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(423,'0','9','PRT','EST','1','35','0','250495401','515505053','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(424,'0','9','PRT','EST','1','35','0','265009652','511305292','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(425,'0','9','PRT','EST','1','35','0','246295640','480392652','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(426,'0','9','PRT','EST','1','35','0','234097012','483595180','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(427,'0','9','PRT','EST','1','35','0','249498168','487410382','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(428,'0','9','PRT','EST','1','35','0','237912214','461513860','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(429,'0','9','PRT','EST','1','35','0','223601646','426828310','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(430,'0','9','PRT','EST','1','35','0','203226664','203226664','NSA','NSA','NSA','11','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(431,'0','8','RST','EST','1','12','568','419954405','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(432,'0','8','RST','EST','1','12','569','381645658','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(433,'0','8','RST','EST','1','12','0','437081902','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(434,'0','8','RST','EST','1','12','0','385517029','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(435,'0','8','RST','EST','1','12','0','365732491','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(436,'0','8','RST','EST','1','12','567','455399732','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(437,'0','8','RST','EST','1','12','0','394543834','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(438,'0','8','RST','EST','1','12','0','323179069','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(439,'0','8','RST','EST','1','12','0','401789625','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(440,'0','8','RST','EST','1','12','0','391104359','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(441,'0','8','RST','EST','1','12','0','425369021','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(442,'0','8','RST','EST','1','12','0','284953158','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(443,'0','8','RST','EST','1','12','0','435605940','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(444,'0','8','RST','EST','1','12','0','382190896','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(445,'0','8','RST','EST','1','12','0','345232620','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(446,'0','8','RST','EST','1','12','0','245121016','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(447,'0','8','RST','EST','1','12','0','350580692','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(448,'0','8','RST','EST','1','12','0','610024199','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(449,'0','8','RST','EST','1','12','0','807620669','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(450,'0','8','RST','EST','1','12','0','794508679','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(451,'0','8','RST','EST','1','12','0','748010735','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(452,'0','8','RST','EST','1','12','0','696930177','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(453,'0','8','RST','EST','1','12','0','762637260','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(454,'0','8','RST','EST','1','12','0','781706469','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(455,'0','8','RST','EST','1','12','0','692134702','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(456,'0','8','RST','EST','1','12','0','703026785','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(457,'0','8','RST','EST','1','12','0','766000454','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(458,'0','8','RST','EST','1','12','0','776314944','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(459,'0','8','RST','EST','1','12','0','726688292','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(460,'0','8','RST','EST','1','12','0','717692192','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(461,'0','8','RST','EST','1','12','0','736908550','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(462,'0','8','RST','EST','1','12','0','699426074','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(463,'0','8','RST','EST','1','12','0','650429956','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(464,'0','8','RST','EST','1','12','0','406453328','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(465,'0','7','RST','EST','1','13','0','419954526','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(466,'0','7','RST','EST','1','13','0','381645779','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(467,'0','7','RST','EST','1','13','0','437082023','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(468,'0','7','RST','EST','1','13','0','385517150','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(469,'0','7','RST','EST','1','13','0','365732612','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(470,'0','7','RST','EST','1','13','0','455399853','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(471,'0','7','RST','EST','1','13','0','394543955','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(472,'0','7','RST','EST','1','13','0','323179190','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(473,'0','7','RST','EST','1','13','0','401789746','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(474,'0','7','RST','EST','1','13','0','391104480','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(475,'0','7','RST','EST','1','13','0','425369142','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(476,'0','7','RST','EST','1','13','0','284953279','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(477,'0','7','RST','EST','1','13','0','435606061','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(478,'0','7','RST','EST','1','13','0','382191017','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(479,'0','7','RST','EST','1','13','0','345232741','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(480,'0','7','RST','EST','1','13','0','245121137','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(481,'0','7','RST','EST','1','13','0','350580813','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(482,'0','7','RST','EST','1','13','0','610024320','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(483,'0','7','RST','EST','1','13','0','807620790','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(484,'0','7','RST','EST','1','13','0','794508800','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(485,'0','7','RST','EST','1','13','0','748010856','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(486,'0','7','RST','EST','1','13','0','696930298','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(487,'0','7','RST','EST','1','13','0','762637381','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(488,'0','7','RST','EST','1','13','0','781706590','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(489,'0','7','RST','EST','1','13','0','692134823','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(490,'0','7','RST','EST','1','13','0','703026906','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(491,'0','7','RST','EST','1','13','0','766000575','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(492,'0','7','RST','EST','1','13','0','776315065','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(493,'0','7','RST','EST','1','13','0','726688413','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(494,'0','7','RST','EST','1','13','0','717692313','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(495,'0','7','RST','EST','1','13','0','736908671','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(496,'0','7','RST','EST','1','13','0','699426195','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(497,'0','7','RST','EST','1','13','0','650430077','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(498,'0','7','RST','EST','1','13','0','406453449','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(499,'0','6','RST','EST','1','14','0','419956871','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(500,'0','6','RST','EST','1','14','0','381648124','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(501,'0','6','RST','EST','1','14','0','437084368','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(502,'0','6','RST','EST','1','14','0','385519495','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(503,'0','6','RST','EST','1','14','0','365734957','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(504,'0','6','RST','EST','1','14','0','455402198','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(505,'0','6','RST','EST','1','14','0','394546300','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(506,'0','6','RST','EST','1','14','0','323181535','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(507,'0','6','RST','EST','1','14','0','401792091','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(508,'0','6','RST','EST','1','14','0','391106825','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(509,'0','6','RST','EST','1','14','0','425371487','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(510,'0','6','RST','EST','1','14','0','284955624','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(511,'0','6','RST','EST','1','14','0','435608406','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(512,'0','6','RST','EST','1','14','0','382193362','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(513,'0','6','RST','EST','1','14','0','345235086','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(514,'0','6','RST','EST','1','14','0','245123482','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(515,'0','6','RST','EST','1','14','0','350583158','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(516,'0','6','RST','EST','1','14','0','610026665','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(517,'0','6','RST','EST','1','14','0','807623135','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(518,'0','6','RST','EST','1','14','0','794511145','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(519,'0','6','RST','EST','1','14','0','748013201','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(520,'0','6','RST','EST','1','14','0','696932643','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(521,'0','6','RST','EST','1','14','0','762639726','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(522,'0','6','RST','EST','1','14','0','781708935','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(523,'0','6','RST','EST','1','14','0','692137168','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(524,'0','6','RST','EST','1','14','0','703029251','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(525,'0','6','RST','EST','1','14','0','766002920','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(526,'0','6','RST','EST','1','14','0','776317410','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(527,'0','6','RST','EST','1','14','0','726690758','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(528,'0','6','RST','EST','1','14','0','717694658','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(529,'0','6','RST','EST','1','14','0','736911016','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(530,'0','6','RST','EST','1','14','0','699428540','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(531,'0','6','RST','EST','1','14','0','650432422','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(532,'0','6','RST','EST','1','14','0','406455794','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(533,'0','10','SRN','EST','1','56','0','419958070','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(534,'0','10','SRN','EST','1','56','0','381649323','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(535,'0','10','SRN','EST','1','56','0','437085567','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(536,'0','10','SRN','EST','1','56','0','385520694','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(537,'0','10','SRN','EST','1','56','0','365736156','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(538,'0','10','SRN','EST','1','56','0','455403397','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(539,'0','10','SRN','EST','1','56','0','394547499','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(540,'0','10','SRN','EST','1','56','0','323182734','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(541,'0','10','SRN','EST','1','56','0','401793290','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(542,'0','10','SRN','EST','1','56','0','391108024','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(543,'0','10','SRN','EST','1','56','0','425372686','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(544,'0','10','SRN','EST','1','56','0','284956823','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(545,'0','10','SRN','EST','1','56','0','435609605','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(546,'0','10','SRN','EST','1','56','0','382194561','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(547,'0','10','SRN','EST','1','56','0','345236285','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(548,'0','10','SRN','EST','1','56','0','245124681','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(549,'0','10','SRN','EST','1','56','0','350584357','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(550,'0','10','SRN','EST','1','56','0','610027864','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(551,'0','10','SRN','EST','1','56','0','807624334','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(552,'0','10','SRN','EST','1','56','0','794512344','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(553,'0','10','SRN','EST','1','56','0','748014400','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(554,'0','10','SRN','EST','1','56','0','696933842','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(555,'0','10','SRN','EST','1','56','0','762640925','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(556,'0','10','SRN','EST','1','56','0','781710134','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(557,'0','10','SRN','EST','1','56','0','692138367','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(558,'0','10','SRN','EST','1','56','0','703030450','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(559,'0','10','SRN','EST','1','56','0','766004119','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(560,'0','10','SRN','EST','1','56','0','776318609','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(561,'0','10','SRN','EST','1','56','0','726691957','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(562,'0','10','SRN','EST','1','56','0','717695857','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(563,'0','10','SRN','EST','1','56','0','736912215','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(564,'0','10','SRN','EST','1','56','0','699429739','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(565,'0','10','SRN','EST','1','56','0','650433621','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
--- INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(566,'0','10','SRN','EST','1','56','0','406456993','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+GO
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(1,'0','11','ABD','EST','1','8','568','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(2,'0','11','ABD','EST','1','8','569','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(3,'0','11','ABD','EST','1','8','567','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(4,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(5,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(6,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(7,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(8,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(9,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(10,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(11,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(12,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(13,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(14,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(15,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(16,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(17,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(18,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(19,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(20,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(21,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(22,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(23,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(24,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(25,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(26,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(27,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(28,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(29,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(30,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(31,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(32,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(33,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(34,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(35,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(36,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(37,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(38,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(39,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(40,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(41,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(42,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(43,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(44,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(45,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(46,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(47,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(48,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(49,'0','11','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','1','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(50,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(51,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(52,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(53,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(54,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(55,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(56,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(57,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(58,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(59,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(60,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(61,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(62,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(63,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(64,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(65,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(66,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(67,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(68,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(69,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(70,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(71,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(72,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(73,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(74,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(75,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(76,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(77,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(78,'0','12','ABD','EST','1','8','0','NSA','NSA','NSA','NSA','NSA','2','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(79,'0','15','AJM','EST','1','43','0','53578088','54451509','VIVO','134182','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(80,'0','15','AJM','EST','1','43','0','17888935','18762356','VIVO','135370','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(81,'0','15','AJM','EST','1','43','0','39204142','40077563','VIVO','136558','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(82,'0','15','AJM','EST','1','43','0','16234787','17108208','VIVO','137746','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(83,'0','15','AJM','EST','1','43','0','50659977','51533398','VIVO','138934','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(84,'0','15','AJM','EST','1','43','0','21605721','22479142','VIVO','140122','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(85,'0','15','AJM','EST','1','43','0','51938187','52811608','VIVO','141310','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(86,'0','15','AJM','EST','1','43','0','28122465','28995886','VIVO','168632','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(87,'0','15','AJM','EST','1','43','0','36535360','37408781','VIVO','251091','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(88,'0','15','AJM','EST','1','43','0','43023869','43897290','VIVO','267634','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(89,'0','15','AJM','EST','1','43','0','46949277','47822698','VIVO','188046','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(90,'0','15','AJM','EST','1','43','0','30852829','31726250','VIVO','233779','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(91,'0','15','AJM','EST','1','43','0','20779320','21652741','VIVO','369857','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(92,'0','15','AJM','EST','1','43','0','27574117','28447538','VIVO','458704','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(93,'0','15','AJM','EST','1','43','0','33558251','34431672','VIVO','401424','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(94,'0','15','AJM','EST','1','43','0','35415424','36288845','VIVO','3665771','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(95,'0','15','AJM','EST','1','43','0','32845841','33719262','VIVO','13235804','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(96,'0','15','AJM','EST','1','43','0','25024190','25897611','VIVO','13036840','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(97,'0','15','AJM','EST','1','43','0','19471220','20344641','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(98,'0','15','AJM','EST','1','43','0','58222606','59096027','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(99,'0','15','AJM','EST','1','43','0','34473411','35346832','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(100,'0','15','AJM','EST','1','43','0','37961095','38834516','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(101,'0','15','AJM','EST','1','43','0','61401552','62274973','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(102,'0','15','AJM','EST','1','43','0','23159805','24033226','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(103,'0','15','AJM','EST','1','43','0','60109865','60983286','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(104,'0','15','AJM','EST','1','43','0','53323169','54196590','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(105,'0','15','AJM','EST','1','43','0','30802753','31676174','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(106,'0','15','AJM','EST','1','43','0','44729642','45603063','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(107,'0','15','AJM','EST','1','43','0','24851072','25724493','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(108,'0','15','AJM','EST','1','43','0','29197982','30071403','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(109,'0','15','AJM','EST','1','43','0','39325227','40198648','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(110,'0','15','AJM','EST','1','43','0','50804653','51678074','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(111,'0','15','AJM','EST','1','43','0','26899075','27772496','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(112,'0','15','AJM','EST','1','43','0','29023073','29896494','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(113,'0','15','AJM','EST','1','43','0','35061174','35934595','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(114,'0','15','AJM','EST','1','43','0','31986601','32860022','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(115,'0','15','AJM','EST','1','43','0','54689011','55562432','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(116,'0','15','AJM','EST','1','43','0','28161686','29035107','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(117,'0','15','AJM','EST','1','43','0','33035062','33908483','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(118,'0','15','AJM','EST','1','43','0','55260117','56133538','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(119,'0','15','AJM','EST','1','43','0','38556549','39429970','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(120,'0','15','AJM','EST','1','43','0','28859630','29733051','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(121,'0','15','AJM','EST','1','43','0','42332667','43206088','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(122,'0','15','AJM','EST','1','43','0','48157621','49031042','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(123,'0','15','AJM','EST','1','43','0','25058426','25931847','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(124,'0','15','AJM','EST','1','43','0','22140614','23014035','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(125,'0','15','AJM','EST','1','43','0','48731606','49605027','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(126,'0','15','AJM','EST','1','43','0','60670244','61543665','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(127,'0','15','AJM','EST','1','43','0','33036728','33910149','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(128,'0','15','AJM','EST','1','43','0','35470143','36343564','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(129,'0','15','AJM','EST','1','43','0','52307740','53181161','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(130,'0','15','AJM','EST','1','43','0','38732927','39606348','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(131,'0','15','AJM','EST','1','43','0','22845992','23719413','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(132,'0','15','AJM','EST','1','43','0','18293889','19167310','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(133,'0','15','AJM','EST','1','43','0','57153158','58026579','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(134,'0','15','AJM','EST','1','43','0','60452730','61326151','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(135,'0','15','AJM','EST','1','43','0','41401738','42275159','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(136,'0','15','AJM','EST','1','43','0','17222481','18095902','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(137,'0','15','AJM','EST','1','43','0','18746179','19619600','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(138,'0','15','AJM','EST','1','43','0','19315518','20188939','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(139,'0','15','AJM','EST','1','43','0','31201606','32075027','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(140,'0','15','AJM','EST','1','43','0','23233771','24107192','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(141,'0','15','AJM','EST','1','43','0','40781592','41655013','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(142,'0','15','AJM','EST','1','43','0','35682575','36555996','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(143,'0','15','AJM','EST','1','43','0','61239155','62112576','VIVO','79397','200200','3','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(144,'0','14','AJM','EST','1','43','0','48640173','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(145,'0','14','AJM','EST','1','43','0','63287356','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(146,'0','14','AJM','EST','1','43','0','77517675','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(147,'0','14','AJM','EST','1','43','0','74410267','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(148,'0','14','AJM','EST','1','43','0','28099683','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(149,'0','14','AJM','EST','1','43','0','40511295','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(150,'0','14','AJM','EST','1','43','0','51996542','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(151,'0','14','AJM','EST','1','43','0','62436353','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(152,'0','14','AJM','EST','1','43','0','63525566','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(153,'0','14','AJM','EST','1','43','0','72278133','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(154,'0','14','AJM','EST','1','43','0','21684102','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(155,'0','14','AJM','EST','1','43','0','38522692','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(156,'0','14','AJM','EST','1','43','0','31945110','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(157,'0','14','AJM','EST','1','43','0','37076134','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(158,'0','14','AJM','EST','1','43','0','22356753','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(159,'0','14','AJM','EST','1','43','0','51679328','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(160,'0','14','AJM','EST','1','43','0','30539854','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(161,'0','14','AJM','EST','1','43','0','58329593','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(162,'0','14','AJM','EST','1','43','0','42638019','NSA','NSA','NSA','NSA','4','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(163,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(164,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(165,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(166,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(167,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(168,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(169,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(170,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(171,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(172,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(173,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(174,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(175,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(176,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(177,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(178,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(179,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(180,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(181,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(182,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(183,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(184,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(185,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(186,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(187,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(188,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(189,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(190,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(191,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(192,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(193,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(194,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(195,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(196,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(197,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(198,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(199,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(200,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(201,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(202,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(203,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(204,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(205,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(206,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(207,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(208,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(209,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(210,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(211,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(212,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(213,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(214,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(215,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(216,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(217,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(218,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(219,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(220,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(221,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(222,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(223,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(224,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(225,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(226,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(227,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(228,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(229,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(230,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(231,'0','2','CHC','EST','1','11','0','NSA','NSA','NSA','NSA','NSA','5','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(232,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(233,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(234,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(235,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(236,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(237,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(238,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(239,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(240,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(241,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(242,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(243,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(244,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(245,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(246,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(247,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(248,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(249,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(250,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(251,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(252,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(253,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(254,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(255,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(256,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(257,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(258,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(259,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(260,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(261,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(262,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(263,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(264,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(265,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(266,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(267,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(268,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(269,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(270,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(271,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(272,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(273,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(274,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(275,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(276,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(277,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(278,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(279,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(280,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(281,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(282,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(283,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(284,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(285,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(286,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(287,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(288,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(289,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(290,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(291,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(292,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(293,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(294,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(295,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(296,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(297,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(298,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(299,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(300,'0','3','CHC','EST','1','12','0','NSA','NSA','NSA','NSA','NSA','6','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(301,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(302,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(303,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(304,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(305,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(306,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(307,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(308,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(309,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(310,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(311,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(312,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(313,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(314,'0','1','CHC','EST','1','15','0','NSA','NSA','NSA','NSA','NSA','7','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(315,'0','5','CHP','EST','1','11','568','58933364','33950947','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(316,'0','5','CHP','EST','1','11','569','46372661','23570817','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(317,'0','5','CHP','EST','1','11','0','57902040','33206384','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(318,'0','5','CHP','EST','1','11','0','40318423','58421212','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(319,'0','5','CHP','EST','1','11','567','23500076','60397845','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(320,'0','5','CHP','EST','1','11','0','58041793','34849995','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(321,'0','5','CHP','EST','1','11','0','53760419','46008816','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(322,'0','5','CHP','EST','1','11','0','16590316','54300978','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(323,'0','5','CHP','EST','1','11','0','47091606','54029721','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(324,'0','5','CHP','EST','1','11','0','40820025','23720793','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(325,'0','5','CHP','EST','1','11','0','61605857','57168043','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(326,'0','5','CHP','EST','1','11','0','22106013','20394565','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(327,'0','5','CHP','EST','1','11','0','49407229','56922602','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(328,'0','5','CHP','EST','1','11','0','37507169','49114566','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(329,'0','5','CHP','EST','1','11','0','37821275','58287622','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(330,'0','5','CHP','EST','1','11','0','23196601','30976158','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(331,'0','5','CHP','EST','1','11','0','17446293','55486794','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(332,'0','5','CHP','EST','1','11','0','55442826','60891834','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(333,'0','5','CHP','EST','1','11','0','54190926','48165874','VIVO','26412020','200','8','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(334,'0','4','CHP','EST','1','15','0','58933688','92884959','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(335,'0','4','CHP','EST','1','15','0','46372985','69944126','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(336,'0','4','CHP','EST','1','15','0','57902364','91109072','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(337,'0','4','CHP','EST','1','15','0','40318747','98740283','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(338,'0','4','CHP','EST','1','15','0','23500400','83898569','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(339,'0','4','CHP','EST','1','15','0','58042117','92892436','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(340,'0','4','CHP','EST','1','15','0','53760743','99769883','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(341,'0','4','CHP','EST','1','15','0','16590640','70891942','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(342,'0','4','CHP','EST','1','15','0','47091930','101121975','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(343,'0','4','CHP','EST','1','15','0','40820349','64541466','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(344,'0','4','CHP','EST','1','15','0','61606181','118774548','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(345,'0','4','CHP','EST','1','15','0','22106337','42501226','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(346,'0','4','CHP','EST','1','15','0','49407553','106330479','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(347,'0','4','CHP','EST','1','15','0','37507493','86622383','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(348,'0','4','CHP','EST','1','15','0','37821599','96109545','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(349,'0','4','CHP','EST','1','15','0','23196925','54173407','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(350,'0','4','CHP','EST','1','15','0','17446617','72933735','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(351,'0','4','CHP','EST','1','15','0','55443150','114376838','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(352,'0','4','CHP','EST','1','15','0','169819988','100564235','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(353,'0','4','CHP','EST','1','15','0','154755485','112096738','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(354,'0','4','CHP','EST','1','15','0','166291112','94513121','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(355,'0','4','CHP','EST','1','15','0','148707495','77694774','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(356,'0','4','CHP','EST','1','15','0','131889148','112236491','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(357,'0','4','CHP','EST','1','15','0','166430865','107955117','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(358,'0','4','CHP','EST','1','15','0','162149491','70785014','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(359,'0','4','CHP','EST','1','15','0','124979388','101286304','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(360,'0','4','CHP','EST','1','15','0','155480678','95014723','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(361,'0','4','CHP','EST','1','15','0','149209097','115800555','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(362,'0','4','CHP','EST','1','15','0','169994929','76300711','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(363,'0','4','CHP','EST','1','15','0','130495085','103601927','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(364,'0','4','CHP','EST','1','15','0','157796301','91701867','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(365,'0','4','CHP','EST','1','15','0','145896241','92015973','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(366,'0','4','CHP','EST','1','15','0','146210347','77391299','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(367,'0','4','CHP','EST','1','15','0','131585673','71640991','VIVO','26412020','200','9','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(368,'0','13','FTI','EST','1','7','568','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(369,'0','13','FTI','EST','1','7','569','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(370,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(371,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(372,'0','13','FTI','EST','1','7','567','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(373,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(374,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(375,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(376,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(377,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(378,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(379,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(380,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(381,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(382,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(383,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(384,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(385,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(386,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(387,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(388,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(389,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(390,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(391,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(392,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(393,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(394,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(395,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(396,'0','13','FTI','EST','1','7','0','NSA','NSA','NSA','NSA','NSA','10','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(397,'0','9','PRT','EST','1','35','0','151818647','268135758','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(398,'0','9','PRT','EST','1','35','0','116317111','265328547','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(399,'0','9','PRT','EST','1','35','0','149011436','288070466','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(400,'0','9','PRT','EST','1','35','0','139059030','246457999','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(401,'0','9','PRT','EST','1','35','0','107398969','258333522','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(402,'0','9','PRT','EST','1','35','0','150934553','304465179','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(403,'0','9','PRT','EST','1','35','0','153530626','241013208','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(404,'0','9','PRT','EST','1','35','0','87482582','235696487','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(405,'0','9','PRT','EST','1','35','0','148213905','253575720','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(406,'0','9','PRT','EST','1','35','0','105361815','285742544','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(407,'0','9','PRT','EST','1','35','0','180380729','244988292','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(408,'0','9','PRT','EST','1','35','0','64607563','220345595','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(409,'0','9','PRT','EST','1','35','0','155738032','279867908','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(410,'0','9','PRT','EST','1','35','0','124129876','258061020','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(411,'0','9','PRT','EST','1','35','0','133931144','211301476','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(412,'0','9','PRT','EST','1','35','0','77370332','167750684','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(413,'0','9','PRT','EST','1','35','0','90380352','260200340','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(414,'0','9','PRT','EST','1','35','0','169819988','440204211','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(415,'0','9','PRT','EST','1','35','0','270384223','537236446','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(416,'0','9','PRT','EST','1','35','0','266852223','527656456','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(417,'0','9','PRT','EST','1','35','0','260804233','487206502','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(418,'0','9','PRT','EST','1','35','0','226402269','470527908','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(419,'0','9','PRT','EST','1','35','0','244125639','518511621','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(420,'0','9','PRT','EST','1','35','0','274385982','507320487','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(421,'0','9','PRT','EST','1','35','0','232934505','459200197','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(422,'0','9','PRT','EST','1','35','0','226265692','476761093','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(423,'0','9','PRT','EST','1','35','0','250495401','515505053','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(424,'0','9','PRT','EST','1','35','0','265009652','511305292','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(425,'0','9','PRT','EST','1','35','0','246295640','480392652','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(426,'0','9','PRT','EST','1','35','0','234097012','483595180','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(427,'0','9','PRT','EST','1','35','0','249498168','487410382','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(428,'0','9','PRT','EST','1','35','0','237912214','461513860','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(429,'0','9','PRT','EST','1','35','0','223601646','426828310','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(430,'0','9','PRT','EST','1','35','0','203226664','203226664','NSA','NSA','NSA','11','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(431,'0','8','RST','EST','1','12','568','419954405','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(432,'0','8','RST','EST','1','12','569','381645658','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(433,'0','8','RST','EST','1','12','0','437081902','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(434,'0','8','RST','EST','1','12','0','385517029','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(435,'0','8','RST','EST','1','12','0','365732491','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(436,'0','8','RST','EST','1','12','567','455399732','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(437,'0','8','RST','EST','1','12','0','394543834','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(438,'0','8','RST','EST','1','12','0','323179069','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(439,'0','8','RST','EST','1','12','0','401789625','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(440,'0','8','RST','EST','1','12','0','391104359','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(441,'0','8','RST','EST','1','12','0','425369021','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(442,'0','8','RST','EST','1','12','0','284953158','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(443,'0','8','RST','EST','1','12','0','435605940','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(444,'0','8','RST','EST','1','12','0','382190896','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(445,'0','8','RST','EST','1','12','0','345232620','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(446,'0','8','RST','EST','1','12','0','245121016','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(447,'0','8','RST','EST','1','12','0','350580692','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(448,'0','8','RST','EST','1','12','0','610024199','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(449,'0','8','RST','EST','1','12','0','807620669','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(450,'0','8','RST','EST','1','12','0','794508679','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(451,'0','8','RST','EST','1','12','0','748010735','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(452,'0','8','RST','EST','1','12','0','696930177','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(453,'0','8','RST','EST','1','12','0','762637260','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(454,'0','8','RST','EST','1','12','0','781706469','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(455,'0','8','RST','EST','1','12','0','692134702','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(456,'0','8','RST','EST','1','12','0','703026785','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(457,'0','8','RST','EST','1','12','0','766000454','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(458,'0','8','RST','EST','1','12','0','776314944','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(459,'0','8','RST','EST','1','12','0','726688292','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(460,'0','8','RST','EST','1','12','0','717692192','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(461,'0','8','RST','EST','1','12','0','736908550','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(462,'0','8','RST','EST','1','12','0','699426074','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(463,'0','8','RST','EST','1','12','0','650429956','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(464,'0','8','RST','EST','1','12','0','406453328','NSA','NSA','NSA','NSA','12','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(465,'0','7','RST','EST','1','13','0','419954526','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(466,'0','7','RST','EST','1','13','0','381645779','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(467,'0','7','RST','EST','1','13','0','437082023','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(468,'0','7','RST','EST','1','13','0','385517150','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(469,'0','7','RST','EST','1','13','0','365732612','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(470,'0','7','RST','EST','1','13','0','455399853','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(471,'0','7','RST','EST','1','13','0','394543955','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(472,'0','7','RST','EST','1','13','0','323179190','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(473,'0','7','RST','EST','1','13','0','401789746','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(474,'0','7','RST','EST','1','13','0','391104480','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(475,'0','7','RST','EST','1','13','0','425369142','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(476,'0','7','RST','EST','1','13','0','284953279','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(477,'0','7','RST','EST','1','13','0','435606061','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(478,'0','7','RST','EST','1','13','0','382191017','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(479,'0','7','RST','EST','1','13','0','345232741','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(480,'0','7','RST','EST','1','13','0','245121137','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(481,'0','7','RST','EST','1','13','0','350580813','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(482,'0','7','RST','EST','1','13','0','610024320','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(483,'0','7','RST','EST','1','13','0','807620790','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(484,'0','7','RST','EST','1','13','0','794508800','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(485,'0','7','RST','EST','1','13','0','748010856','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(486,'0','7','RST','EST','1','13','0','696930298','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(487,'0','7','RST','EST','1','13','0','762637381','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(488,'0','7','RST','EST','1','13','0','781706590','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(489,'0','7','RST','EST','1','13','0','692134823','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(490,'0','7','RST','EST','1','13','0','703026906','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(491,'0','7','RST','EST','1','13','0','766000575','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(492,'0','7','RST','EST','1','13','0','776315065','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(493,'0','7','RST','EST','1','13','0','726688413','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(494,'0','7','RST','EST','1','13','0','717692313','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(495,'0','7','RST','EST','1','13','0','736908671','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(496,'0','7','RST','EST','1','13','0','699426195','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(497,'0','7','RST','EST','1','13','0','650430077','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(498,'0','7','RST','EST','1','13','0','406453449','NSA','NSA','NSA','NSA','13','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(499,'0','6','RST','EST','1','14','0','419956871','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(500,'0','6','RST','EST','1','14','0','381648124','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(501,'0','6','RST','EST','1','14','0','437084368','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(502,'0','6','RST','EST','1','14','0','385519495','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(503,'0','6','RST','EST','1','14','0','365734957','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(504,'0','6','RST','EST','1','14','0','455402198','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(505,'0','6','RST','EST','1','14','0','394546300','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(506,'0','6','RST','EST','1','14','0','323181535','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(507,'0','6','RST','EST','1','14','0','401792091','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(508,'0','6','RST','EST','1','14','0','391106825','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(509,'0','6','RST','EST','1','14','0','425371487','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(510,'0','6','RST','EST','1','14','0','284955624','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(511,'0','6','RST','EST','1','14','0','435608406','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(512,'0','6','RST','EST','1','14','0','382193362','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(513,'0','6','RST','EST','1','14','0','345235086','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(514,'0','6','RST','EST','1','14','0','245123482','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(515,'0','6','RST','EST','1','14','0','350583158','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(516,'0','6','RST','EST','1','14','0','610026665','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(517,'0','6','RST','EST','1','14','0','807623135','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(518,'0','6','RST','EST','1','14','0','794511145','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(519,'0','6','RST','EST','1','14','0','748013201','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(520,'0','6','RST','EST','1','14','0','696932643','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(521,'0','6','RST','EST','1','14','0','762639726','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(522,'0','6','RST','EST','1','14','0','781708935','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(523,'0','6','RST','EST','1','14','0','692137168','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(524,'0','6','RST','EST','1','14','0','703029251','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(525,'0','6','RST','EST','1','14','0','766002920','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(526,'0','6','RST','EST','1','14','0','776317410','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(527,'0','6','RST','EST','1','14','0','726690758','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(528,'0','6','RST','EST','1','14','0','717694658','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(529,'0','6','RST','EST','1','14','0','736911016','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(530,'0','6','RST','EST','1','14','0','699428540','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(531,'0','6','RST','EST','1','14','0','650432422','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(532,'0','6','RST','EST','1','14','0','406455794','NSA','NSA','NSA','NSA','14','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(533,'0','10','SRN','EST','1','56','0','419958070','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(534,'0','10','SRN','EST','1','56','0','381649323','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(535,'0','10','SRN','EST','1','56','0','437085567','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(536,'0','10','SRN','EST','1','56','0','385520694','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(537,'0','10','SRN','EST','1','56','0','365736156','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(538,'0','10','SRN','EST','1','56','0','455403397','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(539,'0','10','SRN','EST','1','56','0','394547499','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(540,'0','10','SRN','EST','1','56','0','323182734','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(541,'0','10','SRN','EST','1','56','0','401793290','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(542,'0','10','SRN','EST','1','56','0','391108024','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(543,'0','10','SRN','EST','1','56','0','425372686','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(544,'0','10','SRN','EST','1','56','0','284956823','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(545,'0','10','SRN','EST','1','56','0','435609605','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(546,'0','10','SRN','EST','1','56','0','382194561','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(547,'0','10','SRN','EST','1','56','0','345236285','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(548,'0','10','SRN','EST','1','56','0','245124681','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(549,'0','10','SRN','EST','1','56','0','350584357','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(550,'0','10','SRN','EST','1','56','0','610027864','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(551,'0','10','SRN','EST','1','56','0','807624334','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(552,'0','10','SRN','EST','1','56','0','794512344','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(553,'0','10','SRN','EST','1','56','0','748014400','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(554,'0','10','SRN','EST','1','56','0','696933842','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(555,'0','10','SRN','EST','1','56','0','762640925','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(556,'0','10','SRN','EST','1','56','0','781710134','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(557,'0','10','SRN','EST','1','56','0','692138367','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(558,'0','10','SRN','EST','1','56','0','703030450','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(559,'0','10','SRN','EST','1','56','0','766004119','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(560,'0','10','SRN','EST','1','56','0','776318609','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(561,'0','10','SRN','EST','1','56','0','726691957','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(562,'0','10','SRN','EST','1','56','0','717695857','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(563,'0','10','SRN','EST','1','56','0','736912215','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(564,'0','10','SRN','EST','1','56','0','699429739','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(565,'0','10','SRN','EST','1','56','0','650433621','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(566,'0','10','SRN','EST','1','56','0','406456993','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(570,'117','7','AUT','EST','1','56','0','406456673','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(571,'116','6','AUT','EST','1','56','0','406456603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(572,'0','10','AUT','EST','1','56','0','650572602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(573,'0','10','AUT','EST','1','56','0','406573603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(574,'0','10','AUT','EST','1','56','0','650574602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(575,'0','10','AUT','EST','1','56','0','406575603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(576,'0','10','AUT','EST','1','56','0','650576602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(577,'0','10','AUT','EST','1','56','0','406577603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(578,'0','10','AUT','EST','1','56','0','650578602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(579,'0','10','AUT','EST','1','56','0','406579603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(580,'0','10','AUT','EST','1','56','0','650580602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(581,'0','10','AUT','EST','1','56','0','406581603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(582,'0','10','AUT','EST','1','56','0','650582602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(583,'0','10','AUT','EST','1','56','0','406583603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(584,'0','10','AUT','EST','1','56','0','650584602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(584,'0','10','AUT','EST','1','56','0','406585603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(586,'0','10','AUT','EST','1','56','0','650586602','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(587,'0','10','AUT','EST','1','56','0','406587603','NSA','NSA','NSA','NSA','15','NSA0000','0',1);
+
 /* se colocar este da erro no cadastro de novo auto
 INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(567,'0','16','AUT','EST','1','0','0','455399732','NSA','NSA','NSA','NSA','16','NSA0000','4',1);
 INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_CODGP,GMP_CODPE,GMP_CODPEI,GMP_CODFBR,GMP_CODAUT,GMP_NUMSERIE,GMP_SINCARD,GMP_OPERADORA,GMP_FONE,GMP_CONTRATO,GMP_CODGML,GMP_PLACACHASSI,GMP_COMPOSICAO,GMP_CODUSR) VALUES(568,'0','16','AUT','EST','1','0','0','419954405','NSA','NSA','NSA','NSA','16','NSA0000','4',1);
@@ -47581,7 +48702,7 @@ SELECT 'INSERT INTO VGRUPOMODELOPRODUTO(GMP_CODIGO,GMP_CODCNTT,GMP_CODGM,GMP_COD
 +''','''+CAST(GMP_PLACACHASSI AS VARCHAR(20))
 +''','''+CAST(GMP_COMPOSICAO AS VARCHAR(10))
 +''',1);'
-FROM GRUPOMODELOPRODUTO
+FROM GRUPOMODELOPRODUTO WHERE GMP_CODGP='AUT'
 */
 GO
 INSERT INTO VGRUPOMODELOLOTE(GML_CODIGO,GML_CODGM,GML_DATA,GML_ENTRADA,GML_CODGMPINI,GML_CODGMPFIM,GML_CODUSR) VALUES(1,'11','2018-12-11','49','1','49',1);
@@ -47669,103 +48790,103 @@ INSERT INTO VVEICULOCOR(VCR_CODIGO,VCR_NOME,VCR_ATIVO ,VCR_REG ,VCR_CODUSR) VALU
 INSERT INTO VVEICULOCOR(VCR_CODIGO,VCR_NOME,VCR_ATIVO ,VCR_REG ,VCR_CODUSR) VALUES('17','VERMELHA','S','P',1);
 INSERT INTO VVEICULOCOR(VCR_CODIGO,VCR_NOME,VCR_ATIVO ,VCR_REG ,VCR_CODUSR) VALUES('18','FANTASIA','S','P',1);
 GO 
--- INSERT INTO VVEICULOFABRICANTE VALUES('AGL','AGRALE','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('ANT','ANTONINI','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('BRO','BOREAL','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('BSA','BIASI','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('BTL','VITAL MARRARA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('CHG','CHARGER','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('CHV','CHEVROLET','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('CTR','CITROEN','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('DBR','DAMBROZ','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('DF','DAF','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('FCH','FACHINI','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('FIT','FIAT','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('FLL','FOLLE','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('FNF','FREENHALF','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('FRD','FORD','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('FRG','FURGOBENTO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('GFR','GAFOR','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('GLG','GALEGO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('GMM','GMC','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('GRR','GUERRA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('HB','HBZ','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('HND','HONDA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('HWO','HOWO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('HYN','HYUNDAI','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('IBR','IBIPORA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('IDR','IDEROL','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('ITL','INTERNACIONAL','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('IVC','IVECO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('KA','KIA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('KNT','KRONORTE','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('KRN','KRONE','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('LBL','LIBRELATO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('LNC','LENCOIS','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MBZ','MERCEDES BENZ','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MLL','MELLON','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MN','MAN','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MNS','MANOS','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MTB','MITSUBISHI','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MTR','MATRA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('MXF','MAXFORT','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('NJU','NIJU','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('NMO','NOMA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('NSA','NAO SE APLICA','S','S',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PGT','PEUGEOT','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PLM','PALMEIRA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PMA','PUMA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PPP','PPL','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PRN','PARNAIBA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PST','PASTRE','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('PTC','PRATICSIDER','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RDI','RODOVIA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RDL','RODOLINEA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RDM','RODOMOURA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RDO','RODOFORT','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RDT','RODOTEC','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RDV','RODOVALE','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RHD','RHODOSS','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RND','RANDON','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('RNT','RENAULT','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('SCH','SCHIFFER','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('SCN','SCANIA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('SNT','SINOTRUK','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('SPD','SAO PEDRO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('SSA','SSANGYONG','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('TCT','TECTRAN','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('THM','THERMOSARA','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('THS','THERMOSUL','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('TNS','TANESFILL','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('TRC','TURISCAR','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('TRL','TRIELHT','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('TSS','ROSSETI','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('UNC','UNICAR','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('VOL','VOLVO','S','P',1);
--- INSERT INTO VVEICULOFABRICANTE VALUES('VW','VOLKSWAGEM','S','P',1);
--- GO
--- INSERT INTO VVEICULOTIPO VALUES('CRR','CARRO','S','P',1);
--- INSERT INTO VVEICULOTIPO VALUES('CRT','CARRETA','S','P',1);
--- INSERT INTO VVEICULOTIPO VALUES('CMN','CAMINHAO','S','P',1);
--- INSERT INTO VVEICULOTIPO VALUES('NSA','NAO SE APLICA','S','S',1);
--- GO
--- INSERT INTO VVEICULOMODELO VALUES('1','NAO SE APLICA','VOL','S','S',1);
--- INSERT INTO VVEICULOMODELO VALUES('2','CONSTELATION','VW','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('3','FH','SCN','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('4','R134','VOL','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('5','STRALIS HD 740S 42TZ','IVC','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('6','INTERNATIONAL 9800P7','ITL','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('7','IVECO CURSOR 450E33T','IVC','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('8','IVECO DAILY 35S14DCS','IVC','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('9','STRALIS HD 570S38T','IVC','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('10','STRALIHD 450 S38 TN1','IVC','S','P',1);
--- INSERT INTO VVEICULOMODELO VALUES('11','STRALIHD 740 S42 TZN','IVC','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('AGL','AGRALE','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('ANT','ANTONINI','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('BRO','BOREAL','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('BSA','BIASI','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('BTL','VITAL MARRARA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('CHG','CHARGER','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('CHV','CHEVROLET','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('CTR','CITROEN','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('DBR','DAMBROZ','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('DF','DAF','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('FCH','FACHINI','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('FIT','FIAT','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('FLL','FOLLE','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('FNF','FREENHALF','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('FRD','FORD','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('FRG','FURGOBENTO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('GFR','GAFOR','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('GLG','GALEGO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('GMM','GMC','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('GRR','GUERRA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('HB','HBZ','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('HND','HONDA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('HWO','HOWO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('HYN','HYUNDAI','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('IBR','IBIPORA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('IDR','IDEROL','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('ITL','INTERNACIONAL','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('IVC','IVECO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('KA','KIA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('KNT','KRONORTE','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('KRN','KRONE','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('LBL','LIBRELATO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('LNC','LENCOIS','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MBZ','MERCEDES BENZ','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MLL','MELLON','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MN','MAN','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MNS','MANOS','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MTB','MITSUBISHI','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MTR','MATRA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('MXF','MAXFORT','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('NJU','NIJU','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('NMO','NOMA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('NSA','NAO SE APLICA','S','S',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PGT','PEUGEOT','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PLM','PALMEIRA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PMA','PUMA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PPP','PPL','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PRN','PARNAIBA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PST','PASTRE','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('PTC','PRATICSIDER','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RDI','RODOVIA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RDL','RODOLINEA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RDM','RODOMOURA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RDO','RODOFORT','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RDT','RODOTEC','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RDV','RODOVALE','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RHD','RHODOSS','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RND','RANDON','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('RNT','RENAULT','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('SCH','SCHIFFER','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('SCN','SCANIA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('SNT','SINOTRUK','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('SPD','SAO PEDRO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('SSA','SSANGYONG','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('TCT','TECTRAN','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('THM','THERMOSARA','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('THS','THERMOSUL','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('TNS','TANESFILL','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('TRC','TURISCAR','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('TRL','TRIELHT','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('TSS','ROSSETI','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('UNC','UNICAR','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('VOL','VOLVO','S','P',1);
+INSERT INTO VVEICULOFABRICANTE VALUES('VW','VOLKSWAGEM','S','P',1);
+GO
+INSERT INTO VVEICULOTIPO VALUES('CRR','CARRO','S','P',1);
+INSERT INTO VVEICULOTIPO VALUES('CRT','CARRETA','S','P',1);
+INSERT INTO VVEICULOTIPO VALUES('CMN','CAMINHAO','S','P',1);
+INSERT INTO VVEICULOTIPO VALUES('NSA','NAO SE APLICA','S','S',1);
+GO
+INSERT INTO VVEICULOMODELO VALUES('1','NAO SE APLICA','VOL','S','S',1);
+INSERT INTO VVEICULOMODELO VALUES('2','CONSTELATION','VW','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('3','FH','SCN','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('4','R134','VOL','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('5','STRALIS HD 740S 42TZ','IVC','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('6','INTERNATIONAL 9800P7','ITL','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('7','IVECO CURSOR 450E33T','IVC','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('8','IVECO DAILY 35S14DCS','IVC','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('9','STRALIS HD 570S38T','IVC','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('10','STRALIHD 450 S38 TN1','IVC','S','P',1);
+INSERT INTO VVEICULOMODELO VALUES('11','STRALIHD 740 S42 TZN','IVC','S','P',1);
 GO
 --UPDATE GENERATOR SET GNR_VALOR=576 WHERE GNR_CODIGO='GRUPOMODELOPRODUTO';
 --UPDATE GENERATOR SET GNR_VALOR=15 WHERE GNR_CODIGO='GRUPOMODELOLOTE';
 --UPDATE GENERATOR SET GNR_VALOR=20 WHERE GNR_CODIGO='GRUPOMODELO';
 --GO
-UPDATE USUARIO SET USR_VENCTO='2019-06-30',USR_PRIMEIROACESSO='N';  
+UPDATE USUARIO SET USR_VENCTO='2019-12-31',USR_PRIMEIROACESSO='N';  
 
 
 /*
@@ -47789,11 +48910,11 @@ BEGIN
   -- ------------------|------|----|----|--------------------|----------------------------------------------------------
   -- NFP_NUMNF         | PK   |    |    | int, not null      |
   -- NFP_CODSNF        | PK   |    |    | int, not null      |
-  -- SNF_CODFLL        | SEL  |    |    | int                | codigo da filial (SERIENF)
+	-- SNF_CODFLL        | SEL  |    |    | int                | codigo da filial (SERIENF)
   -- NFP_EMISSOR       |      |    |    | vc(14), not null   |
-  -- EMISSOR           | SEL  |    |    | vc(60)             | nome do emissor (FAVORECIDO)
+	-- EMISSOR           | SEL  |    |    | vc(60)             | nome do emissor (FAVORECIDO)
   -- NFP_CODNO         |      |    |    | int, not null      | 
-  -- OPERACAO          | SEL  |    |    | vc(30)             | nome da natureza de operacao (NATUREZAOPERACAO)
+	-- OPERACAO          | SEL  |    |    | vc(60)             | nome da natureza de operacao (NATUREZAOPERACAO)
   -- NFP_GUIA          |      |    |    | int, not null      |
   -- NFP_VLRITENS      |      |    |    | n(15,2), not null  | deve ser a soma do valor dos itens (qtdade * unitario)
   -- NFP_VLRFRETE      |      |    |    | n(15,2), not null  | deve ser a soma do frete nos itens
@@ -47807,14 +48928,14 @@ BEGIN
   -- NFP_VLRDESCONTO   |      |    |    | n(15,2), not null  | deve ser a soma do desconto nos itens 
   -- NFP_VLRTOTAL      |      |    |    | n(15,2), not null  | deve ser a soma de ((itens+frete+st+ipi+st+outras+seguro)-desconto)
   -- NFP_CODTRN        |      |    |    | int, not null      | codigo da transportadora
-  -- TRANSPORTADORA    | SEL  |    |    | vc(60)             | nome da transportadora (FAVORECIDO)
+	-- TRANSPORTADORA    | SEL  |    |    | vc(60)             | nome da transportadora (FAVORECIDO)
   -- NFP_VOLUME        |      |    |    | vc(10), null       | qtdade de volumes transportados
   -- NFP_ESPECIE       |      |    |    | vc(10), null       | especie de volumes transportados
   -- NFP_CODVND        |      |    |    | int, not null      | codigo do vendedor
-  -- VENDEDOR          | SEL  |    |    | vc(60)             | nome do vendedor (FAVORECIDO)
+	-- VENDEDOR          | SEL  |    |    | vc(60)             | nome do vendedor (FAVORECIDO)
   -- NFP_DTCANCELA     |      |    |    | date, null         | data do cancelamento da nota
   -- NFP_CODCMP        |      |    |    | int, not null      | mes de competencia
-  -- CMP_NOME          | SEL  |    |    | vc(6)              | apelido do mes de competencia
+	-- CMP_NOME          | SEL  |    |    | vc(6)              | apelido do mes de competencia
   -- NFP_LIVRO         |      |    |    | vc(1), not null    | S=livro/arquivos fiscais, N=nao sai em relatorios fiscais/livros fiscais/arquivos fiscais
   -- NFP_DTENTRADA     |      |    |    | date, not null     | no caso de nota de saida sera preenchido com a emissao da nota
   -- NFP_PESOBRUTO     |      |    |    | n(15,4), not null  |
@@ -47838,11 +48959,11 @@ BEGIN
   -------------------
   DECLARE @nfpNumNfNew        Integer;
   DECLARE @nfpCodSnfNew       Integer;
-  DECLARE @snfCodFllNew       Integer;
+	DECLARE @snfCodFllNew       Integer;
   DECLARE @nfpEmissorNew      VarChar(14);
-  DECLARE @EmissorNew         VarChar(60);
+	DECLARE @EmissorNew         VarChar(60);
   DECLARE @nfpCodNoNew        Integer;
-  DECLARE @OperacaoNew        varchar(30);
+	DECLARE @OperacaoNew        varchar(60);
   DECLARE @nfpGuiaNew         Integer;
   DECLARE @nfpVlrItensNew     Numeric(15,2);
   DECLARE @nfpVlrFreteNew     Numeric(15,2);
@@ -47856,14 +48977,14 @@ BEGIN
   DECLARE @nfpVlrDescontoNew  Numeric(15,2);
   DECLARE @nfpVlrTotalNew     Numeric(15,2);
   DECLARE @nfpCodTrnNew       Integer;
-  DECLARE @TransportadoraNew  Varchar(60);
+	DECLARE @TransportadoraNew  Varchar(60);
   DECLARE @nfpVolumeNew       Varchar(10);
   DECLARE @nfpEspecieNew      varchar(10);
   DECLARE @nfpCodVndNew       Integer;
-  DECLARE @VendedorNew        varchar(60);
+	DECLARE @VendedorNew        varchar(60);
   DECLARE @nfpDtCancelaNew    date;
   DECLARE @nfpCodCmpNew       Integer;
-  DECLARE @cmpNomeNew         varchar(60);
+	DECLARE @cmpNomeNew         varchar(60);
   DECLARE @nfpLivroNew        varchar(1);
   DECLARE @nfpDtEntradaNew    date;
   DECLARE @nfpPesoBrutoNew    numeric(15,4);
@@ -48132,7 +49253,6 @@ BEGIN
       RETURN;
     END CATCH
   END
-  
   --
   --
   -------------------------------------------------------------------------------------
@@ -48141,4 +49261,278 @@ BEGIN
 GO
 */
 
+/*
+CodFVR
+codcntt
+vencimento 
+valor por auto
+nf ou recibo - > ela vai ter que falar
+empresa - > tracloc,con,
+cod servico -> vinculado ao auto
+cod-vendedor
+pagar_lancto(campo informando se ja foi faturado ou nao, com numero do lançamento financeiro)
+pre-faturamento (s/n) default n
+*/
 
+/*
+CREATE TABLE CONTRATOCOBRANCA(
+CNTC_CODCNTT INTEGER NOT NULL,
+CNTC_CODGM INTEGER NOT NULL,
+CNTC_CODSRV INTEGER NOT NULL,
+CNTC_PGTO VARCHAR(1) NOT NULL,
+CNTC_VLRMENSAL NUMERIC(15,6) NOT NULL,
+CNTC_VLRTOTAL NUMERIC(15,6) NOT NULL
+CONSTRAINT PKCONTRATOCOBRANCA PRIMARY KEY (CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV)
+)
+
+SELECT 'INSERT INTO CONTACOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES('
++CAST(CNTC_CODCNTT AS VARCHAR(10))
++','''+CAST(CNTC_CODGM AS VARCHAR(20))
++''','''+CAST(CNTC_CODSRV AS VARCHAR(20))
++''','''+CAST(CNTC_PGTO AS VARCHAR(10))
++''','''+CAST(CNTC_VLRMENSAL AS VARCHAR(10))
++''','''+CAST(CNTC_VLRTOTAL AS VARCHAR(60))
++');'
+FROM CONTRATOCOBRANCA
+
+
+delete from FROM CONTRATOCOBRANCA
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(116,'6','4','M','5.00','50.00');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(116,'6','5','M','5.00','50.00');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(116,'6','34','M','59.90','599.00');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(116,'6','59','M','5.00','50.00');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(116,'6','62','P','99.00','990.00');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(117,'7','5','M','5.00','25.00');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(117,'7','41','M','49.90','249.50');
+INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT,CNTC_CODGM,CNTC_CODSRV,CNTC_PGTO,CNTC_VLRMENSAL,CNTC_VLRTOTAL) VALUES(117,'7','62','P','150.00','750.00');
+
+*/
+
+SELECT
+A.CNTC_CODCNTT
+,A.CNTC_CODGM
+,A.CNTC_CODSRV
+,A.CNTC_PGTO
+,A.CNTC_VLRMENSAL
+,A.CNTC_VLRTOTAL
+,CNTT.CNTT_CODFVR
+FROM CONTRATOCOBRANCA A
+LEFT OUTER JOIN CONTRATO CNTT ON A.CNTC_CODCNTT=CNTT.CNTT_CODIGO
+SELECT * FROM CONTRATO
+
+
+
+
+
+
+INSERT INTO CONTRATO(
+  CNTT_CODIGO
+  ,CNTT_TIPO
+  ,CNTT_EMISSAO
+  ,CNTT_ATIVO
+  ,CNTT_DTINICIO
+  ,CNTT_DTFIM
+  ,CNTT_CODFVR
+  ,CNTT_CODVND
+  ,CNTT_CODIND
+  ,CNTT_VLRMENSAL
+  ,CNTT_VLRPONTUAL
+  ,CNTT_QTDAUTO
+  ,CNTT_QTDENVIADO
+  ,CNTT_QTDEMPENHO
+  ,CNTT_QTDAGENDA
+  ,CNTT_QTDOS
+  ,CNTT_QTDPLACA
+  ,CNTT_QTDATIVADO
+  ,CNTT_FIDELIDADE
+  ,CNTT_INSTPROPRIA
+  ,CNTT_MESES
+  ,CNTT_DIA
+  ,CNTT_VLRNOSHOW
+  ,CNTT_VLRIMPRODUTIVEL
+  ,CNTT_VLRINSTALA
+  ,CNTT_VLRDESISTALA
+  ,CNTT_VLRREINSTALA
+  ,CNTT_VLRMANUTENCAO
+  ,CNTT_VLRREVISAO
+  ,CNTT_LANCTOINI
+  ,CNTT_LANCTOFIM
+  ,CNTT_CODBNC
+  ,CNTT_CODFC
+  ,CNTT_CODGM
+  ,CNTT_LOCALINSTALA
+  ,CNTT_CODEMP
+  ,CNTT_CODLGN
+  ,CNTT_CODUSR) VALUES(
+  117           -- CNTT_CODIGO INTEGER PRIMARY KEY NOT NULL
+  ,'V'          -- CNTT_TIPO VARCHAR(1) NOT NULL
+  ,'2019-07-30' -- CNTT_EMISSAO DATE NOT NULL
+  ,'S'          -- CNTT_ATIVO VARCHAR(1) NOT NULL  
+  ,'2019-07-30' -- CNTT_DTINICIO DATE
+  ,0            -- CNTT_DTFIM INTEGER NOT NULL
+  ,11           -- CNTT_CODFVR INTEGER NOT NULL  
+  ,2            -- CNTT_CODVND INTEGER NOT NULL  
+  ,0            -- CNTT_CODIND INTEGER NOT NULL    
+  ,10000        -- CNTT_VLRMENSAL NUMERIC(15,2) NOT NULL  
+  ,500          -- CNTT_VLRPONTUAL NUMERIC(15,2) NOT NULL  
+  ,1-- CNTT_QTDAUTO INTEGER NOT NULL  
+  ,0-- CNTT_QTDENVIADO INTEGER NOT NULL    
+  ,0-- CNTT_QTDEMPENHO INTEGER NOT NULL        
+  ,0-- CNTT_QTDAGENDA INTEGER NOT NULL
+  ,0-- CNTT_QTDOS INTEGER NOT NULL
+  ,0-- CNTT_QTDPLACA INTEGER NOT NULL    
+  ,0-- CNTT_QTDATIVADO INTEGER NOT NULL      
+  ,'S'-- CNTT_FIDELIDADE VARCHAR(1) NOT NULL
+  ,'N'-- CNTT_INSTPROPRIA VARCHAR(1) NOT NULL  
+  ,12-- CNTT_MESES INTEGER NOT NULL
+  ,5-- CNTT_DIA INTEGER NOT NULL
+  ,0-- CNTT_VLRNOSHOW NUMERIC(15,2) NOT NULL  
+  ,0-- CNTT_VLRIMPRODUTIVEL NUMERIC(15,2) NOT NULL  
+  ,0-- CNTT_VLRINSTALA NUMERIC(15,2) NOT NULL  
+  ,0-- CNTT_VLRDESISTALA NUMERIC(15,2) NOT NULL  
+  ,0-- CNTT_VLRREINSTALA NUMERIC(15,2) NOT NULL    
+  ,0-- CNTT_VLRMANUTENCAO NUMERIC(15,2) NOT NULL  
+  ,0-- CNTT_VLRREVISAO NUMERIC(15,2) NOT NULL  
+  ,0-- CNTT_LANCTOINI INTEGER NOT NULL  
+  ,0-- CNTT_LANCTOFIM INTEGER NOT NULL 
+  ,9-- CNTT_CODBNC INTEGER NOT NULL
+  ,'BOL'-- CNTT_CODFC VARCHAR(3) NOT NULL
+  ,137-- CNTT_CODGM INTEGER NOT NULL  
+  ,'C'-- CNTT_LOCALINSTALA VARCHAR(1) NOT NULL  
+  ,2-- CNTT_CODEMP INTEGER NOT NULL    
+  ,4-- CNTT_CODLGN INTEGER NOT NULL    
+  ,6-- CNTT_CODUSR INTEGER NOT NULL  
+  );
+
+INSERT INTO CONTRATOPRODUTO(
+  CNTP_CODCNTT
+  ,CNTP_IDUNICO
+  ,CNTP_IDSRV
+  ,CNTP_CODGM
+  ,CNTP_CODSRV
+  ,CNTP_CODGP
+  ,CNTP_MENSAL
+  ,CNTP_CODGMP
+  ,CNTP_VALOR
+  ,CNTP_MODOENTREGA
+  ,CNTP_STATUSENTREGA
+  ,CNTP_CODENTREGA
+  ,CNTP_CODINSTALA
+  ,CNTP_DTAGENDA
+  ,CNTP_CODRASTREIO
+  ,CNTP_DTENTREGA
+  ,CNTP_DTATIVACAO
+  ,CNTP_AGENDADO
+  ,CNTP_CODOS
+  ,CNTP_ACAO
+  ,CNTP_CODUSR) VALUES(
+  116--CNTP_CODCNTT INTEGER NOT NULL
+  ,1-- CNTP_IDUNICO INTEGER NOT NULL   
+  ,1-- CNTP_IDSRV INTEGER NOT NULL     
+  ,6-- CNTP_CODGM INTEGER NOT NULL 
+  ,4-- CNTP_CODSRV INTEGER NOT NULL   
+  ,'AUT'-- CNTP_CODGP VARCHAR(3) NOT NULL         
+  ,'M'-- CNTP_MENSAL VARCHAR(1) NOT NULL       
+  ,571-- CNTP_CODGMP INTEGER NOT NULL                -- 571 572 573 574 575 576
+  ,0-- CNTP_VALOR NUMERIC(15,2) NOT NULL  
+  ,'COR'-- CNTP_MODOENTREGA VARCHAR(3) NOT NULL           
+  ,'AGU'-- CNTP_STATUSENTREGA VARCHAR(3) NOT NULL
+  ,0-- CNTP_CODENTREGA INTEGER NOT NULL
+  ,0-- CNTP_CODINSTALA INTEGER NOT NULL
+  ,NULL-- CNTP_DTAGENDA DATE
+  ,NULL-- CNTP_CODRASTREIO VARCHAR(20)
+  ,NULL-- CNTP_DTENTREGA DATE
+  ,NULL-- CNTP_DTATIVACAO DATE  
+  ,'N'-- CNTP_AGENDADO VARCHAR(1) NOT NULL      
+  ,0-- CNTP_CODOS INTEGER NOT NULL     
+  ,0-- CNTP_ACAO INTEGER NOT NULL         
+  ,6--CNTP_CODUSR INTEGER NOT NULL       
+);
+
+INSERT INTO CONTRATOPRODUTO(
+  CNTP_CODCNTT
+  ,CNTP_IDUNICO
+  ,CNTP_IDSRV
+  ,CNTP_CODGM
+  ,CNTP_CODSRV
+  ,CNTP_CODGP
+  ,CNTP_MENSAL
+  ,CNTP_CODGMP
+  ,CNTP_VALOR
+  ,CNTP_MODOENTREGA
+  ,CNTP_STATUSENTREGA
+  ,CNTP_CODENTREGA
+  ,CNTP_CODINSTALA
+  ,CNTP_DTAGENDA
+  ,CNTP_CODRASTREIO
+  ,CNTP_DTENTREGA
+  ,CNTP_DTATIVACAO
+  ,CNTP_AGENDADO
+  ,CNTP_CODOS
+  ,CNTP_ACAO
+  ,CNTP_CODUSR) VALUES(
+  117--CNTP_CODCNTT INTEGER NOT NULL
+  ,1-- CNTP_IDUNICO INTEGER NOT NULL   
+  ,1-- CNTP_IDSRV INTEGER NOT NULL     
+  ,6-- CNTP_CODGM INTEGER NOT NULL 
+  ,4-- CNTP_CODSRV INTEGER NOT NULL   
+  ,'AUT'-- CNTP_CODGP VARCHAR(3) NOT NULL         
+  ,'M'-- CNTP_MENSAL VARCHAR(1) NOT NULL       
+  ,565-- CNTP_CODGMP INTEGER NOT NULL                -- 565 566 568 569 570
+  ,0-- CNTP_VALOR NUMERIC(15,2) NOT NULL  
+  ,'COR'-- CNTP_MODOENTREGA VARCHAR(3) NOT NULL           
+  ,'AGU'-- CNTP_STATUSENTREGA VARCHAR(3) NOT NULL
+  ,0-- CNTP_CODENTREGA INTEGER NOT NULL
+  ,0-- CNTP_CODINSTALA INTEGER NOT NULL
+  ,NULL-- CNTP_DTAGENDA DATE
+  ,NULL-- CNTP_CODRASTREIO VARCHAR(20)
+  ,NULL-- CNTP_DTENTREGA DATE
+  ,NULL-- CNTP_DTATIVACAO DATE  
+  ,'N'-- CNTP_AGENDADO VARCHAR(1) NOT NULL      
+  ,0-- CNTP_CODOS INTEGER NOT NULL     
+  ,0-- CNTP_ACAO INTEGER NOT NULL         
+  ,6--CNTP_CODUSR INTEGER NOT NULL       
+);
+
+
+
+
+
+SELECT
+A.CNTC_CODCNTT
+,A.CNTC_CODGM
+,CNTP.CNTP_CODGMP
+,GMP.GMP_NUMSERIE
+,A.CNTC_VLRMENSAL
+,CONVERT(VARCHAR(10),CNTT.CNTT_DTINICIO,103) AS PRIMEIRO_VENCTO
+,CAST(YEAR(CNTT.CNTT_DTINICIO) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(CNTT.CNTT_DTINICIO) AS VARCHAR(2)),2) AS CMPINI
+,CNTT.CNTT_MESES
+,CONVERT(VARCHAR(10),DateAdd(month, +(CNTT.CNTT_MESES-1), CNTT.CNTT_DTINICIO),103) AS ULTIMO_VENCTO
+,CAST(YEAR(DateAdd(month, +(CNTT.CNTT_MESES-1), CNTT.CNTT_DTINICIO)) AS CHAR(4))+RIGHT('0' + CAST(MONTH(DateAdd(month, +(CNTT.CNTT_MESES-1), CNTT.CNTT_DTINICIO)) AS VARCHAR(2)),2) AS CMPFIM
+,A.CNTC_CODSRV
+,SRV.SRV_NOME
+,SRV.SRV_CODPT
+,A.CNTC_PGTO
+,CNTT.CNTT_CODFVR
+,FVR.FVR_APELIDO
+,CNTT.CNTT_CODBNC
+,PT.PT_CODTD
+,PT.PT_CODFC
+,PT.PT_CODCC
+,CNTT.CNTT_CODEMP
+,EMP.EMP_APELIDO
+,CNTT.CNTT_CODVND
+,VND.FVR_APELIDO AS VND_APELIDO
+,EMP.EMP_CODCDD
+FROM CONTRATOCOBRANCA A
+LEFT OUTER JOIN CONTRATO CNTT ON A.CNTC_CODCNTT=CNTT.CNTT_CODIGO
+LEFT OUTER JOIN FAVORECIDO FVR ON CNTT.CNTT_CODFVR=FVR.FVR_CODIGO
+LEFT OUTER JOIN EMPRESA EMP ON CNTT.CNTT_CODEMP=EMP.EMP_CODIGO
+LEFT OUTER JOIN SERVICO SRV ON A.CNTC_CODSRV=SRV.SRV_CODIGO
+LEFT OUTER JOIN PADRAOTITULO PT ON SRV.SRV_CODPT=PT.PT_CODIGO
+LEFT OUTER JOIN FAVORECIDO VND ON CNTT.CNTT_CODVND=VND.FVR_CODIGO
+LEFT OUTER JOIN CONTRATOPRODUTO CNTP ON A.CNTC_CODCNTT=CNTP.CNTP_CODCNTT AND A.CNTC_CODGM=CNTP.CNTP_CODGM
+LEFT OUTER JOIN GRUPOMODELOPRODUTO GMP ON CNTP.CNTP_CODGMP=GMP.GMP_CODIGO
+
+
+--SELECT * FROM grupomodeloproduto where gmp_codcntt in(116,117)
