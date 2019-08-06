@@ -302,7 +302,12 @@
                     <li><a href="#" onclick="ifAbrir('Trac_Favorecido.php'      ,'jsPub[0].usr_d20','Parametro financeiro &nbsp&nbsp > &nbsp&nbsp Favorecido');">        <i class="fa fa-circle-o"></i> Favorecido</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_FormaCobranca.php'   ,'jsPub[0].usr_d20','Parametro financeiro &nbsp&nbsp > &nbsp&nbsp Forma cobrança');">    <i class="fa fa-circle-o"></i> Forma de cobrança</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_TipoDocumento.php'   ,'jsPub[0].usr_d20','Parametro financeiro &nbsp&nbsp > &nbsp&nbsp Tipo documento');">    <i class="fa fa-circle-o"></i> Tipo de docto</a></li>
-                    <li><a href="#" onclick="ifAbrir('Trac_Transportadora.php'  ,'jsPub[0].usr_d33','Parametro financeiro &nbsp&nbsp > &nbsp&nbsp Transportadora');">    <i class="fa fa-circle-o"></i> Transportadora</a></li>                    
+                    <li><a href="#" onclick="ifAbrir('Trac_Transportadora.php'  ,'jsPub[0].usr_d33','Parametro financeiro &nbsp&nbsp > &nbsp&nbsp Transportadora');">    <i class="fa fa-circle-o"></i> Transportadora</a></li>
+                    <li><a href="#" onclick="abreFluxo();"><i class="fa fa-circle-o"></i> Fluxo Caixa</a></li>
+                    <li><a href="#" onclick="abreNfp();"><i class="fa fa-circle-o"></i> NF Produto</a></li>
+                    <li><a href="#" onclick="abreNfs();"><i class="fa fa-circle-o"></i> NF Servico</a></li>
+                    <li><a href="#" onclick="abreCnab();"><i class="fa fa-circle-o"></i> Cnab</a></li>
+                    <li><a href="#" onclick="abreFatCnt();"><i class="fa fa-circle-o"></i> Faturar contratos</a></li>                   
                     
                     <li class="treeview">
                       <a href="#">
@@ -502,6 +507,42 @@
         if( jsPub[0].usr_d37==0 ){
         } else {  
           window.open('Trac_Pedido.php');
+        };    
+      };
+      function abreFluxo(){
+        if( jsPub[0].usr_d28==0 ){
+        } else {  
+          window.open('Trac_FluxoCaixa.php');
+        };    
+      };  
+      function abreNfs(){
+        if( jsPub[0].usr_d28==0 ){
+        } else {  
+          window.open('Trac_Nfs.php');
+        };    
+      };  
+      function abreNfp(){
+        if( jsPub[0].usr_d28==0 ){
+        } else {  
+          window.open('Trac_Nfp.php');
+        };    
+      };  
+      function abreContabilMes(){
+        if( jsPub[0].usr_d28==0 ){
+        } else {  
+          window.open('Trac_ContabilMes.php');
+        };    
+      };  
+      function abreCnab(){
+        if( jsPub[0].usr_d10==0 ){
+        } else {  
+          window.open('Trac_Cnab.php');
+        };    
+      };  
+      function abreFatCnt(){
+        if( jsPub[0].usr_d10==0 ){
+        } else {  
+          window.open('Trac_CpCrFaturarContrato.php');
         };    
       };  
       //

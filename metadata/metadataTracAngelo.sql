@@ -4815,7 +4815,8 @@ BEGIN
   DECLARE @cnttCodGmNew INTEGER;  
   DECLARE @cnttLocalInstalaNew VARCHAR(1);    
   DECLARE @gmNomeNew VARCHAR(30);
-  DECLARE @cnttCodLgnNew INTEGER;  
+  DECLARE @cnttCodLgnNew INTEGER; 
+  DECLARE @cnttCodEmpNew INTEGER;
   DECLARE @cnttCodUsrNew INTEGER;
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @upD40New INTEGER;
@@ -4851,6 +4852,7 @@ BEGIN
          ,@gmNomeNew              = COALESCE(GM.GM_NOME,'ERRO')         
          ,@cnttCodLgnNew          = i.CNTT_CODLGN         
          ,@cnttCodUsrNew          = i.CNTT_CODUSR
+         ,@cnttCodEmpNew          = i.CNTT_CODEMP
          ,@usrApelidoNew          = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@upD40New               = UP.UP_D40
     FROM inserted i
@@ -4941,7 +4943,7 @@ BEGIN
       ,@cnttCodFcNew            -- CNTT_CODFC
       ,@cnttCodGmNew            -- CNTT_CODGM      
       ,@cnttLocalInstalaNew     -- CNTT_LOCALINSTALA
-      ,0                        -- CNTT_CODEMP   
+      ,@cnttCodEmpNew           -- CNTT_CODEMP   
       ,@cnttCodLgnNew           -- CNTT_CODLGN      
       ,@cnttCodUsrNew           -- CNTT_CODUSR
     );
@@ -5646,8 +5648,8 @@ BEGIN
           RAISERROR('PARA RETIRAR EMPENHO AUTO %i DEVE ESTAR INSTALADO',15,1,@cntpCodGmpOld);
         IF( @reGmpPlaca<>'NSA0000' )  
           RAISERROR('PARA RETIRAR EMPENHO AUTO %i DEVE ESTAR SEM PLACA E ATUALMENTE ESTA LIGADO A %s',15,1,@cntpCodGmpOld,@reGmpPlaca);
-        --IF( @reGmpDtConfigurado IS NOT NULL )  
-        --  RAISERROR('PARA RETIRAR EMPENHO AUTO %i DATA DE CONFIGURACAO DEVE SER BRANCO',15,1,@cntpCodGmpOld);
+        IF( @reGmpDtConfigurado IS NOT NULL )  
+         RAISERROR('PARA RETIRAR EMPENHO AUTO %i DATA DE CONFIGURACAO DEVE SER BRANCO',15,1,@cntpCodGmpOld);
         IF( @reGmpDtEmpenho IS NULL )  
           RAISERROR('PARA RETIRAR EMPENHO AUTO %i DATA DE EMPENHO NAO PODE SER BRANCO',15,1,@cntpCodGmpOld);
         IF( @reGmpCodCntt=0 )  
@@ -16200,7 +16202,6 @@ BEGIN
   SET NOCOUNT ON;  
 
   DECLARE @erroOld VARCHAR(70);   -- Buscando retorno de erro para funcao
-  --ANGELO KOKISO MERGE PAREI AQUI - LINHA 16034 NO GITHUB
   -------------------
   -- Campos da tabela
   -------------------
@@ -20312,7 +20313,7 @@ BEGIN
       ,@fvrCodusrNew             -- FVR_CODUSR
     );
 
-     ----------------------------------------------
+     ----------------------------------------------  ANGELO KOKISO
     -- Cadastrando o favorecido em PONTOESTOQUEIND
     ----------------------------------------------
     IF( @fvrGfCrNew <> 0001) BEGIN
@@ -20326,7 +20327,7 @@ BEGIN
         ,PEI_CODUSR) VALUES(
         IDENT_CURRENT('FAVORECIDO')
         ,CASE WHEN @fvrGfCrNew = 0006 THEN 'CLN' 
-            WHEN @fvrGfCPNew = 0039 THEN 'FOR' 
+            WHEN @fvrGfCrNew = 0039 THEN 'FOR' 
             WHEN @fvrGfCrNew = 0040 THEN 'FNC'  
             WHEN @fvrGfCrNew = 0041 THEN 'CRD'
             ELSE 'CLN' 
@@ -20339,7 +20340,7 @@ BEGIN
       );
       END    
     ELSE BEGIN
-      IF( @fvrGfCPNew <> 0001) BEGIN
+      IF( @fvrGfCpNew <> 0001) BEGIN
         INSERT INTO VPONTOESTOQUEIND( 
           PEI_CODFVR
           ,PEI_CODPE
@@ -20349,10 +20350,10 @@ BEGIN
           ,PEI_REG
           ,PEI_CODUSR) VALUES(
           IDENT_CURRENT('FAVORECIDO')
-          ,CASE WHEN @fvrGfCPNew = 0006 THEN 'CLN' 
-              WHEN @fvrGfCPNew = 0039 THEN 'FOR' 
-              WHEN @fvrGfCPNew = 0040 THEN 'FNC'  
-              WHEN @fvrGfCPNew = 0041 THEN 'CRD'
+          ,CASE WHEN @fvrGfCpNew = 0006 THEN 'CLN' 
+              WHEN @fvrGfCpNew = 0039 THEN 'FOR' 
+              WHEN @fvrGfCpNew = 0040 THEN 'FNC'  
+              WHEN @fvrGfCpNew = 0041 THEN 'CRD'
               ELSE 'CLN' 
           END  -- PEI_CODFVR 'CLN'          -- PEI_CODPE
           ,'NSA'          -- PEI_STATUS

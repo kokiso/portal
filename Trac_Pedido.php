@@ -49,7 +49,8 @@
           $sql.=",CNTT_CODFC";
           $sql.=",CNTT_CODGM";    //Este campo eh acelerador para pegar valores para OSs          
           $sql.=",CNTT_CODLGN";   //Este campo eh acelerador para vendedor ver somente seus pedidos
-          $sql.=",CNTT_LOCALINSTALA";          
+          $sql.=",CNTT_LOCALINSTALA"; 
+          $sql.=",CNTT_CODEMP" ;                  //-- ANGELO KOKISO ADICAO DO CODEMP
           $sql.=",CNTT_CODUSR) VALUES(";
           $sql.="'$contrato'";                    // CNTT_CODIGO     
           $sql.=",'".$lote[0]->tipo."'";          // CNTT_TIPO
@@ -70,6 +71,7 @@
           $sql.=",".$lote[0]->cnttCodGm;          // CNTT_CODGM
           $sql.=",".$lote[0]->codlgn;             // CNTT_CODLGN
           $sql.=",'".$lote[0]->localinstala."'";  // CNTT_LOCALINSTALA
+          $sql.=",'".$lote[0]->codemp."'";        // CNTT_CODEMP -- ANGELO KOKISO ADICAO DO CODEMP
           $sql.=",".$_SESSION["usr_codigo"];      // CNTT_CODUSR
           $sql.=")";
           array_push($arrUpdt,$sql);
@@ -986,7 +988,8 @@
           let clsPlc = jsString("placa");
           clsPlc.principal(false);
           placa.forEach(function(reg){
-            clsPlc.add("placa"    , reg.placa   );
+            //clsPlc.add("placa"    , reg.placa.replace('-','')); -- ANGELO KOKISO TESTAR!!
+            clsPlc.add("placa"    , reg.placa);
             clsPlc.add("codgmp"   , reg.produto  );
           });  
           placa = clsPlc.fim();
@@ -1059,11 +1062,13 @@
 
           item.forEach(function(qtd){
             if( qtd.codgp!="AUT" ){
-              clsCob.add("codgm"     , qtd.produto                       );
-              clsCob.add("codsrv"    , qtd.servico                       );
-              clsCob.add("pgto"      , (qtd.pagto).substring(0,1)        );
-              clsCob.add("vlrmensal" , jsNmrs(qtd.unitario).dolar().ret());
-              clsCob.add("vlrtotal"  , jsNmrs(qtd.mensal).dolar().ret()  );
+              if( qtd.servico!=0 ){
+                clsCob.add("codgm"     , qtd.produto                       );
+                clsCob.add("codsrv"    , qtd.servico                       );
+                clsCob.add("pgto"      , (qtd.pagto).substring(0,1)        );
+                clsCob.add("vlrmensal" , jsNmrs(qtd.unitario).dolar().ret());
+                clsCob.add("vlrtotal"  , jsNmrs(qtd.mensal).dolar().ret()  );
+              }
             }
             if( qtd.codgp=="AUT" ){
               quantidade=parseInt(qtd.qtdade);
@@ -1119,16 +1124,14 @@
           clsJs.add("dia"         , chkds[0].DIA                    );
           clsJs.add("localinstala", chkds[0].LI                     );          
           clsJs.add("codlgn"      , chkds[0].CODLGN                 );          
-          clsJs.add("jsplaca"     , chkds[0].JSPLACA                );          
+          clsJs.add("jsplaca"     , chkds[0].JSPLACA                );
+          clsJs.add("codemp"      , jsPub[0].emp_codigo             ); //-- ANGELO KOKISO ADICAO DO CODEMP     
           clsJs.add("codbnc"      , jsPub[0].emp_codbnc             );
           clsJs.add("codfc"       , "BOL"                           );         
           clsJs.add("PRODUTO"     , produto                         );                    
           clsJs.add("PLACA"       , placa                           );
           clsJs.add("COBRANCA"    , cobranca                        );
           clsJs.add("codpdd"      , chkds[0].CODIGO     );                              
-
-//console.log(produto);
-//return;
 
           fd = new FormData();
           fd.append("pedido" , clsJs.fim());
