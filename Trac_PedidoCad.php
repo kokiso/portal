@@ -134,8 +134,8 @@
           $sql.=" WHERE GMS_CODGM='".$lote[0]->codgm."'";
           $sql.="   AND A.GMS_VENDALOCACAO='".$lote[0]->vendalocacao."'";
           $sql.="   AND A.GMS_ATIVO='S'";
-          // if( $lote[0]->instpropria=="S" )
-          //   $sql.="   AND A.GMS_REFINSTALACAO='N'";  
+          if( $lote[0]->instpropria=="S" )
+            $sql.="   AND A.GMS_REFINSTALACAO='N'";  
           $classe->msgSelect(true);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -414,9 +414,9 @@
           ,"fieldReg"       : "*"                       // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "*"                       // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"position"       : "relative"
-          ,"width"          : "100%"                   // Tamanho da table
-          ,"height"         : "70%"                    // Altura da table
-          //,"tableLeft"      : "2px"                     // Se tiver menu esquerdo
+          ,"width"          : "112em"                   // Tamanho da table
+          ,"height"         : "40em"                    // Altura da table
+          ,"tableLeft"      : "2px"                     // Se tiver menu esquerdo
           ,"relTitulo"      : "PEDIDO"                  // Titulo do relatório
           ,"relOrientacao"  : "P"                       // Paisagem ou retrato
           ,"relFonte"       : "7"                       // Fonte do relatório
@@ -541,8 +541,7 @@
           document.getElementById("frmPedidoCad").newRecord("data-newrecord");
           document.getElementById("edtNumPedido").value     = pega.codpdd;
           document.getElementById("edtDtPedido").value      = pega.emissao;
-          document.getElementById("edtCodFvr").value        = pega.codfvr;
-          document.getElementById("edtCodFvr").setAttribute('data-oldvalue',pega.codfvr);          
+          document.getElementById("edtCodFvr").value        = pega.codfvr;          
           document.getElementById("edtCnpjCpf").value       = pega.cnpj;
           document.getElementById("edtDesFvr").value        = pega.desfvr;
           document.getElementById("cbPrazoContrato").value  = pega.meses;
@@ -725,9 +724,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function fvrF10Click(obj){ 
-        fFavorecidoF10(0,obj.id,"edtCnpjCpf",100         
-            ,{gpfvr:'cliente'
-           });   
+        fFavorecidoF10(0,obj.id,"edtCnpjCpf",100);         
       };
       function RetF10tblFvr(arr){
         document.getElementById("edtCodFvr").value  = jsNmrs(arr[0].CODIGO).emZero(4).ret();
@@ -739,9 +736,7 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fFavorecidoF10(1,obj.id,"edtCnpjCpf",100         
-            ,{gpfvr:'cliente'
-           });   
+          var ret = fFavorecidoF10(1,obj.id,"edtCnpjCpf",100);   
           document.getElementById(obj.id).value       = ( ret.length == 0 ? ""  : jsNmrs(ret[0].CODIGO).emZero(4).ret() );
           document.getElementById("edtCnpjCpf").value = ( ret.length == 0 ? ""  : ret[0].CNPJCPF                        );
           document.getElementById("edtDesFvr").value  = ( ret.length == 0 ? ""  : ret[0].DESCRICAO                      );
@@ -800,7 +795,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function vndF10Click(obj){ 
-        fVendedorF10(0,obj.id,"cbFidelidade",100,{tamColNome:"29.5em",ativo:"S", gpfvr:'cliente' } ); 
+        fVendedorF10(0,obj.id,"cbFidelidade",100,{tamColNome:"29.5em",ativo:"S" } ); 
       };
       function RetF10tblVnd(arr){
         document.getElementById("edtCodVnd").value  = arr[0].CODIGO;
@@ -814,8 +809,7 @@
         if( elOld != elNew ){
           var arr = fVendedorF10(1,obj.id,"cbFidelidade",100,
             {codfvr  : elNew
-             ,ativo  : "S"
-             , gpfvr:'cliente'} 
+             ,ativo  : "S"} 
             ); 
           document.getElementById(obj.id).value       = ( arr.length == 0 ? "0000"  : jsNmrs(arr[0].CODIGO).emZero(4).ret() );  
           document.getElementById("edtDesVnd").value  = ( arr.length == 0 ? ""      : arr[0].DESCRICAO                      );
@@ -871,7 +865,6 @@
           document.getElementById("edtCodGm").setAttribute("data-gmvalorvista",arr[0].VALORVISTA                          );
           document.getElementById("edtCodGm").setAttribute("data-gmvalorprazo",arr[0].VALORPRAZO                          );
           document.getElementById("edtCodGm").setAttribute("data-gmvalorminimo",arr[0].VALORMINIMO                        );
-          document.getElementById("edtCodGm").setAttribute("data-gmvalorinstalacao",arr[0].VALORINSTALACAO);
           document.getElementById("edtCodGm").setAttribute("data-codgp",arr[0].CODGP                                      );
         };
       };
@@ -895,7 +888,7 @@
       };
       ///////////////////////////
       // Excluindo item do pedido
-      ///////////////////////////
+      ///////////////////////////  
       function pedExcluirClick(){
         try{ 
           clsChecados   = objIte.gerarJson("1");
@@ -926,6 +919,8 @@
               };    
             };  
           };
+          //
+          //
           objIte.apagaChecadosSoTable();
           fncTotalPedido();
           $doc("edtVlrMensal").value="0,00";
@@ -933,8 +928,7 @@
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
-      };   
-    
+      }; 
       //////////////////////////////////////////////////////////////////
       // Qquer alteracao em um dos dois combobox altera o valor unitario
       //////////////////////////////////////////////////////////////////
@@ -1076,18 +1070,14 @@
             let vlrMensal   = 0;
             let vlrPontual  = 0;
             let valor       = 0;
+
             tblParc.forEach(function(reg){
               valor+=reg.valor;
               if( reg.pagto=="MENSAL" )
                 vlrMensal+=reg.valor;
               if( reg.pagto=="PONTUAL" )
                 vlrPontual+=reg.valor;
-            });
-            // if ($doc("cbInstPropria").value === 'N'){
-            //   let edtcodgm =  $doc("edtCodGm");
-            //   let valorInstalacao = edtcodgm.getAttribute("data-gmvalorinstalacao");
-            //   vlrPontual+=valorInstalacao;
-            // } 
+            }); 
             $doc("edtVlrMensal").value=jsNmrs(vlrMensal).dolar().sepMilhar().ret();
             $doc("edtVlrPontual").value=jsNmrs(vlrPontual).dolar().sepMilhar().ret();
             $doc("edtVlrMensal").setAttribute("data-vlrdolar",jsNmrs(vlrMensal).dec(2).dolar().ret());      // Para não ter que tirar o separador de milhar
@@ -1437,8 +1427,7 @@
                   +",|codgp|:|"+reg.CODGP+"|"                  
                   +"},";
               if( reg.CODGP=="AUT" ){
-                //qtdadeAuto+=reg.QTDADE;
-                qtdadeAuto+= jsNmrs(reg.QTDADE).inteiro().ret(); //Angelo kokiso - correção na somatoria quando possui diferentes autos
+                qtdadeAuto+=reg.QTDADE;
               };    
             });
             jsItem=jsItem.slice(0,-1);          
@@ -1861,9 +1850,9 @@
       
       function fncAbrirPlc(){
         try{
-          
           clsChecados = objIte.gerarJson("1");
           chkds       = clsChecados.gerar();
+          
           chkds.forEach(function(reg){
             if( reg.PS != "P" )
               throw "Favor selecionar produto principal!"; 
@@ -1889,7 +1878,6 @@
             msg     = requestPedido("Trac_PedidoCad.php",fd); 
             retPhp  = JSON.parse(msg);
             if( retPhp[0].retorno == "OK" ){
-              
               tamC=(retPhp[0]["dados"]).length;
               let achei;
               for( let lin=0; lin<tamC; lin++ ){
@@ -1931,18 +1919,14 @@
       
     </script>
   </head>
-  <body style="background-color: #e6e6e6;">
+  <body style="background-color: #ecf0f5;">
     <div class="divTelaCheia">
       <div id="divTopoInicio" class="divTopoInicio">
-        <div class="divTopoInicio_logo">
-          <img src="imagens/logoMaior.png" id = "user-image" class="user-image" alt="Logomarca Totaltrac">
-        </div>
-
-        <div style="font-size:14px;width:65%;float:left;"><h2 style="text-align:center;">Cadastro de Pedido</h2></div>
-
-        <div style="margin-top:-0.3em; margin-right: 10px; font-size: 14px; float: right;">
-          <a onClick="window.close();" href="#"><h2><i class="fa fa-arrow-left"></i> Voltar</h2></a>
-        </div>        
+        <div class="divTopoInicio_logo"></div>
+        <div class="teEsquerda"></div>
+        <div style="font-size:12px;width:50%;float:left;"><h2 style="text-align:center;">Pedido</h2></div>
+        <div class="teEsquerda"></div>
+        <div onClick="window.close();"  class="btnImagemEsq bie08 bieRed" style="margin-top:2px;"><i class="fa fa-close"> Fechar</i></div>        
         <div onClick="fncGravarPedido();"  class="btnImagemEsq bie10 bieAzul" style="margin-top:2px;"><i class="fa fa-check"> Gravar pedido</i></div>        
       </div>
 
@@ -1950,7 +1934,7 @@
         <form method="post" class="center" id="frmPedidoCad" action="classPhp/imprimirSql.php" target="_newpage" style="margin-top:1em;" >
           <input type="hidden" id="sql" name="sql"/>
           <!-- aqui -->
-          <div class="divAzul" style="margin-left:5%;margin-right:5%;padding-top:1em; height: auto;">
+          <div class="divAzul" style="width:77%;margin-left:12.5%;height: 640px;padding-top:1em;">
           <!-- aqui -->
             <div class="campotexto campo10">
               <input class="campo_input_titulo" id="edtNumPedido" 
@@ -2074,7 +2058,6 @@
                                                   data-gmvalorvista="0,00"
                                                   data-gmvalorprazo="0,00"
                                                   data-gmvalorminimo="0,00"
-                                                  data-gmvalorinstalacao="0,00"
                                                   autocomplete="off"                                                
                                                   maxlength="6"
                                                   type="text"/>
@@ -2166,25 +2149,13 @@
               <label class="campo_label" for="edtVlrPontual">VLR PONTUAL</label>
             </div>
             
-            <div onClick="fncIncluir();"  class="botaoImagemSup-icon-big"><i class="fa fa-plus"> Incluir</i></div>
-            <div onClick="fncRecalculo();"  class="botaoImagemSup-icon-big"><i class="fa fa-code"> Recalculo</i></div>            
-            <div onClick="fncObsPedido();"  class="botaoImagemSup-icon-big"><i class="fa fa-sort-alpha-asc"> Obs</i></div>
-            <div class="campotexto campo10" style="width: 9%">
-              <input class="campo_input inputF10" id="edtCodInd"
-                                                  OnKeyPress="return mascaraInteiro(event);"
-                                                  onBlur="codIndBlur(this);" 
-                                                  onFocus="indFocus(this);" 
-                                                  onClick="indF10Click(this);"
-                                                  data-oldvalue="0000"
-                                                  data-newrecord="0000"                                                  
-                                                  autocomplete="off"
-                                                  type="text" />
-              <label class="campo_label" for="edtCodInd">INDICADO POR:</label>
-            </div>                        
+            <div onClick="fncIncluir();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-plus"> Incluir</i></div>
+            <div onClick="fncRecalculo();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-code"> Recalculo</i></div>            
+            <div onClick="fncObsPedido();"  class="btnImagemEsq bie10 bieAzul"><i class="fa fa-sort-alpha-asc"> Obs</i></div>                        
             <div id="sctnPed">
             </div>  
             <!-- Quem indicou -->
-<!--             <div class="campotexto campo10">
+            <div class="campotexto campo10">
               <input class="campo_input inputF10" id="edtCodInd"
                                                   OnKeyPress="return mascaraInteiro(event);"
                                                   onBlur="codIndBlur(this);" 
@@ -2195,9 +2166,10 @@
                                                   autocomplete="off"
                                                   type="text" />
               <label class="campo_label" for="edtCodInd">INDICADO POR:</label>
-            </div> -->
+            </div>
             <div class="campotexto campo50">
-              <input class="campo_input_titulo input" id="edtDesInd" data-newrecord="NAO SE APLICA" type="text" hidden />
+              <input class="campo_input_titulo input" id="edtDesInd" data-newrecord="NAO SE APLICA" type="text" disabled />
+              <label class="campo_label" for="edtDesInd">NOME</label>
             </div>
             <div class="inactive">
               <input id="edtPedID" value="0" type="text" />

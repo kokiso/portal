@@ -1,6 +1,7 @@
 <?php
   class selectRepetido{
     var $retorno="";
+    
     function qualSelect($qual,$login,$codigo=""){
       $sql="";
       /////////////////////////////////////////////////////////////////////
@@ -8,6 +9,7 @@
       /////////////////////////////////////////////////////////////////////
       $retDados = false;
       $retHtml  = false;
+      $script   = "";
       //
       //
       switch ($qual){
@@ -36,8 +38,7 @@
           break;
           
         case "hlpEndereco":   
-          $sql="";
-          $sql.="SELECT A.CNTE_CODIGO";
+          $sql ="SELECT A.CNTE_CODIGO";
           $sql.="       ,A.CNTE_CEP";          
           $sql.="       ,FVR.FVR_APELIDO";          
           $sql.="       ,COALESCE(C.CDD_NOME,'...') AS CDD_NOME";
@@ -96,8 +97,7 @@
           break;
 
         case "hlpComposicao":   
-          $sql="";
-          $sql.="SELECT A.AC_CODGMP AS CODIGO";
+          $sql ="SELECT A.AC_CODGMP AS CODIGO";
           $sql.="      ,GM.GM_NOME AS DESCRICAO";
           $sql.="      ,GMP.GMP_NUMSERIE AS SERIE";
           $sql.="      ,GMP.GMP_SINCARD AS SINCARD";
@@ -107,7 +107,6 @@
           $sql.=" LEFT OUTER JOIN GRUPOMODELO GM ON GMP.GMP_CODGM=GM.GM_CODIGO";
           $sql.=" LEFT OUTER JOIN FAVORECIDO FVR ON GMP.GMP_CODFBR=FVR.FVR_CODIGO";
           $sql.=" WHERE ((A.AC_CODAMP=".$codigo.") AND (A.AC_CODAMP<>A.AC_CODGMP))";
-//file_put_contents("aaa.xml",$sql);          
           $classe   = new conectaBd();
           $classe->conecta($login);
           $classe->msgSelect(false);
@@ -445,7 +444,7 @@
           $sql.="  FROM DETALHEOS A";
           $sql.="  LEFT OUTER JOIN MENSAGEM MSG ON A.DOS_CODMSG=MSG.MSG_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA US ON A.DOS_CODUSR=US.US_CODIGO";
-          $sql.=" WHERE A.DOS_CODGMP=".$codigo;  // Angelo Kokiso - alterando where para pegar todos detalhes do mesmo auto.
+          $sql.=" WHERE A.DOS_CODOS=".$codigo;
           $classe   = new conectaBd();
           $classe->conecta($login);
           $classe->msgSelect(false);
@@ -485,14 +484,9 @@
             unset($end,$class,$status);
           };
           break;
-
-
-
           
         case "hlpColaborador":          
-          $sql="";
-          
-          $sql.="SELECT A.FVR_NOME,A.FVR_CONTATO,A.FVR_FONE,A.FVR_EMAIL,CDD.CDD_CODEST,CDD.CDD_NOME,A.FVR_ENDERECO,FVR_NUMERO"; 
+          $sql ="SELECT A.FVR_NOME,A.FVR_CONTATO,A.FVR_FONE,A.FVR_EMAIL,CDD.CDD_CODEST,CDD.CDD_NOME,A.FVR_ENDERECO,FVR_NUMERO"; 
           $sql.="  FROM FAVORECIDO A";
           $sql.="  LEFT OUTER JOIN CIDADE CDD ON A.FVR_CODCDD=CDD.CDD_CODIGO";
           $sql.=" WHERE (FVR_CODIGO=".$codigo.")"; 
@@ -529,14 +523,138 @@
             $html.=      "<td class='fpTdTitulo'>FONE</td>";
             $html.=      "<td class='fpTd' >".$tbl["FVR_FONE"]."</td>";
             $html.=      "<td colspan='3' class='fpTdTitulo'>CONTATO ".$tbl["FVR_CONTATO"]."</td>";
-            //$html.=      "<td class='fpTd' >".$tbl["FVR_CONTATO"]."</td>";
             $html.=    "</tr>";
             $html.=  "</tbody>";
             $html.="</table>";
-            //$html.="</div>"; 
           };  
           break;
-          
+
+        case "altEmpresa":
+          $retHtml=true;
+          $html ="<div id='dPaiChk' class='divContainerTable' style='height: 13.2em; width: 41em;border:none'>";
+          $html.="<table id='tblChk' class='fpTable' style='width:100%;'>";
+          $html.="  <thead class='fpThead'>";
+          $html.="    <tr>";
+          $html.="      <th class='fpTh' style='width:20%'>CoDIGO</th>";
+          $html.="      <th class='fpTh' style='width:60%'>DESCRICAO</th>";
+          $html.="      <th class='fpTh' style='width:20%'>SIM</th>";        
+          $html.="    </tr>";
+          $html.="  </thead>";
+          $html.="  <tbody id='tbody_tblChk'>";
+          $html.="    <tr class='fpBodyTr'>";
+          $html.="      <td class='fpTd textoCentro'>01</td>";
+          $html.="      <td class='fpTd'>TRACCOM</td>";
+          $html.="      <td class='fpTd textoCentro'>";
+          $html.="        <div width='100%' height='100%' onclick=' var elTr=this.parentNode.parentNode;fncCheck((elTr.rowIndex-1));'>";
+          $html.="          <i id='img01' data-value='N' class='fa fa-thumbs-o-down' style='margin-left:10px;font-size:1.5em;color:red;'></i>";
+          $html.="        </div>";
+          $html.="      </td>";
+          $html.="    </tr>";
+          $html.="    <tr class='fpBodyTr'>";
+          $html.="      <td class='fpTd textoCentro'>02</td>";
+          $html.="      <td class='fpTd'>TRACLOC</td>";
+          $html.="      <td class='fpTd textoCentro'>";
+          $html.="        <div width='100%' height='100%' onclick=' var elTr=this.parentNode.parentNode;fncCheck((elTr.rowIndex-1));'>";
+          $html.="          <i id='img02' data-value='N' class='fa fa-thumbs-o-down' style='margin-left:10px;font-size:1.5em;color:red;'></i>";
+          $html.="        </div>";
+          $html.="      </td>";
+          $html.="    </tr>";
+          $html.="    <tr class='fpBodyTr'>";
+          $html.="      <td class='fpTd textoCentro'>03</td>";
+          $html.="      <td class='fpTd'>TRACFRAN</td>";
+          $html.="      <td class='fpTd textoCentro'>";
+          $html.="        <div width='100%' height='100%' onclick=' var elTr=this.parentNode.parentNode;fncCheck((elTr.rowIndex-1));'>";
+          $html.="          <i id='img03' data-value='N' class='fa fa-thumbs-o-down' style='margin-left:10px;font-size:1.5em;color:red;'></i>";
+          $html.="        </div>";
+          $html.="      </td>";
+          $html.="    </tr>";
+          $html.="  </tbody>";
+          $html.="</table>";
+          $html.="</div>"; 
+          $html.="<div id='btnConfirmar' onClick='altEmpresaClick();' class='btnImagemEsq bie15 bieAzul bieRight' data-codemp='*' data-desemp='*'><i class='fa fa-check'> Ok</i></div>";  
+
+          $script ="function fncCheck(pLin){";
+          $script.="  let elImg;";
+          $script.="  tblChk.getElementsByTagName('tbody')[0].querySelectorAll('tr').forEach(function (row,indexTr) {";  
+          $script.="    elImg = 'img'+row.cells[0].innerHTML;";
+          $script.="    if( indexTr==pLin ){";
+          $script.="      jsCmpAtivo(elImg).remove('fa-thumbs-o-down').add('fa-thumbs-o-up').cor('blue');";
+          $script.="      document.getElementById('btnConfirmar').setAttribute('data-codemp',row.cells[0].innerHTML);";          
+          $script.="      document.getElementById('btnConfirmar').setAttribute('data-desemp',row.cells[1].innerHTML);";
+          $script.="    } else {";
+          $script.="      jsCmpAtivo(elImg).remove('fa-thumbs-o-up').add('fa-thumbs-o-down').cor('red');";
+          $script.="    };";
+          $script.="  });";
+          $script.="};";
+          //
+          $script.="function altEmpresaClick(){";
+          $script.="  let clsArq;";
+          $script.="  let envPhp;";
+          $script.="  let retornoPhp;";
+          $script.="  let msg;";
+          $script.="  clsArq=jsString('lote');";
+          $script.="  clsArq.add('login'    , 'TRAC'                                                                );";
+          $script.="  clsArq.add('empresa'  , document.getElementById('btnConfirmar').getAttribute('data-desemp')   );";
+          $script.="  clsArq.add('usuario'  , 'TROCAEMPRESA'                                                        );";
+          $script.="  clsArq.add('senha'    , '*'                                                                   );";
+          $script.="  envPhp=clsArq.fim();";
+          $script.="  retornoPhp = new FormData();";
+          $script.="  retornoPhp.append('login',envPhp );";
+          $script.="  msg=requestPedido('Trac_Login.php',retornoPhp);";
+          $script.="  var retPhp=JSON.parse(msg);";
+          $script.="  console.log(retPhp);";          
+          $script.="  if( retPhp[0].retorno=='OK' ){";
+          $script.="    localStorage.setItem('lsPublico',JSON.stringify(retPhp[0].dados));";
+          $script.="    jsPub = JSON.parse(localStorage.getItem('lsPublico'));";          
+          $script.="    localStorage.setItem('lsPathPhp','phpSqlServer.php');";
+          $script.="    switch( arqLocal ){";
+          $script.="      case 'Trac_Banco.php':";
+          $script.="        btnFiltrarClick('S');";          
+          $script.="        break;";
+          $script.="      case 'Trac_Cnab.php':";
+          $script.="        document.getElementById('spnEmpApelido').innerHTML=jsPub[0].emp_apelido;";
+          $script.="        buscaBanco();";
+          $script.="        jsCnb.registros=[];";
+          $script.="        objCnb.montarHtmlCE2017(jsCnb);"; 
+          $script.="        break;";
+          $script.="      case 'Trac_ContabilMes.php':";
+          $script.="        document.getElementById('spnEmpApelido').innerHTML=jsPub[0].emp_apelido;";
+          $script.="        jsCm.registros=[];";
+          $script.="        objCm.montarHtmlCE2017(jsCm);"; 
+          $script.="        break;";
+          $script.="      case 'Trac_CpCr.php':";
+          $script.="        document.getElementById('spnEmpApelido').innerHTML=jsPub[0].emp_apelido;";
+          $script.="        btnFiltrarClick();";                    
+          $script.="        break;";
+          $script.="      case 'Trac_Filial.php':";
+          $script.="        btnFiltrarClick('S');";          
+          $script.="        break;";
+          $script.="      case 'Trac_Imposto.php':";
+          $script.="        btnFiltrarClick('S');";          
+          $script.="        break;";
+          $script.="      case 'Trac_Nfp.php':";
+          $script.="        document.getElementById('spnEmpApelido').innerHTML=jsPub[0].emp_apelido;";
+          $script.="        btnFiltrarClick();";                    
+          $script.="        break;";
+          $script.="      case 'Trac_Nfs.php':";
+          $script.="        document.getElementById('spnEmpApelido').innerHTML=jsPub[0].emp_apelido;";
+          $script.="        btnFiltrarClick();";                    
+          $script.="        break;";
+          $script.="      case 'Trac_CpCrFaturarContrato.php':";  
+          $script.="        let codemp=parseInt(document.getElementById('btnConfirmar').getAttribute('data-codemp'));";          
+          $script.="        tblFc.getElementsByTagName('tbody')[0].querySelectorAll('tr').forEach(function (row,indexTr,tam){";     
+          $script.="          if(row.cells[0].children[0].checked){";
+          $script.="            row.cells[objCol.EMPRESA].innerHTML=document.getElementById('btnConfirmar').getAttribute('data-desemp');";
+          $script.="            row.cells[objCol.CODEMP].innerHTML=codemp;";
+          $script.="            row.cells[objCol.CODFLL].innerHTML=(parseInt(codemp)*1000)+1;";
+          $script.="          };";
+          $script.="        });";
+          $script.="        break;";          
+          $script.="    }";
+          $script.="    janelaFechar();";
+          $script.="  };";                    
+          $script.="};";          
+          break;
       }; 
       ///////////////////
       // Retornando dados
@@ -562,6 +680,7 @@
       if( $retHtml ){
         $this->retorno=[ "retorno"  =>  "OK"
                         ,"dados"    =>  '"'.$html.'"'
+                        ,"script"   =>  '"'.$script.'"'
                         ,"erro"     =>  ""];
       };                
       return $this->retorno;      

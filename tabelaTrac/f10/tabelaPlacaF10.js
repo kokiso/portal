@@ -6,12 +6,11 @@
 ////////////////////////////////////////////////////////////////////////////
 function fPlacaF10(opc,codPlc,foco,topo,objeto){
   let clsStr = new concatStr();
-  clsStr.concat("SELECT A.CNTP_PLACACHASSI AS PLACA"                                    );
+  clsStr.concat("SELECT VCL.VCL_CODIGO AS PLACA"                                    );
   clsStr.concat("       ,VTP.VTP_NOME AS TIPO"                                          );
   clsStr.concat("       ,VMD.VMD_NOME AS MODELO"                                        );
   clsStr.concat("       ,VCL.VCL_ANO AS ANO"                                            );          
-  clsStr.concat("  FROM CONTRATOPLACA A"                                                );
-  clsStr.concat("  LEFT OUTER JOIN VEICULO VCL ON A.CNTP_PLACACHASSI=VCL.VCL_CODIGO"    );            
+  clsStr.concat("  FROM  VEICULO VCL"                                                   );            
   clsStr.concat("  LEFT OUTER JOIN VEICULOCOR VCR ON VCL.VCL_CODVCR=VCR.VCR_CODIGO"     );
   clsStr.concat("  LEFT OUTER JOIN VEICULOTIPO VTP ON VCL.VCL_CODVTP=VTP.VTP_CODIGO"    );
   clsStr.concat("  LEFT OUTER JOIN VEICULOMODELO VMD ON VCL.VCL_CODVMD=VMD.VMD_CODIGO"  );
@@ -35,7 +34,6 @@ function fPlacaF10(opc,codPlc,foco,topo,objeto){
   };
 
   sql=clsStr.fim();
-  console.log(sql)
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,7 @@
           $sql.="       ,CASE WHEN A.SRV_CSLL='S' THEN 'SIM' ELSE 'NAO' END AS SRV_CSLL";
           $sql.="       ,A.SRV_CSLLALIQ";
           $sql.="       ,CASE WHEN A.SRV_ISS='S' THEN 'SIM' ELSE 'NAO' END AS SRV_ISS";
-          $sql.="       ,A.SRV_CODCC";
+          //$sql.="       ,A.SRV_CODCC";
           $sql.="       ,A.SRV_CODSPR";
           $sql.="       ,A.SRV_CODEMP";
           $sql.="       ,E.EMP_APELIDO";
@@ -59,7 +59,7 @@
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.SRV_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESA E ON A.SRV_CODEMP=E.EMP_CODIGO";
           $sql.="  WHERE ((SRV_CODEMP=".$lote[0]->codemp.")";
-          $sql.="   AND ((SRV_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))";                 
+          $sql.="   AND ((SRV_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))";                  
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -374,20 +374,20 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":16 ,"field"          :"SRV_CODCC" 
-                      ,"labelCol"       : "CONTABIL"
-                      ,"obj"            : "edtCodCc"
-                      ,"insUpDel"       : ["N","N","N"]
-                      ,"tamGrd"         : "0em"
-                      ,"tamImp"         : "25"
-                      ,"fieldType"      : "str"
-                      ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9|."
-                      ,"newRecord"      : ["0.00.00.00.0000","this","this"]
-                      ,"validar"        : ["notnull"]
-                      ,"digitosMinMax"  : [1,15]
-                      ,"ajudaCampo"     : [ "Código ..."]
-                      ,"padrao":0}
-            ,{"id":17 ,"field"          :"SRV_CODSPR" 
+            // ,{"id":16 ,"field"          :"SRV_CODCC" 
+            //           ,"labelCol"       : "CONTABIL"
+            //           ,"obj"            : "edtCodCc"
+            //           ,"insUpDel"       : ["N","N","N"]
+            //           ,"tamGrd"         : "0em"
+            //           ,"tamImp"         : "25"
+            //           ,"fieldType"      : "str"
+            //           ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9|."
+            //           ,"newRecord"      : ["0.00.00.00.0000","this","this"]
+            //           ,"validar"        : ["notnull"]
+            //           ,"digitosMinMax"  : [1,15]
+            //           ,"ajudaCampo"     : [ "Código ..."]
+            //           ,"padrao":0}
+            ,{"id":16 ,"field"          :"SRV_CODSPR" 
                       ,"labelCol"       : "CNAE"
                       ,"obj"            : "edtCodSpr"
                       ,"insUpDel"       : ["S","S","N"]
@@ -401,12 +401,12 @@
                       ,"ajudaCampo"     : [ "Código ..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":18 ,"field"          : "SRV_CODEMP" 
+            ,{"id":17 ,"field"          : "SRV_CODEMP" 
                       ,"pk"             : "S"
                       ,"labelCol"       : "CODEMP"  
                       ,"obj"            : "edtCodEmp"  
                       ,"padrao":7}					  
-            ,{"id":19 ,"field"          : "EMP_APELIDO"   
+            ,{"id":18 ,"field"          : "EMP_APELIDO"   
                       ,"labelCol"       : "EMPRESA"
                       ,"obj"            : "edtDesEmp"
                       ,"insUpDel"       : ["N","N","N"]
@@ -415,7 +415,7 @@
                       ,"newRecord"      : [jsPub[0].emp_apelido,"this","this"]
                       ,"ajudaCampo"     : ["Nome da EMpresa."]
                       ,"padrao":0}
-            ,{"id":20 ,"field"          : "SRV_PODEVENDA"  
+            ,{"id":19 ,"field"          : "SRV_PODEVENDA"  
                       ,"labelCol"       : "VENDA" 
                       ,"obj"            : "cbVenda"
                       ,"tipo"           : "cb"                      
@@ -428,7 +428,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":21 ,"field"          : "SRV_PODELOCACAO"  
+            ,{"id":20 ,"field"          : "SRV_PODELOCACAO"  
                       ,"labelCol"       : "LOCACAO" 
                       ,"obj"            : "cbLocacao"
                       ,"tipo"           : "cb"                      
@@ -441,27 +441,27 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":22 ,"field"          : "SRV_ATIVO"  
+            ,{"id":21 ,"field"          : "SRV_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"tamImp"         : "10"                      
                       ,"padrao":2}                                        
-            ,{"id":23 ,"field"          : "SRV_REG"    
+            ,{"id":22 ,"field"          : "SRV_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"tamImp"         : "10"                      
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":24  ,"field"          : "US_APELIDO" 
+            ,{"id":23  ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}                
-            ,{"id":25  ,"field"          : "SRV_CODUSR" 
+            ,{"id":24  ,"field"          : "SRV_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":26 ,"labelCol"       : "PP"      
+            ,{"id":25 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"

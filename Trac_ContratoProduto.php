@@ -237,13 +237,11 @@
         if( $lote[0]->rotina=="placacad" ){
 
           $sql="";
-          $sql.="UPDATE VCONTRATOPLACA";
-          $sql.="   SET CNTP_CODCNTT='".$lote[0]->cntp_codcntt."'";
-          $sql.="       ,CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
-          $sql.="       ,CNTP_CODGMP=".$lote[0]->cntp_codgmp;
-          $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
-          $sql.=" WHERE ((CNTP_CODCNTT='".$lote[0]->cntp_codcntt."') AND (CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'))";
-          //var_dump($sql);     
+          $sql.="UPDATE VVEICULO";
+          $sql.="   SET VCL_CODCNTT='".$lote[0]->cntp_codcntt."'";
+          $sql.="       ,VCL_CODGMP=".$lote[0]->cntp_codgmp;
+          $sql.="       ,VCL_CODUSR=".$_SESSION["usr_codigo"];
+          $sql.=" WHERE ((VCL_CODCNTT='".$lote[0]->cntp_codcntt."') AND (VCL_CODIGO='".$lote[0]->cntp_placachassi."'))";    
           array_push($arrUpdt,$sql); 
 
           $sql="";
@@ -260,12 +258,10 @@
         //////////////////
         if( $lote[0]->rotina=="placaexc" ){
           $sql="";
-          $sql.="UPDATE VCONTRATOPLACA";
-          $sql.="   SET CNTP_CODCNTT='".$lote[0]->cntp_codcntt."'";
-          $sql.="       ,CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
-          $sql.="       ,CNTP_CODGMP= 0";
-          $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
-          $sql.=" WHERE ((CNTP_CODCNTT='".$lote[0]->cntp_codcntt."') AND (CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'))";     
+          $sql.="UPDATE VVEICULO";
+          $sql.="   SET VCL_CODGMP= 0";
+          $sql.="       ,VCL_CODUSR=".$_SESSION["usr_codigo"];
+          $sql.=" WHERE ((VCL_CODCNTT='".$lote[0]->cntp_codcntt."') AND (VCL_CODIGO='".$lote[0]->cntp_placachassi."'))";     
           array_push($arrUpdt,$sql); 
 
           $sql="";
@@ -1100,7 +1096,7 @@
             ,{codcntt: pega.codCntt
               ,divWidth:"66em"
               ,tblWidth:"64em"
-              ,where:" WHERE ((A.CNTP_CODCNTT="+pega.codCntt+") AND (A.CNTP_CODGMP=0))"
+              ,where:" WHERE ((VCL.VCL_CODCNTT="+pega.codCntt+") AND (VCL.VCL_CODGMP=0))"
           }); 
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});

@@ -40,6 +40,7 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
     };  
   };
   sql=clsStr.fim();
+  console.log(sql);
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////

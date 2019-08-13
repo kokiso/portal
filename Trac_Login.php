@@ -321,7 +321,7 @@
             // Passando um JSON para o PHP //
             /////////////////////////////////
             clsArq=jsString("lote");
-            clsArq.add("login"    , "TRAC"                                      );
+            clsArq.add("login"    , "a1"                                      );
             clsArq.add("empresa"  , document.getElementById("edtEmpresa").value );
             clsArq.add("usuario"  , document.getElementById("edtUsuario").value );
             clsArq.add("senha"    , document.getElementById("edtSenha").value   );

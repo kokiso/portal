@@ -52,7 +52,7 @@
           $sql.=",CNTT_LOCALINSTALA"; 
           $sql.=",CNTT_CODEMP" ;                  //-- ANGELO KOKISO ADICAO DO CODEMP
           $sql.=",CNTT_CODUSR) VALUES(";
-          $sql.="'$contrato'";                    // CNTT_CODIGO     
+          $sql.=$contrato;                        // CNTT_CODIGO     
           $sql.=",'".$lote[0]->tipo."'";          // CNTT_TIPO
           $sql.=",'".date('m/d/Y')."'";           // CNTT_EMISSAO
           $sql.=",'S'";                           // CNTT_ATIVO // Angelo Kokiso, Contrato vir ativo a partir do momento que pedido for aprovado e assinado
@@ -79,14 +79,29 @@
             $objPlc=$lote[0]->PLACA;
             foreach ( $objPlc as $plc ){
               $sql="";
-              $sql.="INSERT INTO VCONTRATOPLACA(CNTP_CODCNTT";
-              $sql.=",CNTP_PLACACHASSI";
-              $sql.=",CNTP_CODGMP"; 
-              $sql.=",CNTP_CODUSR) VALUES(";                        
-              $sql.="'$contrato'";                // CNTP_CODCNTT
-              $sql.=",'" .$plc->placa."'";        // CNTP_PLACACHASSI
-              $sql.=",0";                         // CNTP_CODGMP
-              $sql.=",".$_SESSION["usr_codigo"];  // CNTP_CODUSR            
+              $sql.="INSERT INTO VVEICULO(";
+              $sql.="VCL_CODIGO";
+              $sql.=",VCL_CODFVR";
+              $sql.=",VCL_CODVCR";
+              $sql.=",VCL_CODVTP";
+              $sql.=",VCL_CODVMD";
+              $sql.=",VCL_ANO";
+              $sql.=",VCL_CODGMP";
+              $sql.=",VCL_CODCNTT";
+              $sql.=",VCL_ATIVO";
+              $sql.=",VCL_REG"; 
+              $sql.=",VCL_CODUSR) VALUES(";
+              $sql.="'" .$plc->placa."'";          // VCL_CODIGO
+              $sql.=",".$lote[0]->codfvr;          // VCL_CODFVR
+              $sql.=",1";                          // VCL_CODVCR
+              $sql.=",'AUT'";                      // VCL_CODVTP
+              $sql.=",1";                          // VCL_CODVMD
+              $sql.=",1900";                       // VCL_CODANO 
+              $sql.=",0";                          // VCL_CODGMP                       
+              $sql.=",'$contrato'";                // VCL_CODCNTT
+              $sql.=",'S'";                        // VCL_ATIVO
+              $sql.=",'P'";                        // VCL_REG
+              $sql.=",".$_SESSION["usr_codigo"];   // CNTP_CODUSR            
               $sql.=")";
               array_push($arrUpdt,$sql);            
             };  
@@ -144,16 +159,21 @@
           $objCob = $lote[0]->COBRANCA;
           foreach ( $objCob as $cob ){
               $sql="";
-              $sql.="INSERT INTO CONTRATOCOBRANCA(CNTC_CODCNTT";
+              $sql.="INSERT INTO VCONTRATOCOBRANCA(CNTC_CODCNTT";
               $sql.=",CNTC_CODGM";
               $sql.=",CNTC_CODSRV";
-              $sql.=",CNTC_PGTO"; 
+              $sql.=",CNTC_PGTO";
+              $sql.=",CNTC_PRAZOPONTUAL"; 
               $sql.=",CNTC_VLRMENSAL";  
               $sql.=",CNTC_VLRTOTAL) VALUES(";                        
               $sql.="'$contrato'";               // CNTC_CODCNTT
               $sql.=",'" .$cob->codgm."'";       // CNTC_CODGM
               $sql.=",'" .$cob->codsrv."'";      // CNTC_CODSRV
               $sql.=",'" .$cob->pgto."'";        // CNTC_PGTO
+              if ( $cob->pgto == 'P')
+                $sql.= ",'" .$cob->prazoPontual."'" ;
+              else
+                $sql.=  ",0";  //CNTC_PRAZOPONTUAL
               $sql.=",'" .$cob->vlrmensal."'";   // CNTC_VLRMENSAL
               $sql.=",'" .$cob->vlrtotal."'";    // CNTC_VLRTOTAL
               $sql.=")";
@@ -166,7 +186,7 @@
           array_push($arrUpdt,$sql);  
           $atuBd  = true;
         };  
-//file_put_contents("aaa.xml",print_r($arrUpdt,true));        
+//file_put_contents("aaa.xml",print_r($arrUpdt,true));
         //
         //
         if( $lote[0]->rotina=="atualizaStatus" ){          
@@ -1061,14 +1081,13 @@
           ///////////////////////////////////////////////////////////
 
           item.forEach(function(qtd){
-            if( qtd.codgp!="AUT" ){
-              if( qtd.servico!=0 ){
-                clsCob.add("codgm"     , qtd.produto                       );
-                clsCob.add("codsrv"    , qtd.servico                       );
-                clsCob.add("pgto"      , (qtd.pagto).substring(0,1)        );
-                clsCob.add("vlrmensal" , jsNmrs(qtd.unitario).dolar().ret());
-                clsCob.add("vlrtotal"  , jsNmrs(qtd.mensal).dolar().ret()  );
-              }
+            if( qtd.mensal != "0,00" ){
+              clsCob.add("codgm"     , qtd.produto                       );
+              clsCob.add("codsrv"    , qtd.servico                       );
+              clsCob.add("prazoPontual" , qtd.prazo                      );
+              clsCob.add("pgto"      , (qtd.pagto).substring(0,1)        );
+              clsCob.add("vlrmensal" , jsNmrs(qtd.unitario).dolar().ret());
+              clsCob.add("vlrtotal"  , jsNmrs(qtd.mensal).dolar().ret()  );
             }
             if( qtd.codgp=="AUT" ){
               quantidade=parseInt(qtd.qtdade);
@@ -1105,6 +1124,8 @@
             };  
           });
           let cobranca = clsCob.fim();
+          // console.log(cobranca);
+          // throw new Error('Oooops!');
           let produto = clsIte.fim();
 
           clsJs   = jsString("lote");  
