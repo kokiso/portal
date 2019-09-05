@@ -7,6 +7,7 @@
 function fEnderecoF10(opc,codCntE,foco,topo,objeto){
   let clsStr = new concatStr();
   clsStr.concat("SELECT A.CNTE_CODIGO AS CODIGO"                                          );
+  clsStr.concat("       ,A.CNTE_CODFVR AS FAVORECIDO"                                     );
   clsStr.concat("       ,C.CDD_NOME AS CIDADE"                                            );
   clsStr.concat("       ,A.CNTE_CEP AS CEP"                                               );          
   clsStr.concat("       ,A.CNTE_CODLGR+' '+A.CNTE_ENDERECO+' '+A.CNTE_NUMERO AS ENDERECO" );
@@ -22,7 +23,7 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
           clsStr.concat( " {AND} (A.CNTE_ATIVO='"+objeto[key]+"')",true);        
           break;
         case "codfvr": 
-          clsStr.concat(" {WHERE} (A.CNTE_CODFVR='"+objeto[key]+"')",true);
+          //clsStr.concat(" {WHERE} (A.CNTE_CODFVR='"+objeto[key]+"')",true);
           break;
         case "divWidth": 
           divWidth=objeto[key];
@@ -40,7 +41,6 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
     };  
   };
   sql=clsStr.fim();
-  console.log(sql);
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////
@@ -52,17 +52,18 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
     if( bdCntE.retorno=='OK'){
       var jsCntEF10={
         "titulo":[
-           {"id":0 ,"labelCol":"OPC"      ,"tipo":"chk"  ,"tamGrd":"3em"   ,"fieldType":"chk"}                                
-          ,{"id":1 ,"labelCol":"CODIGO"   ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
-          ,{"id":2 ,"labelCol":"CIDADE"   ,"tipo":"edt"  ,"tamGrd":"15em"  ,"fieldType":"str","ordenaColuna":"S"}
-          ,{"id":3 ,"labelCol":"CEP"      ,"tipo":"edt"  ,"tamGrd":"6em"  ,"fieldType":"str","ordenaColuna":"S"}
-          ,{"id":4 ,"labelCol":"ENDERECO" ,"tipo":"edt"  ,"tamGrd":"30em"  ,"fieldType":"str","ordenaColuna":"S"}          
+           {"id":0 ,"labelCol":"OPC"          ,"tipo":"chk"  ,"tamGrd":"3em"   ,"fieldType":"chk"}                                
+          ,{"id":1 ,"labelCol":"CODIGO"       ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
+          ,{"id":2 ,"labelCol":"FAVORECIDO"   ,"tipo":"edt"  ,"tamGrd":"5em"   ,"fieldType":"int","formato":['i4'],"ordenaColuna":"S","align":"center"}
+          ,{"id":3 ,"labelCol":"CIDADE"       ,"tipo":"edt"  ,"tamGrd":"15em"  ,"fieldType":"str","ordenaColuna":"S"}
+          ,{"id":4 ,"labelCol":"CEP"          ,"tipo":"edt"  ,"tamGrd":"6em"   ,"fieldType":"str","ordenaColuna":"S"}
+          ,{"id":5 ,"labelCol":"ENDERECO"     ,"tipo":"edt"  ,"tamGrd":"30em"  ,"fieldType":"str","ordenaColuna":"S"}          
         ]
         ,"registros"      : bdCntE.dados              // Recebe um Json vindo da classe clsBancoDados
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       
         ,"checarTags"     : "N"                     // Somente em tempo de desenvolvimento(olha as pricipais tags)
         ,"tbl"            : tblCntE                   // Nome da table
-        ,"div"        : "cnte"
+        ,"div"            : "cnte"
         ,"prefixo"        : "cnte"                    // Prefixo para elementos do HTML em jsTable2017.js
         ,"tabelaBD"       : "CONTRATOENDERECO"    // Nome da tabela no banco de dados  
         ,"width"          : tblWidth                // Tamanho da table

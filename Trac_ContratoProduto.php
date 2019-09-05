@@ -3,7 +3,7 @@
   if( isset($_POST["contratoproduto"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");                               
       $vldr     = new validaJSon();          
@@ -44,9 +44,10 @@
             } else {                
               $sql="";
               $sql.="UPDATE VCONTRATOPRODUTO";
-              $sql.="   SET CNTP_ACAO=".$reg->cntp_acao;
+              $sql.="   SET CNTP_CODGMP=".$reg->cntp_codgmp;
+              $sql.="       ,CNTP_ACAO=".$reg->cntp_acao;
               $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
-              $sql.=" WHERE ((CNTP_CODCNTT=".$reg->cntp_codcntt.") AND (CNTP_CODGMP=".$reg->cntp_codgmp."))";  
+              $sql.=" WHERE ((CNTP_CODCNTT=".$reg->cntp_codcntt.") AND (CNTP_CODGMP=".$reg->cntp_codgmp."))"; 
               array_push($arrUpdt,$sql);                                    
               $atuBd = true;
             };  
@@ -215,10 +216,12 @@
               $sql.="   SET CNTP_CODENTREGA=".$reg->cntp_codentrega;
               $sql.="       ,CNTP_CODINSTALA=".$reg->cntp_codinstala;                
               $sql.="       ,CNTP_DTAGENDA=".($reg->cntp_dtagenda=="00/00/0000" ? "null" : "'".$reg->cntp_dtagenda."'");
-              $sql.="       ,CNTP_CODPEI=".$reg->cntp_codpei;                              
+              $sql.="       ,CNTP_CODPEI=".$reg->cntp_codpei;
+              $sql.="       ,CNTP_GRUPOCOLAB='".$reg->cntp_codColGrp."'";                              
               $sql.="       ,CNTP_ACAO=".$lote[0]->acao;              
               $sql.=" WHERE ((CNTP_CODCNTT=".$reg->cntp_codcntt.") AND (CNTP_IDUNICO=".$reg->cntp_idunico.") AND (CNTP_CODGMP=".$reg->cntp_codgmp."))";
               array_push($arrUpdt,$sql); 
+              file_put_contents("aaa2.xml",$arrUpdt);
               $atuBd = true;
             };    
           };
@@ -317,7 +320,8 @@
           $sql.="      ,CEI.CNTE_CEP AS CEPINSTALA";                    
           $sql.="      ,CONVERT(VARCHAR(10),A.CNTP_DTAGENDA,127) AS DTAGENDA";                    
           $sql.="      ,GMP.GMP_CODPEI AS CODFVR";          
-          $sql.="      ,COALESCE(FVR.FVR_APELIDO,'') AS COLABORADOR";          
+          $sql.="      ,A.CNTP_GRUPOCOLAB AS COLABORADORES";
+          $sql.="      ,COALESCE(FVR.FVR_APELIDO,'') AS COLABORADOR";           
           $sql.="      ,A.CNTP_CODOS AS OS";                    
           $sql.="      ,A.CNTP_AGENDADO AS AC";          
           $sql.="      ,CASE WHEN ((GMP.GMP_PLACACHASSI IS NULL) OR (GMP.GMP_PLACACHASSI='NSA')) THEN '' ELSE GMP.GMP_PLACACHASSI END AS PLACACHASSI";
@@ -366,7 +370,7 @@
           $sql.="  LEFT OUTER JOIN GRUPOMODELO GM ON A.CNTP_CODGM=GM.GM_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA US ON A.CNTP_CODUSR=US.US_CODIGO"; 
           $sql.="  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMP ON A.CNTP_CODGMP=GMP.GMP_CODIGO";
-          $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON GMP.GMP_CODPEI=FVR.FVR_CODIGO";            // Tem que ser pelo auto pois este é unico
+          $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON A.CNTP_COLAB=FVR.FVR_CODIGO";            // Tem que ser pelo auto pois este é unico
           $sql.="  LEFT OUTER JOIN CONTRATOENDERECO CEE ON A.CNTP_CODENTREGA=CEE.CNTE_CODIGO";
           $sql.="  LEFT OUTER JOIN CONTRATOENDERECO CEI ON A.CNTP_CODINSTALA=CEI.CNTE_CODIGO";          
           $sql.=" WHERE (A.CNTP_CODCNTT='".$lote[0]->codcntt."')"; 
@@ -482,6 +486,7 @@
             ,{"id":7  ,"labelCol"       : "CODGMP"
                       ,"fieldType"      : "int"
                       ,"tamGrd"         : "4em"
+                      ,"ordenaColuna"   : "S"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
             ,{"id":8  ,"labelCol"       : "VALOR" 
@@ -572,14 +577,21 @@
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
-            ,{"id":19 ,"labelCol"       : "COLABORADOR"
+            ,{"id":19 ,"labelCol"       : "COLABORADORES"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "10em"
+                      ,"tamImp"         : "0"
+                      ,"truncate"       : "S"                      
+                      ,"excel"          : "N"                      
+                      ,"padrao":0}
+            ,{"id":20 ,"labelCol"       : "COLABORADOR"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "30"
                       ,"truncate"       : "S"                      
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":20  ,"labelCol"      : "OS"
+            ,{"id":21  ,"labelCol"      : "OS"
                       ,"fieldType"      : "int"
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "0"
@@ -587,7 +599,7 @@
                       ,"popoverTitle"   : "Numero da OS referente instalação"                          
                       ,"popoverLabelCol": "Ordem serviço"                      
                       ,"padrao":0}
-            ,{"id":21 ,"labelCol"       : "AC"
+            ,{"id":22 ,"labelCol"       : "AC"
                       ,"fieldType"      : "str"
                       ,"align"          : "center"                      
                       ,"tamGrd"         : "0em"
@@ -595,7 +607,7 @@
                       ,"excel"          : "S"                   
                       ,"popoverTitle"   : "Para <b>AGENDAMENTO COMPLETO</b> deve ser informado<hr>Endereco de entrega e instalação<br>Data para instalação<br>Colaborador"                          
                       ,"padrao":0}
-            ,{"id":22 ,"labelCol"       : "PLACA_CHASSI"
+            ,{"id":23 ,"labelCol"       : "PLACA_CHASSI"
                       ,"fieldType"      : "str"
                       ,"align"          : "center"
                       ,"tamGrd"         : "10em"
@@ -603,33 +615,34 @@
                       ,"truncate"       : "S"                      
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":23 ,"labelCol"       : "ATIVADO"
+            ,{"id":24 ,"labelCol"       : "ATIVADO"
                       ,"fieldType"      : "dat"
                       ,"align"          : "center"
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":24 ,"labelCol"       : "SERIE"
+            ,{"id":25 ,"labelCol"       : "SERIE"
                       ,"fieldType"      : "str"
                       ,"align"          : "center"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "30"
+                      ,"ordenaColuna"   : "S"
                       ,"truncate"       : "S"
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":25 ,"labelCol"       : "USUARIO" 
+            ,{"id":26 ,"labelCol"       : "USUARIO" 
                       ,"fieldType"      : "str"            
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"                      
                       ,"excel"          : "S"                      
                       ,"padrao":0} 
-            ,{"id":26 ,"labelCol"       : "CODENTREGA"
+            ,{"id":27 ,"labelCol"       : "CODENTREGA"
                       ,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
-            ,{"id":27 ,"labelCol"       : "CODINSTALA"
+            ,{"id":28 ,"labelCol"       : "CODINSTALA"
                       ,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
@@ -640,7 +653,7 @@
             //           ,"fieldType"      : "popover"
             //           ,"popoverTitle"   : "Pop up de campos relacionados a este registro"                      
             //           ,"padrao":0}
-            ,{"id":28 ,"labelCol"       : "COMP"         
+            ,{"id":29 ,"labelCol"       : "COMP"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -677,6 +690,8 @@
                                           ,"popover":{title:"Remover placa",texto:"Remove a <b>placa</b> selecionada do contrato",aviso:"warning"}}             
             ,{"texto":"Marcar"            ,"name":"horMarcar"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-check"                        
                                           ,"popover":{title:"Marcar/Desmarcar",texto:"Inverte todas as linhas da grade pela coluna OPC(marcado)"}}
+            ,{"texto":"Colaborador"       ,"name":"horColab"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-user"                        
+                                          ,"popover":{title:"Colaborador",texto:"Vincula colaborador à placa"}}
             ,{"texto":"Excel"             ,"name":"horExcel"        ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"} 
             ,{"texto":"Imprimir"          ,"name":"horImprimir"     ,"onClick":"3"  ,"enabled":true,"imagem":"fa fa-print"}                    
             ,{"texto":"Fechar"            ,"name":"horFechar"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-close"}
@@ -718,9 +733,9 @@
         // Aqui sao as colunas que vou precisar aqui e Trac_GrupoModeloInd.php
         // esta garante o chkds[0].?????? e objCol
         //////////////////////////////////////////////////////////////////////
-        objCol=fncColObrigatoria.call(jsCntI,[ "AC"         ,"CFG"  ,"CODENTREGA" ,"CODPEI"   ,"CODINSTALA" ,"CODGM"    ,"CODGMP" ,"ATIVADO"  ,"COLABORADOR"
+        objCol=fncColObrigatoria.call(jsCntI,[ "AC"         ,"CFG"  ,"CODENTREGA" ,"CODPEI"   ,"CODINSTALA" ,"CODGM"    ,"CODGMP" ,"ATIVADO"  ,"COLABORADORES"
                                               ,"CONTRATO"   ,"RE"   ,"AGENDA"     ,"EMPENHO"  ,"ENTREGA"  ,"GRP"    ,"IDUNICO"  ,"IDSRV"      
-                                              ,"INSTALA"    ,"ME"   ,"OS"         ,"PE"       ,"PLACA_CHASSI" 
+                                              ,"INSTALA"    ,"ME"   ,"OS"         ,"PE"       ,"PLACA_CHASSI","COLABORADOR" 
                                               ,"REFERENTE"  ,"SE"   ,"SERIE"      ,"USUARIO"  ,"VALOR" ]);
         switch( pega.qualRotina ){
           case 'EMPENHO':
@@ -731,13 +746,15 @@
             $doc("horMarcar").style.display="none";
             $doc("horModoEntrega").style.display="none";
             $doc("horStatusEntrega").style.display="none";
-            $doc("horGerarOs").style.display="none";            
+            $doc("horGerarOs").style.display="none";
+            $doc("horColab").style.display="none";             
             $doc("horEmpenhoExc").style.color="red";
             break;
           case 'AGENDA':
             $doc("horPlacaCad").style.display="none";
             $doc("horPlacaExc").style.display="none";
             $doc("horEmpenhoCad").style.display="none";
+            $doc("horColab").style.display="none";
             $doc("horEmpenhoExc").style.display="none";
             $doc("collapseCorreio").style.display="block";            
             break;
@@ -746,6 +763,7 @@
             $doc("horEmpenhoCad").style.display="none";                     
             $doc("horPlacaCad").style.display="none";
             $doc("horPlacaExc").style.display="none";
+            $doc("horColab").style.display="none";
             //$doc("horAgenda").style.display="none";
             $doc("horMarcar").style.display="none";
             $doc("horModoEntrega").style.display="none";
@@ -760,7 +778,7 @@
             $doc("horAgenda").style.display="none";
             $doc("horMarcar").style.display="none";     
             $doc("horModoEntrega").style.display="none";  
-            $doc("horStatusEntrega").style.display="none";      
+            $doc("horStatusEntrega").style.display="none";   
             $doc("horGerarOs").style.display="none";                        
             $doc("collapseAtiva").style.display="block";            
             $doc("horPlacaExc").style.color="red";        
@@ -850,6 +868,7 @@
       };
       function RetF10tblEnt(arr){
         $doc("edtCodEnt").value      = arr[0].CODIGO;
+        $doc("edtCodEntFvr").value   = arr[0].FAVORECIDO;
         $doc("edtDesEnt").value      = arr[0].ENDERECO;
         $doc("edtCddEnt").value      = arr[0].CIDADE;        
         $doc("edtCepEnt").value      = arr[0].CEP;                
@@ -874,7 +893,8 @@
               ,where:" AND CNTE_CODIGO="+elNew 
               ,tbl:"tblEnt"
           }); 
-          $doc(obj.id).value           = ( arr.length == 0 ? "0000"            : jsNmrs(arr[0].CODIGO).emZero(4).ret() ); 
+          $doc(obj.id).value           = ( arr.length == 0 ? "0000"            : jsNmrs(arr[0].CODIGO).emZero(4).ret() );
+          $doc("edtCodEntFvr").value   = ( arr.length == 0 ? "0000"            : jsNmrs(arr[0].FAVORECIDO).emZero(4).ret() ); 
           $doc("edtDesEnt").value      = ( arr.length == 0 ? "*"               : arr[0].ENDERECO                       );
           $doc("edtCddEnt").value      = ( arr.length == 0 ? "*"               : arr[0].CIDADE                         );
           $doc("edtCepEnt").value      = ( arr.length == 0 ? "*"               : arr[0].CEP                            );
@@ -1196,6 +1216,32 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
+      ////////////////////////
+      // Vincular colaborador
+      ////////////////////////
+      function horColabClick(){
+        try{
+          chkds = objCntI.gerarJson("1").gerar();
+          clsJs = jsString("lote");
+
+          if( chkds[0].PLACA_CHASSI == "" || chkds[0].PLACA_CHASSI == "NSA0000"){
+
+          }
+          else{
+            throw "AUTO COM PLACA NÃO ACEITA COLABORADOR!";
+          }   
+
+          fColaboradorF10(0,"nsa","null",100
+            ,{divWidth:"76em"
+              ,tblWidth:"74em"
+              ,codins:chkds[0].CODINSTALA
+              ,where:'AND A.PEI_CODFVR IN('+chkds[0].COLABORADORES+')'
+          }); 
+          
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Erro"});
+        };
+      };
       /////////////////
       // Agendar
       /////////////////
@@ -1272,7 +1318,8 @@
             clsJs.add("cntp_codcntt"    , parseInt(reg.CONTRATO)                                );           
             clsJs.add("cntp_codentrega" , jsNmrs("edtCodEnt").inteiro().ret()                   );             
             clsJs.add("cntp_codinstala" , jsNmrs("edtCodIns").inteiro().ret()                   );             
-            clsJs.add("cntp_codpei"     , jsNmrs("ageCodCol").inteiro().ret()                   );  //Colaborador(com quem esta o auto)                         
+            clsJs.add("cntp_codpei"     , 0                                                     );  
+            clsJs.add("cntp_codColGrp"  , String($doc("ageCodCol").value)                       );                      
             clsJs.add("cntp_dtagenda"   , jsDatas("edtData").retMMDDYYYY()                      ); 
             clsJs.add("cntp_codmsg"     , parseInt($doc("cbCodMsg").value)                      );
             clsJs.add("cntp_local"      , $doc("cbLocal").value                                 );            
@@ -1313,7 +1360,7 @@
                     row.cells[objCol.ENTREGA].innerHTML     = $doc("edtCepEnt").value;
                     row.cells[objCol.INSTALA].innerHTML     = $doc("edtCepIns").value;
                     row.cells[objCol.AGENDA].innerHTML    = ( $doc("edtData").value=="00/00/0000" ? "" : $doc("edtData").value );
-                    row.cells[objCol.COLABORADOR].innerHTML = $doc("ageApeCol").value;
+                    row.cells[objCol.COLABORADOR].innerHTML = $doc("ageCodCol").value;
                     //////////////////////////////////////////////////////////////////
                     // Para o agendamento ser completo deve ter os 4 campos intormados
                     // Olhando aqui como ficou depois da atualizacao
@@ -1395,7 +1442,7 @@
         };
       };
       ///////////////////////////////
-      // Colaborador para agenda
+      // Grupo de colaboradores para agenda
       ///////////////////////////////
       function colF10Click(obj){
         try{
@@ -1412,30 +1459,41 @@
         };
       };
       function RetF10tblCol(arr){
-        $doc("ageCodCol").value      = arr[0].CODIGO;
-        $doc("ageDesCol").value      = arr[0].COLABORADOR;
-        $doc("ageApeCol").value      = arr[0].APELIDO;
-        $doc("ageCodCol").setAttribute("data-oldvalue",arr[0].CODIGO);
+        let colGrp = '';
+        let colNms = '';
+        for(let i = 0; i < arr.length; i++){
+           colGrp = colGrp.concat(arr[i].CODIGO,',');
+           colNms = colNms.concat(arr[i].COLABORADOR,',');
+        }
+        $doc("ageCodCol").value      = colGrp.slice(0, -1);
+        $doc("ageDesCol").value      = colNms.slice(0, -1);
+        $doc("ageCodCol").setAttribute("data-oldvalue",colGrp.slice(0, -1));
         
         if( pega.qualRotina=="OS" )
           $doc("cbCodMsg").focus();        
       };
       function codColBlur(obj){
-        var elOld = jsNmrs($doc(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
-        var elNew = jsNmrs(obj.id).inteiro().ret();
+        var elOld = $doc(obj.id).getAttribute("data-oldvalue");
+        var elNew = obj.id;
         if( elOld != elNew ){
           var arr = fColaboradorF10(1,"nsa","null",100
             ,{codins:parseInt($doc("edtCodIns").value)
-              ,where:" AND PEI_CODFVR="+elNew 
+              ,where:" AND PEI_CODFVR IN ("+elOld+")" 
               ,divWidth:"76em"
               ,tblWidth:"74em"
-          }); 
-          $doc("ageCodCol").value      = ( arr.length == 0 ? "0000"            : jsNmrs(arr[0].CODIGO).emZero(4).ret() ); 
-          $doc("ageDesCol").value      = ( arr.length == 0 ? ""                : arr[0].COLABORADOR );
-          $doc("ageApeCol").value      = ( arr.length == 0 ? ""                : arr[0].APELIDO );
+          });
+        let colGrp = '';
+        let colNms = '';
+        for(let i = 0; i < arr.length; i++){
+           colGrp = colGrp.concat(arr[i].CODIGO,',');
+           colNms = colNms.concat(arr[i].COLABORADOR,',');
+        }
+          $doc("ageCodCol").value      = ( arr.length == 0 ? "0000"            : colGrp.slice(0, -1) ); 
+          $doc("ageDesCol").value      = ( arr.length == 0 ? ""                : colNms.slice(0, -1) );
           $doc("ageCodCol").setAttribute("data-oldvalue",$doc("ageCodCol").value);
         };
       };
+      
       ///////////////////////////////
       // Modo de entrega
       ///////////////////////////////
@@ -2046,7 +2104,7 @@
     
     <div id="agendacad" class="frmTable" style="display:none; width:90em; margin-left:11em;margin-top:5.5em;position:absolute;">
       <div id="divTitulo" class="frmTituloManutencao">Agendamento<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>
-      <div style="height: 230px; overflow-y: auto;">
+      <div style="height: 270px; overflow-y: auto;">
         <div class="campotexto campo100">
           <!-- Endereco de entrega -->
           <div class="campotexto campo10">
@@ -2059,6 +2117,12 @@
                                                 type="text" />
             <label class="campo_label campo_required" for="edtCodEnt">ENTREGA:</label>
           </div>
+
+          <div class="campotexto campo10">
+            <input class="campo_input input" id="edtCodEntFvr" type="text" disabled="true" />
+            <label class="campo_label" for="edtCodEntFvr">PEI:</label>
+          </div>
+
           <div class="campotexto campo50">
             <input class="campo_input_titulo input" id="edtDesEnt" type="text" disabled /><label class="campo_label campo_required" for="edtDesEnt">ENDERECO ENTREGA</label>
           </div>
@@ -2100,17 +2164,17 @@
           <!--
                  -->
           <!-- Colaborador -->
-          <div class="campotexto campo15">
+          <div class="campotexto campo50">
             <input class="campo_input inputF10" id="ageCodCol"
                                                 onClick="colF10Click(this);"
                                                 onBlur="codColBlur(this);"                                                 
-                                                data-oldvalue="0000"
+                                                data-oldva  lue="0000"
                                                 autocomplete="off"
                                                 type="text" />
             <label class="campo_label campo_required" for="ageCodCol">COLABORADOR:</label>
           </div>
-          <div class="campotexto campo70">
-            <input class="campo_input_titulo input" id="ageDesCol" type="text" disabled /><label class="campo_label campo_required" for="ageDesCol">NOME COLABORADOR</label>
+          <div class="campotexto campo100">
+            <input class="campo_input_titulo input" id="ageDesCol" type="text" disabled /><label class="campo_label campo_required" for="ageDesCol">COLABORADORES</label>
           </div>
           <div id="divReferente" class="campotexto campo20">
             <select class="campo_input_combo" id="cbCodMsg">

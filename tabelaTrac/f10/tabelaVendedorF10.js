@@ -23,7 +23,7 @@ function fVendedorF10(opc,codVnd,foco,topo,objeto){
           clsStr.concat( " {AND} (A.VND_ATIVO='"+objeto[key]+"')",true);        
           break;
         case "gpfvr":
-          clsStr.concat(" {AND} (FVR.FVR_GFCR <> 1)",true); // ANGELO KOKISO APARECER
+          clsStr.concat(" {AND} (FVR.FVR_GFCP = 40)",true); // ANGELO KOKISO APARECER
           break;    
         case "tamColNome": 
           tamColNome=objeto[key];    

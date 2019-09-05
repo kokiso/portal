@@ -3,7 +3,7 @@
   if( isset($_POST["gravar"]) ){
     try{     
       require("conectaSqlServer.class.php");
-      require("validaJSon.class.php"); 
+      require("validaJson.class.php"); 
       require("removeAcento.class.php");
       require("selectRepetido.class.php");      
       require("validaCampo.class.php"); 
@@ -12,7 +12,7 @@
       // return $a["PDR_NOME"] > $b["PDR_NOME"];
       //};
       $clsRa    = new removeAcento();
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["gravar"]);
       ///////////////////////////////////////////////////////////////////////

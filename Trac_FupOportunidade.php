@@ -3,10 +3,10 @@
   if( isset($_POST["fupoportunidade"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");                               
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["fupoportunidade"]);
       ///////////////////////////////////////////////////////////////////////

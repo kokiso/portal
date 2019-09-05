@@ -50,6 +50,7 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
   };
   sql=clsStr.fim();
   sql=sql.replaceAll("[codins]",codins);
+  console.log(sql);
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////
@@ -81,13 +82,15 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
         ,"tbl"            : tblCol                  // Nome da table
         ,"div"            : "col"                   // Prefixo para elementos do HTML em jsTable2017.js
         ,"prefixo"        : "col"                   // Prefixo para elementos do HTML em jsTable2017.js
+        ,"nChecks"        : true                    // Se permite multiplos registros na grade checados
+        ,"qtos"           : 10                      //
         ,"tabelaBD"       : "PRODUTOESTOQUEIND"     // Nome da tabela no banco de dados  
         ,"width"          : tblWidth                // Tamanho da table
         ,"height"         : "39em"                  // Altura da table
-        ,"indiceTable"    : "*"           // Indice inicial da table
+        ,"indiceTable"    : "*"                     // Indice inicial da table
         ,"tamBotao"       : "20"
       };
-      if( objColF10 === undefined ){          
+      if( objColF10 === undefined ){            
         objColF10         = new clsTable2017("objColF10");
         objColF10.tblF10  = true;
         if( (foco != undefined) && (foco != "null") ){

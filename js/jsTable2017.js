@@ -457,7 +457,7 @@ function clsTable2017(obj) {
       /////////////////////////////////////////////////////////////////////////////
       var lblCls  = 'lcls'  + (contMsg+1);  //para remover a mensagem quando do confirmar
       var btnF10  = 'btn'   + (contMsg+1);
-      var btnF10f = 'btn'   + (contMsg+1)+'click()';
+      var btnF10f = 'btn'   + (contMsg+1) +'click()';
       //
       var cePar=document.createElement("div");
       if( tagValida(self.Js.tamBotao) ){
@@ -473,10 +473,10 @@ function clsTable2017(obj) {
         ceImg= document.createElement("i");
         ceImg.className ="fa fa-check";
         ceImg.innerHTML = "Confirmar";
-      ceButton.appendChild(ceImg);
+      ceButton.appendChild(ceImg);  
       ceButton.addEventListener('click',function(){
         try{
-          var clsChecados = self.gerarJson("1");  //Classe para buscar registros checados
+          var clsChecados = self.gerarJson("100");  //Classe para buscar registros checados
           var chkds       = clsChecados.gerar();  //Retorna um array associativo de todos registros checados
           var tamC        = chkds.length;         //Tamanho do array chkds
           for( var checados=0; checados<tamC; checados++ ){        

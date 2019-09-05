@@ -3,14 +3,14 @@
   if( isset($_POST["ordemservico"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
       require("classPhp/dataCompetencia.class.php");
       require("classPhp/selectRepetido.class.php");       						      
 
       $clsCompet  = new dataCompetencia();    
-      $vldr       = new validaJSon();          
+      $vldr       = new validaJson();          
       $retorno    = "";
       $retCls     = $vldr->validarJs($_POST["ordemservico"]);
       ///////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@
         /////////////////////////
         if( $lote[0]->rotina=="gravaobs" ){
           $os=$lote[0]->dos_codigo;
-          $sql ="INSERT INTO DETALHEOS(";
+          $sql  ="INSERT INTO DETALHEOS(";
           $sql.="DOS_CODOS";
           $sql.=",DOS_CODMSG";
           $sql.=",DOS_COMPLEMENTO";          
@@ -69,13 +69,6 @@
           $sql.="       ,CONVERT(VARCHAR(10),A.OS_DTAGENDA,103) AS AGENDA";          
           $sql.="       ,CASE WHEN A.OS_LOCAL='C' THEN 'EXT' ELSE 'INT' END AS LOCAL";
           $sql.="       ,MSG.MSG_NOME AS REFERENTE";
-          /*  
-          $sql.="       ,CASE WHEN (A.OS_REFERENTE='DES')  THEN 'DESISTALACAO'";
-          $sql.="             WHEN (A.OS_REFERENTE='INS')  THEN 'INSTALACAO'";  
-          $sql.="             WHEN (A.OS_REFERENTE='MAN')  THEN 'MANUTENCAO'";                              
-          $sql.="             WHEN (A.OS_REFERENTE='REI')  THEN 'REINSTALACAO'";  
-          $sql.="             WHEN (A.OS_REFERENTE='REV')  THEN 'REVISAO' END AS REFERENTE";
-          */
           $sql.="       ,A.OS_CODGMP AS AUTO";          
           $sql.="       ,A.OS_CODPEI AS CODPEI";                    
           $sql.="       ,PEI.FVR_APELIDO AS COLABORADOR";
@@ -865,7 +858,7 @@
           </div>
           
           <div class="campotexto campo25">
-            <select onChange="fncOsValor(this);" class="campo_input_combo" id="cbEstoque">
+            <select class="campo_input_combo" id="cbEstoque">
             </select>
             <label class="campo_label" for="cbEstoque">ESTOQUE:</label>
           </div>

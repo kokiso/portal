@@ -3,10 +3,10 @@
   if( isset($_POST["grupomodeloind"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");       						                  
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["grupomodeloind"]);
       ///////////////////////////////////////////////////////////////////////
@@ -90,13 +90,14 @@
           $sql.="      ,A.GMP_CODGP AS GRP";
           $sql.="      ,A.GMP_CODPE AS PE";
           $sql.="      ,CASE WHEN GMP_CODAUT>0 THEN CONCAT('AUTO ',GMP_CODAUT) ELSE COALESCE(FVR.FVR_APELIDO,'...') END AS RESPONSAVEL";
-          $sql.="      ,A.GMP_CODAUT AS AUTO";                    
+          $sql.="      ,A.GMP_CODAUT AS AUTO";
           $sql.="      ,A.GMP_NUMSERIE AS SERIE";
           $sql.="      ,A.GMP_SINCARD AS SINCARD";
           $sql.="      ,A.GMP_OPERADORA AS OPERADORA";
           $sql.="      ,A.GMP_FONE AS FONE";
           $sql.="      ,A.GMP_CONTRATO AS CONTRATO";
           $sql.="      ,A.GMP_CODGML AS LOTE";
+          $sql.="      ,CASE WHEN A.GMP_STATUS = 1 THEN 'ESTOQUE' WHEN A.GMP_STATUS = 2 THEN 'INSTALADO' WHEN A.GMP_STATUS = 3 THEN 'MANUTENCAO' END AS STATUS";
           $sql.="      ,PE.PE_SUCATA AS SUCATA";
           $sql.="      ,US.US_APELIDO";          
           $sql.="  FROM GRUPOMODELOPRODUTO A";          
@@ -288,13 +289,21 @@
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"padrao":0}
-            ,{"id":13 ,"labelCol"       : "SUCATA"
+            ,{"id":13 ,"labelCol"       : "STATUS"
+                      ,"fieldType"      : "str"
+                      ,"formato"        : ["i4"]
+                      ,"align"          : "center"                                                            
+                      ,"tamGrd"         : "15em"
+                      ,"tamImp"         : "0"
+                      ,"excel"          : "N"
+                      ,"padrao":0}
+            ,{"id":14 ,"labelCol"       : "SUCATA"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":14 ,"labelCol"       : "USUARIO"
+            ,{"id":15 ,"labelCol"       : "USUARIO"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "0"

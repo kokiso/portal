@@ -3,14 +3,14 @@
   if( isset($_POST["faturarcontrato"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
       require("classPhp/selectRepetido.class.php");       						                        
       //require("classPhp/dataCompetencia.class.php");      
 
       //$clsCompet  = new dataCompetencia();    
-      $vldr       = new validaJSon();          
+      $vldr       = new validaJson();          
       $retorno    = "";
       $retCls     = $vldr->validarJs($_POST["faturarcontrato"]);
       ///////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ file_put_contents("aaa.xml",$sql);
                 $alerta="ok";
                 if( $ite["CNTP_DTATIVACAO"]=="*" )
                   $alerta="alerta";
-                if( $ite["CNTP_PLACACHASSI"]=="NSA0000" )
+                if( $ite["CNTP_PLACACHASSI"]=="NSA0000" && $ite["CNTP_DTATIVACAO"] <> "*")
                   $alerta="erro";
                 
                 
@@ -187,7 +187,7 @@ file_put_contents("aaa.xml",$sql);
                 //////////////////////////////////////////////////////////////////
                 if( $achei==false ){
                   array_push($tblCabec,[
-                    "cntc_codcntt"        =>   $ite["CNTC_CODCNTT"]
+                    "cntc_codcntt"        =>  $ite["CNTC_CODCNTT"]
                     ,"cntt_codfvr"        =>  $ite["CNTT_CODFVR"]
                     ,"fvr_apelido"        =>  $ite["FVR_APELIDO"]
                     ,"vencto"             =>  $vencto

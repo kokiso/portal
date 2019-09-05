@@ -3,11 +3,11 @@
   if( isset($_POST["grupomodelo"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");       
 
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["grupomodelo"]);
       ///////////////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@
                        ,A.GM_CODGP
                        ,GP.GP_NOME
                        ,GM_ESTOQUE
+                       ,(SELECT COUNT(GMP_CODIGO) FROM GRUPOMODELOPRODUTO WHERE GMP_CODGM = A.GM_CODIGO AND GMP_STATUS = 1) AS ESTOQUE_REAL
                        ,GM_ESTOQUEMINIMO
                        ,GM_ESTOQUESUCATA
                        ,GM_ESTOQUEAUTO                       
@@ -50,6 +51,7 @@
                        ,A.GM_VALORPRAZO
                        ,A.GM_VALORMINIMO                       
                        ,A.GM_FIRMWARE
+                       ,CASE WHEN A.GM_MENSURAVEL='S' THEN 'SIM' ELSE 'NAO' END AS GM_MENSURAVEL
                        ,CASE WHEN A.GM_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS GM_ATIVO
                        ,CASE WHEN A.GM_REG='P' THEN 'PUB' WHEN A.GM_REG='S' THEN 'SIS' ELSE 'ADM' END AS GM_REG
                        ,US.US_APELIDO
@@ -58,7 +60,34 @@
                   LEFT OUTER JOIN USUARIOSISTEMA US ON A.GM_CODUSR=US.US_CODIGO
                   LEFT OUTER JOIN FAVORECIDO FVR ON A.GM_CODFBR=FVR.FVR_CODIGO
                   LEFT OUTER JOIN GRUPOPRODUTO GP ON A.GM_CODGP=GP.GP_CODIGO                  
-                 WHERE ((GM_CODGP<>'AUT') AND ((GM_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))"; 
+                 WHERE ((GM_CODGP<>'AUT') AND ((GM_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))
+                 GROUP BY A.GM_CODIGO 
+                       ,A.GM_NOME          
+                       ,A.GM_CODFBR
+                       ,FVR.FVR_APELIDO
+                       ,A.GM_CODGP
+                       ,GP.GP_NOME
+                       ,GM_ESTOQUE
+                        ,GM_ESTOQUEMINIMO
+                       ,GM_ESTOQUESUCATA
+                       ,GM_ESTOQUEAUTO 
+                        ,GM_ESTOQUEAUTO                       
+                       ,GM_NUMSERIE
+                       ,GM_SINCARD
+                       ,GM_OPERADORA
+                       ,GM_FONE
+                       ,GM_VENDA
+                       ,GM_LOCACAO
+                       ,GM_CONTRATO
+                       ,A.GM_VALORVISTA                       
+                       ,A.GM_VALORPRAZO
+                       ,A.GM_VALORMINIMO                       
+                       ,A.GM_FIRMWARE
+                       ,GM_MENSURAVEL
+                       ,GM_ATIVO
+                       ,GM_REG
+                       ,US.US_APELIDO
+                       ,A.GM_CODUSR"; 
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -275,17 +304,33 @@
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "15"
                       ,"align"          : "center"
-                     ,"newRecord"       : ["0000","this","this"]  
+                      ,"newRecord"       : ["0000","this","this"] 
                       ,"formato"        : ["i4"]
+                      ,"popoverLabelCol": "Estoque Total"
+                      ,"popoverTitle"   : "Informação do estoque total (em uso e em estoque)"
                       ,"validar"        : ["intMaiorIgualZero"]
                       ,"importaExcel"   : "N"                                                                
                       ,"padrao":0}
-            ,{"id":8  ,"field"          :"GM_ESTOQUEMINIMO" 
+            ,{"id":8  ,"field"          : "ESTOQUE_REAL" 
+                      ,"fieldType"      : "int"            
+                      ,"labelCol"       : "ER"
+                      ,"obj"            : "edtEstoqueReal"
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"tamGrd"         : "5em"
+                      ,"tamImp"         : "0"
+                      ,"align"          : "center"
+                      ,"formato"        : ["i4"]
+                      ,"popoverLabelCol": "Estoque Real"
+                      ,"popoverTitle"   : "Informação do estoque interno real"
+                      ,"validar"        : ["intMaiorIgualZero"]
+                      ,"importaExcel"   : "N"                                                                
+                      ,"padrao":0}
+            ,{"id":9  ,"field"          :"GM_ESTOQUEMINIMO" 
                       ,"fieldType"      : "int"        
                       ,"insUpDel"       : ["S","S","N"]                      
                       ,"labelCol"       : "EM"
                       ,"obj"            : "edtEstoqueMinimo"
-                      ,"tamGrd"         : "4em"
+                      ,"tamGrd"         : "5em"
                       ,"tamImp"         : "0"
                       ,"align"          : "center"
                      ,"newRecord"       : ["0000","this","this"]  
@@ -295,7 +340,7 @@
                       ,"popoverLabelCol": "Estoque Minimo"
                       ,"popoverTitle"   : "Informação referente estoque minimo para relatório de compra"
                       ,"padrao":0}
-            ,{"id":9  ,"field"          :"GM_ESTOQUESUCATA" 
+            ,{"id":10  ,"field"          :"GM_ESTOQUESUCATA" 
                       ,"fieldType"      : "int"        
                       ,"insUpDel"       : ["N","N","N"]                      
                       ,"labelCol"       : "SUC"
@@ -309,7 +354,7 @@
                       ,"popoverLabelCol": "Sucata"
                       ,"popoverTitle"   : "Total individual de produto transformado em sucata"
                       ,"padrao":0}
-            ,{"id":10 ,"field"          :"GM_ESTOQUEAUTO" 
+            ,{"id":11 ,"field"          :"GM_ESTOQUEAUTO" 
                       ,"fieldType"      : "int"        
                       ,"insUpDel"       : ["N","N","N"]                      
                       ,"labelCol"       : "AUT"
@@ -323,7 +368,7 @@
                       ,"popoverLabelCol": "Auto"
                       ,"popoverTitle"   : "Total individual de produto adicionados a autos"
                       ,"padrao":0}
-            ,{"id":11 ,"field"          : "GM_NUMSERIE"  
+            ,{"id":12 ,"field"          : "GM_NUMSERIE"  
                       ,"labelCol"       : "SERIE" 
                       ,"obj"            : "cbNumSerie"
                       ,"tipo"           : "cb"                      
@@ -338,7 +383,7 @@
                       ,"ajudaCampo"     : [ "Parametro para quando cadastrar produto individual o numero de serie é obrigatorio"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":12 ,"field"          : "GM_SINCARD"  
+            ,{"id":13 ,"field"          : "GM_SINCARD"  
                       ,"labelCol"       : "SINCARD" 
                       ,"obj"            : "cbSinCard"
                       ,"tipo"           : "cb"                      
@@ -353,7 +398,7 @@
                       ,"ajudaCampo"     : [ "Parametro para quando cadastrar produtu individual o numero do sincard é obrigatorio"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":13 ,"field"          : "GM_OPERADORA"  
+            ,{"id":14 ,"field"          : "GM_OPERADORA"  
                       ,"labelCol"       : "OPE" 
                       ,"obj"            : "cbOperadora"
                       ,"tipo"           : "cb"                      
@@ -369,7 +414,7 @@
                       ,"popoverTitle"   : "Se é necessário informar uma operadora"                                                                  
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":14 ,"field"          : "GM_FONE"  
+            ,{"id":15 ,"field"          : "GM_FONE"  
                       ,"labelCol"       : "FONE" 
                       ,"obj"            : "cbFone"
                       ,"tipo"           : "cb"                      
@@ -384,7 +429,7 @@
                       ,"ajudaCampo"     : [ "Parametro para quando cadastrar produtu individual o numero fone é obrigatorio"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":15 ,"field"          : "GM_VENDA"  
+            ,{"id":16 ,"field"          : "GM_VENDA"  
                       ,"labelCol"       : "VENDA" 
                       ,"obj"            : "cbVenda"
                       ,"tipo"           : "cb"                      
@@ -399,7 +444,7 @@
                       ,"ajudaCampo"     : [ "Parametro se o produto pode ser vendido"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}      
-            ,{"id":16 ,"field"          : "GM_LOCACAO"  
+            ,{"id":17 ,"field"          : "GM_LOCACAO"  
                       ,"labelCol"       : "LOCACAO" 
                       ,"obj"            : "cbLocacao"
                       ,"tipo"           : "cb"                      
@@ -414,7 +459,7 @@
                       ,"ajudaCampo"     : [ "Parametro se o produto pode ser locado"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}      
-            ,{"id":17 ,"field"          : "GM_CONTRATO"  
+            ,{"id":18 ,"field"          : "GM_CONTRATO"  
                       ,"labelCol"       : "CONTRATO" 
                       ,"obj"            : "cbContrato"
                       ,"tipo"           : "cb"                      
@@ -429,7 +474,7 @@
                       ,"ajudaCampo"     : [ "Parametro se o produto pode tem contrato"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}     
-            ,{"id":18 ,"field"          : "GM_VALORVISTA"  
+            ,{"id":19 ,"field"          : "GM_VALORVISTA"  
                       ,"labelCol"       : "VLRVISTA" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorVista"
@@ -441,7 +486,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":19 ,"field"          : "GM_VALORPRAZO"  
+            ,{"id":20 ,"field"          : "GM_VALORPRAZO"  
                       ,"labelCol"       : "VLRPRAZO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorPrazo"
@@ -453,7 +498,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":20 ,"field"          : "GM_VALORMINIMO"  
+            ,{"id":21 ,"field"          : "GM_VALORMINIMO"  
                       ,"labelCol"       : "VLRMINIMO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorMinimo"
@@ -465,7 +510,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":21 ,"field"          :"GM_FIRMWARE" 
+            ,{"id":22 ,"field"          :"GM_FIRMWARE" 
                       ,"labelCol"       : "FIRMWARE"
                       ,"obj"            : "edtFirmWare"
                       ,"tamGrd"         : "5em"
@@ -478,26 +523,31 @@
                       ,"validar"        : ["notnull"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":22 ,"field"          : "GM_ATIVO"  
+            ,{"id":23 ,"field"          : "GM_MENSURAVEL" 
+                      ,"labelCol"       : "MENSURAVEL"
+                      ,"obj"            : "cbMensuravel"
+                      ,"funcCor"        : "(objCell.innerHTML=='NAO'  ? objCell.classList.add('fontVermelho') : objCell.classList.add('fontVerde'))"             
+                      ,"padrao":2}
+            ,{"id":24 ,"field"          : "GM_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"padrao":2}                                        
-            ,{"id":23 ,"field"          : "GM_REG"    
+            ,{"id":25 ,"field"          : "GM_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":24 ,"field"          : "US_APELIDO" 
+            ,{"id":26 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"tamImp"         : "0"                                            
                       ,"obj"            : "edtUsuario" 
                       ,"padrao":4}                
-            ,{"id":25 ,"field"          : "GM_CODUSR" 
+            ,{"id":27 ,"field"          : "GM_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":26 ,"labelCol"       : "PP"      
+            ,{"id":28 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -942,7 +992,7 @@
               action="classPhp/imprimirsql.php" 
               target="_newpage">
           <div class="frmTituloManutencao">Modelo<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>              
-          <div style="height: 260px; overflow-y: auto;">
+          <div style="height: 300px; overflow-y: auto;">
             <input type="hidden" id="sql" name="sql"/>
             <div class="campotexto campo100">
               <div class="campotexto campo10">
@@ -1067,6 +1117,13 @@
                 <label class="campo_label campo_required" for="edtFirmWare">FIRMWARE</label>
               </div>
               <div class="campotexto campo20">
+                <select class="campo_input_combo" id="cbMensuravel">
+                  <option value="S">SIM</option>
+                  <option value="N">NAO</option>
+                </select>
+                <label class="campo_label campo_required" for="cbMensuravel">MENSURAVEL</label>
+              </div>
+              <div class="campotexto campo20">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
@@ -1087,6 +1144,7 @@
                 <input id="edtCodUsu" type="text" />
                 <input id="edtEstoqueSucata" type="text" />
                 <input id="edtEstoqueAuto" type="text" />
+                <input id="edtEstoqueReal" type="text" />
               </div>
               <div onClick="btnConfirmarClick();" id="btnConfirmar" class="btnImagemEsq bie15 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>
               <div id="btnCancelar"  class="btnImagemEsq bie15 bieRed bieRight"><i class="fa fa-reply"> Cancelar</i></div>

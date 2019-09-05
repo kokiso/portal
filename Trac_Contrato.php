@@ -3,14 +3,14 @@
   if( isset($_POST["contrato"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
       require("classPhp/dataCompetencia.class.php");
-      require("classPhp/selectRepetido.class.php");       						      
+      require("classPhp/selectRepetido.class.php");                         
 
       $clsCompet  = new dataCompetencia();    
-      $vldr       = new validaJSon();          
+      $vldr       = new validaJson();          
       $retorno    = "";
       $retCls     = $vldr->validarJs($_POST["contrato"]);
       ///////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@
           $sql.="       ,CONVERT(VARCHAR(10),A.CNTT_DTINICIO,127) AS INICIO";                                          
           //$sql.="       ,CONVERT(VARCHAR(10),A.CNTT_DTFIM,127) AS FIM";                                          
           $sql.="       ,CNTT_CODFVR";
-          $sql.="       ,FVR.FVR_APELIDO AS CLIENTE";                    
+          $sql.="       ,FVR.FVR_NOME AS CLIENTE";                    
           //$sql.="       ,CNTT_CODVND";
           //$sql.="       ,CNTT_CODIND";
           $sql.="       ,(CNTT_VLRMENSAL / CNTT_MESES) AS VLRMENSALPARCIAL";
@@ -158,54 +158,54 @@
           $sql.="       ,CNTT_INSTPROPRIA";
           $sql.="       ,US.US_APELIDO";      
           $sql.="      ,CONCAT('<table class=''fpTable'' style=''width:250px;''>'";
-          $sql.="       ,'<thead class=''fpThead''>'";		
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<th class=''fpTh'' style=''width:50%;''> CAMPO'";
-          $sql.="      	,'</th>'";
-          $sql.="      	,'<th class=''fpTh'' style=''width:50%;''> CONTEUDO'";
-          $sql.="      	,'</th>'";
-          $sql.="      	,'</tr>'";
-          $sql.="      	,'</thead>'";          
-          $sql.="       ,'<tbody>'";		          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>VLR NOSHOW</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_VLRNOSHOW,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>VLR IMPRODUTIVEL</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_VLRIMPRODUTIVEL,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>VLR INSTALACAO</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_VLRINSTALA,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>VLR DESISTALACAO</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_VLRDESISTALA,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>VLR MANUTUTENCAO</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_VLRMANUTENCAO,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>VLR REVISAO</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_VLRREVISAO,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>FIDELIDADE</td>'";          
-          $sql.="      	,'<td class=''fpTd''>',CNTT_FIDELIDADE,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>MESES</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_MESES,'</td>'";
-          $sql.="      	,'</tr>'";          
-          $sql.="      	,'<tr>'";
-          $sql.="      	,'<td class=''fpTd''>COBRANCA DIA</td>'";          
-          $sql.="      	,'<td class=''fpTd textoDireita''>',CNTT_DIA,'</td>'";
-          $sql.="      	,'</tr>'";          
+          $sql.="       ,'<thead class=''fpThead''>'";    
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<th class=''fpTh'' style=''width:50%;''> CAMPO'";
+          $sql.="       ,'</th>'";
+          $sql.="       ,'<th class=''fpTh'' style=''width:50%;''> CONTEUDO'";
+          $sql.="       ,'</th>'";
+          $sql.="       ,'</tr>'";
+          $sql.="       ,'</thead>'";          
+          $sql.="       ,'<tbody>'";              
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>VLR NOSHOW</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_VLRNOSHOW,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>VLR IMPRODUTIVEL</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_VLRIMPRODUTIVEL,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>VLR INSTALACAO</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_VLRINSTALA,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>VLR DESISTALACAO</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_VLRDESISTALA,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>VLR MANUTUTENCAO</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_VLRMANUTENCAO,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>VLR REVISAO</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_VLRREVISAO,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>FIDELIDADE</td>'";          
+          $sql.="       ,'<td class=''fpTd''>',CNTT_FIDELIDADE,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>MESES</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_MESES,'</td>'";
+          $sql.="       ,'</tr>'";          
+          $sql.="       ,'<tr>'";
+          $sql.="       ,'<td class=''fpTd''>COBRANCA DIA</td>'";          
+          $sql.="       ,'<td class=''fpTd textoDireita''>',CNTT_DIA,'</td>'";
+          $sql.="       ,'</tr>'";          
           
-          $sql.="       ,'</tbody>'";		                    
-          $sql.="      	,'</table>') AS POPOVER";
+          $sql.="       ,'</tbody>'";                       
+          $sql.="       ,'</table>') AS POPOVER";
           $sql.="  FROM CONTRATO A";           
           $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON A.CNTT_CODFVR=FVR.FVR_CODIGO";          
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA US ON US.US_CODIGO = A.CNTT_CODUSR"; 
@@ -344,7 +344,7 @@
                       ,"fieldType"      : "str"
                       ,"obj"            : "edtCnttFvrNome"
                       ,"insUpDel"       : ["N","N","N"] 
-                      ,"tamGrd"         : "12em"
+                      ,"tamGrd"         : "30em"
                       ,"tamImp"         : "35"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
@@ -766,64 +766,64 @@
         };
       };
       function fncEndereco(str){
-				if( jsNmrs(str).inteiro().ret()>0 ){
+        if( jsNmrs(str).inteiro().ret()>0 ){
                       
-					try{          
-						clsJs   = jsString("lote");  
-						clsJs.add("rotina"  , "hlpEndereco"               );
-						clsJs.add("login"   , jsPub[0].usr_login          );
-						clsJs.add("codfvr"  , jsNmrs(str).inteiro().ret() );
-						fd = new FormData();
-						fd.append("contrato" , clsJs.fim());
-						msg     = requestPedido("Trac_Contrato.php",fd); 
-						retPhp  = JSON.parse(msg);
-						if( retPhp[0].retorno == "OK" ){
-							janelaDialogo(
-								{ height          : "36em"
-									,body           : "16em"
-									,left           : "300px"
-									,top            : "60px"
-									,tituloBarra    : "Endereco"
-									,code           : retPhp[0]["dados"]
-									,width          : "80em"
-									,fontSizeTitulo : "1.8em"
-								}
-							);  
-						};  
-					}catch(e){
-						gerarMensagemErro('catch',e.message,{cabec:"Erro"});
-					};
-				};
+          try{          
+            clsJs   = jsString("lote");  
+            clsJs.add("rotina"  , "hlpEndereco"               );
+            clsJs.add("login"   , jsPub[0].usr_login          );
+            clsJs.add("codfvr"  , jsNmrs(str).inteiro().ret() );
+            fd = new FormData();
+            fd.append("contrato" , clsJs.fim());
+            msg     = requestPedido("Trac_Contrato.php",fd); 
+            retPhp  = JSON.parse(msg);
+            if( retPhp[0].retorno == "OK" ){
+              janelaDialogo(
+                { height          : "36em"
+                  ,body           : "16em"
+                  ,left           : "300px"
+                  ,top            : "60px"
+                  ,tituloBarra    : "Endereco"
+                  ,code           : retPhp[0]["dados"]
+                  ,width          : "80em"
+                  ,fontSizeTitulo : "1.8em"
+                }
+              );  
+            };  
+          }catch(e){
+            gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+          };
+        };
       };
       function fncTerceiro(str,qual){
-				if( jsNmrs(str).inteiro().ret()>0 ){
-					try{          
-						clsJs   = jsString("lote");  
-						clsJs.add("rotina"  , "hlpTerceiro"                     );
-						clsJs.add("login"   , jsPub[0].usr_login                );
-						clsJs.add("array"   , jsNmrs(str).inteiro().ret()+"|0"  );  // Array para informar que eh para pegar o codigo do favorecido
-						fd = new FormData();
-						fd.append("contrato" , clsJs.fim());
-						msg     = requestPedido("Trac_Contrato.php",fd); 
-						retPhp  = JSON.parse(msg);
-						if( retPhp[0].retorno == "OK" ){
-							janelaDialogo(
-								{ height          : "49em"
-									,body           : "16em"
-									,left           : "300px"
-									,top            : "60px"
-									,tituloBarra    : "Terceiros"
-									,code           : retPhp[0]["dados"]
-									,width          : "80em"
-									,fontSizeTitulo : "1.8em"
-								}
-							);
+        if( jsNmrs(str).inteiro().ret()>0 ){
+          try{          
+            clsJs   = jsString("lote");  
+            clsJs.add("rotina"  , "hlpTerceiro"                     );
+            clsJs.add("login"   , jsPub[0].usr_login                );
+            clsJs.add("array"   , jsNmrs(str).inteiro().ret()+"|0"  );  // Array para informar que eh para pegar o codigo do favorecido
+            fd = new FormData();
+            fd.append("contrato" , clsJs.fim());
+            msg     = requestPedido("Trac_Contrato.php",fd); 
+            retPhp  = JSON.parse(msg);
+            if( retPhp[0].retorno == "OK" ){
+              janelaDialogo(
+                { height          : "49em"
+                  ,body           : "16em"
+                  ,left           : "300px"
+                  ,top            : "60px"
+                  ,tituloBarra    : "Terceiros"
+                  ,code           : retPhp[0]["dados"]
+                  ,width          : "80em"
+                  ,fontSizeTitulo : "1.8em"
+                }
+              );
               adicionarDataToggle();
-						};  
-					}catch(e){
-						gerarMensagemErro('catch',e.message,{cabec:"Erro"});
-					};
-				};
+            };  
+          }catch(e){
+            gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+          };
+        };
       };
       function fncUmaPlaca(){
         try{  

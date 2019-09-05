@@ -53,7 +53,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<title>Connect Plus | Trac</title>
+		<title>Totral Trac ERP</title>
 		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- bootstrap nativo javascript -->
     <link rel="stylesheet" href="css/bootstrapNative.css">
@@ -440,12 +440,13 @@
                     </span>
                   </a>
                   <ul class="treeview-menu">
-                    <li><a href="#" onclick="ifAbrir('Trac_PontoEstoque.php'      ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Ponto de Estoque');"><i class="fa fa-circle-o"></i> Ponto de estoque(PE)</a></li>                                    
+                    <li><a href="#" onclick="ifAbrir('Trac_PontoEstoque.php'      ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Ponto de Estoque');"><i class="fa fa-circle-o"></i> Ponto de estoque(PE)</a></li>                                
                     <li><a href="#" onclick="ifAbrir('Trac_PontoEstoqueInd.php'   ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Responsável');"><i class="fa fa-circle-o"></i> Responsavel(PE)</a></li>                                    
                     <li><a href="#" onclick="ifAbrir('Trac_ContratoEndereco.php'  ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Endereço');"><i class="fa fa-circle-o"></i> Endereço</a></li>                     
                     <li><a href="#" onclick="ifAbrir('Trac_GrupoProduto.php'      ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Grupo');"><i class="fa fa-circle-o"></i> Grupo de produto</a></li>                                      
                     <li><a href="#" onclick="ifAbrir('Trac_Fabricante.php'        ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Fabricante');"><i class="fa fa-circle-o"></i> Fabricante</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_Operadora.php'         ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Operadora');"><i class="fa fa-circle-o"></i> Operadora</a></li>
+                    <li><a href="Trac_EstoqueVirtual.php"><i class="fa fa-circle-o"></i> Estoque Virtual</a></li>    
                     <li><a href="#" onclick="ifAbrir('Trac_GrupoModelo.php'       ,'jsPub[0].usr_d35','Estoque &nbsp&nbsp > &nbsp&nbsp Modelos');"><i class="fa fa-circle-o"></i> Modelo/Estoque</a></li>                    
                   </ul>
                 </li> 

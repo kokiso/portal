@@ -1,10 +1,11 @@
 <?php
   session_start();
+  require("classPhp/validaJson.class.php");
   require("classPhp/conectaSqlServer.class.php");
   //require("classPhp/enviarEmail.class.php");
-  require("classPhp/validaJSon.class.php");
+  //require("classPhp/validaJson.class.php");
   if( isset($_POST["login"]) ){
-    $vldr = new validaJSon();          
+    $vldr = new validaJson();          
     $retorno  = "";
     $retCls   = $vldr->validarJs($_POST["login"]);
     if($retCls["retorno"] != "OK"){

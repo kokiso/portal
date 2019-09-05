@@ -3,7 +3,7 @@
   if( isset($_POST["automodelocad"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       //require("classPhp/selectRepetido.class.php");      
       //require("classPhp/validaCampo.class.php"); 
@@ -16,7 +16,7 @@
        return $a["PT_NOME"] > $b["PT_NOME"];
       };
       */
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["automodelocad"]);
       ///////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@
                 $sql.=","  .$reg->codam;              // GMP_CODAM
                 $sql.=",'AUT'";                       // GMP_CODGP
                 $sql.=",'EST'";                       // GMP_CODPE
-                $sql.=",0";                           // GMP_CODPEI
+                $sql.=",1";                           // GMP_CODPEI
                 $sql.=",0";                           // GMP_CODFBR                
                 $sql.=",'" .$nsSerie."'";             // GMP_NUMSERIE - Serie do rastreador
                 $sql.=",'NSA'";                       // GMP_SINCARD
@@ -623,17 +623,17 @@
             /////////////////////////////////////////////////
             // Atualizando a grade em Trac_AutoModelo.php  //
             /////////////////////////////////////////////////
-            let el  = window.opener.document.getElementById("tblAm");
-            let tbl = el.getElementsByTagName("tbody")[0];
-            let nl  = tbl.rows.length;
+            // let el  = window.opener.document.getElementById("tblAm");
+            // let tbl = el.getElementsByTagName("tbody")[0];
+            // let nl  = tbl.rows.length;
                 
-            for(let lin=0 ; (lin<nl) ; lin++){
-              if( jsNmrs(pega.codam).inteiro().ret() == jsNmrs(tbl.rows[lin].cells[parseInt(pega.colCodigo)].innerHTML).inteiro().ret() ){
-                let estoque=( jsNmrs(tbl.rows[lin].cells[parseInt(pega.colEstoque)].innerHTML).inteiro().ret() + jsNmrs(retPhp[0].contador).inteiro().ret() );
-                tbl.rows[lin].cells[parseInt(pega.colEstoque)].innerHTML = jsNmrs(estoque).emZero(4).ret(); 
-                break;  
-              };
-            };  
+            // for(let lin=0 ; (lin<nl) ; lin++){
+            //   if( jsNmrs(pega.codam).inteiro().ret() == jsNmrs(tbl.rows[lin].cells[parseInt(pega.colCodigo)].innerHTML).inteiro().ret() ){
+            //     let estoque=( jsNmrs(tbl.rows[lin].cells[parseInt(pega.colEstoque)].innerHTML).inteiro().ret() + jsNmrs(retPhp[0].contador).inteiro().ret() );
+            //     tbl.rows[lin].cells[parseInt(pega.colEstoque)].innerHTML = jsNmrs(estoque).emZero(4).ret(); 
+            //     break;  
+            //   };
+            // };  
             window.close();
           };
         } catch(e){

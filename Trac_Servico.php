@@ -3,11 +3,11 @@
   if( isset($_POST["servico"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");
 
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["servico"]);
       ///////////////////////////////////////////////////////////////////////
@@ -914,10 +914,6 @@
                   <option value="P">PUBLICO</option>               
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
-              </div>
-              <div class="campotexto campo15">
-                <input class="campo_input inputF10" id="edtCodCc" type="text"/>
-                <label class="campo_label campo_required" for="edtCodCc">CONTABIL:</label>
               </div>
               <div class="campotexto campo20">
                 <input class="campo_input_titulo input" id="edtDesEmp" type="text" disabled />

@@ -3,10 +3,10 @@
   if( isset($_POST["automodeloind"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");       						            
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["automodeloind"]);
       ///////////////////////////////////////////////////////////////////////
@@ -107,6 +107,7 @@
           $sql.="      ,A.GMP_PLACACHASSI AS PLACA_CHASSI";
           $sql.="      ,A.GMP_COMPOSICAO AS QTOS";
           $sql.="      ,A.GMP_CODGML AS LOTE";
+          $sql.="      ,CASE WHEN A.GMP_STATUS = 1 THEN 'ESTOQUE' WHEN A.GMP_STATUS = 2 THEN 'INSTALADO' WHEN A.GMP_STATUS = 3 THEN 'MANUTENCAO' END AS STATUS";
           $sql.="      ,US.US_APELIDO";          
           $sql.="  FROM GRUPOMODELOPRODUTO A";          
           $sql.="  LEFT OUTER JOIN GRUPOMODELO GM ON A.GMP_CODGM=GM.GM_CODIGO";
@@ -266,14 +267,22 @@
                       ,"tamImp"         : "12"
                       ,"excel"          : "S"
                       ,"padrao":0}
-            ,{"id":12 ,"labelCol"       : "USUARIO"
+            ,{"id":12 ,"labelCol"       : "STATUS"
+                      ,"fieldType"      : "str"
+                      ,"formato"        : ["i4"]
+                      ,"align"          : "center"                                                            
+                      ,"tamGrd"         : "15em"
+                      ,"tamImp"         : "0"
+                      ,"excel"          : "N"
+                      ,"padrao":0}
+            ,{"id":13 ,"labelCol"       : "USUARIO"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "25"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":13 ,"labelCol"       : "COMP"         
+            ,{"id":14 ,"labelCol"       : "COMP"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"

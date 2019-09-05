@@ -24,7 +24,7 @@ function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
     for (var key in objeto) {
       switch( key ){
         case "cntp":
-            clsStr.concat("  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMMP ON A.GMP_NUMSERIE = GMMP.GMP_NUMSERIE AND GMMP.GMP_CODCNTT = 0 AND GMMP.GMP_CODPE ='aut'");
+            clsStr.concat("  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMMP ON A.GMP_NUMSERIE = GMMP.GMP_NUMSERIE AND GMMP.GMP_CODCNTT = 0 AND GMMP.GMP_CODPE ='aut' and GMMP.GMP_CODAUT = A.GMP_CODIGO");
             clsStr.concat("  LEFT OUTER JOIN GRUPOMODELO GMM ON GMMP.GMP_CODGM=GMM.GM_CODIGO"                    );
         break;
         case "codgm": 

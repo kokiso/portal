@@ -3,9 +3,9 @@
   if( isset($_POST["grupomodelocad"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["grupomodelocad"]);
       ///////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@
             $sql.=","  .$reg->codgm;              // GMP_CODGM
             $sql.=",'" .$reg->codgp."'";          // GMP_CODGP
             $sql.=",'" .$reg->codpe."'";          // GMP_CODPE
-            $sql.=","  .$reg->codpei;             // GMP_CODPEI
+            $sql.=",1";                           // GMP_CODPEI
             $sql.=","  .$reg->codfbr;             // GMP_CODFBR
             $sql.=",'" .$reg->numserie."'";       // GMP_NUMSERIE
             $sql.=",'" .$reg->sincard."'";        // GMP_SINCARD

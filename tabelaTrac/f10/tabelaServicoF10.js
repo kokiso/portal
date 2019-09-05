@@ -19,12 +19,10 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
          +"       ,A.SRV_CSLL AS CSLL_SN"
          +"       ,A.SRV_CSLLALIQ AS CSLL_ALIQ"
          +"       ,A.SRV_ISS AS ISS_SN"
-         +"       ,A.SRV_CODCC AS CODCC"
          +"       ,SPR.SPR_ALIQUOTA AS ISS_ALIQ"
          +"       ,SPR.SPR_RETIDO AS RETIDO_SN"
          +"  FROM SERVICO A" 
          +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
-         
   if( objeto.fisjur=="F" ){
     var sql="SELECT A.SRV_CODIGO AS CODIGO"
            +"       ,A.SRV_NOME AS DESCRICAO"
@@ -40,7 +38,6 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
            +"       ,CAST('N' AS VARCHAR(1)) AS CSLL_SN"
            +"       ,CAST(0 AS NUMERIC(15,2)) AS CSLL_ALIQ"
            +"       ,A.SRV_ISS AS ISS_SN"
-           +"       ,A.SRV_CODCC AS CODCC"
            +"       ,SPR.SPR_ALIQUOTA AS ISS_ALIQ"
            +"       ,SPR.SPR_RETIDO AS RETIDO_SN"
            +"  FROM SERVICO A" 
@@ -61,13 +58,12 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
            +"       ,CAST('N' AS VARCHAR(1)) AS CSLL_SN"
            +"       ,CAST(0 AS NUMERIC(15,2)) AS CSLL_ALIQ"
            +"       ,A.SRV_ISS AS ISS_SN"
-           +"       ,A.SRV_CODCC AS CODCC"
            +"       ,SPR.SPR_ALIQUOTA AS ISS_ALIQ"
            +"       ,SPR.SPR_RETIDO AS RETIDO_SN"
            +"  FROM SERVICO A" 
            +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
   };  
-  
+
   if( opc == 0 ){            
     sql+=" WHERE (A.SRV_ATIVO='S')";  
     if( typeof objeto === 'object' ){
@@ -109,9 +105,8 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
           ,{"id":12 ,"labelCol":"CSLL_SN"       ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"str","ordenaColuna":"N"}
           ,{"id":13 ,"labelCol":"CSLL_ALIQ"     ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"flo2","ordenaColuna":"N"}
           ,{"id":14 ,"labelCol":"ISS_SN"        ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"str","ordenaColuna":"N"}
-          ,{"id":15 ,"labelCol":"CODCC"         ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"str","ordenaColuna":"N"}
-          ,{"id":16 ,"labelCol":"ISS_ALIQ"      ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"flo2","ordenaColuna":"N"}
-          ,{"id":17 ,"labelCol":"RETIDO_SN"     ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"str","ordenaColuna":"N"}
+          ,{"id":15 ,"labelCol":"ISS_ALIQ"      ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"flo2","ordenaColuna":"N"}
+          ,{"id":16 ,"labelCol":"RETIDO_SN"     ,"tipo":"edt"  ,"tamGrd":"0em"   ,"fieldType":"str","ordenaColuna":"N"}
         ]
         ,"registros"      : bdSrv.dados             // Recebe um Json vindo da classe clsBancoDados
         ,"opcRegSeek"     : true                    // Opção para numero registros/botão/procurar                       

@@ -26,7 +26,7 @@
       $this->msgErro="NENHUM REGISTRO LOCALIZADO PARA ESTA OPÇÃO!";
       array_push($this->vetor,
         array("CONECTA"  =>  array(
-          ["login"=>"a1"  , "path"=>"localhost" , "cnpj"=>"00000000001","user"=>"sa","pass"=>"@Ak167943"]   //Bd oficial
+          ["login"=>"a1"  , "path"=>"localhost" , "cnpj"=>"00000000001","user"=>"sa","pass"=>"@A1111111"]   //Bd oficial
          )
         )
       );    
@@ -163,6 +163,42 @@
             foreach($linha as $campo)
               $registro[]=utf8_encode($campo);
             $reg[]=$registro;
+            $qtosReg++;
+          };
+          if( $qtosReg>0 ){          
+            //$this->retorno=["retorno"=>"OK","dados"=>$reg,"erro"=>""];  
+            $this->retorno=[
+               "retorno"=>"OK"
+              ,"dados"=>$reg
+              ,"erro"=>""
+              ,"qtos"=>$qtosReg
+            ]; 
+          } else {
+            //$this->retorno=["retorno"=>"OK","dados"=>[],"erro"=>""];      
+            //////////////////////////////////////////////////////////////////////////////////////////
+            // Alguns selects podem retornar vazio e não precisam gerar a mensagem de erro, ex:SPED //
+            //////////////////////////////////////////////////////////////////////////////////////////
+            if( $this->msgSelectVazio )
+              $this->retorno=["retorno"=>"ERR","dados"=>"","erro"=>$this->msgErro,"qtos"=>$qtosReg];
+            else            
+              $this->retorno=["retorno"=>"OK","dados"=>[],"erro"=>"","qtos"=>$qtosReg];    
+          };  
+        } catch (Exception $e){
+          $this->retorno=["retorno"=>"ERR","dados"=>"","erro"=>$e];  
+        }  
+      }  
+      return $this->retorno;
+    }
+    function selectDatatables($select){
+      if( $this->retorno['retorno'] != "ERR" ){
+        try{
+          $qtosReg  = 0;
+          $reg      = array();
+          $params   = array();
+          $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
+          $consulta = sqlsrv_query($_SESSION['conn'], $select, $params, $options);
+          while ($linha = sqlsrv_fetch_object($consulta)) {
+            $reg[]=$linha;
             $qtosReg++;
           };
           if( $qtosReg>0 ){          

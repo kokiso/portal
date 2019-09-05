@@ -3,12 +3,12 @@
   if( isset($_POST["contador"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");
       require("classPhp/consultaCep.class.php");            
 
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["contador"]);
       ///////////////////////////////////////////////////////////////////////

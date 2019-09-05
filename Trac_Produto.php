@@ -1,13 +1,14 @@
 <?php
   session_start();
   if( isset($_POST["produto"]) ){
-    try{     
+    try{
+      require("classPhp/validaJson.class.php");
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      //require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");
 
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["produto"]);
       ///////////////////////////////////////////////////////////////////////
@@ -52,19 +53,15 @@
                     ,CONVERT(VARCHAR(10),PRD_DTCADASTRO,127) AS PRD_DTCADASTRO
                     ,CASE WHEN PRD_ATIVO='S' THEN 'SIM' ELSE 'NAO' END PRD_ATIVO
                     ,CASE WHEN PRD_REG='P' THEN 'PUB' WHEN PRD_REG='S' THEN 'SIS' ELSE 'ADM' END PRD_REG
-                    ,PRD_CODEMP
-                    ,EMP_APELIDO
                     ,US_APELIDO
                     ,PRD_CODUSR
                   FROM PRODUTO
-                  LEFT OUTER JOIN EMPRESA ON PRD_CODEMP=EMP_CODIGO
                   LEFT OUTER JOIN USUARIOSISTEMA ON PRD_CODUSR=US_CODIGO
                   LEFT OUTER JOIN EMBALAGEM ON EMB_CODIGO=PRD_CODEMB
                   LEFT OUTER JOIN PRODUTOORIGEM ON PO_CODIGO=PRD_CODPO
                   LEFT OUTER JOIN NCM ON NCM_CODIGO=PRD_CODNCM
                   LEFT OUTER JOIN CSTIPI ON IPI_CODIGO=PRD_CSTIPI
-                  WHERE ((PRD_CODEMP=".$lote[0]->codemp.")
-                  AND ((PRD_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))";                 
+                  WHERE ((PRD_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."'))";                 
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -450,30 +447,16 @@
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"tamImp"         : "10"                      
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
-                      ,"padrao":3}  
-            ,{"id":23 ,"field"          : "PRD_CODEMP" 
-                      ,"pk"             : "S"
-                      ,"labelCol"       : "CODEMP"  
-                      ,"obj"            : "edtCodEmp"  
-                      ,"padrao":7}					  
-            ,{"id":24 ,"field"          : "EMP_APELIDO"   
-                      ,"labelCol"       : "EMPRESA"
-                      ,"obj"            : "edtDesEmp"
-                      ,"insUpDel"       : ["N","N","N"]
-                      ,"tamGrd"         : "0em"
-                      ,"tamImp"         : "0"
-                      ,"newRecord"      : [jsPub[0].emp_apelido,"this","this"]
-                      ,"ajudaCampo"     : ["Nome da EMpresa."]
-                      ,"padrao":0}
-            ,{"id":25  ,"field"          : "US_APELIDO" 
+                      ,"padrao":3}  		  
+            ,{"id":23  ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}                
-            ,{"id":26  ,"field"          : "PRD_CODUSR" 
+            ,{"id":24  ,"field"          : "PRD_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":27 ,"labelCol"       : "PP"      
+            ,{"id":25 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -657,7 +640,6 @@
         clsJs.add("rotina"      , "selectPrd"         );
         clsJs.add("login"       , jsPub[0].usr_login  );
         clsJs.add("ativo"       , atv                 );
-        clsJs.add("codemp"      , jsPub[0].emp_codigo );
         fd = new FormData();
         fd.append("produto" , clsJs.fim());
         msg     = requestPedido("Trac_Produto.php",fd); 
@@ -1074,17 +1056,12 @@
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
               </div>
-              <div class="campotexto campo20">
-                <input class="campo_input_titulo input" id="edtDesEmp" type="text" disabled />
-                <label class="campo_label campo_required" for="edtDesEmp">EMPRESA:</label>
-              </div>
               <div class="campotexto campo15">
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>
               <div class="inactive">
                 <input id="edtCodUsu" type="text" />
-                <input id="edtCodEmp" type="text" />
               </div>
               <div onClick="btnConfirmarClick();" id="btnConfirmar" class="btnImagemEsq bie12 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>
               <div id="btnCancelar"  class="btnImagemEsq bie12 bieRed bieRight"><i class="fa fa-reply"> Cancelar</i></div>

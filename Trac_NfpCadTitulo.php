@@ -3,7 +3,7 @@
   if( isset($_POST["cadnfp"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");      
       require("classPhp/validaCampo.class.php"); 
@@ -16,7 +16,7 @@
        return $a["PT_NOME"] > $b["PT_NOME"];
       };
       */
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["cadnfp"]);
       ///////////////////////////////////////////////////////////////////////
