@@ -277,6 +277,28 @@
           $atuBd = true;
         };
         //////////
+        //Colaborador
+        //////////
+        if( $lote[0]->rotina=="colab" ){
+
+          $sql="";
+          $sql.="UPDATE VVEICULO";
+          $sql.="   SET VCL_CODCNTT='".$lote[0]->cntp_codcntt."'";
+          $sql.="       ,VCL_CODGMP=".$lote[0]->cntp_codgmp;
+          $sql.="       ,VCL_CODUSR=".$_SESSION["usr_codigo"];
+          $sql.=" WHERE ((VCL_CODCNTT='".$lote[0]->cntp_codcntt."') AND (VCL_CODIGO='".$lote[0]->cntp_placachassi."'))";    
+          array_push($arrUpdt,$sql); 
+
+          $sql="";
+          $sql.="UPDATE VCONTRATOPRODUTO";
+          $sql.="   SET CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
+          $sql.="       ,CNTP_ACAO=".$lote[0]->cntp_acao;
+          $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
+          $sql.=" WHERE ((CNTP_CODCNTT=".$lote[0]->cntp_codcntt.") AND (CNTP_CODGMP=".$lote[0]->cntp_codgmp."))";     
+          array_push($arrUpdt,$sql);                                    
+          $atuBd = true;
+        };
+        //////////
         // Empenho
         //////////
         if( $lote[0]->rotina=="empenhocad" ){
@@ -1242,6 +1264,49 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
+      function RetF10tblCol2(arr){
+        console.log(arr);
+        ///////////////////////////////////////////////////////////////////////////
+        // Classe para montar envio para o Php
+        // Colocando o CODGMP em todos os itens devido relacionamento EMPENHO/SERIE
+        ///////////////////////////////////////////////////////////////////////////  
+        clsJs = jsString("lote");        
+        clsJs.add("rotina"            , "colab"                             );              
+        clsJs.add("login"             , jsPub[0].usr_login                  );
+        clsJs.add("cntp_colab"        , arr[0].CODIGO                       );
+        clsJs.add("cntp_codpei"       , arr[0].CODIGO                       );         
+        clsJs.add("cntp_codcntt"      , chkds[0].CONTRATO                   );
+        clsJs.add("cntp_codgmp"       , chkds[0].CODGMP                     );  //Vem do retorno de F10
+        clsJs.add("cntp_acao"         , 10                                  );  //Ver trigger para valor de acao
+
+        //////////////////////
+        // Enviando para o Php
+        //////////////////////    
+        var fd = new FormData();
+        fd.append("contratoproduto" , clsJs.fim());
+        msg=requestPedido("Trac_ContratoProduto.php",fd); 
+
+        retPhp=JSON.parse(msg);
+        if( retPhp[0].retorno != "OK" ){
+          gerarMensagemErro("cnti",retPhp[0].erro,{cabec:"Aviso"});
+        } else {  
+          /////////////////////////////////////////////////
+          // Atualizando a grade deste formulario
+          /////////////////////////////////////////////////
+          tblCntI.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
+            if( jsNmrs(row.cells[objCol.IDUNICO].innerHTML).inteiro().ret()  == jsNmrs(chkds[0].IDUNICO).inteiro().ret() ){
+              row.cells[objCol.PLACA_CHASSI].innerHTML=arr[0].PLACA;              
+            };
+          }); 
+          atualizaGradeContrato.call(window.opener.document.getElementById("tblCntt")
+                                    ,pega.codCntt       // codigo do contrato
+                                    ,pega.CODIGO        // coluna da tabela de contrato
+                                    ,pega.PLACAS        // coluna a ser atualizada
+                                    ,1                  // total a ser atualizado
+          );                          
+          tblCntI.retiraChecked()
+        };  
+      };
       /////////////////
       // Agendar
       /////////////////
@@ -1360,7 +1425,7 @@
                     row.cells[objCol.ENTREGA].innerHTML     = $doc("edtCepEnt").value;
                     row.cells[objCol.INSTALA].innerHTML     = $doc("edtCepIns").value;
                     row.cells[objCol.AGENDA].innerHTML    = ( $doc("edtData").value=="00/00/0000" ? "" : $doc("edtData").value );
-                    row.cells[objCol.COLABORADOR].innerHTML = $doc("ageCodCol").value;
+                    row.cells[objCol.COLABORADORES].innerHTML = $doc("ageCodCol").value;
                     //////////////////////////////////////////////////////////////////
                     // Para o agendamento ser completo deve ter os 4 campos intormados
                     // Olhando aqui como ficou depois da atualizacao
@@ -1900,7 +1965,7 @@
             } else {  
               tblCntI.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
                 if( jsNmrs(row.cells[objCol.IDUNICO].innerHTML).inteiro().ret()  == jsNmrs(chkds[0].IDUNICO).inteiro().ret() ){
-                  console.log(row.cells);
+                  //console.log(row.cells);
                   row.cells[objCol.ATIVADO].innerHTML=$doc("edtDtAtiva").value;
                   return false;
                 };

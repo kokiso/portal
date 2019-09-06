@@ -43,14 +43,15 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
           tblWidth=objeto[key];
           break;
         case "where"  : 
-          clsStr.concat( objeto[key],true);        
+          clsStr.concat( objeto[key],true);
+          tblCol     = "tblCol2";       
           break;           
       };  
     };  
   };
   sql=clsStr.fim();
   sql=sql.replaceAll("[codins]",codins);
-  console.log(sql);
+  // console.log(sql);
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////
@@ -104,7 +105,7 @@ function fColaboradorF10(opc,codCol,foco,topo,objeto){
       ajudaF10.tagH2    = false;
       ajudaF10.mensagem = html;
       ajudaF10.Show('ajudaCol');
-      document.getElementById('tblCol').rows[0].cells[6].click();
+      document.getElementById(tblCol).rows[0].cells[6].click();
       //delete(ajudaF10);
       //delete(objColF10);
     };
