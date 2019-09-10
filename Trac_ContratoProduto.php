@@ -282,19 +282,12 @@
         if( $lote[0]->rotina=="colab" ){
 
           $sql="";
-          $sql.="UPDATE VVEICULO";
-          $sql.="   SET VCL_CODCNTT='".$lote[0]->cntp_codcntt."'";
-          $sql.="       ,VCL_CODGMP=".$lote[0]->cntp_codgmp;
-          $sql.="       ,VCL_CODUSR=".$_SESSION["usr_codigo"];
-          $sql.=" WHERE ((VCL_CODCNTT='".$lote[0]->cntp_codcntt."') AND (VCL_CODIGO='".$lote[0]->cntp_placachassi."'))";    
-          array_push($arrUpdt,$sql); 
-
-          $sql="";
           $sql.="UPDATE VCONTRATOPRODUTO";
-          $sql.="   SET CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
+          $sql.="   SET CNTP_COLAB='".$lote[0]->cntp_colab."'";
           $sql.="       ,CNTP_ACAO=".$lote[0]->cntp_acao;
           $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
-          $sql.=" WHERE ((CNTP_CODCNTT=".$lote[0]->cntp_codcntt.") AND (CNTP_CODGMP=".$lote[0]->cntp_codgmp."))";     
+          $sql.=" WHERE ((CNTP_CODCNTT=".$lote[0]->cntp_codcntt.") AND (CNTP_CODGMP=".$lote[0]->cntp_codgmp."))";
+          //var_dump($sql);     
           array_push($arrUpdt,$sql);                                    
           $atuBd = true;
         };
@@ -1295,15 +1288,9 @@
           /////////////////////////////////////////////////
           tblCntI.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
             if( jsNmrs(row.cells[objCol.IDUNICO].innerHTML).inteiro().ret()  == jsNmrs(chkds[0].IDUNICO).inteiro().ret() ){
-              row.cells[objCol.PLACA_CHASSI].innerHTML=arr[0].PLACA;              
+              row.cells[objCol.COLABORADOR].innerHTML=arr[0].CODIGO;              
             };
-          }); 
-          atualizaGradeContrato.call(window.opener.document.getElementById("tblCntt")
-                                    ,pega.codCntt       // codigo do contrato
-                                    ,pega.CODIGO        // coluna da tabela de contrato
-                                    ,pega.PLACAS        // coluna a ser atualizada
-                                    ,1                  // total a ser atualizado
-          );                          
+          });                         
           tblCntI.retiraChecked()
         };  
       };
