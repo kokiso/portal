@@ -13,6 +13,7 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
   clsStr.concat("       ,A.CNTE_CODLGR+' '+A.CNTE_ENDERECO+' '+A.CNTE_NUMERO AS ENDERECO" );
   clsStr.concat("  FROM CONTRATOENDERECO A"                                               );
   clsStr.concat("  LEFT OUTER JOIN CIDADE C ON A.CNTE_CODCDD=C.CDD_CODIGO"                );
+  clsStr.concat("  WHERE A.CNTE_CODFVR IN (SELECT PEI_CODFVR FROM PONTOESTOQUEIND)"       );
   let tblCntE   = "tblCntE";
   let divWidth  = "54em";
   let tblWidth  = "52em";
@@ -20,7 +21,7 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
     for (var key in objeto) {
       switch( key ){
         case "ativo":
-          clsStr.concat( " {AND} (A.CNTE_ATIVO='"+objeto[key]+"')",true);        
+          clsStr.concat( " AND (A.CNTE_ATIVO='"+objeto[key]+"')",true);        
           break;
         case "codfvr": 
           //clsStr.concat(" {WHERE} (A.CNTE_CODFVR='"+objeto[key]+"')",true);
@@ -41,6 +42,7 @@ function fEnderecoF10(opc,codCntE,foco,topo,objeto){
     };  
   };
   sql=clsStr.fim();
+  console.log(sql);
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////

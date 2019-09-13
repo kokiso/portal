@@ -56,7 +56,7 @@
         /////////////////////////
         // Nova OS
         /////////////////////////
-        if( $lote[0]->rotina=="cados" ){
+        if( $lote[0]->rotina=="cados" ){  
           foreach ( $lote as $reg ){          
             ////////////////////////////////////////////////
             // Obrigatorio achar o registro para atualizacao
@@ -67,7 +67,7 @@
             $retCls=$classe->selectAssoc($sql);
             if( ($retCls['retorno'] != "OK") or ($retCls['qtos'] == 0) ){
               $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
-            } else { 
+            } else {
               $ref=$reg->cntp_codmsg;  
               $sql="INSERT INTO VORDEMSERVICO(";
               $sql.="OS_CODMSG";
@@ -250,6 +250,7 @@
           $sql="";
           $sql.="UPDATE VCONTRATOPRODUTO";
           $sql.="   SET CNTP_PLACACHASSI='".$lote[0]->cntp_placachassi."'";
+          $sql.="       ,CNTP_COLAB=".$lote[0]->cntp_colab;
           $sql.="       ,CNTP_ACAO=".$lote[0]->cntp_acao;
           $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
           $sql.=" WHERE ((CNTP_CODCNTT=".$lote[0]->cntp_codcntt.") AND (CNTP_CODGMP=".$lote[0]->cntp_codgmp."))";     
@@ -287,7 +288,7 @@
           $sql.="       ,CNTP_ACAO=".$lote[0]->cntp_acao;
           $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
           $sql.=" WHERE ((CNTP_CODCNTT=".$lote[0]->cntp_codcntt.") AND (CNTP_CODGMP=".$lote[0]->cntp_codgmp."))";
-          //var_dump($sql);     
+          // var_dump($sql);     
           array_push($arrUpdt,$sql);                                    
           $atuBd = true;
         };
@@ -336,6 +337,7 @@
           $sql.="      ,CONVERT(VARCHAR(10),A.CNTP_DTAGENDA,127) AS DTAGENDA";                    
           $sql.="      ,GMP.GMP_CODPEI AS CODFVR";          
           $sql.="      ,A.CNTP_GRUPOCOLAB AS COLABORADORES";
+          $sql.="      ,A.CNTP_COLAB AS CODCOLAB";
           $sql.="      ,COALESCE(FVR.FVR_APELIDO,'') AS COLABORADOR";           
           $sql.="      ,A.CNTP_CODOS AS OS";                    
           $sql.="      ,A.CNTP_AGENDADO AS AC";          
@@ -357,7 +359,7 @@
           // $sql.="       ,'<tbody>'";              
           // $sql.="       ,'<tr>'";
           // $sql.="       ,'<td class=''fpTd''>GRUPO</td>'";          
-          // $sql.="       ,'<td class=''fpTd''>',CNTP_CODGP,'</td>'";
+          // $sql.="       ,'<td class=''fpTd''>',CNTP_CODGP,'</td>'";  
           // $sql.="       ,'</tr>'";          
           // $sql.="       ,'<tr>'";
           // $sql.="       ,'<td class=''fpTd''>CODIGO AUTO</td>'";          
@@ -599,22 +601,29 @@
                       ,"truncate"       : "S"                      
                       ,"excel"          : "N"                      
                       ,"padrao":0}
-            ,{"id":20 ,"labelCol"       : "COLABORADOR"
+            ,{"id":20 ,"labelCol"       : "CODCOLAB"
+                      ,"fieldType"      : "int"
+                      ,"tamGrd"         : "3em"
+                      ,"tamImp"         : "0"
+                      ,"truncate"       : "S"                      
+                      ,"excel"          : "S"                      
+                      ,"padrao":0}
+            ,{"id":21 ,"labelCol"       : "COLABORADOR"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "30"
                       ,"truncate"       : "S"                      
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":21  ,"labelCol"      : "OS"
+            ,{"id":22  ,"labelCol"      : "OS"
                       ,"fieldType"      : "int"
-                      ,"tamGrd"         : "5em"
+                      ,"tamGrd"         : "7em"
                       ,"tamImp"         : "0"
                       ,"formato"        : ["i6"]                      
                       ,"popoverTitle"   : "Numero da OS referente instalação"                          
                       ,"popoverLabelCol": "Ordem serviço"                      
                       ,"padrao":0}
-            ,{"id":22 ,"labelCol"       : "AC"
+            ,{"id":23 ,"labelCol"       : "AC"
                       ,"fieldType"      : "str"
                       ,"align"          : "center"                      
                       ,"tamGrd"         : "0em"
@@ -622,7 +631,7 @@
                       ,"excel"          : "S"                   
                       ,"popoverTitle"   : "Para <b>AGENDAMENTO COMPLETO</b> deve ser informado<hr>Endereco de entrega e instalação<br>Data para instalação<br>Colaborador"                          
                       ,"padrao":0}
-            ,{"id":23 ,"labelCol"       : "PLACA_CHASSI"
+            ,{"id":24 ,"labelCol"       : "PLACA_CHASSI"
                       ,"fieldType"      : "str"
                       ,"align"          : "center"
                       ,"tamGrd"         : "10em"
@@ -630,14 +639,14 @@
                       ,"truncate"       : "S"                      
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":24 ,"labelCol"       : "ATIVADO"
+            ,{"id":25 ,"labelCol"       : "ATIVADO"
                       ,"fieldType"      : "dat"
                       ,"align"          : "center"
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":25 ,"labelCol"       : "SERIE"
+            ,{"id":26 ,"labelCol"       : "SERIE"
                       ,"fieldType"      : "str"
                       ,"align"          : "center"
                       ,"tamGrd"         : "10em"
@@ -646,18 +655,18 @@
                       ,"truncate"       : "S"
                       ,"excel"          : "S"                      
                       ,"padrao":0}
-            ,{"id":26 ,"labelCol"       : "USUARIO" 
+            ,{"id":27 ,"labelCol"       : "USUARIO" 
                       ,"fieldType"      : "str"            
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"                      
                       ,"excel"          : "S"                      
                       ,"padrao":0} 
-            ,{"id":27 ,"labelCol"       : "CODENTREGA"
+            ,{"id":28 ,"labelCol"       : "CODENTREGA"
                       ,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"padrao":0}
-            ,{"id":28 ,"labelCol"       : "CODINSTALA"
+            ,{"id":29 ,"labelCol"       : "CODINSTALA"
                       ,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
@@ -668,7 +677,7 @@
             //           ,"fieldType"      : "popover"
             //           ,"popoverTitle"   : "Pop up de campos relacionados a este registro"                      
             //           ,"padrao":0}
-            ,{"id":29 ,"labelCol"       : "COMP"         
+            ,{"id":30 ,"labelCol"       : "COMP"         
                       ,"obj"            : "imgPP"
                       ,"tamGrd"         : "5em"
                       ,"tipo"           : "img"
@@ -698,15 +707,15 @@
             ,{"texto":"Agendamento"       ,"name":"horAgenda"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-calendar"
                                           ,"popover":{title:"Opção para informar",texto:"<b>-</b>Endereco de entrega<br><b>-</b>Endereço de instalacao<br><b>-</b>Data de agendamento<br><b>-</b>Colaborador responsavel pela instalação"}}                                           
             ,{"texto":"OS"                ,"name":"horGerarOs"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-wrench"
-                                          ,"popover":{title:"Opção para gerar OS",texto:"Gera automaticamente uma OS de instalação para cada auto"}} 
+                                          ,"popover":{title:"Opção para gerar OS",texto:"Gera automaticamente uma OS de instalação para cada auto"}}
+            ,{"texto":"Colaborador"       ,"name":"horColab"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-user"                        
+                                          ,"popover":{title:"Colaborador",texto:"Vincula colaborador à placa"}} 
             ,{"texto":"Placa"             ,"name":"horPlacaCad"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-truck"
                                           ,"popover":{title:"Adicionar placa",texto:"Adiciona uma nova <b>placa</b> para este contrato"}}             
             ,{"texto":"Placa"             ,"name":"horPlacaExc"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-truck"            
                                           ,"popover":{title:"Remover placa",texto:"Remove a <b>placa</b> selecionada do contrato",aviso:"warning"}}             
             ,{"texto":"Marcar"            ,"name":"horMarcar"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-check"                        
                                           ,"popover":{title:"Marcar/Desmarcar",texto:"Inverte todas as linhas da grade pela coluna OPC(marcado)"}}
-            ,{"texto":"Colaborador"       ,"name":"horColab"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-user"                        
-                                          ,"popover":{title:"Colaborador",texto:"Vincula colaborador à placa"}}
             ,{"texto":"Excel"             ,"name":"horExcel"        ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"} 
             ,{"texto":"Imprimir"          ,"name":"horImprimir"     ,"onClick":"3"  ,"enabled":true,"imagem":"fa fa-print"}                    
             ,{"texto":"Fechar"            ,"name":"horFechar"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-close"}
@@ -748,9 +757,9 @@
         // Aqui sao as colunas que vou precisar aqui e Trac_GrupoModeloInd.php
         // esta garante o chkds[0].?????? e objCol
         //////////////////////////////////////////////////////////////////////
-        objCol=fncColObrigatoria.call(jsCntI,[ "AC"         ,"CFG"  ,"CODENTREGA" ,"CODPEI"   ,"CODINSTALA" ,"CODGM"    ,"CODGMP" ,"ATIVADO"  ,"COLABORADORES"
+        objCol=fncColObrigatoria.call(jsCntI,[ "AC"         ,"CFG"  ,"CODENTREGA" ,"CODPEI"   ,"CODINSTALA" ,"CODGM"    ,"CODGMP" ,"ATIVADO"  
                                               ,"CONTRATO"   ,"RE"   ,"AGENDA"     ,"EMPENHO"  ,"ENTREGA"  ,"GRP"    ,"IDUNICO"  ,"IDSRV"      
-                                              ,"INSTALA"    ,"ME"   ,"OS"         ,"PE"       ,"PLACA_CHASSI","COLABORADOR" 
+                                              ,"INSTALA"    ,"ME"   ,"OS"         ,"PE"       ,"PLACA_CHASSI","COLABORADORES","CODCOLAB","COLABORADOR" 
                                               ,"REFERENTE"  ,"SE"   ,"SERIE"      ,"USUARIO"  ,"VALOR" ]);
         switch( pega.qualRotina ){
           case 'EMPENHO':
@@ -771,6 +780,7 @@
             $doc("horEmpenhoCad").style.display="none";
             $doc("horColab").style.display="none";
             $doc("horEmpenhoExc").style.display="none";
+             $doc("horGerarOs").style.display="none";
             $doc("collapseCorreio").style.display="block";            
             break;
           case 'OS':
@@ -1124,8 +1134,8 @@
             throw "AUTO SEM EMPENHO!";
           if( chkds[0].PLACA_CHASSI != "NSA0000" && chkds[0].PLACA_CHASSI != "")
             throw "PLACA JA CADASTRADA!";
-          if( jsConverte(chkds[0].OS).inteiro()>0 )
-            throw "PLACA DEVE SER INFORMADA ATRAVÉS DA OS "+chkds[0].OS;
+          if( chkds[0].COLABORADOR== "")
+            throw "COLABORADOR NÃO SELECIONADO";
         
           fPlacaF10(0,"nsa","null",100
             ,{codcntt: pega.codCntt
@@ -1147,6 +1157,7 @@
         clsJs.add("login"             , jsPub[0].usr_login                  );
         clsJs.add("cntp_placachassi"  , arr[0].PLACA                        );        
         clsJs.add("cntp_codcntt"      , chkds[0].CONTRATO                   );
+        clsJs.add("cntp_colab"        , chkds[0].CODCOLAB                   );
         clsJs.add("cntp_codgmp"       , chkds[0].CODGMP                     );  //Vem do retorno de F10
         clsJs.add("cntp_acao"         , 3                                   );  //Ver trigger para valor de acao
         //////////////////////
@@ -1244,7 +1255,11 @@
           }
           else{
             throw "AUTO COM PLACA NÃO ACEITA COLABORADOR!";
-          }   
+          } 
+          if( chkds[0].COLABORADOR != "" )
+            throw "COLABORADOR JÁ SELECIONADO";  
+          if( chkds[0].COLABORADORES == "" )
+            throw "AUTO "+chkds[0].CODGMP+" NÃO AGENDADO";
 
           fColaboradorF10(0,"nsa","null",100
             ,{divWidth:"76em"
@@ -1258,7 +1273,6 @@
         };
       };
       function RetF10tblCol2(arr){
-        console.log(arr);
         ///////////////////////////////////////////////////////////////////////////
         // Classe para montar envio para o Php
         // Colocando o CODGMP em todos os itens devido relacionamento EMPENHO/SERIE
@@ -1370,7 +1384,7 @@
             clsJs.add("cntp_codcntt"    , parseInt(reg.CONTRATO)                                );           
             clsJs.add("cntp_codentrega" , jsNmrs("edtCodEnt").inteiro().ret()                   );             
             clsJs.add("cntp_codinstala" , jsNmrs("edtCodIns").inteiro().ret()                   );             
-            clsJs.add("cntp_codpei"     , 0                                                     );  
+            clsJs.add("cntp_codpei"     , jsNmrs("edtCodEntFvr").inteiro().ret()                );
             clsJs.add("cntp_codColGrp"  , String($doc("ageCodCol").value)                       );                      
             clsJs.add("cntp_dtagenda"   , jsDatas("edtData").retMMDDYYYY()                      ); 
             clsJs.add("cntp_codmsg"     , parseInt($doc("cbCodMsg").value)                      );

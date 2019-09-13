@@ -99,7 +99,7 @@
         if( $lote[0]->rotina=="baixaos" ){
           $sql ="UPDATE VORDEMSERVICO";
           $sql.="   SET OS_ACAO=".$lote[0]->os_acao;
-          $sql.="       ,OS_CODVCL='".$lote[0]->os_codvcl."'";          
+          $sql.="       ,OS_CODVCL='".$lote[0]->os_codvcl."'";            
           $sql.="       ,OS_VALOR='".$lote[0]->os_valor."'";                    
           $sql.="       ,OS_COMPLEMENTO='".$lote[0]->os_complemento."'";
           $sql.="       ,OS_ESTOQUE='".$lote[0]->os_estoque."'";          
@@ -484,7 +484,7 @@
 					};
         };  
       };  
-      function fncAdiar(){
+      function fncAdiar(){    
         try{
           if( jsConverte("#edtMotivo").coalesce("") == "" )
             throw "MOTIVO DEVE SER INFORMADO!"; 
@@ -507,7 +507,7 @@
             tblOs.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
               if( jsConverte(row.cells[objCol.OS].innerHTML).inteiro()  == chkds[0].OS ){
                 row.cells[objCol.AGENDA].innerHTML=$doc("edtDtAgenda").value;
-              };
+              };  
             }); 
             ppvAdiar.hide();
             tblOs.retiraChecked()
@@ -568,7 +568,6 @@
           ////////////////////////////////////////////////
           // Olhando aqui se eh servico interno ou externo
           ////////////////////////////////////////////////
-          
           
           $doc("cbStatus").innerHTML="";
           let ceOpt	  = document.createElement("option");          

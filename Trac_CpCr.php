@@ -3,13 +3,14 @@
   if( isset($_POST["cpcr"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJson.class.php"); 
+      require("classPhp/validaJSon.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
       require("classPhp/dataCompetencia.class.php");      
+      require("classPhp/selectRepetido.class.php");                                     
 
       $clsCompet  = new dataCompetencia();    
-      $vldr       = new validaJson();          
+      $vldr       = new validaJSon();          
       $retorno    = "";
       $retCls     = $vldr->validarJs($_POST["cpcr"]);
       ///////////////////////////////////////////////////////////////////////
@@ -26,6 +27,14 @@
         $lote     = $jsonObj->lote;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+        ///////////////////////
+        // Alterando  a empresa
+        ///////////////////////
+        if( $lote[0]->rotina=="altEmpresa" ){
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("altEmpresa",$lote[0]->login);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"script":'.$retSql["script"].',"erro":"'.$retSql["erro"].'"}]';
+        };  
         /////////////////////////
         // Registro do sistema
         /////////////////////////
@@ -41,8 +50,7 @@
         // Copia de documento
         /////////////////////////
         if( $lote[0]->rotina=="copiadocto" ){
-          $sql="";
-          $sql.="SELECT PGR.PGR_MASTER";
+          $sql ="SELECT PGR.PGR_MASTER";
           $sql.="       ,PGR.PGR_LANCTO";
           $sql.="       ,PGR.PGR_CODPTP";
           $sql.="       ,PTP.PTP_NOME";          
@@ -84,7 +92,7 @@
           $sql.="       ,PR.PR_CODINI";
           $sql.="       ,PR.PR_CODFIM";
           $sql.="       ,CC.CC_NOME";
-          $sql.="  FROM PAGAR PGR";
+          $sql.="  FROM PAGAR PGR WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON FVR.FVR_CODIGO = PGR.PGR_CODFVR";
           $sql.="  LEFT OUTER JOIN BANCO BNC ON BNC.BNC_CODIGO = PGR.PGR_CODBNC";
           $sql.="  LEFT OUTER JOIN TIPODOCUMENTO TD ON TD.TD_CODIGO = PGR.PGR_CODTD";
@@ -105,17 +113,17 @@
             //////////////////////
             // Montando o contabil
             //////////////////////
-            $sql="";          
-            $sql.="SELECT RAT.RAT_LANCTO";
+            $sql ="SELECT RAT.RAT_LANCTO";
             $sql.="       ,RAT.RAT_CODCMP";
             $sql.="       ,RAT.RAT_CODCC";
             $sql.="       ,RAT.RAT_CONTABIL";
             $sql.="       ,CC.CC_NOME";          
             $sql.="       ,RAT.RAT_DEBITO";
             $sql.="       ,RAT.RAT_CREDITO";
-            $sql.="  FROM RATEIO RAT";
+            $sql.="  FROM RATEIO RAT WITH(NOLOCK)";
             $sql.="  LEFT OUTER JOIN CONTACONTABIL CC ON CC.CC_CODIGO=RAT.RAT_CODCC";
             $sql.=" WHERE (RAT.RAT_CODIGO BETWEEN ".$tblPgr["PR_CODINI"]." AND ".$tblPgr["PR_CODFIM"].")";
+            $sql.="   AND (RAT.RAT_LANCTO=".$lote[0]->lancto.")";
             $classe->msgSelect(true);
             $retCls=$classe->selectAssoc($sql);
             $tblRat=$retCls["dados"];
@@ -141,8 +149,7 @@
             //////////////////////////
             // Montando o parcelamento
             //////////////////////////
-            $sql="";          
-            $sql.="SELECT PGR_LANCTO,CONVERT(VARCHAR(10),PGR_VENCTO,127) AS PGR_VENCTO,PGR_VLRLIQUIDO,COALESCE(CONVERT(VARCHAR(10),PGR_DATAPAGA,127),'') AS PGR_DATAPAGA FROM PAGAR";
+            $sql ="SELECT PGR_LANCTO,CONVERT(VARCHAR(10),PGR_VENCTO,127) AS PGR_VENCTO,PGR_VLRLIQUIDO,COALESCE(CONVERT(VARCHAR(10),PGR_DATAPAGA,127),'') AS PGR_DATAPAGA FROM PAGAR WITH(NOLOCK)";
             $sql.=" WHERE (PGR_LANCTO BETWEEN ".$tblPgr["PM_LANCTOINI"]." AND ".$tblPgr["PM_LANCTOFIM"].")";
             $sql.="   AND (PGR_MASTER=".$tblPgr["PGR_MASTER"].")";
             $classe->msgSelect(true);
@@ -159,7 +166,7 @@
         // Bloqueio
         /////////////////////////
         if( $lote[0]->rotina=="bloqueio" ){
-          $sql="UPDATE PAGAR SET PGR_BLOQUEADO='".$lote[0]->bq."',PGR_CODUSR=".$_SESSION["usr_codigo"]." WHERE PGR_LANCTO=".$lote[0]->lancto;
+          $sql="UPDATE VPAGAR SET PGR_BLOQUEADO='".$lote[0]->bq."',PGR_CODUSR=".$_SESSION["usr_codigo"]." WHERE PGR_LANCTO=".$lote[0]->lancto;
           array_push($arrUpdt,$sql);            
           $atuBd = true;
         };  
@@ -169,7 +176,7 @@
         if( $lote[0]->rotina=="alteraemissao" ){
           $objReg = $lote[0]->REGISTRO;
           foreach ( $objReg as $reg ){
-            $sql="UPDATE PAGAR SET PGR_DTDOCTO='".$lote[0]->emissao."',PGR_CODUSR=".$_SESSION["usr_codigo"]." WHERE PGR_LANCTO=".$reg->lancto;
+            $sql="UPDATE VPAGAR SET PGR_DTDOCTO='".$lote[0]->emissao."',PGR_CODUSR=".$_SESSION["usr_codigo"]." WHERE PGR_LANCTO=".$reg->lancto;
             array_push($arrUpdt,$sql);            
           };
           $atuBd = true;
@@ -180,7 +187,7 @@
         if( $lote[0]->rotina=="alteravencto" ){
           $objReg = $lote[0]->REGISTRO;
           foreach ( $objReg as $reg ){
-            $sql="UPDATE PAGAR SET PGR_VENCTO='".$lote[0]->vencto."',PGR_CODUSR=".$_SESSION["usr_codigo"]." WHERE PGR_LANCTO=".$reg->lancto;
+            $sql="UPDATE VPAGAR SET PGR_VENCTO='".$lote[0]->vencto."',PGR_CODUSR=".$_SESSION["usr_codigo"]." WHERE PGR_LANCTO=".$reg->lancto;
             array_push($arrUpdt,$sql);            
           };
           $atuBd = true;
@@ -191,8 +198,7 @@
         // Filtrando os registros
         /////////////////////////
         if( $lote[0]->rotina=="filtrar" ){        
-          $sql="";
-          $sql.="SELECT A.PGR_LANCTO AS LANCTO";
+          $sql ="SELECT A.PGR_LANCTO AS LANCTO";
           $sql.="       ,A.PGR_DOCTO AS DOCTO";
           $sql.="       ,CONVERT(VARCHAR(10),A.PGR_DTDOCTO,127) AS PGR_DTDOCTO";          
           $sql.="       ,A.PGR_CODPTP AS TP";
@@ -221,7 +227,7 @@
           $sql.="       ,A.PGR_CODPTT AS CODPTT";       //Coluna naum utlizada na grade-apenas para alteracao docto  
           $sql.="       ,A.PGR_CODCMP AS CODCMP";       //Coluna naum utlizada na grade-apenas para alteracao docto
           $sql.="       ,A.PGR_VLREVENTO AS VLREVENTO"; //Coluna naum utlizada na grade-apenas para alteracao docto          
-          $sql.="  FROM PAGAR A"; 
+          $sql.="  FROM PAGAR A WITH(NOLOCK)"; 
           $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON A.PGR_CODFVR=FVR.FVR_CODIGO";
           $sql.="  LEFT OUTER JOIN BANCO BNC ON A.PGR_CODBNC=BNC.BNC_CODIGO";
           $sql.="  LEFT OUTER JOIN TIPODOCUMENTO TD ON A.PGR_CODTD=TD.TD_CODIGO";
@@ -230,6 +236,7 @@
           $sql.="  LEFT OUTER JOIN USUARIO USR ON A.PGR_CODUSR=USR.USR_CODIGO";
           $sql.=" WHERE (PGR_VENCTO BETWEEN '".$lote[0]->dtini."' AND '".$lote[0]->dtfim."')";           
           $sql.="   AND (PGR_CODPTP IN(".$lote[0]->codptp."))";
+          $sql.="   AND (PGR_CODEMP=".$lote[0]->codemp.")";
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls["qtos"]==0 ){
@@ -276,7 +283,7 @@
     <link rel="stylesheet" href="css/cssTable2017.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
-    <script src="js/jsBiblioteca.js"></script>
+    <!--<script src="js/jsBiblioteca.js"></script>-->
     <script src="js/jsCopiaDoc2017.js"></script>            
     <script>      
       "use strict";
@@ -284,8 +291,9 @@
       // Executar o codigo após a pagina carregada  //
       ////////////////////////////////////////////////
       document.addEventListener("DOMContentLoaded", function(){ 
-        document.getElementById("edtDataIni").value  = jsDatas(0).retDDMMYYYY();      
-        document.getElementById("edtDataFim").value  = jsDatas(0).retDDMMYYYY();      
+        $doc("spnEmpApelido").innerHTML=jsPub[0].emp_apelido;
+        document.getElementById("edtDataIni").value  = jsConverte("hoje").somarDias(-1); //jsDatas(0).retDDMMYYYY();      
+        document.getElementById("edtDataFim").value  = jsConverte("hoje").somarDias(1); //jsDatas(0).retDDMMYYYY();
         /////////////////////////////////////////////
         //     Objeto clsTable2017 MOVTOEVENTO     //
         /////////////////////////////////////////////
@@ -397,6 +405,8 @@
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
+                      ,"funcCor"        : "(parseInt(objCell.innerHTML)>0 ? objCell.classList.add('corAzul') : "
+                                           +"objCell.classList.remove('corAzul'))"
                       ,"padrao":0}
             ,{"id":15 ,"field"          : "REG"    
                       ,"labelCol"       : "REG"     
@@ -453,6 +463,7 @@
             ,{"texto":"Baixa parcial"   ,"name":"horBaixaParc"  ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-code"             }        
             ,{"texto":"Excluir baixa"   ,"name":"horExcBaixa"   ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-sort-amount-asc"  }
             ,{"texto":"Definitivo"      ,"name":"horDefinitivo" ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-sort-amount-asc"  }            
+            ,{"texto":"Fechar"          ,"name":"horFechar"     ,"onClick":"6"  ,"enabled":true ,"imagem":"fa fa-close"           }
           ] 
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
           ,"corLinha"       : "switch (ceTr.cells[4].innerHTML){case 'CP' : ceTr.style.color='red';break; case 'CR' : ceTr.style.color='black';break; default:ceTr.style.color='blue';break;}"          
@@ -471,7 +482,7 @@
           ,"fieldReg"       : "*"                       // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "*"                       // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"position"       : "absolute"
-          ,"width"          : "135em"                   // Tamanho da table
+          ,"width"          : "142em"                   // Tamanho da table
           ,"height"         : "65em"                    // Altura da table
           ,"nChecks"        : true                      // Se permite multiplos registros na grade checados
           ,"tableLeft"      : "opc"                     // Se tiver menu esquerdo
@@ -516,17 +527,19 @@
       var clsChecados;                // Classe para montar Json
       var chkds;                      // Guarda todos registros checados na table 
       var filtroTipo ="CP_CR";        // Buscar os tipos para filtro
-      var objCol;                     // Posicao das colunas da grade que vou precisar neste formulario                  
+      var objCol;                     // Posicao das colunas da grade que vou precisar neste formulario 
+      var arqLocal  = fncFileName(window.location.pathname);  // retorna o nome do arquivo sendo executado      
       function btnFiltrarClick() { 
         clsJs   = jsString("lote");  
-        clsJs.add("rotina"      , "filtrar"           );
-        clsJs.add("login"       , jsPub[0].usr_login  );
-        clsJs.add("dtini"       , jsDatas("edtDataIni").retMMDDYYYY() );
-        clsJs.add("dtfim"       , jsDatas("edtDataFim").retMMDDYYYY() );
-        clsJs.add("codptp"      , "'"+filtroTipo.replaceAll("_","','")+"'" );
+        clsJs.add("rotina"      , "filtrar"                                 );
+        clsJs.add("login"       , jsPub[0].usr_login                        );
+        clsJs.add("dtini"       , jsDatas("edtDataIni").retMMDDYYYY()       );
+        clsJs.add("dtfim"       , jsDatas("edtDataFim").retMMDDYYYY()       );
+        clsJs.add("codptp"      , "'"+filtroTipo.replaceAll("_","','")+"'"  );
+        clsJs.add("codemp"      , jsPub[0].emp_codigo                       );        
         fd = new FormData();
         fd.append("cpcr" , clsJs.fim());
-        msg     = requestPedido("Trac_CpCr.php",fd); 
+        msg     = requestPedido(arqLocal,fd); 
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           //////////////////////////////////////////////////////////////////////////////////
@@ -552,6 +565,10 @@
           chkds.forEach(function(reg){
             if( reg.BAIXA != "" )
               throw "Lancto "+reg.LANCTO+" com data de baixa!"; 
+            if( reg.REG == "SIS" )
+              throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
+            if( jsNmrs(reg.CNAB).inteiro().ret()>0 )
+              throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser alterado!"; 
           });
           ///////////////////////////////////////////////////////////////
           // Se der tudo certo abro a janela para informacao de nova data
@@ -610,7 +627,7 @@
 
             var fd = new FormData();
             fd.append("cpcr" , clsJs.fim());
-            msg=requestPedido("Trac_CpCr.php",fd); 
+            msg=requestPedido(arqLocal,fd); 
             retPhp=JSON.parse(msg);
             if( retPhp[0].retorno=="OK" ){
               /////////////////////////////////////////////////
@@ -647,6 +664,10 @@
           chkds.forEach(function(reg){
             if( reg.BAIXA != "" )
               throw "Lancto "+reg.LANCTO+" com data de baixa!"; 
+            if( reg.REG == "SIS" )
+              throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
+            if( jsNmrs(reg.CNAB).inteiro().ret()>0 )
+              throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser alterado!"; 
           });
           ///////////////////////////////////////////////////////////////
           // Se der tudo certo abro a janela para informacao de nova data
@@ -704,7 +725,7 @@
             clsJs.add("REGISTRO" , registro                         );
             var fd = new FormData();
             fd.append("cpcr" , clsJs.fim());
-            msg=requestPedido("Trac_CpCr.php",fd); 
+            msg=requestPedido(arqLocal,fd); 
             retPhp=JSON.parse(msg);
             if( retPhp[0].retorno=="OK" ){
               /////////////////////////////////////////////////
@@ -723,7 +744,9 @@
                 };    
               };  
               janelaFechar();
-            };  
+            } else {
+              gerarMensagemErro("Ami",retPhp[0].erro,{cabec:"Aviso"});              
+            };    
           };  
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});
@@ -744,7 +767,8 @@
               throw "Lancto bloqueado "+reg.LANCTO+" não pode ser alterado!"; 
             if( jsNmrs(reg.CNAB).inteiro().ret()>0 )
               throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser alterado!"; 
-            
+            if( reg.REG == "SIS" )
+              throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
           });
           //////////////////////////////////////////////////////////////
           // Preparando um objeto para enviar ao formulario de alteracao
@@ -802,6 +826,8 @@
               throw "Lancto "+reg.LANCTO+" verifique status!"; 
             if( reg.TP != "CP" )
               throw "Lancto "+reg.LANCTO+" aceito apenas contas a pagar!"; 
+            if( reg.REG == "SIS" )
+              throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
           });
           //////////////////////////////////////////////////////////////
           // Preparando um objeto para enviar ao formulario de alteracao
@@ -814,7 +840,7 @@
           clsJs.add("bq"      , str                 );
           var fd = new FormData();
           fd.append("cpcr" , clsJs.fim());
-          msg=requestPedido("Trac_CpCr.php",fd); 
+          msg=requestPedido(arqLocal,fd); 
           retPhp=JSON.parse(msg);
           if( retPhp[0].retorno=="OK" ){
             /////////////////////////////////////////////////
@@ -859,6 +885,8 @@
                 throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser baixado!"; 
               if( ["CP","CR"].indexOf(reg.TP) == -1 )
                 throw "Lancto "+reg.LANCTO+" aceito apenas CP ou CR!"; 
+              if( reg.REG == "SIS" )
+                throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
             });
             //////////////////////////////////////////////////////////////
             // Preparando um objeto para enviar ao formulario de alteracao
@@ -927,7 +955,9 @@
                 if( jsNmrs(reg.CNAB).inteiro().ret()>0 )
                   throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser baixado!"; 
                 if( ["CP","CR"].indexOf(reg.TP) == -1 )
-                  throw "Lancto "+reg.LANCTO+" aceito apenas CP ou CR!"; 
+                  throw "Lancto "+reg.LANCTO+" aceito apenas CP ou CR!";
+                if( reg.REG == "SIS" )
+                  throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
               });            
             };
             
@@ -985,14 +1015,16 @@
             
 
             chkds.forEach(function(reg){
+              if( ["PP","MP","PR","MR"].indexOf(reg.TP) == -1 )
+                throw "Lancto "+reg.LANCTO+" aceito apenas PP/PR/MP ou MR!"; 
               if( reg.BAIXA != "" )
                 throw "Lancto "+reg.LANCTO+" com data de baixa!"; 
               if( reg.BQ == "S" )
                 throw "Lancto bloqueado "+reg.LANCTO+" não pode ser baixado!"; 
               if( jsNmrs(reg.CNAB).inteiro().ret()>0 )
-                throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser baixado!"; 
-              if( ["PP","MP","PR","MR"].indexOf(reg.TP) == -1 )
-                throw "Lancto "+reg.LANCTO+" aceito apenas PP/PR/MP ou MR!"; 
+                throw "Lancto "+reg.LANCTO+" com arquivo CNAB não pode ser alterado!"; 
+              if( reg.REG == "SIS" )
+                throw "Lancto do sistema "+reg.LANCTO+" não pode ser alterado!"; 
             });            
             //////////////////////////////////////////////////////////////
             // Preparando um objeto para enviar ao formulario de alteracao
@@ -1050,7 +1082,7 @@
 
           var fd = new FormData();
           fd.append("cpcr" , clsJs.fim());
-          msg=requestPedido("Trac_CpCr.php",fd); 
+          msg=requestPedido(arqLocal,fd); 
           retPhp=JSON.parse(msg);
           if( retPhp[0].retorno=="OK" ){
             /////////////////////////////////////////////////
@@ -1075,8 +1107,9 @@
         };
       };
       
+      
       function fncTipos(){
-        let clsCode = new concatStr();  
+        let clsCode = new concatStr();          
         clsCode.concat("<div id='dPaiChk' class='divContainerTable' style='height: 31.2em; width: 41em;border:none'>");
         clsCode.concat("<table id='tblChk' class='fpTable' style='width:100%;'>");
         clsCode.concat("  <thead class='fpThead'>");
@@ -1095,7 +1128,7 @@
         arr.push({cod:"CR",des:"CONTAS A RECEBER"   ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
         arr.push({cod:"PP",des:"PREVISAO A PAGAS"   ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
         arr.push({cod:"PR",des:"PREVISAO A RECEBER" ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
-        arr.push({cod:"MP",des:"MENSAL A PAGAS"     ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
+        arr.push({cod:"MP",des:"MENSAL A PAGAR"     ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
         arr.push({cod:"MR",des:"MENSAL A RECEBER"   ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
         arr.push({cod:"DT",des:"DESCONTO TOTAL"     ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
         arr.push({cod:"LE",des:"LANCTO EXTRA"       ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
@@ -1132,6 +1165,7 @@
         clsCode.concat("</table>");
         clsCode.concat("</div>"); 
         clsCode.concat("<div id='btnConfirmar' onClick='fncJanelaRet();' class='btnImagemEsq bie15 bieAzul bieRight'><i class='fa fa-check'> Ok</i></div>");        
+
         janelaDialogo(
           { height          : "42em"
             ,body           : "16em"
@@ -1144,6 +1178,10 @@
           }
         );  
       };
+      function fncPhp111(){
+        alert('oi');
+      }  
+      
       ///////////////////////////////////////////
       // Marcando e desmarcando os itens da table
       ///////////////////////////////////////////
@@ -1182,6 +1220,39 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
+      //////////////////
+      // Alterar empresa
+      //////////////////
+      function altEmpresa(){
+        try{          
+          clsJs   = jsString("lote");  
+          clsJs.add("rotina"  , "altEmpresa"                );
+          clsJs.add("login"   , jsPub[0].usr_login          );
+          fd = new FormData();
+          fd.append("cpcr" , clsJs.fim());
+          
+          msg     = requestPedido(arqLocal,fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            janelaDialogo(
+              { height          : "25em"
+                ,body           : "16em"
+                ,left           : "500px"
+                ,top            : "60px"
+                ,tituloBarra    : "Alterar empresa"
+                ,width          : "43em"
+                ,fontSizeTitulo : "1.8em"             //  padrao 2em que esta no css
+                ,code           : retPhp[0]["dados"]  //  clsCode.fim()
+              }
+            );  
+            let scr = document.createElement('script');
+            scr.innerHTML = retPhp[0]["script"];
+            document.getElementsByTagName('body')[0].appendChild(scr);        
+          };
+        }catch(e){
+          gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+        };
+      };  
     </script>
   </head>
   
@@ -1235,12 +1306,30 @@
                               data-placement="right" 
                               data-content="Abre a opção de tipos financeiros para filtro."><i class="indFa fa-edit"></i>
           </div>
+          <div id="divBlRota" class="divBarraLateral" 
+                              onClick="altEmpresa();"
+                              data-title="Ajuda"                               
+                              data-toggle="popover" 
+                              data-placement="right" 
+                              data-content="Alterar empresa."><i class="indFa fa-spinner"></i>
+          </div>
         </section>
       </aside>
 
       <div id="indDivInforme" class="indTopoInicio indTopoInicio100">
         <div class="indTopoInicio_logo"></div>
+        <!--
         <a href="#" class="indLabel"><div id="tituloMenu">Financeiro</div></a>
+        -->
+        <div class="colMd12" style="float:left;margin-bottom:0px;height:50px;">
+          <div class="infoBox">
+            <span class="infoBoxIcon corMd10"><i class="fa fa-folder-open" style="width:25px;"></i></span>
+            <div class="infoBoxContent">
+              <span class="infoBoxText">Financeiro</span>
+              <span id="spnEmpApelido" class="infoBoxLabel"></span>
+            </div>
+          </div>
+        </div>  
         
         <div id="indDivInforme" class="indTopoInicio80">
           <div class="campotexto campo12" style="margin-top:2px;">
@@ -1283,45 +1372,7 @@
         <input type="hidden" id="sql" name="sql"/>      
       </form>  
     </div>
+    <script id="scrpt">
+    </script>
   </body>
 </html>
-
-
-<!-- 
-<div class="btn-group" style="margin-bottom:10px">
-  <button id="makeMeDropdown" class="btn btn-default disabled" disabled="true">All done</button>
-  <div class="dropdown btn-group open">
-    <button id="formDropdown" type="button" class="btn btn-primary dropdown-toggle" 
-                                            data-toggle="dropdown" 
-                                            aria-haspopup="true" 
-                                            role="button" 
-                                            aria-expanded="true" 
-                                            tabindex="0">Login 2
-      <span class="caret"></span>
-    </button>
-    <form class="form-vertical dropdown-menu">
-      <div class="form-group">
-        <label for="inputEmail3" class="control-label">Email</label>
-        <div class="">
-          <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="inputPassword3" class="control-label">Password</label>
-        <div class="">
-          <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="">
-          <div class="checkbox"><label><input type="checkbox"> Remember me</label></div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="">
-          <button type="submit" class="btn btn-default">Sign in</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div> -->

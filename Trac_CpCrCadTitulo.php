@@ -3,7 +3,7 @@
   if( isset($_POST["cadtit"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJson.class.php"); 
+      require("classPhp/validaJSon.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");      
       require("classPhp/validaCampo.class.php"); 
@@ -16,7 +16,7 @@
        return $a["PT_NOME"] > $b["PT_NOME"];
       };
       
-      $vldr     = new validaJson();          
+      $vldr     = new validaJSon();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["cadtit"]);
       ///////////////////////////////////////////////////////////////////////
@@ -30,17 +30,15 @@
         $arrUpdt  = []; 
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
-        $rotina   = $lote[0]->rotina;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
         //
-        if( $rotina=="buscapadrao" ){
-          $sql="";
-          $sql.="SELECT A.PG_CODPDR";
+        if( $lote[0]->rotina=="buscapadrao" ){
+          $sql ="SELECT A.PG_CODPDR";
           $sql.="       ,A.PG_CODPTP";
           $sql.="       ,PDR.PDR_NOME";          
           $sql.="       ,A.PG_INDICE"; 
-          $sql.="  FROM PADRAOGRUPO A";
+          $sql.="  FROM PADRAOGRUPO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN PADRAO PDR ON A.PG_CODPDR=PDR.PDR_CODIGO AND PDR.PDR_ATIVO='S'";          
           $sql.=" WHERE ((PDR.PDR_CODPTT='L') AND (A.PG_ATIVO='S'))";
           $classe->msgSelect(false);
@@ -48,8 +46,7 @@
           $tblPg=$retCls["dados"];
           usort($tblPg,"fncPg");
           //
-          $sql="";
-          $sql.="SELECT A.PT_CODIGO";
+          $sql ="SELECT A.PT_CODIGO";
           $sql.="       ,A.PT_NOME";
           $sql.="       ,A.PT_CODTD";
           $sql.="       ,TD.TD_NOME";          
@@ -59,7 +56,7 @@
           $sql.="       ,A.PT_CODCC";
           $sql.="       ,A.PT_CODPDR";
           $sql.="       ,PG.PG_INDICE AS PT_INDICE";          
-          $sql.="  FROM PADRAOTITULO A"; 
+          $sql.="  FROM PADRAOTITULO A WITH(NOLOCK)"; 
           $sql.="  LEFT OUTER JOIN PADRAOGRUPO PG ON A.PT_CODPDR=PG.PG_CODPDR AND PG.PG_ATIVO='S'";
           $sql.="  LEFT OUTER JOIN TIPODOCUMENTO TD ON A.PT_CODTD=TD.TD_CODIGO AND TD.TD_ATIVO='S'";          
           $sql.="  LEFT OUTER JOIN FORMACOBRANCA FC ON A.PT_CODFC=FC.FC_CODIGO AND FC.FC_ATIVO='S'";                    
@@ -100,28 +97,25 @@
     <script src="js/clsTab2017.js"></script>        
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaBancoF10.js"></script>    
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
         buscaPadrao(); 
-        document.getElementById("edtCodFll").value    = jsNmrs(jsPub[0].emp_codfll).emZero(4).ret();
+        document.getElementById("edtCodFll").value    = jsConverte(jsPub[0].emp_codfll).emZero(4);
         document.getElementById("edtDtDocto").value   = jsDatas(0).retDDMMYYYY();
         document.getElementById("edtVlrEvento").value = "0,00";
         document.getElementById("edtNumPar").value    = "01";
         document.getElementById("edtIntervalo").value = "30";
         document.getElementById("edtCodFvr").value    = "0000";
-        document.getElementById("edtCodBnc").value    = jsNmrs(jsPub[0].emp_codbnc).emZero(4).ret();
+        document.getElementById("edtCodBnc").value    = jsConverte(jsPub[0].emp_codbnc).emZero(4);
         document.getElementById("edtDesBnc").value    = jsPub[0].emp_desbnc;
         document.getElementById("cbCodPtp").focus();
-        
-        //tirar
-        /*
-        document.getElementById("edtCodFvr").value    = "0006";        
-        document.getElementById("edtDesFvr").value    = "JOSE DOS SANTOS";        
-        document.getElementById("edtDocto").value    = "2020";        
-        document.getElementById("edtVlrEvento").value = "200,00";
-        document.getElementById("edtVencto").value = "20/10/2018";
-        */
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Aqui estou informando se vou usar as funcoes de retorno do F10 deste arquivo(false-padrao) ou do arquivo que contem a classe AjudaF10(true)
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        localStorage.setItem("f10Bnc",true);
+        //
         if( jsPub[0].emp_fllunica=="S" ){
           jsCmpAtivo("edtCodFll").remove("campo_input").add("campo_input_titulo").disabled(true);
         };
@@ -164,18 +158,20 @@
       });
       //
       var msg;                        // Variavel para guardadar mensagens de retorno/erro
-      var clsChecados;                // Classe para montar Json  
-      var chkds;                      // Guarda todos registros checados na table 
-      var tamC;                       // Guarda a quantidade de registros   
+      //var clsChecados;                // Classe para montar Json  
+      //var chkds;                      // Guarda todos registros checados na table 
+      //var tamC;                       // Guarda a quantidade de registros   
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP  
       var fd;                         // Formulario para envio de dados para o PHP
       var envPhp;                     // Envia para o Php
       var retPhp;                     // Retorno do Php para a rotina chamadora
       var objPadF10;                  // Obrigatório para instanciar o JS FavorecidoF10      
+      var objBncF10;                  // Obrigatório para instanciar o JS BancoF10
       var minhaAba;
       var contMsg   = 0;
       var cmp       = new clsCampo(); 
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
+      var arqLocal  = fncFileName(window.location.pathname);  // retorna o nome do arquivo sendo executado
       ////////////////////////////////////////////////////
       // Objeto global para uso em toda rotina de cadastro
       ////////////////////////////////////////////////////
@@ -193,7 +189,7 @@
         clsJs.add("login"       , jsPub[0].usr_login  );
         fd = new FormData();
         fd.append("cadtit" , clsJs.fim());
-        msg     = requestPedido("Trac_CpCrCadTitulo.php",fd); 
+        msg     = requestPedido(arqLocal,fd); 
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           objGlobal.tblPg=retPhp[0]["tblPg"];
@@ -409,18 +405,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncF10Click(obj){ 
-        fPadraoF10( { opc:0
-                      ,edtCod:obj.id
-                      ,foco:"edtObservacao"
-                      ,topo:100
-                      ,tableBd:"BANCO"
-                      ,fieldCod:"A.BNC_CODIGO"
-                      ,fieldDes:"A.BNC_NOME"
-                      ,fieldAtv:"A.BNC_ATIVO"
-                      ,typeCod :"int" 
-                      ,divWidth:"36%"
-                      ,tbl:"tblBnc"}
-        );
+        fBancoF10(0,obj.id,"edtObservacao",100,{codemp: jsPub[0].emp_codigo,ativo:"S" } ); 
       };
       function RetF10tblBnc(arr){
         document.getElementById("edtCodBnc").value  = arr[0].CODIGO;
@@ -431,22 +416,17 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fPadraoF10( { opc:1
-                                  ,edtCod:obj.id
-                                  ,foco:"edtObservacao"
-                                  ,topo:100
-                                  ,tableBd:"BANCO"
-                                  ,fieldCod:"A.BNC_CODIGO"
-                                  ,fieldDes:"A.BNC_NOME"
-                                  ,fieldAtv:"A.BNC_ATIVO"
-                                  ,typeCod :"int" 
-                                  ,tbl:"tblBnc"}
-          );
-          document.getElementById(obj.id).value       = ( ret.length == 0 ? "BOL"  : ret[0].CODIGO                );
-          document.getElementById("edtDesBnc").value  = ( ret.length == 0 ? "BOLETO"      : ret[0].DESCRICAO      );
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO ));
+          let arr = fBancoF10(1,obj.id,"edtObservacao",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          document.getElementById(obj.id).value       = ( arr.length == 0 ? "0000"  : jsConverte(arr[0].CODIGO).emZero(4) );
+          document.getElementById("edtDesBnc").value  = ( arr.length == 0 ? "*"     : arr[0].DESCRICAO                    );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )       );
         };
       };
+      //
       function fncCalculaParcelamento(){
         try{    
           msg = new clsMensagem("Erro");
@@ -566,10 +546,11 @@
             clsDup.principal(false);
             
             arrPrcl.forEach(function(reg){
-              clsRat.add("parcela"    , reg.parc                                  );
-              clsRat.add("codcc"      , document.getElementById("edtCodCc").value );
-              clsRat.add("debito"     , (reg.debcre=="D" ? reg.valor : 0)         );
-              clsRat.add("credito"    , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("parcela"          , reg.parc                                  );
+              clsRat.add("codcc"            , document.getElementById("edtCodCc").value );
+              clsRat.add("debito"           , (reg.debcre=="D" ? reg.valor : 0)         );
+              clsRat.add("credito"          , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("comparaVlrEvento" , "S"                                       );
 
               clsDup.add("parcela"    , reg.parc    );
               clsDup.add("vencto"     , reg.vencto  );  

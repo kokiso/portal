@@ -494,7 +494,7 @@
 				<div class="pull-right hidden-xs">
           <b>Versão</b> DEV
         </div>
-        <strong>Copyright <a href="http://www.relieve.com.br" target="blank">Relieve - Soluções em TI</a>.</strong>  - Todos os direitos reservados.
+        <strong>Copyright <a href="http://www.totaltrac.com.br" target="blank">Total Trac - Soluções em Rastreamento e Telemetria</a>.</strong>  - Todos os direitos reservados.
 			</footer>	
 					
 		</div>
