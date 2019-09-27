@@ -27,6 +27,33 @@
           $retSql = $cSql->qualSelect("detAuto",$lote[0]->login,$lote[0]->codgmp);
           $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
         };
+        if( $lote[0]->rotina=="selectCol" ){
+          $tblCol="*";
+          $sql="SELECT A.PEI_CODFVR AS CODIGO
+                ,DES.FVR_NOME AS COLABORADOR 
+                ,CASE WHEN A.PEI_STATUS='BOM' THEN CAST('BOM' AS VARCHAR(3))
+                  WHEN A.PEI_STATUS='OTI' THEN CAST('OTIMO' AS VARCHAR(5))       
+                  WHEN A.PEI_STATUS='RAZ' THEN CAST('RAZOAVEL' AS VARCHAR(8))
+                  WHEN A.PEI_STATUS='RUI' THEN CAST('RUIM' AS VARCHAR(4)) 
+                  ELSE 'NSA' END AS STATUS
+                FROM PONTOESTOQUEIND A
+                LEFT OUTER JOIN FAVORECIDO DES ON A.PEI_CODFVR=DES.FVR_CODIGO 
+                WHERE A.PEI_CODPE IN('CRD','INS','TRC','CLN','FVR')
+                AND A.PEI_ATIVO='S'";
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] == "OK" ){
+            $tblCol=$retCls['dados'];    
+          };
+          
+          if( ($tblCol=="*")){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{ "retorno":"OK"
+                        ,"tblCol":'.json_encode($tblCol).'                      
+                        ,"erro":""}]'; 
+          };  
+        };
         /////////////////////////
         // Gerar OS de instalacao
         /////////////////////////
@@ -221,7 +248,6 @@
               $sql.="       ,CNTP_ACAO=".$lote[0]->acao;              
               $sql.=" WHERE ((CNTP_CODCNTT=".$reg->cntp_codcntt.") AND (CNTP_IDUNICO=".$reg->cntp_idunico.") AND (CNTP_CODGMP=".$reg->cntp_codgmp."))";
               array_push($arrUpdt,$sql); 
-              file_put_contents("aaa2.xml",$arrUpdt);
               $atuBd = true;
             };    
           };
@@ -288,7 +314,7 @@
           $sql.="       ,CNTP_ACAO=".$lote[0]->cntp_acao;
           $sql.="       ,CNTP_CODUSR=".$_SESSION["usr_codigo"];
           $sql.=" WHERE ((CNTP_CODCNTT=".$lote[0]->cntp_codcntt.") AND (CNTP_CODGMP=".$lote[0]->cntp_codgmp."))";
-          // var_dump($sql);     
+          //var_dump($sql);     
           array_push($arrUpdt,$sql);                                    
           $atuBd = true;
         };
@@ -452,6 +478,7 @@
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
+        buscarCol()
         ////////////////////////////////////////////////////////
         //Recuperando os dados recebidos de Trac_Contrato.php
         ////////////////////////////////////////////////////////
@@ -750,7 +777,21 @@
         }; 
         if( objCntI === undefined ){  
           objCntI=new clsTable2017("objCntI");
-        };  
+        };
+
+        function buscarCol(){
+          clsJs   = jsString("lote");  
+          clsJs.add("rotina"  , "selectCol"          );
+          clsJs.add("login"   , jsPub[0].usr_login  );
+          fd = new FormData();
+          fd.append("contratoproduto" , clsJs.fim());
+          msg     = requestPedido("Trac_ContratoProduto.php",fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            tblCol=retPhp[0]["tblCol"];  
+          };  
+        };
+
         objCntI.montarHtmlCE2017(jsCntI);
         $doc("dPaifrmCntI").style.float="none";
         //////////////////////////////////////////////////////////////////////
@@ -829,7 +870,8 @@
       var envPhp;                     // Envia para o Php
       var retPhp;                     // Retorno do Php para a rotina chamadora
       var pega;                       // Recuperar localStorage      
-      var objCol;                     // Posicao das colunas da grade que vou precisar neste formulario            
+      var objCol;                     // Posicao das colunas da grade que vou precisar neste formulario  
+      var tblCol;          
       //var oEnd;                       // Para saber se estou informando um endereco de entrega ou de instalacao
       var abrePlaca;      
       var ppvCorreio;                 // Abrir popover somente com click(Codigo rastreamento)
@@ -971,6 +1013,120 @@
           $doc("edtCddIns").value      = ( arr.length == 0 ? ""                : arr[0].CIDADE );
           $doc("edtCepIns").value      = ( arr.length == 0 ? ""                : arr[0].CEP );
           $doc("edtCodIns").setAttribute("data-oldvalue",$doc("edtCodIns").value);
+        };
+      };
+      function colClick(el,lbl){
+        let clsCode = new concatStr();  
+        clsCode.concat("<div id='dPaiColChk' class='divContainerTable' style='height: 31.2em; width: 45em;border:none'>");
+        clsCode.concat("<table id='tblColChk' class='fpTable' style='width:100%;'>");
+        clsCode.concat("  <thead class='fpThead'>");
+        clsCode.concat("    <tr>");
+        clsCode.concat("      <th class='fpTh' style='width:30%'>CODIGO</th>");
+        clsCode.concat("      <th class='fpTh' style='width:40%'>COLABORADOR</th>");
+        clsCode.concat("      <th class='fpTh' style='width:20%'>STATUS</th>");
+        clsCode.concat("      <th class='fpTh' style='width:10%'>SIM</th>");          
+        clsCode.concat("    </tr>");
+        clsCode.concat("  </thead>");
+        clsCode.concat("  <tbody id='tbody_tblChk'>");
+        //////////////////////
+        // Preenchendo a table
+        //////////////////////  
+        let arr=[];
+        tblCol.forEach(function(reg){
+          arr.push({cod:reg.CODIGO,des:reg.COLABORADOR,ncm:reg.STATUS ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
+        });
+        /////////////////////////////////////////////
+        // Atualizando a grade com a informacao atual
+        /////////////////////////////////////////////
+        if( el.value != "NSA" ){
+          let splt=(el.value).split("_");  
+          splt.forEach( function(sp){
+            arr.forEach( function(ar){
+              if( ar.cod==sp ){
+                ar.sn   = "S";
+                ar.fa   = "fa fa-thumbs-o-up";
+                ar.cor  = "blue";
+              }
+            });
+          });
+        };
+        ///////////////////////////////////
+        // Mostrando as opcoes para selecao
+        ///////////////////////////////////
+        arr.forEach(function(reg){
+          clsCode.concat("    <tr class='fpBodyTr'>");
+          clsCode.concat("      <td class='fpTd textoCentro'>"+reg.cod+"</td>");
+          clsCode.concat("      <td class='fpTd'>"+reg.des+"</td>");
+          clsCode.concat("      <td class='fpTd'>"+reg.ncm+"</td>");
+          clsCode.concat("      <td class='fpTd textoCentro'>");
+          clsCode.concat("        <div width='100%' height='100%' onclick=' var elTr=this.parentNode.parentNode;fncCheckCol((elTr.rowIndex-1));'>");
+          clsCode.concat("          <i id='img"+reg.cod+"' data-value='"+reg.sn+"' class='"+reg.fa+"' style='margin-left:10px;font-size:1.5em;color:"+reg.cor+";'></i>");
+          clsCode.concat("        </div>");
+          clsCode.concat("      </td>");
+          clsCode.concat("    </tr>");
+        });
+        //////  
+        // Fim
+        //////
+        clsCode.concat("  </tbody>");        
+        clsCode.concat("</table>");
+        clsCode.concat("</div>"); 
+        clsCode.concat("<div id='btnColConfirmar' onClick='fncJanelaColRet(\""+el.id+"\");' class='btnImagemEsq bie15 bieAzul bieRight'><i class='fa fa-check'> Ok</i></div>");        
+        janelaDialogo(      
+          { height          : "42em"
+            ,body           : "16em"
+            ,left           : "300px"
+            ,top            : "60px"
+            ,tituloBarra    : "Selecione Produto "+lbl
+            ,code           : clsCode.fim()
+            ,width          : "48em"
+            ,fontSizeTitulo : "1.8em"           // padrao 2em que esta no css
+          }
+        );  
+      };
+      ///////////////////////////////////////////
+      // Marcando e desmarcando os itens da table
+      ///////////////////////////////////////////
+      function fncCheckCol(pLin){
+        let tbl   = tblColChk.getElementsByTagName("tbody")[0];
+        let elImg = "img"+tbl.rows[pLin].cells[0].innerHTML;
+        let sn    = document.getElementById(elImg).getAttribute("data-value")
+        if( sn=="N" ){
+          jsCmpAtivo(elImg).remove("fa-thumbs-o-down").add("fa-thumbs-o-up").cor("blue");
+          document.getElementById(elImg).setAttribute("data-value","S"); 
+        } else {
+          jsCmpAtivo(elImg).remove("fa-thumbs-o-up").add("fa-thumbs-o-down").cor("red");
+          document.getElementById(elImg).setAttribute("data-value","N"); 
+        }
+      };
+      ///////////////////////////////////////////
+      // Recuperando os itens marcados na table
+      ///////////////////////////////////////////
+      function fncJanelaColRet(obj){
+        try{              
+          let tbl = tblColChk.getElementsByTagName("tbody")[0];
+          let nl  = tbl.rows.length;
+          let elImg;
+          if( nl>0 ){
+            let filtroCol="";
+            let filtroColNome="";
+            for(let lin=0 ; (lin<nl) ; lin++){
+              elImg="img"+tbl.rows[lin].cells[0].innerHTML;
+              
+              if( document.getElementById(elImg).getAttribute("data-value") == "S" ){
+                filtroCol+=( filtroCol=="" ? tbl.rows[lin].cells[0].innerHTML: ",".concat(tbl.rows[lin].cells[0].innerHTML) );
+                filtroColNome+=( filtroColNome=="" ? tbl.rows[lin].cells[1].innerHTML: ",".concat(tbl.rows[lin].cells[1].innerHTML) );
+              };
+            };
+            if( filtroCol=="" )
+              filtroCol="NSA"; 
+            document.getElementById(obj).value=filtroCol;
+            document.getElementById('ageDesCol').value=filtroColNome;
+
+            janelaFechar();
+          };  
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
       ///////////////////////////////
@@ -1302,7 +1458,8 @@
           /////////////////////////////////////////////////
           tblCntI.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
             if( jsNmrs(row.cells[objCol.IDUNICO].innerHTML).inteiro().ret()  == jsNmrs(chkds[0].IDUNICO).inteiro().ret() ){
-              row.cells[objCol.COLABORADOR].innerHTML=arr[0].CODIGO;              
+              row.cells[objCol.CODCOLAB].innerHTML=arr[0].CODIGO; 
+              row.cells[objCol.COLABORADOR].innerHTML=arr[0].COLABORADOR;             
             };
           });                         
           tblCntI.retiraChecked()
@@ -1386,7 +1543,7 @@
             clsJs.add("cntp_codinstala" , jsNmrs("edtCodIns").inteiro().ret()                   );             
             clsJs.add("cntp_codpei"     , jsNmrs("edtCodEntFvr").inteiro().ret()                );
             clsJs.add("cntp_codColGrp"  , String($doc("ageCodCol").value)                       );                      
-            clsJs.add("cntp_dtagenda"   , jsDatas("edtData").retMMDDYYYY()                      ); 
+            clsJs.add("cntp_dtagenda"   , jsDatas("edtData").retYYYYtMMtDD()                      ); 
             clsJs.add("cntp_codmsg"     , parseInt($doc("cbCodMsg").value)                      );
             clsJs.add("cntp_local"      , $doc("cbLocal").value                                 );            
             clsJs.add("cntp_codvcl"     , (reg.PLACA_CHASSI=="" ? "NSA0000" : reg.PLACA_CHASSI) );            
@@ -1394,7 +1551,7 @@
           });
           //////////////////////
           // Enviando para o Php
-          //////////////////////    
+          ////////////////////// 
           var fd = new FormData();
           fd.append("contratoproduto" , clsJs.fim());
           msg=requestPedido("Trac_ContratoProduto.php",fd); 
@@ -1643,7 +1800,7 @@
       ///////////////////////////////////////
       // Atualizando o banco de dados e grade
       ///////////////////////////////////////
-      function fncModoEntregaRet(){
+      function fncModoEntregaRet(){ 
         try{  
           if( ["COR","MAO","TRA"].indexOf($doc("edtModoEntrega").value) == -1 )
             throw "MODALIDADE DE ENTREGA "+$doc("edtModoEntrega").value+" INVALIDA!";            
@@ -2232,11 +2389,9 @@
           <!-- Colaborador -->
           <div class="campotexto campo50">
             <input class="campo_input inputF10" id="ageCodCol"
-                                                onClick="colF10Click(this);"
-                                                onBlur="codColBlur(this);"                                                 
-                                                data-oldva  lue="0000"
                                                 autocomplete="off"
-                                                type="text" />
+                                                onClick="colClick(this,'obrigatorio');"
+                                                readonly />
             <label class="campo_label campo_required" for="ageCodCol">COLABORADOR:</label>
           </div>
           <div class="campotexto campo100">

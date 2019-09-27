@@ -1628,7 +1628,7 @@ pre code {
   margin-left: auto;
 }
 */
-/*
+
 .row {
   margin-right: -15px;
   margin-left: -15px;
@@ -2267,7 +2267,7 @@ pre code {
     margin-left: 0;
   }
 }
-*/
+
 /*
 table {
   background-color: transparent;
@@ -3857,7 +3857,7 @@ tbody.collapse.in {
   clip: rect(0, 0, 0, 0);
   pointer-events: none;
 }
-/*
+
 .input-group {
   position: relative;
   display: table;
@@ -4016,7 +4016,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   z-index: 2;
   margin-left: -1px;
 }
-*/
+
 
 /*
 .nav {

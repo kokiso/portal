@@ -5,7 +5,7 @@
 // jsPub[0].usr_clientes) sao os clientes que o usuario pode ver          //
 ////////////////////////////////////////////////////////////////////////////
 function fServicoF10(opc,codSrv,foco,topo,objeto){
-  var sql="SELECT A.SRV_CODIGO AS CODIGO"
+  var sql="SELECT DISTINCT A.SRV_CODIGO AS CODIGO"
          +"       ,A.SRV_NOME AS DESCRICAO"
          +"       ,A.SRV_INSS AS INSS_SN"
          +"       ,A.SRV_INSSALIQ AS INSS_ALIQ"
@@ -24,7 +24,7 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
          +"  FROM SERVICO A" 
          +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
   if( objeto.fisjur=="F" ){
-    var sql="SELECT A.SRV_CODIGO AS CODIGO"
+    var sql="SELECT DISTINCT A.SRV_CODIGO AS CODIGO"
            +"       ,A.SRV_NOME AS DESCRICAO"
            +"       ,CAST('N' AS VARCHAR(1)) AS INSS_SN"
            +"       ,CAST(0 AS NUMERIC(15,2)) AS INSS_ALIQ"
@@ -44,7 +44,7 @@ function fServicoF10(opc,codSrv,foco,topo,objeto){
            +"  LEFT OUTER JOIN SERVICOPREFEITURA SPR ON SRV_CODSPR=SPR.SPR_CODIGO";
   };
   if( objeto.categoria=="SIM" ){
-    var sql="SELECT A.SRV_CODIGO AS CODIGO"
+    var sql="SELECT DISTINCT A.SRV_CODIGO AS CODIGO"
            +"       ,A.SRV_NOME AS DESCRICAO"
            +"       ,A.SRV_INSS AS INSS_SN"
            +"       ,A.SRV_INSSALIQ AS INSS_ALIQ"

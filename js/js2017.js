@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function(){
   ////////////////////////////////////////////////////////////
   if( document.getElementById('cbReg') != undefined ){
     if(jsPub[0].usr_admpub=="A"){
-      var ceOpt 	= document.createElement("option");        
+      var ceOpt   = document.createElement("option");        
       ceOpt.value = "A";
       ceOpt.text  = "ADMINISTRADOR";
       document.getElementById("cbReg").appendChild(ceOpt);
@@ -273,7 +273,7 @@ function jsDatas(data){
     ,retPriDiaMes : function(){ return '01/'+this.mes()+'/'+this.anoYYYY(); } 
     ,retSomarDias : function(n){
       var sdData  = new Date(this.anoYYYY(),(this.mes()-1),this.dia());
-      sdData.setFullYear(sdData.getFullYear(),sdData.getMonth(),(sdData.getDate()+n));	
+      sdData.setFullYear(sdData.getFullYear(),sdData.getMonth(),(sdData.getDate()+n));  
       this.data=(sdData.getDate()).EmZero(2)+'/'+(sdData.getMonth()+1).EmZero(2)+'/'+(sdData.getFullYear()).EmZero(4);
       return this;
     }   
@@ -701,7 +701,7 @@ function mascaraNumero(masc,quem,evento,letdig){
           cursor++;
         if( (j)==l+1 )
           break;
-      }; 	
+      };  
     };
   };
   quem.setSelectionRange(cursor, cursor);
@@ -2516,7 +2516,7 @@ function encherComboUf(elId){
   let ufs=["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"];
   let tam=ufs.length;
   for( let lin=0;lin<tam;lin++ ){
-    ceOpt 	= document.createElement("option");        
+    ceOpt   = document.createElement("option");        
     ceOpt.value = ufs[lin];
     ceOpt.text  = ufs[lin];
     if( ufs[lin]=="SP" ){

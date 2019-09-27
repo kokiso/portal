@@ -151,6 +151,7 @@
                   <a class="dropdown-item" onclick="abrePedido();" href="#">Pedido</a>
                   <a class="dropdown-item" onclick="abreContrato();" href="#">Contrato</a>
                   <a class="dropdown-item" onclick="abreOrdemServico();" href="#">OS</a>
+                  <a class="dropdown-item" onclick="abreOrdemServicoAvulso();" href="#">OS Avulsa</a>
                 </div>
               </li>
           </ul>
@@ -558,7 +559,13 @@
         } else {  
           window.open('Trac_OrdemServico.php');
         };    
-      };  
+      }; 
+      function abreOrdemServicoAvulso(){
+        if( jsPub[0].usr_d40==0 ){
+        } else {  
+          window.open('Trac_OrdemServicoAvulso.php');
+        };    
+      }; 
       //
       function altS(){
         let clsCode = new concatStr();  

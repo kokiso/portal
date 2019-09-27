@@ -3,14 +3,14 @@
   if( isset($_POST["cpcr"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
       require("classPhp/dataCompetencia.class.php");      
       require("classPhp/selectRepetido.class.php");                                     
 
       $clsCompet  = new dataCompetencia();    
-      $vldr       = new validaJSon();          
+      $vldr       = new validaJson();          
       $retorno    = "";
       $retCls     = $vldr->validarJs($_POST["cpcr"]);
       ///////////////////////////////////////////////////////////////////////

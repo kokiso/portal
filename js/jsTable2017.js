@@ -426,12 +426,12 @@ function clsTable2017(obj) {
     var param=['','',''];
     param[0]=ttl;
     param[1]="\'"+self.Js.tbl+"'";
-    //param[2]='txtProcurar_'+self.Js.div+'.value';
-    if( self.Js.div === undefined ){
-			param[2]='txtProcurar_'+self.Js.prefixo+'.value';
-		} else {
-			param[2]='txtProcurar_'+self.Js.div+'.value';
-	  };		
+    param[2]='txtProcurar_'+self.Js.div+'.value';
+  //   if( self.Js.div === undefined ){
+		// 	param[2]='txtProcurar_'+self.Js.prefixo+'.value';
+		// } else {
+		// 	param[2]='txtProcurar_'+self.Js.div+'.value';
+	 //  };		
     param[3]='lblProcurar_'+self.Js.tbl+'.innerHTML';
     var func=self.obj+'.filtraTbl('+param[1]+','+param[2]+','+param[3]+');';
     ceInput.setAttribute("onkeyup",func);
@@ -476,7 +476,7 @@ function clsTable2017(obj) {
       ceButton.appendChild(ceImg);  
       ceButton.addEventListener('click',function(){
         try{
-          var clsChecados = self.gerarJson("100");  //Classe para buscar registros checados
+          var clsChecados = self.gerarJson("1");  //Classe para buscar registros checados
           var chkds       = clsChecados.gerar();  //Retorna um array associativo de todos registros checados
           var tamC        = chkds.length;         //Tamanho do array chkds
           for( var checados=0; checados<tamC; checados++ ){        

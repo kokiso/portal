@@ -171,6 +171,9 @@
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
     <script src="js/jsBiblioteca.js"></script>
+<!--     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
     <script>      
       "use strict";
       ////////////////////////////////////////////////
@@ -338,20 +341,7 @@
           , 
           "botoesH":[
             {"texto":"Baixar"           ,"name":"horBaixaOs" ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"}             
-            /*
-            ,{"texto":"Excluir"         ,"name":"horExcluir"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-minus"
-                                        ,"popover":{title:"Excluir",texto:"Esta opção exclui o contrato do sistema em definitivo.<hr>Não existe maneira de recuperar o registro",aviso:"warning"}} 
-            ,{"texto":"Empenho"         ,"name":"horEmpenho"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
-                                        ,"popover":{title:"Empenho",texto:"Opção para empenhar individualmente cada auto pelo seu número de serie<hr>"
-                                                                          +"O auto obrigatoriamente deve estar em estoque"}} 
-            ,{"texto":"Agenda"          ,"name":"horAgenda"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-calendar"
-                                        ,"popover":{title:"Agenda",texto:"Opção para informar endereço entrega/instalação/data/colaborador<hr>"
-                                                                          +"O auto obrigatoriamente deve estar empenhado"}} 
-            ,{"texto":"Placa"           ,"name":"horPlaca"      ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-truck"
-                                        ,"popover":{title:"Placa/Ativação",texto:"Opção para informar a <b>placa</b> e <b>data de ativação</b>"}} 
-            ,{"texto":"Copia contrato"  ,"name":"horCopiaPed"   ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-print"          }                                    
-            */
-            ,{"texto":"Fechar"          ,"name":"horFechar"     ,"onClick":"6"  ,"enabled":true ,"imagem":"fa fa-close"          }
+            ,{"texto":"Fechar"          ,"name":"horFechar"     ,"onClick":"6"  ,"enabled":true ,"imagem":"fa fa-close"}
           ] 
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
@@ -364,7 +354,7 @@
           ,"divModalDentro" : "sctnOs"                  // Onde vai se appendado dentro do objeto(Ou uma ou outra, se existir esta despreza a divModal)
           ,"tbl"            : "tblOs"                   // Nome da table
           ,"prefixo"        : "Me"                      // Prefixo para elementos do HTML em jsTable2017.js
-          ,"tabelaBD"       : "VORDEMSERVICO"               // Nome da tabela no banco de dados  
+          ,"tabelaBD"       : "VORDEMSERVICO"           // Nome da tabela no banco de dados  
           ,"tabelaBKP"      : "*"                       // Nome da tabela no banco de dados  
           ,"fieldAtivo"     : "*"                       // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
           ,"fieldReg"       : "*"                       // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
@@ -698,7 +688,7 @@
                               data-placement="right" 
                               data-content="Opção para impressão de item(s) em tela.">
             <i class="indFa fa-print"></i>
-          </div>
+          </div>  
           <div id="divBlRota" class="divBarraLateral" 
                               onClick="objOs.excel();"
                               data-title="Ajuda"                               

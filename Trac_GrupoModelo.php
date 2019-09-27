@@ -1,6 +1,6 @@
 <?php
   session_start();
-  if( isset($_POST["grupomodelo"]) ){
+  if( isset($_POST["grupomodelo"]) ){   
     try{     
       require("classPhp/conectaSqlServer.class.php");
       require("classPhp/validaJson.class.php"); 
@@ -25,6 +25,28 @@
         $rotina   = $lote[0]->rotina;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+
+        //////////////////////////////////////////////////////
+        //  Dados para JavaScript GRUPOPRODUTO/GRUPOMODELO  //
+        // Select somente uma vez                           //
+        //////////////////////////////////////////////////////
+        if( $rotina=="selectPrd" ){
+          $tblPrd="*";
+          $sql="SELECT PRD_CODIGO AS CODIGO,PRD_NOME AS NOME , PRD_CODNCM AS NCM FROM PRODUTO WHERE PRD_ATIVO='S'";
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] == "OK" ){
+            $tblPrd=$retCls['dados'];    
+          };
+          
+          if( ($tblPrd=="*")){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{ "retorno":"OK"
+                        ,"tblPrd":'.json_encode($tblPrd).'                      
+                        ,"erro":""}]'; 
+          };  
+        };
         //////////////////////////////////////////////////
         //       Dados para JavaScript GRUPOMODELO      //
         //////////////////////////////////////////////////
@@ -47,6 +69,7 @@
                        ,CASE WHEN A.GM_VENDA='S' THEN 'SIM' ELSE 'NAO' END AS GM_VENDA
                        ,CASE WHEN A.GM_LOCACAO='S' THEN 'SIM' ELSE 'NAO' END AS GM_LOCACAO
                        ,CASE WHEN A.GM_CONTRATO='S' THEN 'SIM' ELSE 'NAO' END AS GM_CONTRATO
+                       ,COALESCE(A.GM_PRDCODIGO,'SEM VINCULO')
                        ,A.GM_VALORVISTA                       
                        ,A.GM_VALORPRAZO
                        ,A.GM_VALORMINIMO                       
@@ -79,6 +102,7 @@
                        ,GM_VENDA
                        ,GM_LOCACAO
                        ,GM_CONTRATO
+                       ,A.GM_PRDCODIGO
                        ,A.GM_VALORVISTA                       
                        ,A.GM_VALORPRAZO
                        ,A.GM_VALORMINIMO                       
@@ -200,6 +224,7 @@
       // Executar o codigo após a pagina carregada  //
       ////////////////////////////////////////////////
       document.addEventListener("DOMContentLoaded", function(){ 
+        buscarPrd()
         ////////////////////////////////////////////////
         //      Objeto clsTable2017 GRUPOMODELO       //
         ////////////////////////////////////////////////
@@ -473,8 +498,16 @@
                       ,"digitosMinMax"  : [1,1]
                       ,"ajudaCampo"     : [ "Parametro se o produto pode tem contrato"]
                       ,"importaExcel"   : "S"                                                                
-                      ,"padrao":0}     
-            ,{"id":19 ,"field"          : "GM_VALORVISTA"  
+                      ,"padrao":0}
+            ,{"id":19 ,"field"          : "GM_PRDCODIGO"  
+                      ,"labelCol"       : "PRODUTO_FISCAL" 
+                      ,"obj"            : "edtPrdCodigo"                     
+                      ,"tamGrd"         : "8em"
+                      ,"tamImp"         : "0"                      
+                      ,"fieldType"      : "str"
+                      ,"align"          : "center"                                                                                   
+                      ,"padrao":0}      
+            ,{"id":20 ,"field"          : "GM_VALORVISTA"  
                       ,"labelCol"       : "VLRVISTA" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorVista"
@@ -486,7 +519,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":20 ,"field"          : "GM_VALORPRAZO"  
+            ,{"id":21 ,"field"          : "GM_VALORPRAZO"  
                       ,"labelCol"       : "VLRPRAZO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorPrazo"
@@ -498,7 +531,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":21 ,"field"          : "GM_VALORMINIMO"  
+            ,{"id":22 ,"field"          : "GM_VALORMINIMO"  
                       ,"labelCol"       : "VLRMINIMO" 
                       ,"newRecord"      : ["0,00","this","this"]
                       ,"obj"            : "edtValorMinimo"
@@ -510,7 +543,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":22 ,"field"          :"GM_FIRMWARE" 
+            ,{"id":23 ,"field"          :"GM_FIRMWARE" 
                       ,"labelCol"       : "FIRMWARE"
                       ,"obj"            : "edtFirmWare"
                       ,"tamGrd"         : "5em"
@@ -523,31 +556,31 @@
                       ,"validar"        : ["notnull"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":23 ,"field"          : "GM_MENSURAVEL" 
+            ,{"id":24 ,"field"          : "GM_MENSURAVEL" 
                       ,"labelCol"       : "MENSURAVEL"
                       ,"obj"            : "cbMensuravel"
                       ,"funcCor"        : "(objCell.innerHTML=='NAO'  ? objCell.classList.add('fontVermelho') : objCell.classList.add('fontVerde'))"             
                       ,"padrao":2}
-            ,{"id":24 ,"field"          : "GM_ATIVO"  
+            ,{"id":25 ,"field"          : "GM_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"padrao":2}                                        
-            ,{"id":25 ,"field"          : "GM_REG"    
+            ,{"id":26 ,"field"          : "GM_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":26 ,"field"          : "US_APELIDO" 
+            ,{"id":27 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"tamImp"         : "0"                                            
                       ,"obj"            : "edtUsuario" 
                       ,"padrao":4}                
-            ,{"id":27 ,"field"          : "GM_CODUSR" 
+            ,{"id":28 ,"field"          : "GM_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":28 ,"labelCol"       : "PP"      
+            ,{"id":29 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -705,10 +738,24 @@
       var retPhp                      // Retorno do Php para a rotina chamadora
       var contMsg   = 0;              // contador para mensagens
       var cmp       = new clsCampo(); // Abrindo a classe campos
-      var tblInd;                     // Guardando os modelos para "horIndividual"  
+      var tblInd;                     // Guardando os modelos para "horIndividual"
+      var tblPrd                       // Tabela GRUPOPRODUTO  
       var objCol;                     // Posicao das colunas da grade que vou precisar neste formulario/Trac_GrupoModeloInd.php      
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
       var intCodDir = parseInt(jsPub[0].usr_d35);
+
+      function buscarPrd(){
+        clsJs   = jsString("lote");  
+        clsJs.add("rotina"  , "selectPrd"          );
+        clsJs.add("login"   , jsPub[0].usr_login  );
+        fd = new FormData();
+        fd.append("grupomodelo" , clsJs.fim());
+        msg     = requestPedido("Trac_GrupoModelo.php",fd); 
+        retPhp  = JSON.parse(msg);
+        if( retPhp[0].retorno == "OK" ){
+          tblPrd=retPhp[0]["tblPrd"];  
+        };  
+      };  
       //
       //
       function funcRetornar(intOpc){
@@ -916,6 +963,120 @@
           };
         };
       };
+      function prdClick(el,lbl){
+        let clsCode = new concatStr();  
+        clsCode.concat("<div id='dPaiPrdChk' class='divContainerTable' style='height: 31.2em; width: 45em;border:none'>");
+        clsCode.concat("<table id='tblPrdChk' class='fpTable' style='width:100%;'>");
+        clsCode.concat("  <thead class='fpThead'>");
+        clsCode.concat("    <tr>");
+        clsCode.concat("      <th class='fpTh' style='width:30%'>CODIGO</th>");
+        clsCode.concat("      <th class='fpTh' style='width:40%'>NOME</th>");
+        clsCode.concat("      <th class='fpTh' style='width:20%'>NCM</th>");
+        clsCode.concat("      <th class='fpTh' style='width:10%'>SIM</th>");          
+        clsCode.concat("    </tr>");
+        clsCode.concat("  </thead>");
+        clsCode.concat("  <tbody id='tbody_tblChk'>");
+        //////////////////////
+        // Preenchendo a table
+        //////////////////////  
+        let arr=[];
+        tblPrd.forEach(function(reg){
+          arr.push({cod:reg.CODIGO,des:reg.NOME,ncm:reg.NCM ,sn:"N" ,fa:"fa fa-thumbs-o-down" ,cor:"red"});
+        });
+        /////////////////////////////////////////////
+        // Atualizando a grade com a informacao atual
+        /////////////////////////////////////////////
+        if( el.value != "NSA" ){
+          let splt=(el.value).split("_");  
+          splt.forEach( function(sp){
+            arr.forEach( function(ar){
+              if( ar.cod==sp ){
+                ar.sn   = "S";
+                ar.fa   = "fa fa-thumbs-o-up";
+                ar.cor  = "blue";
+              }
+            });
+          });
+        };
+        ///////////////////////////////////
+        // Mostrando as opcoes para selecao
+        ///////////////////////////////////
+        arr.forEach(function(reg){
+          clsCode.concat("    <tr class='fpBodyTr'>");
+          clsCode.concat("      <td class='fpTd textoCentro'>"+reg.cod+"</td>");
+          clsCode.concat("      <td class='fpTd'>"+reg.des+"</td>");
+          clsCode.concat("      <td class='fpTd'>"+reg.ncm+"</td>");
+          clsCode.concat("      <td class='fpTd textoCentro'>");
+          clsCode.concat("        <div width='100%' height='100%' onclick=' var elTr=this.parentNode.parentNode;fncCheckPrd((elTr.rowIndex-1));'>");
+          clsCode.concat("          <i id='img"+reg.cod+"' data-value='"+reg.sn+"' class='"+reg.fa+"' style='margin-left:10px;font-size:1.5em;color:"+reg.cor+";'></i>");
+          clsCode.concat("        </div>");
+          clsCode.concat("      </td>");
+          clsCode.concat("    </tr>");
+        });
+        //////  
+        // Fim
+        //////
+        clsCode.concat("  </tbody>");        
+        clsCode.concat("</table>");
+        clsCode.concat("</div>"); 
+        clsCode.concat("<div id='btnPrdConfirmar' onClick='fncJanelaPrdRet(\""+el.id+"\");' class='btnImagemEsq bie15 bieAzul bieRight'><i class='fa fa-check'> Ok</i></div>");        
+        janelaDialogo(      
+          { height          : "42em"
+            ,body           : "16em"
+            ,left           : "300px"
+            ,top            : "60px"
+            ,tituloBarra    : "Selecione Produto "+lbl
+            ,code           : clsCode.fim()
+            ,width          : "48em"
+            ,fontSizeTitulo : "1.8em"           // padrao 2em que esta no css
+          }
+        );  
+      };
+      ///////////////////////////////////////////
+      // Marcando e desmarcando os itens da table
+      ///////////////////////////////////////////
+      function fncCheckPrd(pLin){
+        let tbl   = tblPrdChk.getElementsByTagName("tbody")[0];
+        let elImg = "img"+tbl.rows[pLin].cells[0].innerHTML;
+        let sn    = document.getElementById(elImg).getAttribute("data-value")
+        if( sn=="N" ){
+          jsCmpAtivo(elImg).remove("fa-thumbs-o-down").add("fa-thumbs-o-up").cor("blue");
+          document.getElementById(elImg).setAttribute("data-value","S"); 
+        } else {
+          jsCmpAtivo(elImg).remove("fa-thumbs-o-up").add("fa-thumbs-o-down").cor("red");
+          document.getElementById(elImg).setAttribute("data-value","N"); 
+        }
+      };
+      ///////////////////////////////////////////
+      // Recuperando os itens marcados na table
+      ///////////////////////////////////////////
+      function fncJanelaPrdRet(obj){
+        try{              
+          let tbl = tblPrdChk.getElementsByTagName("tbody")[0];
+          let nl  = tbl.rows.length;
+          let elImg;
+          if( nl>0 ){
+            let filtroPrd="";
+            let filtroPrdQtd="";
+            for(let lin=0 ; (lin<nl) ; lin++){
+              elImg="img"+tbl.rows[lin].cells[0].innerHTML;
+              
+              if( document.getElementById(elImg).getAttribute("data-value") == "S" ){
+                filtroPrd+=( filtroPrd=="" ? tbl.rows[lin].cells[0].innerHTML: "_".concat(tbl.rows[lin].cells[0].innerHTML) );
+                filtroPrdQtd+=( filtroPrdQtd=="" ? tbl.rows[lin].cells[3].children[0].value: "_".concat(tbl.rows[lin].cells[3].children[0].value) );
+              };
+            };
+            if( filtroPrd=="" )
+              filtroPrd="NSA"; 
+              console.log(obj);
+            document.getElementById(obj).value=filtroPrd;
+
+            janelaFechar();
+          };  
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Erro"});
+        };
+      };
       ///////////////////
       // Lotes importados
       ///////////////////
@@ -1090,6 +1251,15 @@
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbContrato">CONTRATO:</label>
+              </div>
+              <div class="campotexto campo40">
+                  <input class="campo_input inputF10" id="edtPrdCodigo"
+                                                            type="text" 
+                                                            autocomplete="off"
+                                                            onClick="prdClick(this,'obrigatorio');"
+                                                            readonly
+                                                       />
+                  <label class="campo_label campo_required" for="edtPrdCodigo">PRODUTO FISCAL</label>
               </div>
               <div class="campotexto campo20">
                 <input class="campo_input edtDireita" id="edtValorVista" 
