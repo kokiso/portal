@@ -7,7 +7,7 @@
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");      
       require("classPhp/validaCampo.class.php"); 
-      
+      /*  
       function fncPg($a, $b) {
        return $a["PDR_NOME"] > $b["PDR_NOME"];
       };
@@ -15,7 +15,7 @@
       function fncPt($a, $b) {
        return $a["PT_NOME"] > $b["PT_NOME"];
       };
-      
+      */
       $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["cpcraltdocto"]);
@@ -60,6 +60,7 @@
     <script src="js/js2017.js"></script>
     <script src="js/clsTab2017.js"></script>        
     <script src="js/jsTable2017.js"></script>
+    <script src="tabelaTrac/f10/tabelaBancoF10.js"></script>        
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
     <script>      
       "use strict";
@@ -68,7 +69,7 @@
         //Recuperando os dados recebidos de Trac_CpCr.php
         /////////////////////////////////////////////////
         pega=JSON.parse(localStorage.getItem("addAlt")).lote[0];
-        localStorage.removeItem("addAlt");
+        //localStorage.removeItem("addAlt");
         document.getElementById("edtCodBnc").value      = jsNmrs(pega.codbnc).emZero(4).ret();        
         document.getElementById("edtCodCc").value       = pega.codcc;                
         document.getElementById("edtCodCmp").value      = pega.codcmp;                        
@@ -159,6 +160,8 @@
       var retPhp;                     // Retorno do Php para a rotina chamadora
       var objPadF10;                  // Obrigatório para instanciar o JS FavorecidoF10      
       var pega;                       // Recuperar localStorage
+      var objBncF10;                  // Obrigatório para instanciar o JS BancoF10      
+      var objFcF10;                   // Obrigatório para instanciar o       
       var minhaAba;
       var contMsg   = 0;
       var cmp       = new clsCampo(); 
@@ -305,18 +308,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncF10Click(obj){ 
-        fPadraoF10( { opc:0
-                      ,edtCod:obj.id
-                      ,foco:"edtObservacao"
-                      ,topo:100
-                      ,tableBd:"BANCO"
-                      ,fieldCod:"A.BNC_CODIGO"
-                      ,fieldDes:"A.BNC_NOME"
-                      ,fieldAtv:"A.BNC_ATIVO"
-                      ,typeCod :"int" 
-                      ,divWidth:"36%"
-                      ,tbl:"tblBnc"}
-        );
+        fBancoF10(0,obj.id,"edtObservacao",100,{codemp: jsPub[0].emp_codigo,ativo:"S" } ); 
       };
       function RetF10tblBnc(arr){
         document.getElementById("edtCodBnc").value  = arr[0].CODIGO;
@@ -327,20 +319,14 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fPadraoF10( { opc:1
-                                  ,edtCod:obj.id
-                                  ,foco:"edtObservacao"
-                                  ,topo:100
-                                  ,tableBd:"BANCO"
-                                  ,fieldCod:"A.BNC_CODIGO"
-                                  ,fieldDes:"A.BNC_NOME"
-                                  ,fieldAtv:"A.BNC_ATIVO"
-                                  ,typeCod :"int" 
-                                  ,tbl:"tblBnc"}
-          );
-          document.getElementById(obj.id).value       = ( ret.length == 0 ? "BOL"  : ret[0].CODIGO                );
-          document.getElementById("edtDesBnc").value  = ( ret.length == 0 ? "BOLETO"      : ret[0].DESCRICAO      );
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO ));
+          let arr = fBancoF10(1,obj.id,"edtObservacao",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          document.getElementById(obj.id).value       = ( arr.length == 0 ? "0000"  : jsConverte(arr[0].CODIGO).emZero(4) );
+          document.getElementById("edtDesBnc").value  = ( arr.length == 0 ? "*"     : arr[0].DESCRICAO                    );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )       );
         };
       };
       function fncCalculaParcelamento(){
@@ -394,6 +380,7 @@
           ///////////////////////////////////////////
           // Olhando aqui se algum campo foi alterado
           ///////////////////////////////////////////
+          /*
           let alterado=0;
           if( jsNmrs("edtCodBnc").inteiro().ret() != jsNmrs(document.getElementById("edtCodBnc").getAttribute("data-oldvalue")).inteiro().ret() )
             alterado++;
@@ -415,6 +402,7 @@
             alterado++;
           if( alterado==0 )
             throw "Nenhum campo alterado!"; 
+          */
           //////////////////////////////////////////////
           // Um documento naum pode ter desconto e multa
           //////////////////////////////////////////////
@@ -491,10 +479,11 @@
             clsDup.principal(false);
             
             arrPrcl.forEach(function(reg){
-              clsRat.add("parcela"    , reg.parc                                  );
-              clsRat.add("codcc"      , document.getElementById("edtCodCc").value );
-              clsRat.add("debito"     , (reg.debcre=="D" ? reg.valor : 0)         );
-              clsRat.add("credito"    , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("parcela"          , reg.parc                                  );
+              clsRat.add("codcc"            , document.getElementById("edtCodCc").value );
+              clsRat.add("debito"           , (reg.debcre=="D" ? reg.valor : 0)         );
+              clsRat.add("credito"          , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("comparaVlrEvento" , "S"                                       );
 
               clsDup.add("parcela"    , reg.parc    );
               clsDup.add("vencto"     , reg.vencto  );  

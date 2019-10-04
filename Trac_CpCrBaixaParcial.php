@@ -7,7 +7,7 @@
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");      
       require("classPhp/validaCampo.class.php"); 
-      
+      /*
       function fncPg($a, $b) {
        return $a["PDR_NOME"] > $b["PDR_NOME"];
       };
@@ -15,7 +15,7 @@
       function fncPt($a, $b) {
        return $a["PT_NOME"] > $b["PT_NOME"];
       };
-      
+      */
       $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["cpcrbaixaparcial"]);
@@ -37,8 +37,7 @@
         // Baixa
         /////////////////////////
         if( $lote[0]->rotina=="baixa" ){
-          $sql="";
-          $sql.="UPDATE VPAGAR"; 
+          $sql ="UPDATE VPAGAR"; 
           $sql.="   SET PGR_DATAPAGA='".$lote[0]->dtbaixa."'";
           $sql.="       ,PGR_CHEQUE='".$lote[0]->doctobaixa."'";
           $sql.="       ,PGR_VLRBAIXA='".$lote[0]->vlrsaldo."'";
@@ -49,8 +48,7 @@
           /////////////////////////////////////////////////////////////////////////////////
           // Como os dados ja estaum no banco de dados apenas recupero para inserir o saldo
           /////////////////////////////////////////////////////////////////////////////////
-          $sql="";
-          $sql.="SELECT PGR_BLOQUEADO";
+          $sql ="SELECT PGR_BLOQUEADO";
           $sql.=",PGR_CODBNC";          
           $sql.=",PGR_CODFVR";
           $sql.=",PGR_CODFC";
@@ -66,7 +64,7 @@
           $sql.=",PGR_INDICE";
           $sql.=",PGR_CODPT";
           $sql.=",PGR_VLREVENTO";
-          $sql.=",PGR_VLRPARCELA";
+          $sql.=",(PGR_VLRPARCELA-PGR_VLRDESCONTO+PGR_VLRMULTA) AS PGR_VLRPARCELA";
           $sql.=",PGR_VLRLIQUIDO";
           $sql.=",PGR_CODCC";
           $sql.=",PGR_CODSNF";
@@ -80,7 +78,7 @@
           $sql.=",PGR_REG";
           $sql.=",PR.PR_CODCC";
           $sql.=",PR.PR_DEBCRE";
-          $sql.=" FROM PAGAR"; 
+          $sql.=" FROM PAGAR WITH(NOLOCK)"; 
           $sql.=" LEFT OUTER JOIN PAGARRATEIO PR ON PGR_LANCTO=PR.PR_LANCTO"; 
           $sql.=" WHERE PGR_LANCTO=".$lote[0]->lancto;
           $classe->msgSelect(false);
@@ -90,8 +88,7 @@
           // Gravando na PAGAR
           ////////////////////  
           $lancto=$classe->generator("PAGAR"); 
-          $sql="";
-          $sql="INSERT INTO VPAGAR(";
+          $sql ="INSERT INTO VPAGAR(";
           $sql.="PGR_LANCTO";
           $sql.=",PGR_BLOQUEADO";
           $sql.=",PGR_CODBNC";
@@ -150,8 +147,7 @@
           /////////////////////
           // Gravando na RATEIO
           /////////////////////
-          $sql="";
-          $sql.="INSERT INTO VRATEIO(";
+          $sql ="INSERT INTO VRATEIO(";
           $sql.="RAT_LANCTO";                
           $sql.=",RAT_CODCC";
           $sql.=",RAT_DEBITO";
@@ -212,7 +208,7 @@
     <script src="js/js2017.js"></script>
     <script src="js/clsTab2017.js"></script>        
     <script src="js/jsTable2017.js"></script>
-    <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaBancoF10.js"></script>        
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
@@ -302,7 +298,7 @@
       var fd;                         // Formulario para envio de dados para o PHP
       var envPhp;                     // Envia para o Php
       var retPhp;                     // Retorno do Php para a rotina chamadora
-      var objPadF10;                  // Obrigatório para instanciar o JS FavorecidoF10      
+      var objBncF10;                  // Obrigatório para instanciar o JS BancoF10            
       var pega;                       // Recuperar localStorage;
       var minhaAba;
       var contMsg   = 0;
@@ -315,18 +311,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncF10Click(obj){ 
-        fPadraoF10( { opc:0
-                      ,edtCod:obj.id
-                      ,foco:"edtObservacao"
-                      ,topo:100
-                      ,tableBd:"BANCO"
-                      ,fieldCod:"A.BNC_CODIGO"
-                      ,fieldDes:"A.BNC_NOME"
-                      ,fieldAtv:"A.BNC_ATIVO"
-                      ,typeCod :"int" 
-                      ,divWidth:"36%"
-                      ,tbl:"tblBnc"}
-        );
+        fBancoF10(0,obj.id,"edtObservacao",100,{codemp: jsPub[0].emp_codigo,ativo:"S" } ); 
       };
       function RetF10tblBnc(arr){
         document.getElementById("edtCodBnc").value  = arr[0].CODIGO;
@@ -337,23 +322,16 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fPadraoF10( { opc:1
-                                  ,edtCod:obj.id
-                                  ,foco:"edtObservacao"
-                                  ,topo:100
-                                  ,tableBd:"BANCO"
-                                  ,fieldCod:"A.BNC_CODIGO"
-                                  ,fieldDes:"A.BNC_NOME"
-                                  ,fieldAtv:"A.BNC_ATIVO"
-                                  ,typeCod :"int" 
-                                  ,tbl:"tblBnc"}
-          );
-          document.getElementById(obj.id).value       = ( ret.length == 0 ? "BOL"  : ret[0].CODIGO                );
-          document.getElementById("edtDesBnc").value  = ( ret.length == 0 ? "BOLETO"      : ret[0].DESCRICAO      );
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO ));
+          let arr = fBancoF10(1,obj.id,"edtObservacao",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          document.getElementById(obj.id).value       = ( arr.length == 0 ? "0000"  : jsConverte(arr[0].CODIGO).emZero(4) );
+          document.getElementById("edtDesBnc").value  = ( arr.length == 0 ? "*"     : arr[0].DESCRICAO                    );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )       );
         };
       };
-      
       function fncGravar(){
         try{       
           //

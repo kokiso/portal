@@ -29,8 +29,7 @@
         //    Dados para JavaScript CNABERRO       //
         /////////////////////////////////////////////
         if( $rotina=="selectErr" ){
-          $sql="";
-          $sql.="SELECT A.ERR_CODBCD";
+          $sql ="SELECT A.ERR_CODBCD";
           $sql.="       ,B.BCD_NOME";
           $sql.="       ,A.ERR_CODPTP";
           $sql.="       ,P.PTP_NOME";
@@ -44,7 +43,7 @@
           $sql.="       ,CASE WHEN A.ERR_REG='P' THEN 'PUB' WHEN A.ERR_REG='S' THEN 'SIS' ELSE 'ADM' END AS ERR_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.ERR_CODUSR";
-          $sql.="  FROM CNABERRO A";
+          $sql.="  FROM CNABERRO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.ERR_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN BANCOCODIGO B ON A.ERR_CODBCD=B.BCD_CODIGO";
           $sql.="  LEFT OUTER JOIN PAGARTIPO P ON A.ERR_CODPTP=P.PTP_CODIGO";
@@ -324,7 +323,7 @@
           ,"fieldReg"       : "ERR_REG"             // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "ERR_CODUSR"          // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
-          ,"width"          : "108em"               // Tamanho da table
+          ,"width"          : "110em"               // Tamanho da table
           ,"height"         : "58em"                // Altura da table
           ,"tableLeft"      : "sim"                 // Se tiver menu esquerdo
           ,"relTitulo"      : "CNABERRO"            // Titulo do relatório

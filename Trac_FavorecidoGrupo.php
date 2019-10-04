@@ -29,8 +29,7 @@
         //    Dados para JavaScript FAVORECIDOGRUPO //
         //////////////////////////////////////////////
         if( $rotina=="selectFvr" ){
-          $sql="";
-          $sql.="SELECT A.FVR_CODIGO";
+          $sql ="SELECT A.FVR_CODIGO";
           $sql.="       ,A.FVR_NOME";
           $sql.="       ,A.FVR_GFCP";
           $sql.="       ,GFP.GF_NOME AS GRUPOCP";
@@ -113,7 +112,7 @@
                       ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
                       ,"newRecord"      : ["0000","this","this"]
                       ,"validar"        : ["notnull"]
-                      ,"digitosMinMax"  : [1,6] // ANGELO KOKISO aumento da range máxima para 6
+                      ,"digitosMinMax"  : [1,4]
                       ,"ajudaCampo"     : [ "Código do Favorecido"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}

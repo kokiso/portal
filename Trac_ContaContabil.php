@@ -29,8 +29,7 @@
         //    Dados para JavaScript CONTACONTABIL  //
         /////////////////////////////////////////////
         if( $rotina=="selectCc" ){
-          $sql="";
-          $sql.="SELECT A.CC_CODIGO";
+          $sql ="SELECT A.CC_CODIGO";
           $sql.="       ,A.CC_NOME";
           $sql.="       ,CASE WHEN A.CC_LANCTO='S' THEN 'SIM' ELSE 'NAO' END AS CC_LANCTO";
           $sql.="       ,A.CC_CODCTR";
@@ -40,7 +39,7 @@
           $sql.="       ,CASE WHEN A.CC_REG='P' THEN 'PUB' WHEN A.CC_REG='S' THEN 'SIS' ELSE 'ADM' END AS CC_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.CC_CODUSR";
-          $sql.="  FROM CONTACONTABIL A";
+          $sql.="  FROM CONTACONTABIL A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.CC_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN CONTARESUMO E ON A.CC_CODCTR=E.CTR_CODIGO";
           $sql.="  WHERE (CC_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";

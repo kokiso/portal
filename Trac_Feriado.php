@@ -29,8 +29,7 @@
         //    Dados para JavaScript FERIADO    //
         /////////////////////////////////////////
         if( $rotina=="selectFrd" ){
-          $sql="";
-          $sql.="SELECT CONVERT(VARCHAR(10),A.FRD_CODIGO,127) AS FRD_CODIGO";		  
+          $sql ="SELECT CONVERT(VARCHAR(10),A.FRD_CODIGO,127) AS FRD_CODIGO";		  
           $sql.="       ,A.FRD_CODEMP";
           $sql.="       ,E.EMP_APELIDO";
           $sql.="       ,A.FRD_NOME";
@@ -40,7 +39,7 @@
           $sql.="       ,CASE WHEN A.FRD_REG='P' THEN 'PUB' WHEN A.FRD_REG='S' THEN 'SIS' ELSE 'ADM' END AS FRD_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.FRD_CODUSR";
-          $sql.="  FROM FERIADO A";
+          $sql.="  FROM FERIADO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.FRD_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESA E ON A.FRD_CODEMP=E.EMP_CODIGO";
           $sql.=" WHERE ((FRD_CODEMP=".$lote[0]->codemp.")";

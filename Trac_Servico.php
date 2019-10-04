@@ -29,8 +29,7 @@
         //    Dados para JavaScript SERVICO       //
         ///////////////////////////////////////////
         if( $rotina=="selectSrv" ){
-          $sql="";
-          $sql.="SELECT A.SRV_CODIGO";
+          $sql ="SELECT A.SRV_CODIGO";
           $sql.="       ,A.SRV_NOME";
           $sql.="       ,CASE WHEN A.SRV_ENTSAI='S' THEN 'SAI' ELSE 'ENT' END AS SRV_ENTSAI";
           $sql.="       ,CASE WHEN A.SRV_INSS='S' THEN 'SIM' ELSE 'NAO' END AS SRV_INSS";
@@ -45,21 +44,23 @@
           $sql.="       ,CASE WHEN A.SRV_CSLL='S' THEN 'SIM' ELSE 'NAO' END AS SRV_CSLL";
           $sql.="       ,A.SRV_CSLLALIQ";
           $sql.="       ,CASE WHEN A.SRV_ISS='S' THEN 'SIM' ELSE 'NAO' END AS SRV_ISS";
-          //$sql.="       ,A.SRV_CODCC";
           $sql.="       ,A.SRV_CODSPR";
           $sql.="       ,A.SRV_CODEMP";
           $sql.="       ,E.EMP_APELIDO";
           $sql.="       ,CASE WHEN A.SRV_PODEVENDA='S' THEN 'SIM' ELSE 'NAO' END AS SRV_PODEVENDA";          
           $sql.="       ,CASE WHEN A.SRV_PODELOCACAO='S' THEN 'SIM' ELSE 'NAO' END AS SRV_PODELOCACAO";                    
+          $sql.="       ,SRV_CODPT";
+          $sql.="       ,PT_NOME";                    
           $sql.="       ,CASE WHEN A.SRV_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS SRV_ATIVO";
           $sql.="       ,CASE WHEN A.SRV_REG='P' THEN 'PUB' WHEN A.SRV_REG='S' THEN 'SIS' ELSE 'ADM' END AS SRV_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.SRV_CODUSR";
-          $sql.="  FROM SERVICO A";
+          $sql.="  FROM SERVICO A WITH(NOLOCK)";
+          $sql.="  LEFT OUTER JOIN PADRAOTITULO PT ON A.SRV_CODPT=PT.PT_CODIGO";          
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.SRV_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESA E ON A.SRV_CODEMP=E.EMP_CODIGO";
           $sql.="  WHERE ((SRV_CODEMP=".$lote[0]->codemp.")";
-          $sql.="   AND ((SRV_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))";                  
+          $sql.="   AND ((SRV_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))";                 
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -162,12 +163,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
     <title>Servico</title>
+    <!-- bootstrap nativo javascript -->
+    <link rel="stylesheet" href="css/bootstrapNative.css">
+    <script src="js/bootstrap-native.js"></script>    
+    <!-- bootstrap nativo javascript -->
     <link rel="stylesheet" href="css/css2017.css">
     <link rel="stylesheet" href="css/cssTable2017.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>
     <script src="tabelaTrac/f10/tabelaServicoPrefeituraF10.js"></script>
+    <script src="tabelaTrac/f10/tabelaPadraoTituloF10.js"></script>            
     <script language="javascript" type="text/javascript"></script>
     <script>
       "use strict";
@@ -222,6 +228,8 @@
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,1]
                       ,"ajudaCampo"     : [ "Direito para opção..."]
+                      ,"popoverTitle"   : "Entrada ou Saida"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
             ,{"id":4  ,"field"          : "SRV_INSS"  
@@ -374,19 +382,6 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            // ,{"id":16 ,"field"          :"SRV_CODCC" 
-            //           ,"labelCol"       : "CONTABIL"
-            //           ,"obj"            : "edtCodCc"
-            //           ,"insUpDel"       : ["N","N","N"]
-            //           ,"tamGrd"         : "0em"
-            //           ,"tamImp"         : "25"
-            //           ,"fieldType"      : "str"
-            //           ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9|."
-            //           ,"newRecord"      : ["0.00.00.00.0000","this","this"]
-            //           ,"validar"        : ["notnull"]
-            //           ,"digitosMinMax"  : [1,15]
-            //           ,"ajudaCampo"     : [ "Código ..."]
-            //           ,"padrao":0}
             ,{"id":16 ,"field"          :"SRV_CODSPR" 
                       ,"labelCol"       : "CNAE"
                       ,"obj"            : "edtCodSpr"
@@ -441,27 +436,52 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":21 ,"field"          : "SRV_ATIVO"  
+                      
+            ,{"id":21 ,"field"          : "SRV_CODPT" 
+                      ,"labelCol"       : "CODPT"
+                      ,"obj"            : "edtCodPt"
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "0"
+                      ,"fieldType"      : "int"
+                      ,"newRecord"      : ["0000","this","this"]
+                      ,"validar"        : ["notnull"]
+                      ,"digitosMinMax"  : [1,4]
+                      ,"ajudaCampo"     : [  "Codigo da Operacao padrao. Registro deve existir na tabela PadraoTitulo e tem o formato 9999"
+                                            ,"A checagem de cada rotina é relacionada com esta informação"]
+                      ,"importaExcel"   : "S"                                                                
+                      ,"padrao":0}
+            ,{"id":22 ,"field"          : "PT_NOME"   
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"labelCol"       : "OPERACAO_PADRAO "
+                      ,"obj"            : "edtDesPt"
+                      ,"tamGrd"         : "15em"
+                      ,"tamImp"         : "0"
+                      ,"truncate"       : true
+                      ,"digitosMinMax"  : [1,60]
+                      ,"validar"        : ["notnull"]                      
+                      ,"ajudaCampo"     : ["Descrição de OPERACAO PADRAO para esta natureza."]
+                      ,"padrao":0}
+            ,{"id":23 ,"field"          : "SRV_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"tamImp"         : "10"                      
                       ,"padrao":2}                                        
-            ,{"id":22 ,"field"          : "SRV_REG"    
+            ,{"id":24 ,"field"          : "SRV_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"tamImp"         : "10"                      
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":23  ,"field"          : "US_APELIDO" 
+            ,{"id":25 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}                
-            ,{"id":24  ,"field"          : "SRV_CODUSR" 
+            ,{"id":26 ,"field"          : "SRV_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":25 ,"labelCol"       : "PP"      
+            ,{"id":27 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -488,6 +508,7 @@
           ] 
           ,"registros"      : []                    // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar                     
+          ,"popover"        : true                  // Opção para gerar ajuda no formato popUp(Hint)                                            
           ,"checarTags"     : "N"                   // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
           ,"idBtnCancelar"  : "btnCancelar"         // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmSrv"              // Onde vai ser gerado a table
@@ -502,7 +523,7 @@
           ,"fieldReg"       : "SRV_REG"             // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "SRV_CODUSR"          // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
-          ,"width"          : "104em"               // Tamanho da table
+          ,"width"          : "106em"               // Tamanho da table
           ,"height"         : "58em"                // Altura da table
           ,"tableLeft"      : "sim"                 // Se tiver menu esquerdo
           ,"relTitulo"      : "SERVICO"             // Titulo do relatório
@@ -566,6 +587,7 @@
             ,{"id":12 ,"field":"%CSLL"      ,"labelCol":"CSLL_ALIQ"   ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":13 ,"field":"ISS"        ,"labelCol":"ISS_SN"      ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":14 ,"field":"CNAE"       ,"labelCol":"CNAE"        ,"tamGrd":"6em"     ,"tamImp":"20"}
+            ,{"id":15 ,"field":"OP"         ,"labelCol":"OP"          ,"tamGrd":"6em"     ,"tamImp":"20"}            
             ,{"id":15 ,"field":"ERRO"       ,"labelCol":"ERRO"        ,"tamGrd":"45em"    ,"tamImp":"100"}
           ]
           ,"botoesH":[
@@ -605,7 +627,7 @@
       var objSrv;                     // Obrigatório para instanciar o JS TFormaCob
       var jsSrv;                      // Obj principal da classe clsTable2017
       var objSprF10;                  // Obrigatório para instanciar o JS TServicoPrefeitura
-      //var jsSpr;                      // Obj principal da classe clsTable2017
+      var objPtF10;                   // Obrigatório para instanciar o JS PadraoTitulo      
       var objExc;                     // Obrigatório para instanciar o JS Importar excel
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var objPadF10;                  // Obrigatório para instanciar o JS BancoF10
@@ -724,6 +746,34 @@
           document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )         );
         };
       };
+      ///////////////////////////////
+      //   AJUDA PARA PADRAOTITULO //
+      ///////////////////////////////
+      function ptFocus(obj){ 
+        $doc(obj.id).setAttribute("data-oldvalue",$doc(obj.id).value); 
+      };
+      function ptF10Click(obj){ 
+        fPadraoTituloF10(0,obj.id,"cbAtivo",100,{debcre: ($doc("cbEntSai").value=="S" ? "C" : "D" ), ativo:"S" } ); 
+      };
+      function RetF10tblPt(arr){
+        $doc("edtCodPt").value  = arr[0].CODIGO;
+        $doc("edtDesPt").value  = arr[0].DESCRICAO;
+        $doc("edtCodPt").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function codPtBlur(obj){
+        var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          let arr = fPadraoTituloF10(1,obj.id,"cbAtivo",100,
+            { codpt  : elNew
+             ,debcre: ($doc("cbEntSai").value=="S" ? "C" : "D" )
+             ,ativo  : "S"} 
+          ); 
+          $doc(obj.id).value       = ( arr.length == 0 ? "0000"  : jsConverte(arr[0].CODIGO).emZero(4)  );   
+          $doc("edtDesPt").value  = ( arr.length == 0 ? "*"     : arr[0].DESCRICAO                      );
+          $doc(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )        );
+        };
+      };
       ////////////////////
       // Cadastrar servico
       ////////////////////
@@ -769,7 +819,7 @@
               action="classPhp/imprimirsql.php" 
               target="_newpage">
           <div class="frmTituloManutencao">Serviço<img class="frmTituloManutencaoImg" src="imagens\chave.png" title="campo obrigatório" /></div>          
-          <div style="height: 220px; overflow-y: auto;">
+          <div style="height: 240px; overflow-y: auto;">
           <input type="hidden" id="sql" name="sql"/>
             <div class="campotexto campo100">
               <div class="campotexto campo10">
@@ -877,7 +927,7 @@
                 <label class="campo_label campo_required" for="cbIss">ISS:</label>
               </div>
               
-              <div class="campotexto campo20">
+              <div class="campotexto campo25">
                 <input class="campo_input inputF10" id="edtCodSpr"
                                                     onBlur="CodSprBlur(this);" 
                                                     onFocus="sprFocus(this);" 
@@ -888,38 +938,57 @@
                                                     type="text"/>
                 <label class="campo_label campo_required" for="edtCodSpr">CNAE:</label>
               </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo20">
                 <select class="campo_input_combo" id="cbVenda" >                                
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbVenda">VENDA:</label>
               </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo20">
                 <select class="campo_input_combo" id="cbLocacao" >
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbVenda">LOCACAO:</label>
               </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo10">
+                <input class="campo_input inputF10" id="edtCodPt"
+                                                    OnKeyPress="return mascaraInteiro(event);"
+                                                    onBlur="codPtBlur(this);" 
+                                                    onFocus="ptFocus(this);" 
+                                                    onClick="ptF10Click(this);"
+                                                    data-newrecord="0000"
+                                                    data-oldvalue=""
+                                                    autocomplete="off"
+                                                    maxlength="4"
+                                                    type="text"/>
+                <label class="campo_label campo_required" for="edtCodPt">PADRAO:</label>
+              </div>
+              <div class="campotexto campo40">
+                <input class="campo_input_titulo input" id="edtDesPt" 
+                                                        data-newrecord="*"  
+                                                        type="text" disabled />
+                <label class="campo_label campo_required" for="edtDesPt">PADRAO_NOME:</label>
+              </div>
+              <div class="campotexto campo10">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbAtivo">ATIVO</label>
               </div>
-              <div class="campotexto campo20">
+              <div class="campotexto campo15">
                 <select class="campo_input_combo" id="cbReg">
                   <option value="P">PUBLICO</option>               
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
               </div>
-              <div class="campotexto campo20">
+              <div class="campotexto campo12">
                 <input class="campo_input_titulo input" id="edtDesEmp" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesEmp">EMPRESA:</label>
               </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo12">
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>

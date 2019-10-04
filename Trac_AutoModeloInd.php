@@ -76,6 +76,18 @@
             };  
           };  
         };
+        if( $lote[0]->rotina=="remontar" ){
+           foreach ( $lote as $reg ){  
+              $sql="";
+              $sql.="UPDATE VGRUPOMODELOPRODUTO";
+              $sql.="   SET GMP_CODAUT=".$reg->gmp_codaut."";
+              $sql.="       ,GMP_ACAO=".$reg->gmp_acao;
+              $sql.="       ,GMP_CODUSR=".$_SESSION["usr_codigo"];
+              $sql.=" WHERE (GMP_CODIGO=".$reg->gmp_codigo.")";  
+              array_push($arrUpdt,$sql);                                    
+              $atuBd = true;
+           }
+        };
         ///////////////////////////////////////////////
         //            COMPOSICAO DO AUTO             //
         ///////////////////////////////////////////////
@@ -168,7 +180,10 @@
     <script src="js/clsTab2017.js"></script>        
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
-    <script src="tabelaTrac/f10/tabelaPontoEstoqueIndF10.js"></script>            
+    <script src="tabelaTrac/f10/tabelaPontoEstoqueIndF10.js"></script> 
+    <script src="tabelaTrac/f10/tabelaEquipamentoF10.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://getbootstrap.com/2.3.2/assets/js/bootstrap.js"></script>           
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
@@ -304,7 +319,9 @@
           "botoesH":[
              //{"texto":"Configurar"    ,"name":"horConfigurado"  ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-wifi"        }  
             //{"texto":"Transferir"    ,"name":"horTransf"       ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-repeat"       }               
-             {"texto":"Sucata"        ,"name":"horSucata"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-trash-o"     }              
+             {"texto":"Sucata"        ,"name":"horSucata"       ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-trash-o"     } 
+            ,{"texto":"Remontar"      ,"name":"horRemontar"     ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-pencil-square-o" } 
+            ,{"texto":"Retornar"      ,"name":"horRetornar"     ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-undo" }              
             ,{"texto":"Excel"         ,"name":"horExcel"        ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o" }  
             ,{"texto":"Imprimir"      ,"name":"horImprimir"     ,"onClick":"3"  ,"enabled":true,"imagem":"fa fa-print"        }                    
             ,{"texto":"Fechar"        ,"name":"horFechar"       ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-close"       }
@@ -353,7 +370,8 @@
       var objAmi;                     // Obrigatório para instanciar o JS Semestral
       var jsAmi;                      // Obj principal da classe clsTable2017
       var objPadF10;                  // Obrigatório para instanciar o JS PadraoF10            
-      var objPeiF10;                  // Obrigatório para instanciar o JS FabricanteF10                  
+      var objPeiF10;                  // Obrigatório para instanciar o JS FabricanteF10
+      var objEquipF10;                // Obrigatório para instanciar o JS FabricanteF10                  
       var msg;                        // Variavel para guardadar mensagens de retorno/erro
       var chkds;                      // Guarda todos registros checados na table 
       var tamC;                       // Guarda a quantidade de registros   
@@ -429,7 +447,7 @@
 						gerarMensagemErro('catch',e.message,{cabec:"Erro"});
 					};
 				};
-      };  
+      }; 
       //////////////////////////////
       //  AJUDA PARA PONTOESTOQUE //
       //////////////////////////////
@@ -654,11 +672,132 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
-      
-      
-      
-      
-      
+      function horRemontarClick(){    
+        try{
+           $('#confirmRemonte').modal({
+              backdrop: 'static',
+              keyboard: false
+          })
+          .on('click', '#remontarAuto', function(e) {
+              // Preparando para enviar ao Php
+              chkds=objAmi.gerarJson("n").gerar();          
+              msg         = "ok";
+              clsJs       = jsString("lote");
+              chkds.forEach(function(reg){
+                if( reg.PE != "SUC" )
+                  throw "AUTO NÃO PODE ESTAR EM SUCATA AO REMONTAR";  
+                clsJs.add("rotina"      , "remontar"            );              
+                clsJs.add("login"       , jsPub[0].usr_login  );                         
+                clsJs.add("gmp_codaut"  , reg.TRAC            );
+                clsJs.add("gmp_codigoOld"  , $doc("edtEqpOld").getAttribute("data-id")            ); 
+                clsJs.add("gmp_codigoNew"  , $doc("edtEqpNew").getAttribute("data-id")            ); 
+                clsJs.add("gmp_numserie"  , $doc("edtEqpNew").value            ); 
+                clsJs.add("gmp_tipoeqp"  , $doc("edtTipoNew").value            );                        
+              });
+              //////////////////////
+              // Enviando para o Php
+              //////////////////////    
+              var fd = new FormData();
+              fd.append("automodeloind" , clsJs.fim());
+              msg=requestPedido("Trac_AutoModeloInd.php",fd); 
+              retPhp=JSON.parse(msg);
+              if( retPhp[0].retorno != "OK" ){  
+                gerarMensagemErro("gmi",retPhp[0].erro,{cabec:"Aviso"});
+              } else {  
+
+                tblAmi.retiraChecked()
+              
+              };
+          });  
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Erro"});
+        };
+      }; 
+
+      function horRetornarClick(){
+        try{
+
+           $('#confirmRetorno').modal({
+              backdrop: 'static',
+              keyboard: false
+          })
+          .on('click', '#retornarAuto', function(e) {
+              alert('teste retorno')
+              // Preparando para enviar ao Php
+              chkds=objAmi.gerarJson("n").gerar();          
+              msg         = "ok";
+              clsJs       = jsString("lote");
+              chkds.forEach(function(reg){
+                if( reg.PE != "EST" )
+                  throw "AUTO DEVE ESTA EM ESTOQUE PARA CONFIGURAÇÃO!";  
+                clsJs.add("rotina"      , "retornar"            );              
+                clsJs.add("login"       , jsPub[0].usr_login  );                        
+                clsJs.add("gmp_codigo"  , reg.TRAC            );                        
+              });
+              //////////////////////
+              // Enviando para o Php
+              //////////////////////    
+              var fd = new FormData();
+              fd.append("automodeloind" , clsJs.fim());
+              msg=requestPedido("Trac_AutoModeloInd.php",fd); 
+              retPhp=JSON.parse(msg);
+              if( retPhp[0].retorno != "OK" ){
+                gerarMensagemErro("gmi",retPhp[0].erro,{cabec:"Aviso"});
+              } else {  
+                tblAmi.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
+                  chkds.forEach(function(reg){                
+                    if( jsNmrs(row.cells[objCol.TRAC].innerHTML).inteiro().ret()  == jsNmrs(reg.TRAC).inteiro().ret() ){
+                      row.cells[objCol.CONFIGURADO].innerHTML = "";
+                      row.cells[objCol.PE].innerHTML          = "SUC";
+                      row.cells[objCol.PE].classList.add("corFonteAlterado");  
+                    };  
+                  });
+                });
+                tblAmi.retiraChecked()
+              
+              }; 
+           } ); 
+        }catch(e){
+          gerarMensagemErro("catch",e,{cabec:"Erro"});
+        };
+      } 
+      function equipCadClick(flag){ 
+        chkds=objAmi.gerarJson("n").gerar();         
+        if(flag == 'old'){
+          fEquipamentoF10(0,"nsa","null",100
+          ,{ codaut:parseInt(chkds[0].TRAC)
+            ,codgp:"A.GMP_CODGP <> 'AUT'"
+            ,divWidth:"76em"
+            ,tblWidth:"74em"
+          });
+        }
+        else{
+          fEquipamentoF10(0,"nsa","null",100
+          ,{codpe:"EST"
+            ,codgp:"A.GMP_CODGP <> 'AUT'"
+            ,codaut:0
+            ,tbl:'tblEquip2'
+            ,tipo:$doc("edtTipoOld").value 
+            ,divWidth:"76em"
+            ,tblWidth:"74em"
+          });
+        }
+      };
+            
+      function RetF10tblEquip(arr){
+        $doc("edtEqpOld").value      = arr[0].NOME;
+        $doc("edtNomeOld").value      = arr[0].SERIE;        
+        $doc("edtTipoOld").value      = arr[0].TIPO;                
+        $doc("edtEqpOld").setAttribute("data-id",arr[0].CODIGO);
+
+      };
+      function RetF10tblEquip2(arr){
+        $doc("edtEqpNew").value      = arr[0].NOME;
+        $doc("edtNomeNew").value      = arr[0].SERIE; 
+        $doc("edtTipoNew").value      = arr[0].TIPO;                           
+        $doc("edtEqpNew").setAttribute("data-id",arr[0].CODIGO);
+
+      };
       //////////////////////
       // Fechar formulario
       //////////////////////
@@ -835,6 +974,77 @@
         </div>  
       </div>
     </div>
+    <div class="modal fade" id="confirmRetorno" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title" id="exampleModalLongTitle" style="text-align: center;">Retornar Auto</h1>
+          </div>
+          <div class="modal-body">
+            <h2 style="text-align: center;">
+              Auto desmembrado não possui retorno, continuar ação?
+            </h2>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Voltar</button>
+            <button type="button" class="btn btn-success" id="retornarAuto">Continuar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="confirmRemonte" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title" id="exampleModalLongTitle" style="text-align: center;">Remontar Auto</h1>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="edtEqpOld">Equipamento</label> 
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    <input type="search" readonly class="form-control" id="edtEqpOld" data-id =""  style="cursor: pointer;" required onClick="equipCadClick('old');">
+                  </div>
+                </div>
+              <div class="form-group col-md-4">
+                <label for="edtNomeOld">Nome do Equipamento</label>
+                <input type="text" class="form-control" id="edtNomeOld" required disabled="true">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="edtTipoOld">Tipo de Equipamento</label>
+                <input type="text" class="form-control" id="edtTipoOld" required disabled="true">
+              </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="edtEqpNew">Novo Equipamento</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    <input type="search" readonly class="form-control" id="edtEqpNew" data-id ="" style="cursor: pointer;" required
+                    onClick="equipCadClick('new');">
+                  </div>
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="edtNomeNew">Nome do Equipamento</label>
+                  <input type="text" class="form-control" id="edtNomeNew" required disabled="true">
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="edtTipoNew">Tipo de Equipamento</label>
+                  <input type="text" class="form-control" id="edtTipoNew" required disabled="true">
+                </div>
+              </div>
+              <div class="form-group col-md-4 col-md-offset-8">
+                <button type="submit" class="btn btn-success" id="remontarAuto">Cadastrar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="cleanModal();">Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
       //
       //
@@ -853,7 +1063,7 @@
               throw "AUTO JA CONFIGURADO!";  
             if( reg.PE != "EST" )
               throw "AUTO DEVE ESTA EM ESTOQUE PARA CONFIGURAÇÃO!";  
-            
+              
           });
           evtConfigura.status="ok";            
         }catch(e){
@@ -868,6 +1078,15 @@
           $doc("edtDtConfigura").value=jsDatas(0).retDDMMYYYY();
         };
       },false);
+      function cleanModal(){
+         document.getElementById("edtEqpOld").value = '';
+         document.getElementById("edtNomeOld").value = '';
+         document.getElementById("edtTipoOld").value = '';
+
+         document.getElementById("edtEqpNew").value = '';
+         document.getElementById("edtNomeNew").value = '';
+         document.getElementById("edtTipoNew").value = '';
+      }
     </script>
   </body>
 </html>

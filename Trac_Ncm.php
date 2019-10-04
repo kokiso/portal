@@ -35,7 +35,7 @@
                        ,CASE WHEN A.NCM_REG='P' THEN 'PUB' WHEN A.NCM_REG='S' THEN 'SIS' ELSE 'ADM' END AS NCM_REG
                        ,US_APELIDO
                        ,NCM_CODUSR
-                  FROM NCM A
+                  FROM NCM A WITH(NOLOCK)
                   LEFT OUTER JOIN USUARIOSISTEMA U ON A.NCM_CODUSR=U.US_CODIGO
                  WHERE (NCM_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                 
           $classe->msgSelect(false);

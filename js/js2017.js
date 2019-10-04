@@ -783,6 +783,12 @@ function jsConverte(data){
       return ret;
     }  
     ,dolar(retFloat=false){
+      /////////////////////////////////////////////////////////
+      // Para poder dar o replace preciso transformar em string
+      /////////////////////////////////////////////////////////
+      if( typeof( retorno )=="number" )
+        retorno=retorno.toString();  
+      //
       compara[0]=retorno.length;
       compara[1]=retorno.replace(/[^0-9-.,]/g,"").replace(",",".");
       if( compara[0]==(compara[1]).length )

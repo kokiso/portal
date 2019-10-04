@@ -35,12 +35,11 @@
         $classe->conecta($lote[0]->login);
         //
         if( $rotina=="buscapadrao" ){
-          $sql="";
-          $sql.="SELECT A.PG_CODPDR";
+          $sql ="SELECT A.PG_CODPDR";
           $sql.="       ,A.PG_CODPTP";
           $sql.="       ,PDR.PDR_NOME";          
           $sql.="       ,A.PG_INDICE"; 
-          $sql.="  FROM PADRAOGRUPO A";
+          $sql.="  FROM PADRAOGRUPO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN PADRAO PDR ON A.PG_CODPDR=PDR.PDR_CODIGO AND PDR.PDR_ATIVO='S'";          
           $sql.=" WHERE ((PDR.PDR_CODPTT='N') AND (A.PG_ATIVO='S'))";
           $classe->msgSelect(false);
@@ -48,8 +47,7 @@
           $tblPg=$retCls["dados"];
           usort($tblPg,"fncPg");
           //
-          $sql="";
-          $sql.="SELECT A.PT_CODIGO";
+          $sql ="SELECT A.PT_CODIGO";
           $sql.="       ,A.PT_NOME";
           $sql.="       ,A.PT_CODTD";
           $sql.="       ,TD.TD_NOME";          
@@ -59,7 +57,7 @@
           $sql.="       ,A.PT_CODCC";
           $sql.="       ,A.PT_CODPDR";
           $sql.="       ,PG.PG_INDICE AS PT_INDICE";          
-          $sql.="  FROM PADRAOTITULO A"; 
+          $sql.="  FROM PADRAOTITULO A WITH(NOLOCK)"; 
           $sql.="  LEFT OUTER JOIN PADRAOGRUPO PG ON A.PT_CODPDR=PG.PG_CODPDR AND PG.PG_ATIVO='S'";
           $sql.="  LEFT OUTER JOIN TIPODOCUMENTO TD ON A.PT_CODTD=TD.TD_CODIGO AND TD.TD_ATIVO='S'";          
           $sql.="  LEFT OUTER JOIN FORMACOBRANCA FC ON A.PT_CODFC=FC.FC_CODIGO AND FC.FC_ATIVO='S'";                    
@@ -281,10 +279,11 @@
             clsDup.principal(false);
             
             arrPrcl.forEach(function(reg){
-              clsRat.add("parcela"    , reg.parc                                  );
-              clsRat.add("codcc"      , document.getElementById("edtCodCc").value );
-              clsRat.add("debito"     , (reg.debcre=="D" ? reg.valor : 0)         );
-              clsRat.add("credito"    , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("parcela"          , reg.parc                                  );
+              clsRat.add("codcc"            , document.getElementById("edtCodCc").value );
+              clsRat.add("debito"           , (reg.debcre=="D" ? reg.valor : 0)         );
+              clsRat.add("credito"          , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("comparaVlrEvento" , "S"                                       );
 
               clsDup.add("parcela"    , reg.parc    );
               clsDup.add("vencto"     , reg.vencto  );  
@@ -339,12 +338,13 @@
             if( retPhp[0].retorno != "OK" ){
               throw retPhp[0].erro;
             } else {  
-              gerarMensagemErro("cad",retPhp[0].erro,{cabec:"Aviso",foco:"cbCodPtp"});
+              //gerarMensagemErro("cad",retPhp[0].erro,{cabec:"Aviso",foco:"edtVlrEvento"});
+              gerarMensagemErro("cad",retPhp[0].erro,{cabec:"Aviso",foco:"edtVlrEvento"});
               document.getElementById("edtVlrEvento").value = "0,00";
             };
           };  
         } catch(e){
-          gerarMensagemErro("pgr",e,{cabec:"Erro);          
+          gerarMensagemErro("pgr",e,{cabec:"Erro"});          
         };  
       };
     </script>

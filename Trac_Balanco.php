@@ -29,8 +29,7 @@
         //    Dados para JavaScript BALANCO        //
         /////////////////////////////////////////////
         if( $rotina=="selectBln" ){
-          $sql="";
-          $sql.="SELECT A.BLN_CODIGO";
+          $sql ="SELECT A.BLN_CODIGO";
           $sql.="       ,A.BLN_NOME";
           $sql.="       ,A.BLN_CODSPD";
           $sql.="       ,S.SPD_NOME";
@@ -38,7 +37,7 @@
           $sql.="       ,CASE WHEN A.BLN_REG='P' THEN 'PUB' WHEN A.BLN_REG='S' THEN 'SIS' ELSE 'ADM' END AS BLN_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.BLN_CODUSR";
-          $sql.="  FROM BALANCO A";
+          $sql.="  FROM BALANCO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.BLN_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN SPED S ON A.BLN_CODSPD=S.SPD_CODIGO";
           $sql.="  WHERE (BLN_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";

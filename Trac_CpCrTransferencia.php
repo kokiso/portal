@@ -6,7 +6,7 @@
       require("classPhp/validaJson.class.php"); 
       //require("classPhp/removeAcento.class.php");
       //require("classPhp/validaCampo.class.php"); 
-      
+      /*
       function fncPg($a, $b) {
        return $a["PDR_NOME"] > $b["PDR_NOME"];
       };
@@ -14,7 +14,7 @@
       function fncPt($a, $b) {
        return $a["PT_NOME"] > $b["PT_NOME"];
       };
-      
+      */
       $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["transferencia"]);
@@ -37,9 +37,8 @@
           // BUSCANDO O FAVORECIDO PELO BANCO DEBITO
           ///////////////////////////////////////////// 
           $erro="ok";
-          $sql="";
-          $sql.="SELECT PT_CODIGO,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC";
-          $sql.="  FROM PADRAOTITULO";
+          $sql ="SELECT PT_CODIGO,PT_CODTD,PT_CODFC,PT_DEBCRE,PT_CODCC";
+          $sql.="  FROM PADRAOTITULO WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN PADRAO PDR ON PT_CODPDR=PDR.PDR_CODIGO";
           $sql.=" WHERE PDR.PDR_CODPTT='T'";
           $classe->msgSelect(true);
@@ -75,8 +74,7 @@
             $lancto=$classe->generator("PAGAR"); 
             $docto    = "TD".str_pad($lancto, 6, "0", STR_PAD_LEFT);
             
-            $sql="";
-            $sql="INSERT INTO VPAGAR(";
+            $sql ="INSERT INTO VPAGAR(";
             $sql.="PGR_LANCTO";
             $sql.=",PGR_BLOQUEADO";
             $sql.=",PGR_CHEQUE";          
@@ -139,8 +137,7 @@
             ////////////////////////////////////////////
             // Gravando na RATEIO TRANSFERENCIA A DEBITO
             ////////////////////////////////////////////
-            $sql="";
-            $sql.="INSERT INTO VRATEIO(";
+            $sql ="INSERT INTO VRATEIO(";
             $sql.="RAT_LANCTO";                
             $sql.=",RAT_CODCC";
             $sql.=",RAT_DEBITO";
@@ -164,7 +161,7 @@
             /////////////////////////////////////////////
             // BUSCANDO O FAVORECIDO PELO BANCO CREDITO
             /////////////////////////////////////////////  
-            $sql="SELECT BNC_CODFVR FROM BANCO WHERE BNC_CODIGO=".$lote[0]->codbnccre;
+            $sql="SELECT BNC_CODFVR FROM BANCO WITH(NOLOCK) WHERE BNC_CODIGO=".$lote[0]->codbnccre;
             $classe->msgSelect(false);
             $retCls=$classe->selectAssoc($sql);
             $codfvr=$retCls["dados"][0]["BNC_CODFVR"];
@@ -174,8 +171,7 @@
             $lancto=$classe->generator("PAGAR"); 
             $docto    = "TC".str_pad($lancto, 6, "0", STR_PAD_LEFT);
             
-            $sql="";
-            $sql="INSERT INTO VPAGAR(";
+            $sql ="INSERT INTO VPAGAR(";
             $sql.="PGR_LANCTO";
             $sql.=",PGR_BLOQUEADO";
             $sql.=",PGR_CHEQUE";          
@@ -238,8 +234,7 @@
             ////////////////////////////////////////////
             // Gravando na RATEIO TRANSFERENCIA A DEBITO
             ////////////////////////////////////////////
-            $sql="";
-            $sql.="INSERT INTO VRATEIO(";
+            $sql ="INSERT INTO VRATEIO(";
             $sql.="RAT_LANCTO";                
             $sql.=",RAT_CODCC";
             $sql.=",RAT_DEBITO";
@@ -269,7 +264,7 @@
         if( count($arrUpdt) >0 ){
           $retCls=$classe->cmd($arrUpdt);
           if( $retCls['retorno']=="OK" ){
-            $retorno='[{"retorno":"OK","dados":"","erro":"'.count($arrUpdt).' REGISTRO(s) ATUALIZADO(s)!"}]'; 
+            $retorno='[{"retorno":"OK","dados":"","erro":"'.(count($arrUpdt)/2).' REGISTRO(s) ATUALIZADO(s)!"}]'; 
           } else {
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           };  
@@ -382,7 +377,12 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncDebF10Click(obj){ 
-        fBancoF10(0,obj.id,"edtCodBncCre",100); 
+        //fBancoF10(0,obj.id,"edtCodBncCre",100); 
+        fBancoF10(0,obj.id,"edtCodBncCre",100,{codemp: jsPub[0].emp_codigo
+                                               ,ativo:"S"
+                                               ,where: " {AND} (A.BNC_CODIGO <> "+$doc("edtCodBncCre").value+")"
+                                               } 
+        ); 
       };
       function RetF10tblBnc(arr){
         if( debcre=="debito" ){
@@ -401,11 +401,17 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fBancoF10(1,obj.id,"edtCodBncCre",100); 
-          document.getElementById(obj.id).value         = ( ret.length == 0 ? "0000"     : ret[0].CODIGO            );
-          document.getElementById("edtDesBncDeb").value = ( ret.length == 0 ? ""         : ret[0].DESCRICAO         );
-          document.getElementById("edtCodFvrDeb").value = ( ret.length == 0 ? "0000"     : ret[0].CODFVR            );
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO )  );
+          //var ret = fBancoF10(1,obj.id,"edtCodBncCre",100); 
+          let arr = fBancoF10(1,obj.id,"edtCodBncCre",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          
+          document.getElementById(obj.id).value         = ( arr.length == 0 ? "0000"     : arr[0].CODIGO            );
+          document.getElementById("edtDesBncDeb").value = ( arr.length == 0 ? ""         : arr[0].DESCRICAO         );
+          document.getElementById("edtCodFvrDeb").value = ( arr.length == 0 ? "0000"     : arr[0].CODFVR            );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "BOL" : arr[0].CODIGO )  );
         };
       };
       ///////////////////////////////
@@ -415,17 +421,27 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncCreF10Click(obj){ 
-        fBancoF10(0,obj.id,"edtObservacao",100); 
+        //fBancoF10(0,obj.id,"edtObservacao",100); 
+        fBancoF10(0,obj.id,"edtObservacao",100,{codemp: jsPub[0].emp_codigo
+                                                ,ativo:"S" 
+                                                ,where: " {AND} (A.BNC_CODIGO <> "+$doc("edtCodBncDeb").value+")"
+                                                } 
+        ); 
       };
       function codBncCreBlur(obj){
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fBancoF10(1,obj.id,"edtObservacao",100); 
-          document.getElementById(obj.id).value           = ( ret.length == 0 ? "0000"  : ret[0].CODIGO     );
-          document.getElementById("edtDesBncCre").value   = ( ret.length == 0 ? ""      : ret[0].DESCRICAO  );
-          document.getElementById("edtCodFvrCre").value   = ( ret.length == 0 ? "0000"  : ret[0].CODFVR     );          
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO ));
+          //var ret = fBancoF10(1,obj.id,"edtObservacao",100); 
+          let arr = fBancoF10(1,obj.id,"edtObservacao",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          document.getElementById(obj.id).value           = ( arr.length == 0 ? "0000"  : arr[0].CODIGO     );
+          document.getElementById("edtDesBncCre").value   = ( arr.length == 0 ? ""      : arr[0].DESCRICAO  );
+          document.getElementById("edtCodFvrCre").value   = ( arr.length == 0 ? "0000"  : arr[0].CODFVR     );          
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "BOL" : arr[0].CODIGO ));
         };
       };
       

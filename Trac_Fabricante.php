@@ -469,6 +469,7 @@
                       ,foco:"edtCodGp"
                       ,topo:100
                       ,tableBd:"FAVORECIDO"
+                      ,where:'AND A.FVR_GFCP = 39'
                       ,fieldCod:"A.FVR_CODIGO"
                       ,fieldDes:"A.FVR_NOME"
                       ,fieldAtv:"A.FVR_ATIVO"

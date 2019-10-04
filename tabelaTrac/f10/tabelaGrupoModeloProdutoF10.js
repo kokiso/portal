@@ -7,11 +7,11 @@
 function fGrupoModeloProdutoF10(opc,codGmp,foco,topo,objeto){
   let clsStr = new concatStr();
   let flag = false; 
-  clsStr.concat("SELECT A.GMP_CODIGO AS CODIGO,GM.GM_NOME AS DESCRICAO,A.GMP_NUMSERIE AS SERIE"   );
-      if( objeto['cntp']){
-          clsStr.concat("       ,GMM.GM_NOME AS MODELO"                                           );
-          flag = true;    
-        };  
+    clsStr.concat("SELECT A.GMP_CODIGO AS CODIGO,GM.GM_NOME AS DESCRICAO,A.GMP_NUMSERIE AS SERIE"   );
+    if( objeto['cntp']){
+        clsStr.concat("       ,GMM.GM_NOME AS MODELO"                                           );
+        flag = true;    
+      };  
   clsStr.concat("  ,A.GMP_SINCARD AS SINCARD"                                                );
   clsStr.concat("  ,CASE WHEN A.GMP_DTCONFIGURADO IS NULL THEN 'NAO' ELSE 'SIM' END AS CFG"       );            
   clsStr.concat("  FROM GRUPOMODELOPRODUTO A"                                                     );

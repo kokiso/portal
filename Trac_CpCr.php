@@ -7,7 +7,7 @@
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
       require("classPhp/dataCompetencia.class.php");      
-      require("classPhp/selectRepetido.class.php");                                     
+      require("classPhp/selectRepetido.class.php");       						                  
 
       $clsCompet  = new dataCompetencia();    
       $vldr       = new validaJson();          

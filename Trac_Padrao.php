@@ -29,8 +29,7 @@
         //    Dados para JavaScript PADRAO         //
         /////////////////////////////////////////////
         if( $rotina=="selectPdr" ){
-          $sql="";
-          $sql.="SELECT A.PDR_CODIGO";
+          $sql ="SELECT A.PDR_CODIGO";
           $sql.="       ,A.PDR_NOME";
           $sql.="       ,A.PDR_CODPTT";
           $sql.="       ,PTT.PTT_NOME";
@@ -38,7 +37,7 @@
           $sql.="       ,CASE WHEN A.PDR_REG='P' THEN 'PUB' WHEN A.PDR_REG='S' THEN 'SIS' ELSE 'ADM' END AS PDR_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.PDR_CODUSR";
-          $sql.="  FROM PADRAO A";
+          $sql.="  FROM PADRAO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN PAGARTITULO PTT ON A.PDR_CODPTT=PTT.PTT_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.PDR_CODUSR=U.US_CODIGO";
           $sql.="  WHERE (PDR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";

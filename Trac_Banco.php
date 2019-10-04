@@ -6,7 +6,7 @@
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");
-
+      require("classPhp/selectRepetido.class.php");      
       $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["banco"]);
@@ -22,15 +22,21 @@
         $arrUpdt  = []; 
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
-        $rotina   = $lote[0]->rotina;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+        ///////////////////////
+        // Alterando  a empresa
+        ///////////////////////
+        if( $lote[0]->rotina=="altEmpresa" ){
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("altEmpresa",$lote[0]->login);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"script":'.$retSql["script"].',"erro":"'.$retSql["erro"].'"}]';
+        };  
         /////////////////////////////////////////////
         //    Dados para JavaScript BANCO          //
         /////////////////////////////////////////////
-        if( $rotina=="selectBnc" ){
-          $sql="";
-          $sql.="SELECT A.BNC_CODIGO";
+        if( $lote[0]->rotina=="selectBnc" ){
+          $sql ="SELECT A.BNC_CODIGO";
           $sql.="       ,A.BNC_NOME";
           $sql.="       ,A.BNC_SALDO";
           $sql.="       ,A.BNC_CODFVR";
@@ -45,6 +51,7 @@
           $sql.="       ,A.BNC_AGENCIADV";
           $sql.="       ,A.BNC_CONTA";
           $sql.="       ,A.BNC_CONTADV";
+          $sql.="       ,CASE WHEN A.BNC_CNAB='S' THEN 'SIM' ELSE 'NAO' END AS BNC_CNAB";          
           $sql.="       ,A.BNC_CODEMP";
           $sql.="       ,CASE WHEN A.BNC_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS BNC_ATIVO";
           $sql.="       ,CASE WHEN A.BNC_REG='P' THEN 'PUB' WHEN A.BNC_REG='S' THEN 'SIS' ELSE 'ADM' END AS BNC_REG";
@@ -52,7 +59,7 @@
           $sql.="       ,A.BNC_CODUSR";
           $sql.="       ,E.EMP_APELIDO";
           $sql.="       ,FVR.FVR_NOME";          
-          $sql.="  FROM BANCO A";
+          $sql.="  FROM BANCO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.BNC_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON A.BNC_CODFVR=FVR.FVR_CODIGO";
           $sql.="  LEFT OUTER JOIN BANCOSTATUS B ON A.BNC_CODBST=B.BST_CODIGO";
@@ -71,7 +78,7 @@
         ////////////////////////////////////
         //        Importar excel          //
         ////////////////////////////////////
-        if( $rotina=="impExcel" ){
+        if( $lote[0]->rotina=="impExcel" ){
           ////////////////////////////////////////////////////////////////////////
           // Enviando para a class todas as colunas com as checagens necessaria //
           // Nome da tabela e numeros de erros(se existir)                      //
@@ -162,9 +169,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
     <title>Banco</title>
+    <!-- bootstrap nativo javascript -->
+    <link rel="stylesheet" href="css/bootstrapNative.css">
+    <script src="js/bootstrap-native.js"></script>    
+    <!-- bootstrap nativo javascript -->
     <link rel="stylesheet" href="css/css2017.css">
     <link rel="stylesheet" href="css/cssTable2017.css">
-    <!--<link rel="stylesheet" href="css/cssFaTable.css">-->
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>
@@ -227,6 +237,7 @@
                       ,"obj"            : "edtCodFvr"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
+                      ,"formato"        : ["i4"]                      
                       ,"fieldType"      : "int"
                       ,"newRecord"      : ["0000","this","this"]
                       ,"validar"        : ["notnull"]
@@ -328,7 +339,7 @@
                       ,"newRecord"      : ["","this","this"]
                       ,"digitosMinMax"  : [1,8]
                       ,"formato"        : ["uppercase","removeacentos","tiraaspas","alltrim"]                      
-                      ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
+                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
@@ -355,7 +366,7 @@
                       ,"newRecord"      : ["","this","this"]
                       ,"formato"        : ["uppercase","removeacentos","tiraaspas","alltrim"]                      
                       ,"digitosMinMax"  : [1,20]
-                      ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
+                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"padrao":0}
             ,{"id":15 ,"field"          : "BNC_CONTADV"   
@@ -370,31 +381,44 @@
                       ,"digitosValidos" : "0|1|2|3|4|5|6|7|8|9"
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"padrao":0}
-            ,{"id":16 ,"field"          : "BNC_CODEMP" 
+                      
+            ,{"id":16 ,"field"          : "BNC_CNAB"   
+                      ,"insUpDel"       : ["S","S","N"]
+                      ,"labelCol"       : "CNAB"
+                      ,"obj"            : "cbCnab"
+                      ,"tamGrd"         : "3em"
+                      ,"tipo"           : "cb"
+                      ,"tamImp"         : "11"
+                      ,"newRecord"      : ["N","this","this"]
+                      ,"digitosMinMax"  : [1,1]
+                      ,"validar"        : ["notnull"]                      
+                      ,"ajudaCampo"     : [ "Direito para opção..."]
+                      ,"padrao":0}
+            ,{"id":17 ,"field"          : "BNC_CODEMP" 
                       ,"labelCol"       : "CODEMP"  
                       ,"obj"            : "edtCodEmp"  
                       ,"padrao":7}  
-            ,{"id":17 ,"field"          : "BNC_ATIVO"  
+            ,{"id":18 ,"field"          : "BNC_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"tamImp"         : "10"                      
                       ,"padrao":2}                                        
-            ,{"id":18 ,"field"          : "BNC_REG"    
+            ,{"id":19 ,"field"          : "BNC_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"tamImp"         : "10"                      
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":19 ,"field"          : "US_APELIDO" 
+            ,{"id":20 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}                
-            ,{"id":20 ,"field"          : "BNC_CODUSR" 
+            ,{"id":21 ,"field"          : "BNC_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}   
-            ,{"id":21 ,"field"          : "EMP_APELIDO"   
+            ,{"id":22 ,"field"          : "EMP_APELIDO"   
                       ,"labelCol"       : "EMPRESA"
                       ,"obj"            : "edtDesEmp"
                       ,"insUpDel"       : ["N","N","N"]
@@ -403,18 +427,18 @@
                       ,"newRecord"      : [jsPub[0].emp_apelido,"this","this"]
                       ,"ajudaCampo"     : ["Nome da empresa."]
                       ,"padrao":0}
-            ,{"id":22 ,"field"          : "FVR_NOME"   
+            ,{"id":23 ,"field"          : "FVR_NOME"   
                       ,"insUpDel"       : ["N","N","N"]
                       ,"labelCol"       : "DESFVR"
                       ,"obj"            : "edtDesFvr"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"newRecord"      : ["","this","this"]
-                      ,"digitosMinMax"  : [1,15]
+                      ,"digitosMinMax"  : [1,60]
                       ,"validar"        : ["notnull"]                      
                       ,"ajudaCampo"     : ["Descrição de FAVORECIDO para esta banco."]
                       ,"padrao":0}
-            ,{"id":23 ,"labelCol"       : "PP"      
+            ,{"id":24 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -437,12 +461,15 @@
             ,{"texto":"Excluir"       ,"name":"horExcluir"        ,"onClick":"2"  ,"enabled":true ,"imagem":"fa fa-minus"            }
             ,{"texto":"Tarifa"        ,"name":"horTarifa"         ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-money"            }            
             ,{"texto":"Transferencia" ,"name":"horTransferencia"  ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-sliders"          }                        
-            ,{"texto":"Extrato"       ,"name":"horExtrato"        ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-sliders"          }                                    
+            ,{"texto":"Extrato"       ,"name":"horExtrato"        ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-sliders"          }
+            ,{"texto":"Empresa" 			,"name":"horEmpresa"        ,"onClick":"7"  ,"enabled":true	,"imagem":"fa fa-spinner"          
+                                        ,"popover":{title:"Ajuda",texto:"Opção para alterar empresa"}												         } 						
             ,{"texto":"Imprimir"      ,"name":"horImprimir"       ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"            }                        
             ,{"texto":"Fechar"        ,"name":"horFechar"         ,"onClick":"8"  ,"enabled":true ,"imagem":"fa fa-close"            }
           ] 
           ,"registros"      : []                    // Recebe um Json vindo da classe clsBancoDados
-          ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar                     
+          ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar    
+          ,"popover"        : true                  // Opção para gerar ajuda no formato popUp(Hint)              										          
           ,"checarTags"     : "N"                   // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
           ,"idBtnCancelar"  : "btnCancelar"         // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmBnc"              // Onde vai ser gerado a table
@@ -561,6 +588,7 @@
       var cmp       = new clsCampo(); // Abrindo a classe campos
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
       var intCodDir = parseInt(jsPub[0].usr_d06);
+      var arqLocal  = fncFileName(window.location.pathname);  // retorna o nome do arquivo sendo executado
       function funcRetornar(intOpc){
         document.getElementById("divRotina").style.display  = (intOpc==0 ? "block" : "none" );        
         document.getElementById("divExcel").style.display   = (intOpc==1 ? "block" : "none" );
@@ -590,7 +618,7 @@
         clsJs.add("codemp"      , jsPub[0].emp_codigo   );
         fd = new FormData();
         fd.append("banco" , clsJs.fim());
-        msg     = requestPedido("Trac_Banco.php",fd); 
+        msg     = requestPedido(arqLocal,fd); 
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           //////////////////////////////////////////////////////////////////////////////////
@@ -622,7 +650,7 @@
             fd = new FormData();
             fd.append("banco"      , envPhp            );
             fd.append("arquivo"   , edtArquivo.files[0] );
-            msg     = requestPedido("Trac_Banco.php",fd); 
+            msg     = requestPedido(arqLocal,fd); 
             retPhp  = JSON.parse(msg);
             if( retPhp[0].retorno == "OK" ){
               //////////////////////////////////////////////////////////////////////////////////
@@ -876,7 +904,40 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
-    </script>,,,
+      //////////////////
+      // Alterar empresa
+      //////////////////
+      function horEmpresaClick(){
+        try{          
+          clsJs   = jsString("lote");  
+          clsJs.add("rotina"  , "altEmpresa"                );
+          clsJs.add("login"   , jsPub[0].usr_login          );
+          fd = new FormData();
+          fd.append("banco" , clsJs.fim());
+          
+          msg     = requestPedido(arqLocal,fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            janelaDialogo(
+              { height          : "25em"
+                ,body           : "16em"
+                ,left           : "400px"
+                ,top            : "60px"
+                ,tituloBarra    : "Alterar empresa"
+                ,width          : "43em"
+                ,fontSizeTitulo : "1.8em"             //  padrao 2em que esta no css
+                ,code           : retPhp[0]["dados"]  //  clsCode.fim()
+              }
+            );  
+            let scr = document.createElement('script');
+            scr.innerHTML = retPhp[0]["script"];
+            document.getElementsByTagName('body')[0].appendChild(scr);        
+          };
+        }catch(e){
+          gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+        };
+      };  
+    </script>
   </head>
   <body>
     <div class="divTelaCheia">
@@ -977,24 +1038,33 @@
                 <input class="campo_input" id="edtContaDiv" maxlength="1" type="text" />
                 <label class="campo_label campo_required" for="edtContaDiv">DÍG:</label>
               </div>
-             <div class="campotexto campo25">
+              
+             <div class="campotexto campo20">
+              <select class="campo_input_combo" id="cbCnab">
+                <option value="S">SIM</option>
+                <option value="N">NAO</option>
+              </select>
+              <label class="campo_label campo_required" for="cbCnab">ACEITA CNAB:</label>
+             </div>
+              
+             <div class="campotexto campo20">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbAtivo">ATIVO</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo20">
                 <select class="campo_input_combo" id="cbReg">
                   <option value="P">PUBLICO</option>               
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo20">
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo20">
                 <input class="campo_input_titulo input" id="edtDesEmp" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesEmp">EMPRESA:</label>
               </div>

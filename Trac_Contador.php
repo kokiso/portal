@@ -37,8 +37,7 @@
         //    Dados para JavaScript CONTADOR       //
         /////////////////////////////////////////////
         if( $rotina=="selectCnt" ){
-          $sql="";
-          $sql.="SELECT A.CNT_CODIGO";
+          $sql ="SELECT A.CNT_CODIGO";
           $sql.="       ,A.CNT_NOME";
           $sql.="       ,A.CNT_CRC";
           $sql.="       ,A.CNT_CPF";
@@ -87,7 +86,7 @@
           $sql.="       ,CASE WHEN A.CNT_REG='P' THEN 'PUB' WHEN A.CNT_REG='S' THEN 'SIS' ELSE 'ADM' END AS CNT_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.CNT_CODUSR";
-          $sql.="  FROM CONTADOR A";
+          $sql.="  FROM CONTADOR A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.CNT_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN CIDADE C ON A.CNT_CODCDD=C.CDD_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESA E ON A.CNT_CODEMP=E.EMP_CODIGO";

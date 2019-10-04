@@ -7,7 +7,7 @@
       require("classPhp/consultaCep.class.php");
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");
-
+          
       $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["contratoendereco"]);
@@ -24,14 +24,16 @@
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
         $rotina   = $lote[0]->rotina;
-        $classe   = new conectaBd();
-        $classe->conecta($lote[0]->login);
+      //   $classe   = new conectaBd();
+      //   $classe->conecta($lote[0]->login);
         ///////////////////////////////////////////////
         // Buscando CEP para complemento de cadastro //
         ///////////////////////////////////////////////
         if( $rotina=="rotinaCep" ){
           $clsCep  = new consultaCep();
           $retorno=$clsCep->buscaCep($lote[0]->cep);
+          echo $retorno;
+          exit;
         };
         /////////////////////////////////////////////////
         //    Dados para JavaScript CONTRATOENDERECO   //

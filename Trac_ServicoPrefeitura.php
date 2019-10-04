@@ -29,8 +29,7 @@
         //    Dados para JavaScript SERVICOPREFEITURA //
         ////////////////////////////////////////////////
         if( $rotina=="selectSpr" ){
-          $sql="";
-          $sql.="SELECT A.SPR_CODIGO";
+          $sql ="SELECT A.SPR_CODIGO";
           $sql.="       ,SPR_CODCDD";
           $sql.="       ,CDD_NOME";
           $sql.="       ,SPR_NOME";
@@ -41,7 +40,7 @@
           $sql.="       ,CASE WHEN SPR_REG='P' THEN 'PUB' WHEN A.SPR_REG='S' THEN 'SIS' ELSE 'ADM' END AS SPR_REG";
           $sql.="       ,US_APELIDO";
           $sql.="       ,SPR_CODUSR";
-          $sql.="  FROM SERVICOPREFEITURA A";
+          $sql.="  FROM SERVICOPREFEITURA A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA US ON A.SPR_CODUSR=US.US_CODIGO";
           $sql.="  LEFT OUTER JOIN CIDADE CDD ON A.SPR_CODCDD=CDD.CDD_CODIGO";
           $sql.="  WHERE ((SPR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."'))";                 

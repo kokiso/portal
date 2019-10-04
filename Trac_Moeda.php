@@ -35,7 +35,7 @@
                        ,CASE WHEN A.MOE_REG='P' THEN 'PUB' WHEN A.MOE_REG='S' THEN 'SIS' ELSE 'ADM' END AS MOE_REG
                        ,US_APELIDO
                        ,MOE_CODUSR
-                  FROM MOEDA A
+                  FROM MOEDA A WITH(NOLOCK)
                   LEFT OUTER JOIN USUARIOSISTEMA U ON A.MOE_CODUSR=U.US_CODIGO
                  WHERE (MOE_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                 
           $classe->msgSelect(false);

@@ -63,7 +63,7 @@
           case "AVE"      : $codtl="AV";  break;
           case "AVENIDA"  : $codtl="AV";  break;
           case "COM"      : $codtl="RUA"; break;
-          case "ESTRADA"  : $codtl="ETR";  break;  // Angelo Kokiso, adição do parâmetro de estrada.
+          case "ESTRADA"  : $codtl="ETR"; break;  // Angelo Kokiso, adição do parâmetro de estrada.
           case "PASSAGEM" : $codtl="RUA"; break;
           case "PCA"      : $codtl="PCA"; break;
           case "PÇA"      : $codtl="PCA"; break;

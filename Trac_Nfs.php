@@ -6,9 +6,10 @@
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
-      require("classPhp/dataCompetencia.class.php");      
+      //require("classPhp/dataCompetencia.class.php");      
+      require("classPhp/selectRepetido.class.php");      
 
-      $clsCompet  = new dataCompetencia();    
+      //$clsCompet  = new dataCompetencia();    
       $vldr       = new validaJson();          
       $retorno    = "";
       $retCls     = $vldr->validarJs($_POST["nfs"]);
@@ -26,6 +27,14 @@
         $lote     = $jsonObj->lote;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+        ///////////////////////
+        // Alterando  a empresa
+        ///////////////////////
+        if( $lote[0]->rotina=="altEmpresa" ){
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("altEmpresa",$lote[0]->login);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"script":'.$retSql["script"].',"erro":"'.$retSql["erro"].'"}]';
+        };  
         /////////////////////////
         // Cancelar NF
         /////////////////////////
@@ -49,8 +58,7 @@
         // Filtrando os registros
         /////////////////////////
         if( $lote[0]->rotina=="filtrar" ){        
-          $sql="";
-          $sql.="SELECT A.NFS_LANCTO AS LANCTO";
+          $sql ="SELECT A.NFS_LANCTO AS LANCTO";
           $sql.="       ,A.NFS_CODCMP AS CODCMP";
           $sql.="       ,CMP.CMP_NOME AS COMPET";          
           $sql.="       ,A.NFS_NUMNF AS NF";          
@@ -68,7 +76,7 @@
           $sql.="       ,A.NFS_CODVERIFICACAO AS RECIBO";          
           $sql.="       ,CASE WHEN A.NFS_REG='P' THEN 'PUB' WHEN A.NFS_REG='S' THEN 'SIS' ELSE 'ADM' END AS REG";          
           $sql.="       ,US.US_APELIDO";          
-          $sql.="  FROM NFSERVICO A";           
+          $sql.="  FROM NFSERVICO A WITH(NOLOCK)";           
           $sql.="  LEFT OUTER JOIN PAGAR PGR ON A.NFS_LANCTO=PGR.PGR_LANCTO";          
           $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON PGR.PGR_CODFVR=FVR.FVR_CODIGO";          
           $sql.="  LEFT OUTER JOIN SERIENF SNF ON A.NFS_CODSNF=SNF.SNF_CODIGO";          
@@ -123,7 +131,7 @@
     <link rel="stylesheet" href="css/cssTable2017.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
-    <script src="js/jsBiblioteca.js"></script>
+    <!--<script src="js/jsBiblioteca.js"></script>-->
     <script src="js/jsCopiaDoc2017.js"></script>            
     <script>      
       "use strict";
@@ -131,6 +139,7 @@
       // Executar o codigo após a pagina carregada  //
       ////////////////////////////////////////////////
       document.addEventListener("DOMContentLoaded", function(){ 
+        $doc("spnEmpApelido").innerHTML=jsPub[0].emp_apelido;
         document.getElementById("edtDesCmp").value = jsDatas(0).retMMMbYY();
         validaCmp(document.getElementById("edtDesCmp").value);
         document.getElementById("edtDesCmp").foco();
@@ -164,6 +173,8 @@
                       ,"tamImp"         : "15"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
+                      ,"popoverTitle"   : "Competência fiscal"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":4  ,"labelCol"       : "NF"
                       ,"fieldType"      : "int"
@@ -183,10 +194,12 @@
                       ,"padrao":0}
             ,{"id":6  ,"labelCol"       : "ES"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "2em"
+                      ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
+                      ,"popoverTitle"   : "Informa se NF é entrada ou saída"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":7  ,"labelCol"       : "TD"
                       ,"fieldType"      : "str"
@@ -194,6 +207,8 @@
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
+                      ,"popoverTitle"   : "Tipo de documento"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":8  ,"labelCol"       : "EMISSAO"
                       ,"fieldType"      : "str"
@@ -230,6 +245,8 @@
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
+                      ,"popoverTitle"   : "Parametro informando se NF entra no livro mensal para apuração"                          
+                      ,"popoverLabelCol": "Livro"                      
                       ,"padrao":0}
             ,{"id":13 ,"labelCol"       : "FILIAL"
                       ,"fieldType"      : "int"
@@ -253,6 +270,8 @@
                       ,"tamImp"         : "15"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
+                      ,"popoverTitle"   : "Parametro informando se NF deve ser enviada a prefeitura"                          
+                      ,"popoverLabelCol": "Prefeitura"                      
                       ,"padrao":0}
             ,{"id":16 ,"labelCol"       : "RECIBO"
                       ,"fieldType"      : "str"
@@ -296,12 +315,13 @@
           , 
           "botoesH":[
              {"texto":"Novo lancto" ,"name":"horNovaNf"     ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-plus"       }
-            ,{"texto":"Cancelar NF" ,"name":"horCancelaNf" ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-calendar"    }             
-            ,{"texto":"Fechar"          ,"name":"horFechar"     ,"onClick":"6"  ,"enabled":true ,"imagem":"fa fa-close" }
+            ,{"texto":"Cancelar NF" ,"name":"horCancelaNf"  ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-calendar"    }             
+            ,{"texto":"Fechar"      ,"name":"horFechar"     ,"onClick":"6"  ,"enabled":true ,"imagem":"fa fa-close" }
           ] 
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
           ,"corLinha"       : "switch (ceTr.cells[5].innerHTML){case 'E' : ceTr.style.color='red';break; case 'S' : ceTr.style.color='black';break;}"          
           ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
+          ,"popover"        : true                      // Opção para gerar ajuda no formato popUp(Hint)                                                      
           ,"checarTags"     : "N"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
           ,"div"            : "frmNfs"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaNfs"               // Para fechar a div onde estão os fieldset ao cadastrar
@@ -353,11 +373,12 @@
       var retPhp                      // Retorno do Php para a rotina chamadora
       var contMsg   = 0;              // contador para mensagens
       var objCol;                     // Posicao das colunas da grade que vou precisar neste formulario      
+      var clsChecados;                // Classe para montar Json
+      var chkds;                      // Guarda todos registros checados na table 
       var cmp       = new clsCampo(); // Abrindo a classe campos
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
       var intCodDir = parseInt(jsPub[0].usr_d05);
-      var clsChecados;                // Classe para montar Json
-      var chkds;                      // Guarda todos registros checados na table 
+      var arqLocal  = fncFileName(window.location.pathname);  // retorna o nome do arquivo sendo executado      
       function btnFiltrarClick() { 
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "filtrar"           );
@@ -367,7 +388,7 @@
 
         fd = new FormData();
         fd.append("nfs" , clsJs.fim());
-        msg     = requestPedido("Trac_Nfs.php",fd); 
+        msg     = requestPedido(arqLocal,fd); 
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           //////////////////////////////////////////////////////////////////////////////////
@@ -401,6 +422,8 @@
           chkds.forEach(function(reg){
             if( reg.CANCELADA != "" )
               throw "Lancto "+reg.LANCTO+" com data de cancelamento!"; 
+            if( reg.REG == "SIS" )
+              throw "Lancto "+reg.LANCTO+" parametrizado como do sistema!"; 
           });
           //////////////////////////////////////////////////////////////
           // Preparando um objeto para enviar ao formulario de alteracao
@@ -413,7 +436,7 @@
           clsJs.add("data"    , jsDatas(0).retMMDDYYYY()  );
           var fd = new FormData();
           fd.append("nfs" , clsJs.fim());
-          msg=requestPedido("Trac_Nfs.php",fd); 
+          msg=requestPedido(arqLocal,fd); 
           retPhp=JSON.parse(msg);
           if( retPhp[0].retorno=="OK" ){
             /////////////////////////////////////////////////
@@ -460,7 +483,7 @@
 
           var fd = new FormData();
           fd.append("nfs" , clsJs.fim());
-          msg=requestPedido("Trac_Nfs.php",fd); 
+          msg=requestPedido(arqLocal,fd); 
           retPhp=JSON.parse(msg);
           if( retPhp[0].retorno=="OK" ){
             /////////////////////////////////////////////////
@@ -484,6 +507,39 @@
           gerarMensagemErro("catch",e,"Erro");
         };
       };
+      //////////////////
+      // Alterar empresa
+      //////////////////
+      function altEmpresa(){
+        try{          
+          clsJs   = jsString("lote");  
+          clsJs.add("rotina"  , "altEmpresa"                );
+          clsJs.add("login"   , jsPub[0].usr_login          );
+          fd = new FormData();
+          fd.append("nfs" , clsJs.fim());
+          
+          msg     = requestPedido(arqLocal,fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            janelaDialogo(
+              { height          : "25em"
+                ,body           : "16em"
+                ,left           : "500px"
+                ,top            : "60px"
+                ,tituloBarra    : "Alterar empresa"
+                ,width          : "43em"
+                ,fontSizeTitulo : "1.8em"             //  padrao 2em que esta no css
+                ,code           : retPhp[0]["dados"]  //  clsCode.fim()
+              }
+            );  
+            let scr = document.createElement('script');
+            scr.innerHTML = retPhp[0]["script"];
+            document.getElementsByTagName('body')[0].appendChild(scr);        
+          };
+        }catch(e){
+          gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+        };
+      };  
     </script>
   </head>
   <body style="background-color: #ecf0f5;">
@@ -512,12 +568,30 @@
                               data-placement="right" 
                               data-content="Esta opção transforma o registro para o sistema. Este não poderá mais ser alterado e nem excluido"><i class="indFa fa-key"></i>
           </div>
+          <div id="divBlRota" class="divBarraLateral" 
+                              onClick="altEmpresa();"
+                              data-title="Ajuda"                               
+                              data-toggle="popover" 
+                              data-placement="right" 
+                              data-content="Alterar empresa."><i class="indFa fa-spinner"></i>
+          </div>
         </section>
       </aside>
 
       <div id="indDivInforme" class="indTopoInicio indTopoInicio100">
         <div class="indTopoInicio_logo"></div>
+        <!--
         <a href="#" class="indLabel"><div id="tituloMenu">NF serviço</div></a>
+        -->
+        <div class="colMd12" style="float:left;margin-bottom:0px;height:50px;">
+          <div class="infoBox">
+            <span class="infoBoxIcon corMd10"><i class="fa fa-folder-open" style="width:25px;"></i></span>
+            <div class="infoBoxContent">
+              <span class="infoBoxText">NF Servico</span>
+              <span id="spnEmpApelido" class="infoBoxLabel"></span>
+            </div>
+          </div>
+        </div>  
         
         <div id="indDivInforme" class="indTopoInicio80" style="padding-top:2px;">
           

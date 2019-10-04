@@ -29,8 +29,7 @@
         //    Dados para JavaScript COMPETENCIA    //
         /////////////////////////////////////////////
         if( $rotina=="selectCmp" ){
-          $sql="";
-          $sql.="SELECT A.CMP_CODIGO";
+          $sql ="SELECT A.CMP_CODIGO";
           $sql.="       ,A.CMP_CODEMP";
           $sql.="       ,E.EMP_APELIDO";
           $sql.="       ,A.CMP_NOME";
@@ -39,12 +38,11 @@
           $sql.="       ,CASE WHEN A.CMP_REG='P' THEN 'PUB' WHEN A.CMP_REG='S' THEN 'SIS' ELSE 'ADM' END AS CMP_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.CMP_CODUSR";
-          $sql.="  FROM COMPETENCIA A";
+          $sql.="  FROM COMPETENCIA A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.CMP_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESA E ON A.CMP_CODEMP=E.EMP_CODIGO";
           $sql.="  WHERE ((CMP_CODEMP=".$lote[0]->codemp.")";
           $sql.="    AND ((CMP_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')))";                 
-          //$sql.="  WHERE (CMP_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -300,7 +298,7 @@
           ,"formPassoPasso" : "Trac_Espiao.php"     // Endereço da pagina PASSO A PASSO
           ,"indiceTable"    : "CODIGO"              // Indice inicial da table
           ,"tamBotao"       : "12"                  // Tamanho botoes defalt 12 [12/25/50/75/100]
-          ,"tamMenuTable"   : ["10em","20em"]                                
+          ,"tamMenuTable"   : ["8em","20em"]                                
           ,"labelMenuTable" : "Opções"              // Caption para menu table 
           ,"_menuTable"     :[
                                 ["Regitros ativos"                        ,"fa-thumbs-o-up"   ,"btnFiltrarClick('S');"]

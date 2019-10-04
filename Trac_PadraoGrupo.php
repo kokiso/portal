@@ -29,8 +29,7 @@
         //    Dados para JavaScript PADRAOGRUPO    //
         /////////////////////////////////////////////
         if( $rotina=="selectPg" ){
-          $sql="";
-          $sql.="SELECT A.PG_CODPDR";
+          $sql ="SELECT A.PG_CODPDR";
           $sql.="       ,P.PDR_NOME";
           $sql.="       ,A.PG_CODPTP";
           $sql.="       ,T.PTP_NOME";
@@ -38,7 +37,7 @@
           $sql.="       ,CASE WHEN A.PG_REG='P' THEN 'PUB' WHEN A.PG_REG='S' THEN 'SIS' ELSE 'ADM' END AS PG_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.PG_CODUSR";
-          $sql.="  FROM PADRAOGRUPO A";
+          $sql.="  FROM PADRAOGRUPO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.PG_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN PADRAO P ON A.PG_CODPDR=P.PDR_CODIGO";
           $sql.="  LEFT OUTER JOIN PAGARTIPO T ON A.PG_CODPTP=T.PTP_CODIGO";

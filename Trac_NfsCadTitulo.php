@@ -36,24 +36,26 @@
         /////////////////////////////////////////////////////
         // Buscando a aliquota se for do simples
         /////////////////////////////////////////////////////
-
         if( $rotina=="buscaAliquota" ){
-          $sql="";
-          $sql.="SELECT FMS_ALIQUOTA FROM FECHAMESSIMPLES WHERE FMS_CODMES=".$lote[0]->codcmp." AND FMS_CODEMP=".$_SESSION["emp_codigo"];
+          $sql="SELECT FMS_ALIQUOTA FROM FECHAMESSIMPLES WITH(NOLOCK) WHERE FMS_CODMES=".$lote[0]->codcmp." AND FMS_CODEMP=".$_SESSION["emp_codigo"];
           $classe->msgSelect(true);
           $retCls=$classe->selectAssoc($sql);
-          $retorno='[{"retorno":"OK"
-                     ,"qtos": '.$retCls["qtos"].'
-                     ,"tblFms":'.json_encode($retCls["dados"][0]).'
-                     ,"erro":""}]'; 
+          if( $retCls["qtos"]==0 ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"NENHUMA ALIQUOTA CADASTRADA PARA ESTA COMPETENCIA"}]';              
+          } else {    
+            $retorno='[{"retorno":"OK"
+                       ,"qtos": '.$retCls["qtos"].'
+                       ,"tblFms":'.json_encode($retCls["dados"][0]).'
+                       ,"erro":""}]'; 
+          };           
         };
-        /////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////
         // Buscando a serie da NF e parametros complementares
-        /////////////////////////////////////////////////////
+        // Trac_NfsCadTitulo.php / Trac_CpCrFaturarContrato.php
+        ///////////////////////////////////////////////////////
         if( $rotina=="buscaSnf" ){
-          $sql="";
-          $sql.="SELECT A.SNF_CODIGO,A.SNF_INFORMARNF,A.SNF_NFFIM,A.SNF_CODTD,TD.TD_NOME,A.SNF_ENTSAI";
-          $sql.="  FROM SERIENF A";
+          $sql ="SELECT A.SNF_CODIGO,A.SNF_NFPROXIMA,A.SNF_CODTD,TD.TD_NOME,A.SNF_ENTSAI";
+          $sql.="  FROM SERIENF A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN TIPODOCUMENTO TD ON TD.TD_CODIGO=A.SNF_CODTD";
           $sql.=" WHERE ((A.SNF_ENTSAI='".$lote[0]->entsai."')"; 
           $sql.="   AND (A.SNF_CODTD='".$lote[0]->codtd."')";
@@ -61,9 +63,13 @@
           $sql.="   AND (A.SNF_ATIVO='S'))"; 
           $classe->msgSelect(true);
           $retCls=$classe->selectAssoc($sql);
-          $retorno='[{"retorno":"OK"
-                     ,"tblSnf":'.json_encode($retCls["dados"][0]).'
-                     ,"erro":""}]'; 
+          if( $retCls["qtos"]==0 ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"NENHUM(a) '.$lote[0]->destd.' DISPONIVEL PARA LANCAMENTO"}]';              
+          } else {  
+            $retorno='[{"retorno":"OK"
+                       ,"tblSnf":'.json_encode($retCls["dados"][0]).'
+                       ,"erro":""}]'; 
+          };           
         };    
       };  
     } catch(Exception $e ){
@@ -93,16 +99,15 @@
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
     <script src="tabelaTrac/f10/tabelaFavorecidoF10.js"></script>
     <script src="tabelaTrac/f10/tabelaServicoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaBancoF10.js"></script>    
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
-        //buscaPadrao(); 
         /////////////////////////////////////
         // Prototype para preencher campos //
         /////////////////////////////////////
         document.getElementById("frmNfs").newRecord("data-newrecord");
         document.getElementById("cbOpcao").focus();
-        
         //document.getElementById("edtCodFll").value    = jsNmrs(jsPub[0].emp_codfll).emZero(4).ret();
         //document.getElementById("edtDtDocto").value   = jsDatas(0).retDDMMYYYY();
         //document.getElementById("edtCodBnc").value    = jsNmrs(jsPub[0].emp_codbnc).emZero(4).ret();
@@ -129,11 +134,11 @@
              {"id":0  ,"nomeAba"      : "parcela" 
                       ,"labelAba"     : "Parcelamento"
                       ,"table"        : "tblPrcl"
-                      ,"widthTable"   : "45em" 
+                      ,"widthTable"   : "55em" 
                       ,"heightTable"  : "18em"                     
                       ,"widthAba"     : "12em" 
                       ,"rolagemVert"  : true 
-                      ,"somarCols":[2]
+                      ,"somarCols":[2,3,4,5]
                       ,"head":[  { "labelCol"   : "PARC"     
                                   ,"width"      : "4em"  
                                   ,"fieldType"  : "int"
@@ -141,12 +146,27 @@
                                   ,"editar"     : "N"
                                   ,"classe"     : ""}
                                 ,{ "labelCol"   : "VENCTO"   
-                                  ,"width"      : "10em"  
+                                  ,"width"      : "6em"  
                                   ,"fieldType"  : "dat"
                                   ,"editar"     : "S"
                                   ,"classe"     : "edtData"}
                                 ,{ "labelCol"   : "VALOR"    
-                                  ,"width"      : "12em" 
+                                  ,"width"      : "8em" 
+                                  ,"fieldType"  : "flo"
+                                  ,"editar"     : "S"
+                                  ,"classe"     : "edtDireita"}
+                                ,{ "labelCol"   : "ISS"    
+                                  ,"width"      : "6em" 
+                                  ,"fieldType"  : "flo"
+                                  ,"editar"     : "S"
+                                  ,"classe"     : "edtDireita"}
+                                ,{ "labelCol"   : "IRRF"    
+                                  ,"width"      : "6em" 
+                                  ,"fieldType"  : "flo"
+                                  ,"editar"     : "S"
+                                  ,"classe"     : "edtDireita"}
+                                ,{ "labelCol"   : "INSS"    
+                                  ,"width"      : "6em" 
                                   ,"fieldType"  : "flo"
                                   ,"editar"     : "S"
                                   ,"classe"     : "edtDireita"}
@@ -169,10 +189,12 @@
       var objPadF10;                  // Obrigatório para instanciar o JS PadraoF10      
       var objFvrF10;                  // Obrigatório para instanciar o JS FavorecidoF10      
       var objSrvF10;                  // Obrigatório para instanciar o JS ServicoF10      
+      var objBncF10;                  // Obrigatório para instanciar o JS BancoF10            
       var minhaAba;
       var contMsg   = 0;
       var cmp       = new clsCampo(); 
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
+      var arqLocal  = fncFileName(window.location.pathname);  // retorna o nome do arquivo sendo executado      
       ////////////////////////////
       //  AJUDA PARA FAVORECIDO //
       ////////////////////////////
@@ -239,15 +261,15 @@
         document.getElementById("edtAliqIss").value     = arr[0].ISS_ALIQ;
         document.getElementById("edtIssRet").value      = arr[0].RETIDO_SN;
         document.getElementById("edtObservacao").value  = arr[0].DESCRICAO;        
-        document.getElementById("edtCodFvr").setAttribute("data-oldvalue",arr[0].CODIGO);
+        //document.getElementById("edtCodFvr").setAttribute("data-oldvalue",arr[0].CODIGO);
+        document.getElementById("edtCodSrv").setAttribute("data-oldvalue",arr[0].CODIGO);
+        // Pegando a operacao padrao e contabilizacao
+        document.getElementById("edtCodSrv").setAttribute("data-codpt",arr[0].CODPT);
         document.getElementById("edtAliqIss").setAttribute("data-oldvalue",arr[0].ISS_ALIQ);
         //////////////////////////////////////////////////////////////////////////////////////
         // Guardando a aliquota se o usuario informar retido "N" e depois retornar para "S" //
         //////////////////////////////////////////////////////////////////////////////////////
         document.getElementById("edtAliqIss").setAttribute("data-oldvalue",arr[0].ISS_ALIQ);        
-        
-        
-        
       };
       function codSrvBlur(obj){
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
@@ -283,9 +305,12 @@
           document.getElementById("edtObservacao").value  = document.getElementById("edtDesSrv").value;
           document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )  );
           document.getElementById("edtAliqIss").setAttribute("data-oldvalue",arr[0].ISS_ALIQ);
+          /////////////////////////////////////////////
+          // Pegando a operacao padrao e contabilizacao
+          /////////////////////////////////////////////
+          document.getElementById("edtCodSrv").setAttribute("data-codpt",arr[0].CODPT);
         };
       };
-      
       ///////////////////////////////
       //  AJUDA PARA TIPODOCUMENTO //
       ///////////////////////////////
@@ -383,18 +408,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncF10Click(obj){ 
-        fPadraoF10( { opc:0
-                      ,edtCod:obj.id
-                      ,foco:"edtObservacao"
-                      ,topo:100
-                      ,tableBd:"BANCO"
-                      ,fieldCod:"A.BNC_CODIGO"
-                      ,fieldDes:"A.BNC_NOME"
-                      ,fieldAtv:"A.BNC_ATIVO"
-                      ,typeCod :"int" 
-                      ,divWidth:"36%"
-                      ,tbl:"tblBnc"}
-        );
+        fBancoF10(0,obj.id,"edtObservacao",100,{codemp: jsPub[0].emp_codigo,ativo:"S" } ); 
       };
       function RetF10tblBnc(arr){
         document.getElementById("edtCodBnc").value  = arr[0].CODIGO;
@@ -405,20 +419,14 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fPadraoF10( { opc:1
-                                  ,edtCod:obj.id
-                                  ,foco:"edtObservacao"
-                                  ,topo:100
-                                  ,tableBd:"BANCO"
-                                  ,fieldCod:"A.BNC_CODIGO"
-                                  ,fieldDes:"A.BNC_NOME"
-                                  ,fieldAtv:"A.BNC_ATIVO"
-                                  ,typeCod :"int" 
-                                  ,tbl:"tblBnc"}
-          );
-          document.getElementById(obj.id).value       = ( ret.length == 0 ? "BOL"  : ret[0].CODIGO                );
-          document.getElementById("edtDesBnc").value  = ( ret.length == 0 ? "*" : ret[0].DESCRICAO                );
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO ));
+          let arr = fBancoF10(1,obj.id,"edtObservacao",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          document.getElementById(obj.id).value       = ( arr.length == 0 ? "0000"  : jsConverte(arr[0].CODIGO).emZero(4) );
+          document.getElementById("edtDesBnc").value  = ( arr.length == 0 ? "*"     : arr[0].DESCRICAO                    );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )       );
         };
       };
       function fncCalculaParcelamento(){
@@ -443,6 +451,9 @@
                 [ "01" 
                   ,document.getElementById("edtVencto").value
                   ,document.getElementById("edtVlrEvento").value
+                  ,document.getElementById("edtValorIss").value
+                  ,document.getElementById("edtValorIrrf").value
+                  ,document.getElementById("edtValorInss").value
                 ]
               );
             } else {
@@ -457,6 +468,9 @@
                   [ (lin+1) 
                     ,document.getElementById("edtVencto").value
                     ,( ((lin+1)<np) ? jsNmrs(vlrParc).dec(2).real().ret() : jsNmrs(vlrEvento).dec(2).real().ret() )
+                    ,( lin==0 ? jsNmrs(vlrParc).dec(3).real().ret() : 0 )
+                    ,( lin==0 ? jsNmrs(vlrParc).dec(4).real().ret() : 0 )
+                    ,( lin==0 ? jsNmrs(vlrParc).dec(5).real().ret() : 0 )
                   ]
                 );
                 vlrEvento = (vlrEvento-vlrParc);
@@ -471,31 +485,32 @@
       };
       //
       function buscarBd(opc){
-        try{          
+        try{  
           clsJs=jsString("lote");            
           clsJs.add("login"   , jsPub[0].usr_login                                              );
           clsJs.add("rotina"  , "buscaSnf"                                                      );
           clsJs.add("codtd"   , document.getElementById("cbOpcao").value                        );
           clsJs.add("codfll"  , document.getElementById("edtCodFll").value                      );
           clsJs.add("entsai"  , (document.getElementById("edtCodPtp").value=="CP" ? "E" : "S")  );
-          
+          clsJs.add("destd"   , jsConverte("^cbOpcao").texto()                                  );
           var fd = new FormData();
           fd.append("cadnfs" , clsJs.fim());
-          msg=requestPedido("Trac_NfsCadTitulo.php",fd); 
+          msg=requestPedido(arqLocal,fd); 
           retPhp=JSON.parse(msg);
           if( retPhp[0].retorno=="OK" ){
             document.getElementById("edtCodTd").value       = retPhp[0].tblSnf["SNF_CODTD"];
             document.getElementById("edtDesTd").value       = retPhp[0].tblSnf["TD_NOME"];
             document.getElementById("edtCodSnf").value      = retPhp[0].tblSnf["SNF_CODIGO"];
             document.getElementById("edtEntSai").value      = retPhp[0].tblSnf["SNF_ENTSAI"];
-            document.getElementById("edtNumNf").value       = jsNmrs(retPhp[0].tblSnf["SNF_NFFIM"]).emZero(6).ret();
-            document.getElementById("edtInformarNf").value  = retPhp[0].tblSnf["SNF_INFORMARNF"];
+            document.getElementById("edtNumNf").value       = jsNmrs(retPhp[0].tblSnf["SNF_NFPROXIMA"]).emZero(6).ret();
             
             jsCmpAtivo("edtCodTd").remove("campo_input inputF10").add("campo_input_titulo").disabled(true);
-            if( retPhp[0].tblSnf["SNF_INFORMARNF"]=="N" )
+            if( document.getElementById("edtEntSai").value=="S" )
               jsCmpAtivo("edtNumNf").remove("campo_input inputF10").add("campo_input_titulo").disabled(true);  
-            
-          };  
+          } else {
+            gerarMensagemErro("Ami",retPhp[0].erro,{cabec:"Aviso"});              
+          };    
+          
         }catch(e){
           gerarMensagemErro("catch",e.message,"Erro");
         };
@@ -532,7 +547,7 @@
             
             var fd = new FormData();
             fd.append("cadnfs" , clsJs.fim());
-            msg=requestPedido("Trac_NfsCadTitulo.php",fd); 
+            msg=requestPedido(arqLocal,fd); 
             retPhp=JSON.parse(msg);
             if( retPhp[0].retorno=="OK" ){
               if( retPhp[0].qtos==1 ){
@@ -542,7 +557,9 @@
               } else {
                 jsCmpAtivo("edtAliqIss").remove("campo_input_titulo").add("campo_input input").disabled(true);                    
               }
-            };  
+            } else {
+              gerarMensagemErro("Ami",retPhp[0].erro,{cabec:"Aviso"});              
+            };    
           }catch(e){
             gerarMensagemErro("catch",e.message,"Erro");
           };
@@ -621,6 +638,9 @@
               { parc    : jsNmrs(tbl.rows[lin].cells[0].innerHTML).inteiro().ret()
                 ,vencto : jsDatas(tbl.rows[lin].cells[1].innerHTML).retMMDDYYYY()
                 ,valor  : jsNmrs(tbl.rows[lin].cells[2].innerHTML).dec(2).dolar().ret()
+                ,iss    : jsNmrs(tbl.rows[lin].cells[3].innerHTML).dec(2).dolar().ret()
+                ,irrf   : jsNmrs(tbl.rows[lin].cells[4].innerHTML).dec(2).dolar().ret()
+                ,inss   : jsNmrs(tbl.rows[lin].cells[5].innerHTML).dec(2).dolar().ret()
                 ,debcre : ( document.getElementById("edtCodPtp").value=="CR" ? "C" : "D" )
               }  
             )
@@ -680,11 +700,12 @@
           msg.floMaiorIgualZero("CSLL_ALIQ"     , document.getElementById("edtCsllAliq").value                );
           msg.floMaiorIgualZero("PIS_BC"        , document.getElementById("edtPisBc").value                   );
           msg.contido("ENTRADA_SAIDA"           , document.getElementById("edtEntSai").value,["E","S"]        );          
-          msg.contido("INFORMAR_NF"             , document.getElementById("edtInformarNf").value,["S","N"]    );
-          msg.contido("OPCAO"                   , document.getElementById("cbOpcao").value,["NFS","REC","RPS"]);          
+          msg.contido("OPCAO"                   , document.getElementById("cbOpcao").value,["NFS","REC","RPS"]);   
+          msg.intMaiorZero("OPERACAO_PADRAO"    , $doc("edtCodSrv").getAttribute("data-codpt")                );
+          
           //
           if( jsNmrs(totGrd).dec(2).real().ret() != jsNmrs("edtVlrEvento").dec(2).real().ret() )
-            msg.add("CAMPO<b> VALOR EVENTO "+jsNmrs("edtVlrEvento").dec(2).dolar().ret()+ "</b>DIVERGE DO TOTAL GRADE PARCELAMENTO "+totGrd+"!");           
+            msg.add("CAMPO<b> VALOR EVENTO "+jsNmrs("edtVlrEvento").dec(2).dolar().ret()+" </b>DIVERGE DO TOTAL GRADE PARCELAMENTO "+totGrd+"!");           
           //
           if( msg.ListaErr() != "" ){
             msg.Show();
@@ -703,7 +724,7 @@
             clsNfs.add("numnf"        , document.getElementById("edtNumNf").value       );
             clsNfs.add("codsnf"       , document.getElementById("edtCodSnf").value      );
             clsNfs.add("vlrretencao"  , jsNmrs("edtValorRetido").dolar().ret()          );
-            //clsNfs.add("livro"        , "S"                                             );
+            clsNfs.add("livro"        , "S"                                             );
             clsNfs.add("codvnd"       , 0                                               );
             clsNfs.add("codcdd"       , document.getElementById("edtCodCdd").value      );
             clsNfs.add("contrato"     , 0                                               );
@@ -722,25 +743,49 @@
             clsNfs.add("vlrcsll"      , jsNmrs("edtValorCsll").dolar().ret()            );            
             clsNfs.add("aliqiss"      , jsNmrs("edtAliqIss").dolar().ret()              );
             clsNfs.add("vlriss"       , jsNmrs("edtValorIss").dolar().ret()             );            
-            clsNfs.add("informarnf"   , document.getElementById("edtInformarNf").value  );    
             clsNfs.add("opcao"        , document.getElementById("cbOpcao").value        );    
-            let servico = clsNfs.fim();            
-            
+            let servico     = clsNfs.fim();            
+            let vlrRetencao = (jsConverte("#edtValorIss").dolar(true)+jsConverte("#edtValorIrrf").dolar(true)+jsConverte("#edtValorInss").dolar(true));  
             
             arrPrcl.forEach(function(reg){
-              clsRat.add("parcela"    , reg.parc                                  );
-              clsRat.add("codcc"      , document.getElementById("edtCodCc").value );
-              clsRat.add("debito"     , (reg.debcre=="D" ? reg.valor : 0)         );
-              clsRat.add("credito"    , (reg.debcre=="C" ? reg.valor : 0)         );
+              clsRat.add("parcela"          , reg.parc                            );
+              clsRat.add("codcc"            , $doc("edtCodCc").value              );
+              clsRat.add("debito"           , (reg.debcre=="D" ? reg.valor : 0)   );
+              clsRat.add("credito"          , (reg.debcre=="C" ? reg.valor : 0)   );
+              clsRat.add("comparaVlrEvento" , "S"                                 );
 
-              clsDup.add("parcela"    , reg.parc    );
-              clsDup.add("vencto"     , reg.vencto  );  
-              clsDup.add("vlrparcela" , reg.valor   );              
+              if( reg.parc=1 ){
+                if( reg.iss>0 ){
+                  clsRat.add("parcela"          , reg.parc                        );
+                  clsRat.add("codcc"            , "1.01.05.05.0005"               );
+                  clsRat.add("debito"           , (reg.debcre=="C" ? reg.iss : 0) );
+                  clsRat.add("credito"          , (reg.debcre=="D" ? reg.iss : 0) );
+                  clsRat.add("comparaVlrEvento" , "N"                             );
+                };  
+                if( reg.irrf>0 ){
+                  clsRat.add("parcela"          , reg.parc                          );
+                  clsRat.add("codcc"            , "1.01.05.05.0004"                 );
+                  clsRat.add("debito"           , (reg.debcre=="C" ? reg.irrf : 0)  );
+                  clsRat.add("credito"          , (reg.debcre=="D" ? reg.irrf : 0)  );
+                  clsRat.add("comparaVlrEvento" , "N"                               );
+                };  
+                if( reg.inss>0 ){
+                  clsRat.add("parcela"          , reg.parc                          );
+                  clsRat.add("codcc"            , "1.01.05.05.0006"                 );
+                  clsRat.add("debito"           , (reg.debcre=="C" ? reg.inss : 0)  );
+                  clsRat.add("credito"          , (reg.debcre=="D" ? reg.inss : 0)  );
+                  clsRat.add("comparaVlrEvento" , "N"                               );
+                };  
+              };  
+
+              clsDup.add("parcela"      , reg.parc                          );
+              clsDup.add("vencto"       , reg.vencto                        );  
+              clsDup.add("vlrparcela"   , reg.valor                         );
+              clsDup.add("vlrretencao"  , (reg.parc==1 ? vlrRetencao : 0 )  );              
               
             });  
-            let rateio    = clsRat.fim();
-            let duplicata = clsDup.fim();
-
+            let rateio      = clsRat.fim();
+            let duplicata   = clsDup.fim();
             
             let clsFin = jsString("lote");
             clsFin.add("login"              , jsPub[0].usr_login  );
@@ -750,33 +795,33 @@
             // Como vem de NFP/NFS/CONTRATO/TARIFA/TRANSF aqui informo qual direito vou olhar
             // pois um usuario pode lancar contrato mas naum NFProduto
             ///////////////////////////////////////////////////////////////////////////////////
-            clsFin.add("verdireito"         , 27                                              );            
-            clsFin.add("codbnc"             , document.getElementById("edtCodBnc").value      );
-            clsFin.add("codcc"              , "NULL"                                          );  //Se NULL o trigger faz    
-            clsFin.add("codcmp"             , document.getElementById("edtCodCmp").value      );  //Competencia contabil          
-            clsFin.add("codfvr"             , document.getElementById("edtCodFvr").value      );
-            clsFin.add("codfc"              , document.getElementById("edtCodFc").value       );
-            clsFin.add("codtd"              , document.getElementById("edtCodTd").value       );
-            clsFin.add("codfll"             , document.getElementById("edtCodFll").value      );
-            clsFin.add("codptt"             , "F"                                             );            
-            clsFin.add("docto"              , "NFS"+jsNmrs("edtNumNf").emZero(6).ret()        );
-            clsFin.add("dtdocto"            , jsDatas("edtDtDocto").retMMDDYYYY()             );
-            clsFin.add("lancto"             , 0                                               );  //Se maior que zero eh rotina de alteracao            
-            clsFin.add("observacao"         , document.getElementById("edtObservacao").value  );
-            clsFin.add("codpt"              , 0                                               );
-            clsFin.add("codptp"             , document.getElementById("edtCodPtp").value      );
-            clsFin.add("vlrdesconto"        , 0                                               );
-            clsFin.add("vlrevento"          , jsNmrs("edtVlrEvento").dolar().ret()            );
-            clsFin.add("vlrmulta"           , 0                                               );
-            clsFin.add("vlrretencao"        , 0                                               );
-            clsFin.add("vlrpis"             , 0                                               );
-            clsFin.add("vlrcofins"          , 0                                               );
-            clsFin.add("vlrcsll"            , 0                                               );
-            clsFin.add("temnfp"             , "N"                                             );
-            clsFin.add("temnfs"             , "S"                                             );            
-            clsFin.add("DUPLICATA"          , duplicata                                       );
-            clsFin.add("RATEIO"             , rateio                                          );
-            clsFin.add("SERVICO"            , servico                                         );
+            clsFin.add("verdireito"         , 27                                            );            
+            clsFin.add("codbnc"             , $doc("edtCodBnc").value                       );
+            clsFin.add("codcc"              , "NULL"                                        );  //Se NULL o trigger faz    
+            clsFin.add("codcmp"             , $doc("edtCodCmp").value                       );  //Competencia contabil          
+            clsFin.add("codfvr"             , $doc("edtCodFvr").value                       );
+            clsFin.add("codfc"              , $doc("edtCodFc").value                        );
+            clsFin.add("codtd"              , $doc("edtCodTd").value                        );
+            clsFin.add("codfll"             , $doc("edtCodFll").value                       );
+            clsFin.add("codptt"             , "F"                                           );            
+            clsFin.add("docto"              , "NFS"+jsNmrs("edtNumNf").emZero(6).ret()      );
+            clsFin.add("dtdocto"            , jsDatas("edtDtDocto").retMMDDYYYY()           );
+            clsFin.add("lancto"             , 0                                             );  //Se maior que zero eh rotina de alteracao            
+            clsFin.add("observacao"         , $doc("edtObservacao").value                   );
+            clsFin.add("codpt"              , $doc("edtCodSrv").getAttribute("data-codpt")  );
+            clsFin.add("codptp"             , $doc("edtCodPtp").value                       );
+            clsFin.add("vlrdesconto"        , 0                                             );
+            clsFin.add("vlrevento"          , jsConverte("#edtVlrEvento").dolar(true)       );  //jsNmrs("edtVlrEvento").dolar().ret()
+            clsFin.add("vlrmulta"           , 0                                             );
+            clsFin.add("vlrretencao"        , vlrRetencao                                   );
+            clsFin.add("vlrpis"             , 0                                             );
+            clsFin.add("vlrcofins"          , 0                                             );
+            clsFin.add("vlrcsll"            , 0                                             );
+            clsFin.add("temnfp"             , "N"                                           );
+            clsFin.add("temnfs"             , "S"                                           );            
+            clsFin.add("DUPLICATA"          , duplicata                                     );
+            clsFin.add("RATEIO"             , rateio                                        );
+            clsFin.add("SERVICO"            , servico                                       );
             ///////////////////////
             // Enviando para gravar
             ///////////////////////
@@ -788,8 +833,9 @@
             if( retPhp[0].retorno != "OK" ){
               throw retPhp[0].erro;
             } else {  
-              gerarMensagemErro("cad",retPhp[0].erro,"AVISO","edtCodFvr");  
+              gerarMensagemErro("cad",retPhp[0].erro,"AVISO","cbOpcao");  
               document.getElementById("frmNfs").newRecord("data-newrecord");
+              document.getElementById("edtCodSrv").setAttribute("data-codpt",0);
               document.getElementById("cbOpcao").focus();
               minhaAba.limparTable("tblPrcl");
             };
@@ -901,6 +947,7 @@
                                                 onClick="srvF10Click(this);"
                                                 data-newrecord="0000"
                                                 data-oldvalue="0000" 
+                                                data-codpt="0000" 
                                                 autocomplete="off"
                                                 type="text" />
             <label class="campo_label campo_required" for="edtCodSrv">SERVICO:</label>
@@ -1118,7 +1165,7 @@
             <input id="edtCofinsAliq" data-newrecord="0,00" type="text" />
             <input id="edtCsllAliq" data-newrecord="0,00" type="text" />
             <input id="edtPisBc" data-newrecord="0,00" type="text" />
-            <input id="edtInformarNf" data-newrecord="*" type="text" />
+            <!--<input id="edtInformarNf" data-newrecord="*" type="text" />-->
           </div>
           <div onClick="fncGravar();" class="btnImagemEsq bie12 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>                    
           <div onClick="window.close();" class="btnImagemEsq bie12 bieRed bieRight"><i class="fa fa-reply"> Cancelar</i></div>

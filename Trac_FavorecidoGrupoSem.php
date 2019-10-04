@@ -38,14 +38,13 @@
         /////////////////////////////////////////////////////
 
         if( $lote[0]->rotina=="semestral" ){
-          $sql="";
-          $sql.="SELECT TOP 6 CMP_CODIGO AS CODIGO,CMP_NOME AS NOME FROM COMPETENCIA"; 
-          $sql.=" WHERE CMP_CODIGO>=".$lote[0]->codcmp." AND CMP_CODEMP=".$_SESSION["emp_codigo"];
+          $sql ="SELECT TOP 6 CMP_CODIGO AS CODIGO,CMP_NOME AS NOME FROM COMPETENCIA"; 
+          $sql.=" WHERE ((CMP_CODIGO>=".$lote[0]->codcmp.") AND (CMP_CODEMP=".$_SESSION["emp_codigo"]."))";
           $sql.=" ORDER BY CMP_CODIGO"; 
           $classe->msgSelect(true);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls["qtos"]==0 ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"NENHUM REGISTRO LOCALIZADO"}]';              
+            $retorno='[{"retorno":"ERR","dados":"","erro":"NENHUMA COMPETENCIA LOCALIZADA"}]';              
           } else { 
             $desmes   = ["AAA99","AAA99","AAA99","AAA99","AAA99","AAA99"];
             ///////////////////////////////////////////////////////
@@ -96,8 +95,7 @@
             // Montando o select para retornar ao JavaScript
             ////////////////////////////////////////////////
             if( $lote[0]->grupofavorecido=="grupo" ){
-              $sql="";
-              $sql.="SELECT GF.GF_NOME";
+              $sql ="SELECT GF.GF_NOME";
               $sql.=$arrSql[0];
               $sql.=$arrSql[1];
               $sql.=$arrSql[2];
@@ -105,7 +103,7 @@
               $sql.=$arrSql[4];
               $sql.=$arrSql[5];
               $sql.="       ,SUM( CASE WHEN (".$campo." BETWEEN '".$dtIni."' AND '".$dtFim."') THEN A.PGR_VLRLIQUIDO ELSE 0 END )";
-              $sql.="  FROM PAGAR A";
+              $sql.="  FROM PAGAR A WITH(NOLOCK)";
               $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON A.PGR_CODFVR=FVR.FVR_CODIGO";
               if( $lote[0]->codptp=="CP" ){            
                 $sql.="  LEFT OUTER JOIN GRUPOFAVORECIDO GF ON FVR.FVR_GFCP=GF.GF_CODIGO";
@@ -113,11 +111,11 @@
                 $sql.="  LEFT OUTER JOIN GRUPOFAVORECIDO GF ON FVR.FVR_GFCR=GF.GF_CODIGO";              
               };  
               $sql.=" WHERE( (".$campo." BETWEEN '".$dtIni."' AND '".$dtFim."') AND (A.PGR_CODPTP='".$lote[0]->codptp."'))";
+              $sql.="   AND( A.PGR_CODEMP=".$_SESSION["emp_codigo"].")";
               $sql.="  GROUP BY GF.GF_NOME";
             };
             if( $lote[0]->grupofavorecido=="favorecido" ){
-              $sql="";
-              $sql.="SELECT SUBSTRING(FVR.FVR_NOME,1,35) AS FVR_NOME";
+              $sql ="SELECT SUBSTRING(FVR.FVR_NOME,1,35) AS FVR_NOME";
               $sql.=$arrSql[0];
               $sql.=$arrSql[1];
               $sql.=$arrSql[2];
@@ -125,19 +123,12 @@
               $sql.=$arrSql[4];
               $sql.=$arrSql[5];
               $sql.="       ,SUM( CASE WHEN (".$campo." BETWEEN '".$dtIni."' AND '".$dtFim."') THEN A.PGR_VLRLIQUIDO ELSE 0 END )";
-              $sql.="  FROM PAGAR A";
+              $sql.="  FROM PAGAR A WITH(NOLOCK)";
               $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON A.PGR_CODFVR=FVR.FVR_CODIGO";
-              /*
-              if( $lote[0]->codptp=="CP" ){            
-                $sql.="  LEFT OUTER JOIN GRUPOFAVORECIDO GF ON FVR.FVR_GFCP=GF.GF_CODIGO";
-              } else {
-                $sql.="  LEFT OUTER JOIN GRUPOFAVORECIDO GF ON FVR.FVR_GFCR=GF.GF_CODIGO";              
-              };  
-              */
               $sql.=" WHERE( (".$campo." BETWEEN '".$dtIni."' AND '".$dtFim."') AND (A.PGR_CODPTP='".$lote[0]->codptp."'))";
+              $sql.="   AND( A.PGR_CODEMP=".$_SESSION["emp_codigo"].")";              
               $sql.="  GROUP BY FVR.FVR_NOME";
             };
-            
             $classe->msgSelect(true);
             $retCls=$classe->select($sql);
             $retorno='[{"retorno":"OK"
@@ -176,7 +167,7 @@
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
         pega=localStorage.getItem("addParametro")
-        localStorage.removeItem("addParametro");
+        //localStorage.removeItem("addParametro");
         document.getElementById("labelId").innerHTML=(pega=="grupo" ? "Grupo semestral" : "Favorecido semestral" );
         
         document.getElementById("edtDesCmp").foco();

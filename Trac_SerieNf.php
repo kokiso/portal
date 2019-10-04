@@ -29,15 +29,12 @@
         //    Dados para JavaScript SERIENF       //
         ///////////////////////////////////////////
         if( $rotina=="selectSnf" ){
-          $sql="";
-          $sql.="SELECT A.SNF_CODIGO";
+          $sql ="SELECT A.SNF_CODIGO";
           $sql.="       ,A.SNF_SERIE";
           $sql.="       ,CASE WHEN A.SNF_ENTSAI='S' THEN 'SAI' ELSE 'ENT' END AS SNF_ENTSAI";
           $sql.="       ,A.SNF_CODTD";
           $sql.="       ,T.TD_NOME";
-          $sql.="       ,CASE WHEN A.SNF_INFORMARNF='S' THEN 'SIM' ELSE 'NAO' END AS SNF_INFORMARNF";
-          $sql.="       ,A.SNF_NFINICIO";
-          $sql.="       ,A.SNF_NFFIM";
+          $sql.="       ,A.SNF_NFPROXIMA";
           $sql.="       ,A.SNF_MODELO";
           $sql.="       ,CASE WHEN A.SNF_LIVRO='S' THEN 'SIM' ELSE 'NAO' END AS SNF_LIVRO";          
           $sql.="       ,CASE WHEN A.SNF_ENVIO='P' THEN CAST('PREFEITURA' AS VARCHAR(10))";
@@ -51,7 +48,7 @@
           $sql.="       ,CASE WHEN A.SNF_REG='P' THEN 'PUB' WHEN A.SNF_REG='S' THEN 'SIS' ELSE 'ADM' END AS SNF_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.SNF_CODUSR";
-          $sql.="  FROM SERIENF A";
+          $sql.="  FROM SERIENF A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.SNF_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN TIPODOCUMENTO T ON A.SNF_CODTD=T.TD_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESA E ON A.SNF_CODEMP=E.EMP_CODIGO";
@@ -176,6 +173,8 @@
         if( jsPub[0].emp_fllunica=="S" ){
           jsCmpAtivo("edtCodFll").remove("campo_input").add("campo_input_titulo").disabled(true);
         };
+        prodServ=localStorage.getItem("prodServ");  // Recebendo P ou S
+        localStorage.removeItem("prodServ")
         //////////////////////////////////////////
         //   Objeto clsTable2017 SERIENF        //
         //////////////////////////////////////////
@@ -234,7 +233,7 @@
                       ,"tamImp"         : "12"
                       ,"fieldType"      : "str"
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|.| "
-                      ,"newRecord"      : ["NFS","this","this"]
+                      ,"newRecord"      : [ (prodServ=='P' ? 'NFP' : 'NFS'),"this","this"]
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,3]
                       ,"ajudaCampo"     : [ "Tipo de documento"]
@@ -252,24 +251,11 @@
                       ,"formato"        : ["uppercase","removeacentos","tiraaspas","alltrim"]                      
                       ,"ajudaCampo"     : ["Nome da ContaContabil."]
                       ,"padrao":0}
-            ,{"id":6  ,"field"          : "SNF_INFORMARNF"  
-                      ,"labelCol"       : "INFORMARNF" 
-                      ,"obj"            : "cbInformarNf"
-                      ,"tipo"           : "cb"                      
-                      ,"tamGrd"         : "5em"
-                      ,"tamImp"         : "20"                      
-                      ,"fieldType"      : "str"
-                      ,"newRecord"      : ["N","this","this"]
-                      ,"validar"        : ["notnull"]
-                      ,"digitosMinMax"  : [1,1]
-                      ,"ajudaCampo"     : [ "Direito para opção..."]
-                      ,"importaExcel"   : "S"                                                                
-                      ,"padrao":0}                                                  
-            ,{"id":7  ,"field"          : "SNF_NFINICIO"  
-                      ,"labelCol"       : "NFINICIO" 
+            ,{"id":6  ,"field"          : "SNF_NFPROXIMA"  
+                      ,"labelCol"       : "NFPROX" 
                       ,"newRecord"      : ["000000","this","this"]
                       ,"insUpDel"       : ["S","N","N"]                      
-                      ,"obj"            : "edtNfInicio"
+                      ,"obj"            : "edtNfProxima"
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "16"                      
                       ,"fieldType"      : "int"
@@ -279,20 +265,7 @@
                       ,"ajudaCampo"     : [ "Direito para opção..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":8  ,"field"          : "SNF_NFFIM"  
-                      ,"labelCol"       : "NFFIM" 
-                      ,"newRecord"      : ["000000","this","this"]
-                      ,"obj"            : "edtNfFim"
-                      ,"tamGrd"         : "6em"
-                      ,"tamImp"         : "16"                      
-                      ,"fieldType"      : "int"
-                      ,"formato"        : ["i6"]
-                      ,"validar"        : ["intMaiorZero"]
-                      ,"digitosMinMax"  : [1,10]
-                      ,"ajudaCampo"     : [ "Direito para opção..."]
-                      ,"importaExcel"   : "S"                                                                
-                      ,"padrao":0}                                                  
-            ,{"id":9  ,"field"          : "SNF_MODELO"   
+            ,{"id":7  ,"field"          : "SNF_MODELO"   
                       ,"labelCol"       : "MODELO"
                       ,"obj"            : "edtModelo"
                       ,"insUpDel"       : ["S","S","N"]
@@ -305,7 +278,7 @@
                       ,"ajudaCampo"     : ["Direito para opção..."]
                       ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"field"         : "SNF_LIVRO"   
+            ,{"id":8  ,"field"         : "SNF_LIVRO"   
                       ,"labelCol"       : "LIVRO"
                       ,"obj"            : "cbLivro"
                       ,"insUpDel"       : ["S","S","N"]
@@ -316,7 +289,7 @@
                       ,"ajudaCampo"     : ["Direito para opção..."]
                       ,"importaExcel"   : "S"                                          
                       ,"padrao":0}
-            ,{"id":11 ,"field"         : "SNF_ENVIO"   
+            ,{"id":9  ,"field"         : "SNF_ENVIO"   
                       ,"labelCol"       : "ENVIO"
                       ,"obj"            : "cbEnvio"
                       ,"insUpDel"       : ["S","S","N"]
@@ -327,7 +300,7 @@
                       ,"ajudaCampo"     : ["Direito para opção..."]
                       ,"importaExcel"   : "S"                                          
                       ,"padrao":0}
-            ,{"id":12 ,"field"          : "SNF_CODFLL" 
+            ,{"id":10 ,"field"          : "SNF_CODFLL" 
                       ,"labelCol"       : "FILIAL"  
                       ,"obj"            : "edtCodFll"  
                       ,"newRecord"      : [jsPub[0].emp_codfll,"this","this"]                      
@@ -336,12 +309,12 @@
                       ,"formato"        : ["i4"]
                       ,"inputDisabled"  : (jsPub[0].emp_fllunica=="S" ? true : false )
                       ,"padrao":7}					  
-            ,{"id":13 ,"field"          : "SNF_CODEMP" 
+            ,{"id":11 ,"field"          : "SNF_CODEMP" 
                       ,"pk"             : "S"
                       ,"labelCol"       : "CODEMP"  
                       ,"obj"            : "edtCodEmp"  
                       ,"padrao":7}					  
-            ,{"id":14 ,"field"          : "EMP_APELIDO"   
+            ,{"id":12 ,"field"          : "EMP_APELIDO"   
                       ,"labelCol"       : "EMPRESA"
                       ,"obj"            : "edtDesEmp"
                       ,"insUpDel"       : ["N","N","N"]
@@ -352,7 +325,7 @@
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z| "
                       ,"ajudaCampo"     : ["Nome da Cidade."]
                       ,"padrao":0}
-            ,{"id":15 ,"field"          : "SNF_IDF"   
+            ,{"id":13 ,"field"          : "SNF_IDF"   
                       ,"labelCol"       : "IDF"
                       ,"obj"            : "edtIdf"
                       ,"insUpDel"       : ["S","S","N"]
@@ -365,27 +338,27 @@
                       ,"ajudaCampo"     : ["Direito para opção..."]
                       ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":16 ,"field"          : "SNF_ATIVO"  
+            ,{"id":14 ,"field"          : "SNF_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"tamImp"         : "10"                      
                       ,"padrao":2}                                        
-            ,{"id":17 ,"field"          : "SNF_REG"    
+            ,{"id":15 ,"field"          : "SNF_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"tamImp"         : "10"                      
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":18 ,"field"          : "US_APELIDO" 
+            ,{"id":16 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}                
-            ,{"id":19 ,"field"          : "SNF_CODUSR" 
+            ,{"id":17 ,"field"          : "SNF_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":20 ,"labelCol"       : "PP"      
+            ,{"id":18 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -481,7 +454,7 @@
             ,{"id":1  ,"field":"ES"         ,"labelCol":"ENT_SAI"     ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":2  ,"field":"CODTD"      ,"labelCol":"TIPO_DOCTO"  ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":3  ,"field":"INFORMARNF" ,"labelCol":"IFORMAR_NF"  ,"tamGrd":"6em"     ,"tamImp":"20"}
-            ,{"id":4  ,"field":"NFINICIO"   ,"labelCol":"NF_INICIO"   ,"tamGrd":"6em"     ,"tamImp":"20"}
+            ,{"id":4  ,"field":"NFPROXIMA"  ,"labelCol":"NF_PROXIMA"  ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":5  ,"field":"NFFIM"      ,"labelCol":"NF_FIM"      ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":6  ,"field":"IDF"        ,"labelCol":"NUM_IDF"     ,"tamGrd":"6em"     ,"tamImp":"20"}
             ,{"id":7  ,"field":"MODELO"     ,"labelCol":"MODELO"      ,"tamGrd":"6em"     ,"tamImp":"20"}
@@ -530,8 +503,9 @@
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
       var msg;                        // Variavel para guardadar mensagens de retorno/erro 
-      var envPhp                      // Para enviar dados para o Php      
-      var retPhp                      // Retorno do Php para a rotina chamadora
+      var envPhp;                     // Para enviar dados para o Php      
+      var retPhp;                     // Retorno do Php para a rotina chamadora
+      var prodServ;                   // Recebendo se eh Produto ou Servico (PS)
       var contMsg   = 0;              // contador para mensagens
       var cmp       = new clsCampo(); // Abrindo a classe campos
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
@@ -559,11 +533,11 @@
       ////////////////////////////
       function btnFiltrarClick(atv) { 
         clsJs   = jsString("lote");  
-        clsJs.add("rotina"      , "selectSnf"                       );
-        clsJs.add("login"       , jsPub[0].usr_login                );
-        clsJs.add("ativo"       , atv                               );
-        clsJs.add("codemp"      , jsPub[0].emp_codigo               );
-        clsJs.add("ps"          , localStorage.getItem("prodServ")  );
+        clsJs.add("rotina"      , "selectSnf"         );
+        clsJs.add("login"       , jsPub[0].usr_login  );
+        clsJs.add("ativo"       , atv                 );
+        clsJs.add("codemp"      , jsPub[0].emp_codigo );
+        clsJs.add("ps"          , prodServ            );
         fd = new FormData();
         fd.append("serienf" , clsJs.fim());
         msg     = requestPedido("Trac_SerieNf.php",fd); 
@@ -629,14 +603,14 @@
       function tdF10Click(obj){ 
         fPadraoF10( { opc:0
                       ,edtCod:obj.id
-                      ,foco:"cbInformarNf"
+                      ,foco:"edtNfProxima"
                       ,topo:100
                       ,tableBd:"TIPODOCUMENTO"
                       ,fieldCod:"A.TD_CODIGO"
                       ,fieldDes:"A.TD_NOME"
                       ,fieldAtv:"A.TD_ATIVO"
                       ,typeCod :"str"
-                      ,where:" AND A.TD_SERIENF = '" +localStorage.getItem("prodServ")+"'"                      
+                      ,where:" AND A.TD_SERIENF = '" +prodServ+"'"                      
                       ,tbl:"tblTd"}
         );
       };
@@ -651,14 +625,14 @@
         if( elOld != elNew ){
           var ret = fPadraoF10( { opc:1
                                   ,edtCod:obj.id
-                                  ,foco:"cbInformarNf"
+                                  ,foco:"edtNfProxima"
                                   ,topo:100
                                   ,tableBd:"TIPODOCUMENTO"
                                   ,fieldCod:"A.TD_CODIGO"
                                   ,fieldDes:"A.TD_NOME"
                                   ,fieldAtv:"A.TD_ATIVO"
                                   ,typeCod :"str" 
-                                  ,where:" AND A.TD_SERIENF = '" +localStorage.getItem("prodServ")+"'"                                  
+                                  ,where:" AND A.TD_SERIENF = '" +prodServ+"'"                                  
                                   ,tbl:"tblTd"}
           );
           document.getElementById(obj.id).value       = ( ret.length == 0 ? "FAT"  : ret[0].CODIGO             );
@@ -713,6 +687,7 @@
                 <input class="campo_input_titulo input" id="edtDesTd" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesTd">NOME_TIPODOCUMENTO:</label>
               </div>
+              <!--
               <div class="campotexto campo15">
                 <select class="campo_input_combo" name="cbInformarNf" id="cbInformarNf">
                   <option value="S">SIM</option>
@@ -720,13 +695,15 @@
                 </select>
                 <label class="campo_label campo_required" for="cbInformarNf">INFORMAR NF:</label>
               </div>
+              -->
               <div class="campotexto campo10">
-                <input class="campo_input_titulo input" id="edtNfInicio" 
+                <input class="campo_input_titulo input" id="edtNfProxima" 
                                                         OnKeyPress="return mascaraInteiro(event);"
                                                         type="text" 
                                                         maxlength="6" />
-                <label class="campo_label campo_required" for="edtNfInicio">NF INICIO:</label>
+                <label class="campo_label campo_required" for="edtNfProxima">NF PROXIMA:</label>
               </div>
+              <!--
               <div class="campotexto campo10">
                 <input class="campo_input_titulo input" id="edtNfFim" 
                                                         OnKeyPress="return mascaraInteiro(event);"
@@ -734,6 +711,7 @@
                                                         maxlength="6" />
                 <label class="campo_label campo_required" for="edtNfFim">NF FIM:</label>
               </div>
+              -->
               <div class="campotexto campo20">
                 <input class="campo_input" id="edtIdf" type="text" maxlength="20" />
                 <label class="campo_label campo_required" for="edtIdf">IDF:</label>
@@ -792,8 +770,8 @@
                 <input id="edtCodUsu" type="text" />
                 <input id="edtCodEmp" type="text" />
               </div>
-              <div id="btnConfirmar" class="btnImagemEsq bie15 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>
-              <div id="btnCancelar"  class="btnImagemEsq bie15 bieRed bieRight"><i class="fa fa-reply"> Cancelar</i></div>
+              <div id="btnConfirmar" class="btnImagemEsq bie12 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>
+              <div id="btnCancelar"  class="btnImagemEsq bie12 bieRed bieRight"><i class="fa fa-reply"> Cancelar</i></div>
             </div>
           </div>
         </form>

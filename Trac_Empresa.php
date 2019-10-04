@@ -37,8 +37,7 @@
         //    Dados para JavaScript EMPRESA        //
         /////////////////////////////////////////////
         if( $rotina=="selectEmp" ){
-          $sql="";
-          $sql.="SELECT A.EMP_CODIGO";
+          $sql ="SELECT A.EMP_CODIGO";
           $sql.="       ,A.EMP_NOME";
           $sql.="       ,A.EMP_APELIDO";
           $sql.="       ,A.EMP_CNPJ";
@@ -80,7 +79,7 @@
           $sql.="       ,CASE WHEN A.EMP_REG='P' THEN 'PUB' WHEN A.EMP_REG='S' THEN 'SIS' ELSE 'ADM' END AS EMP_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.EMP_CODUSR";
-          $sql.="  FROM EMPRESA A";
+          $sql.="  FROM EMPRESA A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.EMP_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN CIDADE C ON A.EMP_CODCDD=C.CDD_CODIGO";
           $sql.="  LEFT OUTER JOIN EMPRESATRIBFED E ON A.EMP_CODETF=E.ETF_CODIGO";
@@ -584,6 +583,7 @@
                       ,"tamImp"         : "0"
                       ,"fieldType"      : "str"
                       ,"newRecord"      : ["","this","this"]
+                      ,"formato"        : ["removeacentos","tiraaspas","alltrim"]
                       ,"validar"        : ["podeNull"]
                       ,"digitosMinMax"  : [0,30]
                       ,"ajudaCampo"     : [ "Direito para opção..."]
@@ -632,6 +632,7 @@
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"newRecord"      : ["","this","this"]
+                      ,"formato"        : ["removeacentos","tiraaspas","alltrim"]
                       ,"digitosMinMax"  : [0,20]
                       ,"validar"        : ["podeNull"]
                       ,"ajudaCampo"     : [ "Direito para opção..."]
@@ -707,12 +708,12 @@
           ]
           , 
           "botoesH":[
-             {"texto":" Cadastrar" ,"name":"horCadastrar"  ,"onClick":"0"  ,"enabled":true ,"imagem":"fa fa-plus"             }
-            ,{"texto":" Alterar"   ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"  }
-            ,{"texto":" Excluir"   ,"name":"horExcluir"    ,"onClick":"2"  ,"enabled":true ,"imagem":"fa fa-trash-o"            }
-            ,{"texto":" Excel"     ,"name":"horExcel"      ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"      }        
-            ,{"texto":" Imprimir"  ,"name":"horImprimir"   ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"  }                       
-           // ,// {"texto":"Fechar"    ,"name":"horFechar"     ,"onClick":"8"  ,"enabled":true ,"imagem":"fa fa-close"            }
+             {"texto":"Cadastrar" ,"name":"horCadastrar"  ,"onClick":"0"  ,"enabled":true ,"imagem":"fa fa-plus"             }
+            ,{"texto":"Alterar"   ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"  }
+            ,{"texto":"Excluir"   ,"name":"horExcluir"    ,"onClick":"2"  ,"enabled":true ,"imagem":"fa fa-minus"            }
+            ,{"texto":"Excel"     ,"name":"horExcel"      ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"      }        
+            ,{"texto":"Imprimir"  ,"name":"horImprimir"   ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"            }                        
+            ,{"texto":"Fechar"    ,"name":"horFechar"     ,"onClick":"8"  ,"enabled":true ,"imagem":"fa fa-close"            }
           ] 
           ,"registros"      : []                    // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar                     
@@ -731,8 +732,7 @@
           ,"fieldReg"       : "EMP_REG"             // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "EMP_CODUSR"          // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
-          ,"max-width"      : "105em"                   // Tamanho máximo da table //Angelo kokiso - mudança no tamanho da tabela
-          ,"width"          : "min-content"                    // Tamanho da table
+          ,"width"          : "110em"               // Tamanho da table
           ,"height"         : "58em"                // Altura da table
           ,"tableLeft"      : "sim"                 // Se tiver menu esquerdo
           ,"relTitulo"      : "EMPRESA"          // Titulo do relatório

@@ -6,7 +6,7 @@
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
       require("classPhp/selectRepetido.class.php");                               
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJson();          
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["contratoproduto"]);
       ///////////////////////////////////////////////////////////////////////

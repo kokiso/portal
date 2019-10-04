@@ -6,7 +6,7 @@
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
-      require("classPhp/selectRepetido.class.php");                                           
+      require("classPhp/selectRepetido.class.php");       						                        
       //require("classPhp/dataCompetencia.class.php");      
 
       //$clsCompet  = new dataCompetencia();    
@@ -106,7 +106,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
           if( $retCls['retorno'] != "OK" ){
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           } else { 
-            $tbl      = $retCls["dados"];
+						$tbl		  =	$retCls["dados"];
             $tblIte   = [];          
             $tblCntt  = [];
             $tblCabec = [];           
@@ -152,7 +152,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
                   ,"dias_inicio"      =>  $ite["DIASINICIO"]              //Numero de dias da ativacao ateh o ultimo dia do mes de cobrança
                   ,"cntc_pgto"        =>  $ite["CNTC_PGTO"]               //Mensal ou pontual
                   ,"indice"           =>  $indice                         //lancto( num lancto apos faturar - sempre 0 )
-                ]); 
+                ]);	
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Aqui vou gerar um aviso de alerta ou erro na grade de contrato mostrando que existe algo inconsistente na grade inferior de autos
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +259,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
                      ,"item":'.json_encode($tblIte).'
                      ,"erro":""}]'; 
           unset($tblCntt,$tblIte);
-        };
+				};
         ///////////////////////////////////////////////////////
         // Buscando a serie da NF e parametros complementares
         // Trac_NfsCadTitulo.php / Trac_CpCrFaturarContrato.php
@@ -343,20 +343,20 @@ $sql ="SELECT A.CNTC_CODCNTT";
              {"id":0  ,"labelCol":"OPC"     
                       ,"padrao":1} 
             ,{"id":1  ,"labelCol"       : "CONTRATO"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "6em"
                       ,"formato"        : ["i6"]
                       ,"tamImp"         : "15"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":2  ,"labelCol"       : "CODFVR"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":3  ,"labelCol"       : "CLIENTE"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "20"
                       ,"truncate"       : true                      
@@ -381,7 +381,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
                       ,"excel"          : "S"
                       ,"padrao":0}
             ,{"id":7  ,"labelCol"       : "TD"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
@@ -390,50 +390,50 @@ $sql ="SELECT A.CNTC_CODCNTT";
                       ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":8  ,"labelCol"       : "CODEMP"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":9  ,"labelCol"       : "CODFLL"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":10 ,"labelCol"       : "EMPRESA"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "20"
                       ,"excel"   : "S"
                       ,"padrao":0}
             ,{"id":11 ,"labelCol"       : "CODVND"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":12 ,"labelCol"       : "VENDEDOR"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"truncate"       : true
                       ,"tamImp"         : "20"
                       ,"excel"   : "S"
                       ,"padrao":0}
             ,{"id":13 ,"labelCol"       : "CODCDD"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"excel"   : "S"
                       ,"padrao":0}
             ,{"id":14 ,"labelCol"       : "CODBNC"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":15 ,"labelCol"       : "FC"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
@@ -441,19 +441,19 @@ $sql ="SELECT A.CNTC_CODCNTT";
                       ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":16 ,"labelCol"       : "CODPT"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":17 ,"labelCol"       : "INDICE"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":18 ,"labelCol"       : "CONTABIL"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
@@ -461,38 +461,38 @@ $sql ="SELECT A.CNTC_CODCNTT";
                       ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":19 ,"labelCol"       : "CODSRV"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "0"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":20 ,"labelCol"       : "LANCTO"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"formato"        : ["i6"]                      
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "10"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"padrao":0}
             ,{"id":21 ,"labelCol"       : "AUTOS"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"formato"        : ["i4"]                      
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "10"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"popoverTitle"   : "Total de autos no contrato"                          
                       ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":22 ,"labelCol"       : "GRD"
-                      ,"fieldType"      : "int"
+											,"fieldType"      : "int"
                       ,"formato"        : ["i4"]                      
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "10"
-                      ,"excel"          : "S"
+                      ,"excel"   				: "S"
                       ,"popoverTitle"   : "Total de autos na grade inferior de lançamentos"                          
                       ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":23 ,"labelCol"       : "CHECK"
-                      ,"fieldType"      : "str"
+											,"fieldType"      : "str"
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
@@ -561,12 +561,12 @@ $sql ="SELECT A.CNTC_CODCNTT";
             ,{"id":2  ,"labelCol"       : "SERVICO"
                       ,"fieldType"      : "str"            
                       ,"tamGrd"         : "30em"
-                      ,"tamImp"         : "40"                      
+                      ,"tamImp"         : "40"											
                       ,"padrao":0}
             ,{"id":3  ,"labelCol"       : "ATIVACAO"
                       ,"fieldType"      : "str"                        
                       ,"tamGrd"         : "7em"
-                      ,"tamImp"         : "25"                      
+                      ,"tamImp"         : "25"											
                       ,"padrao":0}
             ,{"id":4  ,"labelCol"       : "DIAS"
                       ,"fieldType"      : "int"
@@ -583,7 +583,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
                       ,"fieldType"      : "str"                        
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "20"
-                      ,"funcCor"        : "(objCell.innerHTML=='NSA0000'  ? objCell.classList.add('corAviso') : objCell.classList.remove('corAviso'))"                      
+                      ,"funcCor"        : "(objCell.innerHTML=='NSA0000'  ? objCell.classList.add('corAviso') : objCell.classList.remove('corAviso'))"											
                       ,"padrao":0}
             ,{"id":7  ,"labelCol"       : "VLRMENSAL"
                       ,"fieldType"      : "flo2"                       
@@ -598,7 +598,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
             ,{"id":9  ,"labelCol"       : "GERENCIAL"
                       ,"fieldType"      : "str"                        
                       ,"tamGrd"         : "0em"
-                      ,"tamImp"         : "30"                      
+                      ,"tamImp"         : "30"											
                       ,"padrao":0}
             ,{"id":10 ,"labelCol"       : "CODSRV"
                       ,"fieldType"      : "int"
@@ -608,7 +608,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
             ,{"id":11 ,"labelCol"       : "MP"
                       ,"fieldType"      : "str"                        
                       ,"tamGrd"         : "2em"
-                      ,"tamImp"         : "10"                      
+                      ,"tamImp"         : "10"											
                       ,"padrao":0}
                       
           ]
@@ -684,14 +684,14 @@ $sql ="SELECT A.CNTC_CODCNTT";
       ////////////////////////////
       // Filtrando os registros //
       ////////////////////////////
-      function btnFiltrarClick(){
+			function btnFiltrarClick(){
         try{        
           if( jsConverte($doc("edtDesCmp").getAttribute("data-codcmp")).inteiro()<=0 )
             throw "COMPETENCIA INVALIDA PARA FILTRO!";
           
           clsJs   = jsString("lote");  
-          clsJs.add("rotina"      , "selectFat"                                   );
-          clsJs.add("login"       , jsPub[0].usr_login                            );
+          clsJs.add("rotina"      , "selectFat"        	                          );
+          clsJs.add("login"       , jsPub[0].usr_login	                          );
           clsJs.add("codcmp"      , $doc("edtDesCmp").getAttribute("data-codcmp") );
           fd = new FormData();
           fd.append("faturarcontrato" , clsJs.fim());
@@ -707,7 +707,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
             //////////////////////////////////////////////////////////////////////////////////
             jsFat.registros=objFat.addIdUnico(retPhp[0]["dados"]);
             objFat.montarBody2017();
-            arrIte  = retPhp[0]["item"];
+            arrIte	=	retPhp[0]["item"];
           };  
         }catch(e){
           gerarMensagemErro("catch",e,{cabec:"Erro"});
@@ -716,7 +716,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
       ////////////////////////////
       //        Faturar         //
       ////////////////////////////
-      function btnFaturarClick(){
+			function btnFaturarClick(){
         try{
           clsChecados = objFat.gerarJson("1");
           chkds       = clsChecados.gerar();
@@ -1114,7 +1114,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
           
           let valor=0;  
           jsIte.registros=[];          
-          arrFilter.forEach(function(cmp){
+					arrFilter.forEach(function(cmp){
             jsIte.registros.push([
               cmp.cntc_codcntt
               ,cmp.srv_nome
@@ -1129,7 +1129,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
               ,cmp.cntc_pgto              
             ])
             valor+=jsConverte( (cmp.cntc_vlrmensal).toString() ).dolar(true);
-          });
+					});
 
           objIte.montarBody2017();          
           $doc("lblIte").innerHTML="Mostrando lançamentos com vencimento <b>"+chkds[0].VENCTO+"</b> Total "+valor.toFixed(2);//  jsConverte(valor.toString()).real();

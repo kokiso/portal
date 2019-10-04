@@ -29,8 +29,7 @@
         //    Dados para JavaScript CNABRETORNO    //
         /////////////////////////////////////////////
         if( $rotina=="selectCr" ){
-          $sql="";
-          $sql.="SELECT A.CR_CODBCD";
+          $sql ="SELECT A.CR_CODBCD";
           $sql.="       ,B.BCD_NOME";
           $sql.="       ,A.CR_CODIGO";          
           $sql.="       ,A.CR_NOME";
@@ -45,7 +44,7 @@
           $sql.="       ,CASE WHEN A.CR_REG='P' THEN 'PUB' WHEN A.CR_REG='S' THEN 'SIS' ELSE 'ADM' END AS CR_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.CR_CODUSR";
-          $sql.="  FROM CNABRETORNO A";
+          $sql.="  FROM CNABRETORNO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.CR_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN BANCOCODIGO B ON A.CR_CODBCD=B.BCD_CODIGO";
           $sql.="  WHERE (CR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";

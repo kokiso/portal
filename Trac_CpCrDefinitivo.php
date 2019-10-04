@@ -38,8 +38,7 @@
         /////////////////////////
         if( $lote[0]->rotina=="definitivo" ){
           foreach ( $lote as $reg ){
-            $sql="";
-            $sql.="UPDATE VPAGAR"; 
+            $sql ="UPDATE VPAGAR"; 
             $sql.="   SET PGR_VENCTO='".$reg->vencto."'";
             $sql.="       ,PGR_CODBNC='".$reg->codbnc."'";
             $sql.="       ,PGR_CODCMP='".$reg->codcmp."'";
@@ -49,8 +48,7 @@
             /////////////////////////////////////////////////////////////////////////////////
             // Como os dados ja estaum no banco de dados apenas recupero para inserir o saldo
             /////////////////////////////////////////////////////////////////////////////////
-            $sql="";
-            $sql.="SELECT PGR_BLOQUEADO";
+            $sql ="SELECT PGR_BLOQUEADO";
             $sql.=",PGR_CODBNC";          
             $sql.=",PGR_CODFVR";
             $sql.=",PGR_CODFC";
@@ -80,7 +78,7 @@
             $sql.=",PGR_REG";
             $sql.=",PR.PR_CODCC";
             $sql.=",PR.PR_DEBCRE";
-            $sql.=" FROM PAGAR"; 
+            $sql.=" FROM PAGAR WITH(NOLOCK)"; 
             $sql.=" LEFT OUTER JOIN PAGARRATEIO PR ON PGR_LANCTO=PR.PR_LANCTO"; 
             $sql.=" WHERE PGR_LANCTO=".$reg->lancto;
             $classe->msgSelect(false);
@@ -96,8 +94,7 @@
               (($tbl["PGR_CODPTP"] == "MR") ? "CP" :  "*" ))) );
             
             $lancto=$classe->generator("PAGAR"); 
-            $sql="";
-            $sql="INSERT INTO VPAGAR(";
+            $sql ="INSERT INTO VPAGAR(";
             $sql.="PGR_LANCTO";
             $sql.=",PGR_BLOQUEADO";
             $sql.=",PGR_CODBNC";
@@ -132,7 +129,7 @@
             $sql.=",'" .$tbl["PGR_CODTD"]."'";          // CODTD
             $sql.=",'" .$reg->vencto."'";               // VENCTO
             $sql.=",'" .$reg->docto."'";                // DOCTO
-            $sql.=",'" .$tbl["PGR_DTDOCTO"]."'";        // DTDOCTO
+            $sql.=",'" .date('Y-m-d')."'";              // DTDOCTO
             $sql.=",'P'";                               // CODPTT
             $sql.=","  .$lancto;                        // MASTER
             $sql.=",'" .$tbl["PGR_OBSERVACAO"]."'";     // OBSERVACAO
@@ -156,8 +153,7 @@
             /////////////////////
             // Gravando na RATEIO
             /////////////////////
-            $sql="";
-            $sql.="INSERT INTO VRATEIO(";
+            $sql ="INSERT INTO VRATEIO(";
             $sql.="RAT_LANCTO";                
             $sql.=",RAT_CODCC";
             $sql.=",RAT_DEBITO";
@@ -209,7 +205,7 @@
 <!DOCTYPE html>
   <head>
     <meta charset="utf-8">
-    <title>Baixa parcial</title>
+    <title>Em definitivo</title>
     <style id="meuCss">
     </style>  
     <!-- 
@@ -228,12 +224,12 @@
         //Recuperando os dados recebidos de Trac_CpCr.php
         /////////////////////////////////////////////////
         pega=JSON.parse(localStorage.getItem("addAlt")).lote;
-        localStorage.removeItem("addAlt");
-        document.getElementById("edtCodBnc").value      = jsNmrs(pega[0].codbnc).emZero(4).ret();        
-        document.getElementById("edtDesBnc").value      = pega[0].desbnc;        
-        document.getElementById("edtDocto").value       = pega[0].docto;
-        document.getElementById("edtVencto").value      = pega[0].vencto;
-        document.getElementById("edtCodBnc").foco();
+        //localStorage.removeItem("addAlt");
+        $doc("edtCodBnc").value      = jsConverte(pega[0].codbnc).emZero(4);      
+        $doc("edtDesBnc").value      = pega[0].desbnc;        
+        $doc("edtDocto").value       = pega[0].docto;
+        $doc("edtVencto").value      = pega[0].vencto;
+        $doc("edtCodBnc").foco();
         
         var jsTab={
           "pai"         : "appAba"  //Onde vai ser appendado o html gerado
@@ -305,19 +301,22 @@
               ,reg.vencto
               ,reg.codbnc              
               ,reg.desbnc
-              ,reg.valor
+              ,jsConverte(reg.valor).abs() //reg.valor
             ]
           );
-          vlrTotal+=jsNmrs(reg.valor).abs().dolar().ret(); 
+//debugger;          
+          //reg.valor=jsConverte(reg.valor).abs();  
+          //vlrTotal+=jsConverte(reg.valor).dolar(true);//          jsNmrs(reg.valor).abs().dolar().ret(); 
         });    
-        document.getElementById("edtVlrBaixa").value = jsNmrs(vlrTotal).abs().real().ret();;         
+        //$doc("edtVlrEvento").value = jsConverte(vlrTotal.toString()).real()  ;//jsNmrs(vlrTotal).abs().real().ret();         
+        $doc("edtVlrEvento").value="0,00";
         //
       });
       //
       var msg;                        // Variavel para guardadar mensagens de retorno/erro
-      var clsChecados;                // Classe para montar Json  
-      var chkds;                      // Guarda todos registros checados na table 
-      var tamC;                       // Guarda a quantidade de registros   
+      //var clsChecados;                // Classe para montar Json  
+      //var chkds;                      // Guarda todos registros checados na table 
+      //var tamC;                       // Guarda a quantidade de registros   
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP  
       var fd;                         // Formulario para envio de dados para o PHP
       var envPhp;                     // Envia para o Php
@@ -425,10 +424,12 @@
         
         for(let lin = 0; lin < nl; lin++){
           if( el.rows[lin].cells[0].children[0].checked==true ){ 
-            el.rows[lin].cells[objGrade.colDocto].innerHTML  = document.getElementById("edtDocto").value;
-            el.rows[lin].cells[objGrade.colVencto].innerHTML = document.getElementById("edtVencto").value;
-            el.rows[lin].cells[objGrade.colCodBnc].innerHTML = document.getElementById("edtCodBnc").value;
-            el.rows[lin].cells[objGrade.colDesBnc].innerHTML = document.getElementById("edtDesBnc").value;
+            el.rows[lin].cells[objGrade.colDocto].innerHTML  = jsConverte("#edtDocto").upper();
+            el.rows[lin].cells[objGrade.colVencto].innerHTML = $doc("edtVencto").value;
+            el.rows[lin].cells[objGrade.colCodBnc].innerHTML = $doc("edtCodBnc").value;
+            el.rows[lin].cells[objGrade.colDesBnc].innerHTML = $doc("edtDesBnc").value;
+            if( jsConverte("#edtVlrEvento").dolar(true)>0 )
+              el.rows[lin].cells[objGrade.colValor].innerHTML  = $doc("edtVlrEvento").value;
           };  
         };
       };
@@ -487,11 +488,11 @@
           </div>
           
           <div class="campotexto campo15">
-            <input class="campo_input_titulo edtDireita" id="edtVlrBaixa" 
+            <input class="campo_input edtDireita" id="edtVlrEvento" 
                                                   onBlur="fncCasaDecimal(this,2);"            
                                                   maxlength="15" 
                                                   type="text" />
-            <label class="campo_label campo_required" for="edtVlrBaixa">VLR BAIXA:</label>
+            <label class="campo_label campo_required" for="edtVlrEvento">VALOR:</label>
           </div>
           <div onClick="fncGravar();" class="btnImagemEsq bie12 bieAzul bieRight"><i id="imgOk" class="fa fa-check"> Gravar</i></div>          
           <div onClick="fncGrade();" class="btnImagemEsq bie15 bieAzul bieRight"><i id="imgGrade" class="fa fa-save"> Grade</i></div>                    

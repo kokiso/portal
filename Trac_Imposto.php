@@ -6,6 +6,7 @@
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");
+      require("classPhp/selectRepetido.class.php");            
 
       $vldr     = new validaJson();          
       $retorno  = "";
@@ -22,15 +23,22 @@
         $arrUpdt  = []; 
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
-        $rotina   = $lote[0]->rotina;
+        //$rotina   = $lote[0]->rotina;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+        ///////////////////////
+        // Alterando  a empresa
+        ///////////////////////
+        if( $lote[0]->rotina=="altEmpresa" ){
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("altEmpresa",$lote[0]->login);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"script":'.$retSql["script"].',"erro":"'.$retSql["erro"].'"}]';
+        };  
         /////////////////////////////////////////////
         //    Dados para JavaScript IMPOSTO        //
         /////////////////////////////////////////////
-        if( $rotina=="selectImp" ){
-          $sql="";
-          $sql.="SELECT A.IMP_UFDE";
+        if( $lote[0]->rotina=="selectImp" ){
+          $sql ="SELECT A.IMP_UFDE";
           $sql.="       ,E.EST_NOME";
           $sql.="       ,A.IMP_UFPARA";
           $sql.="       ,E.EST_NOME";
@@ -90,7 +98,7 @@
         ////////////////////////////////////
         //        Importar excel          //
         ////////////////////////////////////
-        if( $rotina=="impExcel" ){
+        if( $lote[0]->rotina=="impExcel" ){
           ////////////////////////////////////////////////////////////////////////
           // Enviando para a class todas as colunas com as checagens necessaria //
           // Nome da tabela e numeros de erros(se existir)                      //
@@ -181,6 +189,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
     <title>Imposto</title>
+    <!-- bootstrap nativo javascript -->
+    <link rel="stylesheet" href="css/bootstrapNative.css">
+    <script src="js/bootstrap-native.js"></script>    
+    <!-- bootstrap nativo javascript -->
     <link rel="stylesheet" href="css/css2017.css">
     <link rel="stylesheet" href="css/cssTable2017.css">
     <script src="js/js2017.js"></script>
@@ -296,6 +308,8 @@
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,3]
                       ,"ajudaCampo"     : [ "Código da Cidade"]
+                      ,"popoverTitle"   : "Codigo da categoria"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
             ,{"id":8  ,"field"          : "CTG_NOME"   
@@ -321,6 +335,8 @@
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,1]
                       ,"ajudaCampo"     : [ "Direito para opção..."]
+                      ,"popoverTitle"   : "Entrada ou Saida"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
             ,{"id":10 ,"field"          :"IMP_CODNO" 
@@ -338,6 +354,8 @@
                       ,"digitosMinMax"  : [1,2]
                       ,"ajudaCampo"     : [ "Código da Cidade"]
                       ,"importaExcel"   : "S"                                                                
+                      ,"popoverTitle"   : "Natureza da operação"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
             ,{"id":11 ,"field"          : "NO_NOME"   
                       ,"labelCol"       : "NO"
@@ -542,17 +560,20 @@
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
             ,{"id":27 ,"field"          : "IMP_ALTERANFP"  
-                      ,"labelCol"       : "ALTERANFP" 
+                      ,"labelCol"       : "ALTERAR" 
                       ,"obj"            : "cbAlteraNfp"
                       ,"tipo"           : "cb"                      
-                      ,"tamGrd"         : "3em"
+                      ,"tamGrd"         : "6em"
+                      ,"align"          : "center"
                       ,"tamImp"         : "17"                      
                       ,"fieldType"      : "str"
                       ,"newRecord"      : ["N","this","this"]
                       ,"validar"        : ["notnull"]
                       ,"digitosMinMax"  : [1,1]
                       ,"ajudaCampo"     : [ "Direito para opção..."]
-                      ,"importaExcel"   : "S"                                                                
+                      ,"importaExcel"   : "S"
+                      ,"popoverTitle"   : "No lançamento o colaborador pode alterar valores dos impostos"                          
+                      ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}                                                  
             ,{"id":28 ,"field"          :"IMP_CODFLL" 
                       ,"labelCol"       : "FILIAL"
@@ -638,11 +659,14 @@
             ,{"texto":"Alterar"   ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"  }
             ,{"texto":"Excluir"   ,"name":"horExcluir"    ,"onClick":"2"  ,"enabled":true ,"imagem":"fa fa-minus"            }
             ,{"texto":"Excel"     ,"name":"horExcel"      ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"      }        
+            ,{"texto":"Empresa" 			,"name":"horEmpresa"        ,"onClick":"7"  ,"enabled":true	,"imagem":"fa fa-spinner"          
+                                      ,"popover":{title:"Ajuda",texto:"Opção para alterar empresa"}									         } 						
             ,{"texto":"Imprimir"  ,"name":"horImprimir"   ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"            }                        
             ,{"texto":"Fechar"    ,"name":"horFechar"     ,"onClick":"8"  ,"enabled":true ,"imagem":"fa fa-close"            }
           ] 
           ,"registros"      : []                    // Recebe um Json vindo da classe clsBancoDados
-          ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar                     
+          ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar      
+          ,"popover"        : true                  // Opção para gerar ajuda no formato popUp(Hint)                                  
           ,"checarTags"     : "N"                   // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
           ,"idBtnConfirmar" : "btnConfirmar"        // Se existir executa o confirmar do form/fieldSet
           ,"idBtnCancelar"  : "btnCancelar"         // Se existir executa o cancelar do form/fieldSet
@@ -658,7 +682,7 @@
           ,"fieldReg"       : "IMP_REG"             // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "IMP_CODUSR"          // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
-          ,"width"          : "90em"                // Tamanho da table
+          ,"width"          : "96em"                // Tamanho da table
           ,"height"         : "58em"                // Altura da table
           ,"tableLeft"      : "sim"                 // Se tiver menu esquerdo
           ,"relTitulo"      : "IMPOSTO"             // Titulo do relatório
@@ -725,7 +749,7 @@
             ,{"id":14 ,"field":"CSTCOFINS"    ,"labelCol":"CST_COFINS"    ,"tamGrd":"6em"     ,"tamImp":"20"  }
             ,{"id":15 ,"field":"ALIQCOFINS%"  ,"labelCol":"ALIQ_COFINS"   ,"tamGrd":"6em"     ,"tamImp":"20"  }	
             ,{"id":16 ,"field":"ALIQST%"      ,"labelCol":"ALIQ_ST"       ,"tamGrd":"6em"     ,"tamImp":"20"  }	
-            ,{"id":17 ,"field":"ALTERANFP"    ,"labelCol":"ALTERAR_NF"    ,"tamGrd":"6em"     ,"tamImp":"20"  }	
+            ,{"id":17 ,"field":"ALTERAR"      ,"labelCol":"ALTERAR_NF"    ,"tamGrd":"6em"     ,"tamImp":"20"  }	
             ,{"id":18 ,"field":"FILIAL"       ,"labelCol":"FILIAL"        ,"tamGrd":"6em"     ,"tamImp":"20"  }	
             ,{"id":19 ,"field":"ERRO"         ,"labelCol":"ERRO"          ,"tamGrd":"45em"    ,"tamImp":"100" }            
           ]
@@ -778,6 +802,7 @@
       var cmp       = new clsCampo(); // Abrindo a classe campos
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
       var intCodDir = parseInt(jsPub[0].usr_d23);
+      var arqLocal  = fncFileName(window.location.pathname);  // retorna o nome do arquivo sendo executado
       function funcRetornar(intOpc){
         document.getElementById("divRotina").style.display  = (intOpc==0 ? "block" : "none" );        
         document.getElementById("divExcel").style.display   = (intOpc==1 ? "block" : "none" );
@@ -807,7 +832,7 @@
         clsJs.add("codemp"      , jsPub[0].emp_codigo );
         fd = new FormData();
         fd.append("imposto" , clsJs.fim());
-        msg     = requestPedido("Trac_Imposto.php",fd); 
+        msg     = requestPedido(arqLocal,fd); 
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           //////////////////////////////////////////////////////////////////////////////////
@@ -839,7 +864,7 @@
             fd = new FormData();
             fd.append("imposto"      , envPhp            );
             fd.append("arquivo"   , edtArquivo.files[0] );
-            msg     = requestPedido("Trac_Imposto.php",fd); 
+            msg     = requestPedido(arqLocal,fd); 
             retPhp  = JSON.parse(msg);
             if( retPhp[0].retorno == "OK" ){
               //////////////////////////////////////////////////////////////////////////////////
@@ -1085,9 +1110,9 @@
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "1" : ret[0].CODIGO )  );
         };
       };
-      /////////////////////
-      //  AJUDA PARA CFO //
-      /////////////////////
+      //////////////////////
+      //  AJUDA PARA CFOP //
+      //////////////////////
       function cfoFocus(obj){ 
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
@@ -1365,6 +1390,39 @@
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "1" : ret[0].CODIGO )  );
         };
       };
+      //////////////////
+      // Alterar empresa
+      //////////////////
+      function horEmpresaClick(){
+        try{          
+          clsJs   = jsString("lote");  
+          clsJs.add("rotina"  , "altEmpresa"                );
+          clsJs.add("login"   , jsPub[0].usr_login          );
+          fd = new FormData();
+          fd.append("imposto" , clsJs.fim());
+          
+          msg     = requestPedido(arqLocal,fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            janelaDialogo(
+              { height          : "25em"
+                ,body           : "16em"
+                ,left           : "400px"
+                ,top            : "60px"
+                ,tituloBarra    : "Alterar empresa"
+                ,width          : "43em"
+                ,fontSizeTitulo : "1.8em"             //  padrao 2em que esta no css
+                ,code           : retPhp[0]["dados"]  //  clsCode.fim()
+              }
+            );  
+            let scr = document.createElement('script');
+            scr.innerHTML = retPhp[0]["script"];
+            document.getElementsByTagName('body')[0].appendChild(scr);        
+          };
+        }catch(e){
+          gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+        };
+      };  
     </script>
   </head>
   <body>

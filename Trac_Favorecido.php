@@ -997,7 +997,6 @@
           fd = new FormData();
           fd.append("contratoendereco" , clsJs.fim()); 
           msg = requestPedido("Trac_ContratoEndereco.php",fd);
-          console.log(msg); 
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno != "OK" ){
             gerarMensagemErro("cnti",retPhp[0].erro,{cabec:"Aviso"});

@@ -38,8 +38,7 @@
         /////////////////////////
         if( $lote[0]->rotina=="baixatotal" ){
           foreach ( $lote as $reg ){
-            $sql="";
-            $sql.="UPDATE VPAGAR"; 
+            $sql ="UPDATE VPAGAR"; 
             $sql.="   SET PGR_DATAPAGA='".$reg->dtbaixa."'";
             $sql.="       ,PGR_CHEQUE='".$reg->doctobaixa."'";
             $sql.="       ,PGR_CODBNC='".$lote[0]->codbnc."'";
@@ -54,8 +53,7 @@
         /////////////////////////
         if( $lote[0]->rotina=="excluirbaixa" ){
           foreach ( $lote as $reg ){
-            $sql="";
-            $sql.="UPDATE VPAGAR"; 
+            $sql ="UPDATE VPAGAR"; 
             $sql.="   SET PGR_DATAPAGA=NULL";
             $sql.="       ,PGR_CHEQUE=NULL";
             $sql.="       ,PGR_CODUSR=".$_SESSION["usr_codigo"];
@@ -94,7 +92,7 @@
 <!DOCTYPE html>
   <head>
     <meta charset="utf-8">
-    <title>Baixa parcial</title>
+    <title>Baixa total</title>
     <style id="meuCss">
     </style>  
     <!-- 
@@ -105,7 +103,7 @@
     <script src="js/js2017.js"></script>
     <script src="js/clsTab2017.js"></script>        
     <script src="js/jsTable2017.js"></script>
-    <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaBancoF10.js"></script>        
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
@@ -202,8 +200,8 @@
       var fd;                         // Formulario para envio de dados para o PHP
       var envPhp;                     // Envia para o Php
       var retPhp;                     // Retorno do Php para a rotina chamadora
-      var objPadF10;                  // Obrigatório para instanciar o JS FavorecidoF10      
       var pega;                       // Recuperar localStorage;
+      var objBncF10;                  // Obrigatório para instanciar o JS BancoF10            
       var minhaAba;
       var contMsg   = 0;
       var cmp       = new clsCampo(); 
@@ -215,18 +213,7 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
       function bncF10Click(obj){ 
-        fPadraoF10( { opc:0
-                      ,edtCod:obj.id
-                      ,foco:"edtDoctoBaixa"
-                      ,topo:100
-                      ,tableBd:"BANCO"
-                      ,fieldCod:"A.BNC_CODIGO"
-                      ,fieldDes:"A.BNC_NOME"
-                      ,fieldAtv:"A.BNC_ATIVO"
-                      ,typeCod :"int" 
-                      ,divWidth:"36%"
-                      ,tbl:"tblBnc"}
-        );
+        fBancoF10(0,obj.id,"edtDtBaixa",100,{codemp: jsPub[0].emp_codigo,ativo:"S" } ); 
       };
       function RetF10tblBnc(arr){
         document.getElementById("edtCodBnc").value  = arr[0].CODIGO;
@@ -237,23 +224,18 @@
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){
-          var ret = fPadraoF10( { opc:1
-                                  ,edtCod:obj.id
-                                  ,foco:"edtDoctoBaixa"
-                                  ,topo:100
-                                  ,tableBd:"BANCO"
-                                  ,fieldCod:"A.BNC_CODIGO"
-                                  ,fieldDes:"A.BNC_NOME"
-                                  ,fieldAtv:"A.BNC_ATIVO"
-                                  ,typeCod :"int" 
-                                  ,tbl:"tblBnc"}
-          );
-          document.getElementById(obj.id).value       = ( ret.length == 0 ? "BOL"  : ret[0].CODIGO                );
-          document.getElementById("edtDesBnc").value  = ( ret.length == 0 ? "BOLETO"      : ret[0].DESCRICAO      );
-          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "BOL" : ret[0].CODIGO ));
+          let arr = fBancoF10(1,obj.id,"edtDtBaixa",100,
+            {codbnc  : elNew
+             ,codemp : jsPub[0].emp_codigo
+             ,ativo  : "S"} 
+          ); 
+          document.getElementById(obj.id).value       = ( arr.length == 0 ? "0000"  : jsConverte(arr[0].CODIGO).emZero(4) );
+          document.getElementById("edtDesBnc").value  = ( arr.length == 0 ? "*"     : arr[0].DESCRICAO                    );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( arr.length == 0 ? "0000" : arr[0].CODIGO )       );
         };
       };
-      
+      //
+      //
       function fncGravar(){
         try{       
           //

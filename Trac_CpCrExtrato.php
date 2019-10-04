@@ -26,8 +26,7 @@
         $classe->conecta($lote[0]->login);
         //
         if( $rotina=="filtrar" ){        
-          $sql="";
-          $sql.="SELECT A.EXT_CODIGO AS SEQ";
+          $sql ="SELECT A.EXT_CODIGO AS SEQ";
           $sql.="       ,CONVERT(VARCHAR(10),A.EXT_DATA,127) AS DATA";                    
           $sql.="       ,A.EXT_LANCTO AS LANCTO";          
           $sql.="       ,PGR.PGR_DOCTO AS DOCTO";
@@ -37,7 +36,7 @@
           $sql.="       ,A.EXT_DEBITO AS DEBITO";
           $sql.="       ,A.EXT_CREDITO AS CREDITO";          
           $sql.="       ,A.EXT_SALDO AS SALDO";          
-          $sql.="  FROM EXTRATO A"; 
+          $sql.="  FROM EXTRATO A WITH(NOLOCK)"; 
           $sql.="  LEFT OUTER JOIN PAGAR PGR ON A.EXT_LANCTO=PGR.PGR_LANCTO";          
           $sql.="  LEFT OUTER JOIN FAVORECIDO FVR ON PGR.PGR_CODFVR=FVR.FVR_CODIGO";
           $classe->msgSelect(false);
@@ -247,6 +246,7 @@
         if( retPhp[0].retorno == "OK" ){
           jsExt.registros=objExt.addIdUnico(retPhp[0]["dados"]);
           objExt.montarBody2017();
+          jsExt.relTitulo="EXTRATO "+$doc("edtDesBnc").value+" A PARTIR DE "+$doc("edtData").value;
         }
       };
       function fncImprimir(){

@@ -29,8 +29,7 @@
         //    Dados para JavaScript CNABINSTRUCAO    //
         ///////////////////////////////////////////////
         if( $rotina=="selectCi" ){
-          $sql="";
-          $sql.="SELECT A.CI_CODBCD";
+          $sql ="SELECT A.CI_CODBCD";
           $sql.="       ,B.BCD_NOME";
           $sql.="       ,A.CI_CODIGO";          
           $sql.="       ,A.CI_NOME";
@@ -38,7 +37,7 @@
           $sql.="       ,CASE WHEN A.CI_REG='P' THEN 'PUB' WHEN A.CI_REG='S' THEN 'SIS' ELSE 'ADM' END AS CI_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.CI_CODUSR";
-          $sql.="  FROM CNABINSTRUCAO A";
+          $sql.="  FROM CNABINSTRUCAO A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.CI_CODUSR=U.US_CODIGO";
           $sql.="  LEFT OUTER JOIN BANCOCODIGO B ON A.CI_CODBCD=B.BCD_CODIGO";
           $sql.="  WHERE (CI_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";
@@ -277,7 +276,7 @@
           ,"fieldReg"       : "CI_REG"              // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "CI_CODUSR"           // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
-          ,"width"          : "95em"                // Tamanho da table
+          ,"width"          : "98em"                // Tamanho da table
           ,"height"         : "58em"                // Altura da table
           ,"tableLeft"      : "sim"                 // Se tiver menu esquerdo
           ,"relTitulo"      : "CNABINSTRUCAO"       // Titulo do relatório

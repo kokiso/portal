@@ -29,8 +29,7 @@
         //    Dados para JavaScript ALIQUOTASIMPLES //
         //////////////////////////////////////////////
         if( $rotina=="selectAs" ){
-          $sql="";
-          $sql.="SELECT A.AS_ANEXO";
+          $sql ="SELECT A.AS_ANEXO";
           $sql.="       ,A.AS_ITEM";
           $sql.="       ,A.AS_VLRINI";
           $sql.="       ,A.AS_VLRFIM";
@@ -46,13 +45,9 @@
           $sql.="       ,CASE WHEN A.AS_REG='P' THEN 'PUB' WHEN A.AS_REG='S' THEN 'SIS' ELSE 'ADM' END AS AS_REG";
           $sql.="       ,U.US_APELIDO";
           $sql.="       ,A.AS_CODUSR";
-          $sql.="       ,A.AS_CODEMP";
-          $sql.="       ,E.EMP_APELIDO";
-          $sql.="  FROM ALIQUOTASIMPLES A";
+          $sql.="  FROM ALIQUOTASIMPLES A WITH(NOLOCK)";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.AS_CODUSR=U.US_CODIGO";
-          $sql.="  LEFT OUTER JOIN EMPRESA E ON A.AS_CODEMP=E.EMP_CODIGO";
           $sql.="  WHERE (AS_ANEXO=".$lote[0]->anexo.")";
-          $sql.="    AND (AS_CODEMP=".$lote[0]->codemp.")";
           //$sql.=" ORDER BY AS_ANEXO";
           $classe->msgSelect(true);
           $retCls=$classe->select($sql);
@@ -211,7 +206,7 @@
                       ,"labelCol"       : "VLRINI"
                       ,"obj"            : "edtVlrIni"
                       ,"newRecord"      : ["0,00","this","this"]
-                      ,"tamGrd"         : "10em"
+                      ,"tamGrd"         : "8em"
                       ,"tamImp"         : "20"
                       ,"fieldType"      : "flo2"
                       ,"validar"        : ["F>=0"]
@@ -223,7 +218,7 @@
                       ,"labelCol"       : "VLRFIM"
                       ,"obj"            : "edtVlrFim"
                       ,"newRecord"      : ["0,00","this","this"]
-                      ,"tamGrd"         : "10em"
+                      ,"tamGrd"         : "8em"
                       ,"tamImp"         : "20"
                       ,"fieldType"      : "flo2"
                       ,"validar"        : ["F>=0"]
@@ -354,24 +349,7 @@
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":17 ,"field"          : "AS_CODEMP" 
-                      ,"pk"             : "S"
-                      ,"labelCol"       : "CODEMP"  
-                      ,"obj"            : "edtCodEmp"  
-                      ,"padrao":7}  
-            ,{"id":18 ,"field"          : "EMP_APELIDO"   
-                      ,"insUpDel"       : ["N","N","N"]
-                      ,"labelCol"       : "EMPRESA"
-                      ,"obj"            : "edtDesEmp"
-                      ,"tamGrd"         : "0em"
-                      ,"tamImp"         : "0"
-                      ,"newRecord"      : [jsPub[0].emp_apelido,"this","this"]
-                      ,"digitosMinMax"  : [2,15]
-                      ,"validar"        : ["notnull"]                      
-                      ,"ajudaCampo"     : ["Descrição do Banco para esta AliquotaSimples."]
-                      ,"padrao":0}
-                      
-            ,{"id":19 ,"labelCol"       : "PP"      
+            ,{"id":17 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP" 
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -464,7 +442,7 @@
         jsExc={
           "titulo":[
              {"id":0  ,"field":"ANEXO"    ,"labelCol":"ANEXO"         ,"tamGrd":"6em"     ,"tamImp":"20"  }
-            ,{"id":1  ,"field":"ITEM"     ,"labelCol":"ITEM"          ,"tamGrd":"6em"     ,"tamImp":"20"  }
+            ,{"id":1  ,"field":"IT"       ,"labelCol":"ITEM"          ,"tamGrd":"6em"     ,"tamImp":"20"  }
             ,{"id":2  ,"field":"VLRINI"   ,"labelCol":"VALOR_INICIAL" ,"tamGrd":"6em"     ,"tamImp":"20"  }
             ,{"id":3  ,"field":"VLRFIM"   ,"labelCol":"VALOR_FINAL"   ,"tamGrd":"6em"     ,"tamImp":"20"  }
             ,{"id":4  ,"field":"ALIQUOTA" ,"labelCol":"ALIQUOTA"      ,"tamGrd":"6em"     ,"tamImp":"20"  }
@@ -750,14 +728,8 @@
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>
-              <div class="campotexto campo15">
-                <input class="campo_input" id="edtDesEmp" type="text" />
-                <label class="campo_label campo_required" for="edtDesEmp">EMPRESA</label>
-              </div>
-              
               <div class="inactive">
                 <input id="edtCodUsu" type="text" />
-                <input id="edtCodEmp" type="text" />
               </div>
               <div id="btnConfirmar" class="btnImagemEsq bie12 bieAzul bieRight"><i class="fa fa-check"> Confirmar</i></div>
               <div id="btnCancelar"  class="btnImagemEsq bie12 bieRed bieRight"><i class="fa fa-reply"> Cancelar</i></div>

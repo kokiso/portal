@@ -200,10 +200,10 @@ tr.shown td.details-control {
 				       $(node).removeClass('dt-button buttons-collection')
 				    },
 	                buttons: [
-	                    {extend:'copy',title: 'Estoque Virtual',filename: 'estoque_virtual',},
+	                    {extend:'copy' ,title: 'Estoque Virtual',filename: 'estoque_virtual',},
 	                    {extend:'excel',title: 'Estoque Virtual',filename: 'estoque_virtual'},
-	                    {extend:'csv',title: 'Estoque Virtual',filename: 'estoque_virtual'},
-	                    {extend:'pdf',title: 'Estoque Virtual',filename: 'estoque_virtual'}
+	                    {extend:'csv'  ,title: 'Estoque Virtual',filename: 'estoque_virtual'},
+	                    {extend:'pdf'  ,title: 'Estoque Virtual',filename: 'estoque_virtual'}
 	                ]
             	},
             	{
