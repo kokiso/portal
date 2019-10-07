@@ -218,6 +218,7 @@
     <script src="tabelaTrac/f10/tabelaPadraoF10.js"></script>    
     <script src="tabelaTrac/f10/tabelaFabricanteF10.js"></script>        
     <script language="javascript" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
       "use strict";
       ////////////////////////////////////////////////
@@ -974,6 +975,11 @@
         clsCode.concat("      <th class='fpTh' style='width:20%'>NCM</th>");
         clsCode.concat("      <th class='fpTh' style='width:10%'>SIM</th>");          
         clsCode.concat("    </tr>");
+        clsCode.concat("    <tr>");
+        clsCode.concat('      <th><input type="text" id="txtColuna1"/></th>');
+        clsCode.concat('      <th><input type="text" id="txtColuna2"/></th>');
+        clsCode.concat('      <th><input type="text" id="txtColuna3"/></th>');
+        clsCode.concat("    </tr>");
         clsCode.concat("  </thead>");
         clsCode.concat("  <tbody id='tbody_tblChk'>");
         //////////////////////
@@ -1068,7 +1074,6 @@
             };
             if( filtroPrd=="" )
               filtroPrd="NSA"; 
-              console.log(obj);
             document.getElementById(obj).value=filtroPrd;
 
             janelaFechar();
@@ -1077,6 +1082,27 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
+
+      //ANGELO KOKISO TESTAR!!
+      $(function(){
+        $("#tblPrdChk input").keyup(function(){   
+            console.log('pudim');    
+            var index = $(this).parent().index();
+            var nth = "#tblPrdChk td:nth-child("+(index+1).toString()+")";
+            var valor = $(this).val().toUpperCase();
+            $("#tblPrdChk tbody tr").show();
+            $(nth).each(function(){
+                if($(this).text().toUpperCase().indexOf(valor) < 0){
+                    $(this).parent().hide();
+                }
+            });
+        });
+     
+        $("#tblPrdChk input").blur(function(){
+            $(this).val("");
+        });
+      });
+
       ///////////////////
       // Lotes importados
       ///////////////////

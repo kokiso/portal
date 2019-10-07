@@ -4,7 +4,7 @@
 // foco  - Onde vai o foco quando confirmar                               //
 // jsPub[0].usr_clientes) sao os clientes que o usuario pode ver          //
 ////////////////////////////////////////////////////////////////////////////
-function fNcmF10(opc,codNo,foco,topo,objeto){
+function fNaturezaOperacaoF10(opc,codNo,foco,topo,objeto){
   let clsStr = new concatStr();
   clsStr.concat("SELECT A.NCM_CODIGO AS CODIGO,A.NCM_NOME AS DESCRICAO"         );
   clsStr.concat("       ,PT.PT_CODCC AS CODCC"                                  );  

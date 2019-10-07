@@ -55,9 +55,9 @@
           $sql.="   AND (A.IMP_CODCTG='".$lote[0]->codctg."')";
           $sql.="   AND (A.IMP_ENTSAI='".$lote[0]->entsai."')";
           $sql.="   AND (A.IMP_CODNO='".$lote[0]->codno."')";          
-          $sql.="   AND (A.IMP_CODEMP=".$lote[0]->codemp.")";
           $sql.="   AND (A.IMP_CODFLL=".$lote[0]->codfll.")";
-          $sql.="   AND (A.IMP_ATIVO='S')";  
+          $sql.="   AND (A.IMP_ATIVO='S')";
+          var_dump($sql);  
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls["retorno"] != "OK" ){
@@ -625,8 +625,7 @@
       };
       function prdF10Click(obj){ 
         fProdutoF10(0,obj.id,"null",100,{
-            codemp  : jsPub[0].emp_codigo
-            ,ativo  : "S"
+            ativo  : "S"
             ,entsai : document.getElementById("edtEntSai").value
           } 
         ); 

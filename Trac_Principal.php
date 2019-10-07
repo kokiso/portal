@@ -152,6 +152,7 @@
                   <a class="dropdown-item" onclick="abreContrato();" href="#">Contrato</a>
                   <a class="dropdown-item" onclick="abreOrdemServico();" href="#">OS</a>
                   <a class="dropdown-item" onclick="abreOrdemServicoAvulso();" href="#">OS Avulsa</a>
+                  <a class="dropdown-item" onclick="teste();" href="#">teste</a>
                 </div>
               </li>
           </ul>
@@ -564,6 +565,12 @@
         if( jsPub[0].usr_d40==0 ){
         } else {  
           window.open('Trac_OrdemServicoAvulso.php');
+        };    
+      };
+      function teste(){
+        if( jsPub[0].usr_d40==0 ){
+        } else {  
+          window.open('Trac_EnviaNfp.php');
         };    
       }; 
       //
