@@ -34,7 +34,7 @@ function downloadCsv($array){
 };
 require("classPhp/conectaSqlServer.class.php");
 $classe   = new conectaBd();
-$classe->conecta('a1');
+$classe->conecta('a2');
 $sql = '';	
 	if(!isset($_POST['fvr']) && !isset($_POST['exp'])){
 		$array = array("data"=>'');

@@ -1,5 +1,6 @@
-ALTER VIEW VGRUPOMODELOPRODUTO AS
+CREATE VIEW VGMPREMONTERETORNO AS
   SELECT GMP_CODIGO
+         ,CAST(0 AS INTEGER) AS GMP_CODOLD
          ,GMP_CODCNTT  
          ,GMP_CODGM
          ,GMP_CODGP
@@ -10,7 +11,7 @@ ALTER VIEW VGRUPOMODELOPRODUTO AS
          ,GMP_NUMSERIE
          ,GMP_SINCARD
          ,GMP_OPERADORA
-         ,GMP_FONE
+         ,GMP_FONE  
          ,GMP_CONTRATO
          ,GMP_CODGML
          ,GMP_DTCONFIGURADO
@@ -23,7 +24,7 @@ ALTER VIEW VGRUPOMODELOPRODUTO AS
          ,GMP_CODUSR
     FROM GRUPOMODELOPRODUTO
 GO
-ALTER TRIGGER dbo.TRGViewGRUPOMODELOPRODUTO_BU ON dbo.VGRUPOMODELOPRODUTO
+ALTER TRIGGER dbo.TRGViewGMPREMONTERETORNO_BU ON dbo.VGMPREMONTERETORNO
 INSTEAD OF UPDATE
 AS
 BEGIN
@@ -33,6 +34,7 @@ BEGIN
   -- Campos da tabela
   -------------------
   DECLARE @gmpCodigoNew INTEGER;
+  DECLARE @gmpCodOldNew INTEGER;
   DECLARE @gmpCodCnttNew INTEGER;  
   DECLARE @gmpCodGmNew INTEGER;
   DECLARE @gmNomeNew VARCHAR(20);
@@ -55,15 +57,20 @@ BEGIN
   DECLARE @gmpPlacaChassiNew VARCHAR(20);
   DECLARE @gmpComposicaoNew INTEGER;
   DECLARE @gmpAcaoNew INTEGER;
+  DECLARE @gmpTipoEqp VARCHAR(3);
   DECLARE @gmpCodUsrNew INTEGER;
   DECLARE @gmpStatusNew INTEGER;
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @upD35New INTEGER;
+  DECLARE @cntpCod INTEGER;
+  DECLARE @cntpPlacaChassi VARCHAR(9);
+  DECLARE @gpTipo VARCHAR(3);
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
-  SELECT @gmpCodigoNew          = i.GMP_CODIGO   
+  SELECT @gmpCodigoNew          = i.GMP_CODIGO
+         ,@gmpCodOldNew         = i.GMP_CODOLD   
          ,@gmpCodCnttNew        = i.GMP_CODCNTT
          ,@gmpCodGmNew          = i.GMP_CODGM    
          ,@gmNomeNew            = COALESCE(GM.GM_NOME,'ERRO')         
@@ -87,6 +94,7 @@ BEGIN
          ,@gmpComposicaoNew     = i.GMP_COMPOSICAO
          ,@gmpStatusNew         = COALESCE(i.GMP_STATUS,1)
          ,@gmpAcaoNew           = i.GMP_ACAO
+         ,@gmpTipoEqp           = i.GMP_TIPOEQP
          ,@gmpCodUsrNew         = i.GMP_CODUSR
          ,@usrApelidoNew        = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew         = COALESCE(USR.USR_ADMPUB,'P')
@@ -124,6 +132,27 @@ BEGIN
     -------------------------------------------------------------
     IF( @upD35New<3 )
       RAISERROR('USUARIO %s NAO POSSUI DIREITO 35 PARA ALTERAR NA TABELA PRODUTO',15,1,@usrApelidoNew);
+    
+    SELECT @cntpPlacaChassi = CNTP_PLACACHASSI FROM CONTRATOPRODUTO WHERE CNTP_CODGMP = @gmpCodigoNew;
+      IF(@cntpCod <> 'NSA0000')
+        RAISERROR('AUTO %s INSTALADO NÃO PODE SER REMONTADO',15,1,@gmpCodigoNew);
+    --REMONTE
+    IF( @gmpAcaoNew=3 ) BEGIN
+      SELECT @gpTipo = GM_GPSERIEOBRIGATORIO FROM GRUPOMODELO WHERE GM_CODIGO = @gmpCodGmNew;
+      IF (@gpTipo = @gpTipo)
+        UPDATE GRUPOMODELOPRODUTO SET GMP_NUMSERIE = @gmpNumSerieNew WHERE GMP_CODIGO = @gmpCodAutNew;
+
+      UPDATE GRUPOMODELOPRODUTO SET GMP_CODPE = 'EMP', GMP_CODAUT = @gmpCodAutNew WHERE GMP_CODIGO = @gmpCodigoNew;
+      
+      UPDATE GRUPOMODELOPRODUTO SET GMP_CODPE = 'EST', GMP_CODAUT = 0 WHERE GMP_CODIGO = @gmpCodOldNew;
+    END
+    --RETORNO
+    IF( @gmpAcaoNew=4 ) BEGIN
+      SELECT @cntpPlacaChassi = CNTP_PLACACHASSI FROM CONTRATOPRODUTO WHERE CNTP_CODGMP = @gmpCodigoNew;
+      IF(@cntpCod <> 'NSA0000')
+        RAISERROR('AUTO %s INSTALADO NÃO PODE SER REMONTADO',15,1,@gmpCodigoNew);
+    END
+
     ------------------------------------------------------------------------------------
     -- Se checar até aqui verifico os campos que estão no banco de dados antes de gravar  
     -- Campos OLD da tabela
@@ -173,7 +202,7 @@ BEGIN
            ,@gmpCodUsrOld         = d.GMP_CODUSR
       FROM GRUPOMODELOPRODUTO d 
       LEFT OUTER JOIN PONTOESTOQUE PE ON d.GMP_CODPE=PE.PE_CODIGO
-     WHERE d.GMP_CODIGO=@gmpCodigoNew;  
+     WHERE d.GMP_CODIGO=@gmpCodAutNew;  
     ---------------------------------------------------------------------
     -- Primary Key nao pode ser alterada
     ---------------------------------------------------------------------
@@ -187,47 +216,7 @@ BEGIN
       RAISERROR('CAMPO FABRICANTE NAO PODE SER ALTERADO',15,1);  
     IF( @gmpCodGmlOld<>@gmpCodGmlNew )
       RAISERROR('CAMPO LOTE NAO PODE SER ALTERADO',15,1);  
-    ---------------------------------------------------------------------
-    -- Validacao na tabela
-    ---------------------------------------------------------------------
-    IF( @gmpCodPeOld <> @gmpCodPeNew ) BEGIN
-      IF( (@gmpCodPeNew='SUC') AND (@peSucataOld='N') )
-        RAISERROR('ESTOQUE %s NAO ACEITA TRANSFERENCIA PARA SUCATA!',15,1,@gmpCodPeOld);
-      -------------------------------------------------  
-      -- Quando se esta empenhando um produto o PE muda
-      -------------------------------------------------  
-      IF( (@gmpCodAutNew>0) AND (@gmpCodPeNew<>'EMP') )
-        RAISERROR('PRODUTO COM AUTO NAO PODE SER TRANSFERIDO!',15,1);
-      
-      IF( (@gmpCodPeOld<>'SUC') AND (@gmpCodPeNew='SUC') )
-        UPDATE VGRUPOMODELO SET GM_ESTOQUE=(GM_ESTOQUE-1),GM_ESTOQUESUCATA=(GM_ESTOQUESUCATA+1) WHERE GM_CODIGO=@gmpCodGmOld;
-    END
     --  
-    UPDATE dbo.GRUPOMODELOPRODUTO
-       SET GMP_CODCNTT        = @gmpCodCnttNew    
-           ,GMP_CODPE         = @gmpCodPeNew           
-           ,GMP_CODPEI        = @gmpCodPeiNew   
-           ,GMP_CODAUT        = @gmpCodAutNew            
-           ,GMP_NUMSERIE      = @gmpNumSerieNew 
-           ,GMP_SINCARD       = @gmpSincardNew  
-           ,GMP_OPERADORA     = @gmpOperadoraNew
-           ,GMP_FONE          = @gmpFoneNew     
-           ,GMP_CONTRATO      = @gmpContratoNew 
-           ,GMP_DTCONFIGURADO = @gmpDtConfiguradoNew
-           ,GMP_DTEMPENHO     = @gmpDtEmpenhoNew           
-           ,GMP_PLACACHASSI   = @gmpPlacaChassiNew
-           ,GMP_COMPOSICAO    = @gmpComposicaoNew
-           ,GMP_STATUS        = @gmpStatusNew
-           ,GMP_CODUSR        = @gmpCodUsrNew   
-    WHERE GMP_CODIGO = @gmpCodigoNew;  
-    -----------------------------  
-    -- Gravando o detalhe do AUTO
-    -----------------------------
-    IF( @gmpAcaoNew=1 )
-      INSERT INTO DETALHEAUTO(DA_CODGMP,DA_CODMSG,DA_CODUSR) VALUES(@gmpCodigoNew,1,@gmpCodUsrNew);
-    IF( @gmpAcaoNew=2 )
-      INSERT INTO DETALHEAUTO(DA_CODGMP,DA_CODMSG,DA_CODUSR) VALUES(@gmpCodigoNew,3,@gmpCodUsrNew);
-      
     ---------------  
     -- Gravando LOG
     ---------------

@@ -79,7 +79,22 @@
         if( $lote[0]->rotina=="remontar" ){
            foreach ( $lote as $reg ){  
               $sql="";
-              $sql.="UPDATE VGRUPOMODELOPRODUTO";
+              $sql.="UPDATE VGMPREMONTERETORNO";
+              $sql.="   SET GMP_CODIGO=".$reg->gmp_codigoNew."";
+              $sql.="       ,GMP_CODOLD=".$reg->gmp_codigoOld;
+              $sql.="       ,GMP_NUMSERIE=".$reg->gmp_numserie."";
+              $sql.="       ,GMP_TIPOEQP=".$reg->gmp_tipoeqp."";
+              $sql.="       ,GMP_ACAO= 3 ";
+              $sql.="       ,GMP_CODUSR=".$_SESSION["usr_codigo"];
+              $sql.=" WHERE (GMP_CODIGO=".$reg->gmp_codaut.")";  
+              array_push($arrUpdt,$sql);                                    
+              $atuBd = true;
+           }
+        };
+        if( $lote[0]->rotina=="retornar" ){
+           foreach ( $lote as $reg ){  
+              $sql="";
+              $sql.="UPDATE VGMPREMONTERETORNO";
               $sql.="   SET GMP_CODAUT=".$reg->gmp_codaut."";
               $sql.="       ,GMP_ACAO=".$reg->gmp_acao;
               $sql.="       ,GMP_CODUSR=".$_SESSION["usr_codigo"];
@@ -672,7 +687,7 @@
           gerarMensagemErro("catch",e,{cabec:"Erro"});
         };
       };
-      function horRemontarClick(){    
+      function horRemontarClick(){     
         try{
            $('#confirmRemonte').modal({
               backdrop: 'static',
