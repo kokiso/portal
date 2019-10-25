@@ -95,10 +95,9 @@
            foreach ( $lote as $reg ){  
               $sql="";
               $sql.="UPDATE VGMPREMONTERETORNO";
-              $sql.="   SET GMP_CODAUT=".$reg->gmp_codaut."";
-              $sql.="       ,GMP_ACAO=".$reg->gmp_acao;
+              $sql.="   SET GMP_ACAO= 4 ";
               $sql.="       ,GMP_CODUSR=".$_SESSION["usr_codigo"];
-              $sql.=" WHERE (GMP_CODIGO=".$reg->gmp_codigo.")";  
+              $sql.=" WHERE (GMP_CODIGO=".$reg->gmp_codaut.")";  
               array_push($arrUpdt,$sql);                                    
               $atuBd = true;
            }
@@ -404,7 +403,7 @@
         clsJs   = jsString("lote");  
         clsJs.add("rotina"  , "filtrar"                                 );
         clsJs.add("login"   , jsPub[0].usr_login                        );
-        clsJs.add("data"    , jsDatas("edtDataIni").retMMDDYYYY()       );
+        clsJs.add("data"    , jsDatas("edtDataIni").retDDMMYYYY()       );
         clsJs.add("codam"   , pega.codam                                );
         fd = new FormData();
         fd.append("automodeloind" , clsJs.fim());
@@ -689,7 +688,15 @@
       };
       function horRemontarClick(){     
         try{
-           $('#confirmRemonte').modal({
+          $('table tr').each(function(i) {
+            // Only check rows that contain a checkbox
+            var $chkbox = $(this).find('input[type="checkbox"]');
+            if ($chkbox.length) {
+              var status = $chkbox.prop('checked');
+              console.log('Table row ' + i + ' contains a checkbox with a checked status of: ' + status);
+            }
+          });
+                 $('#confirmRemonte').modal({
               backdrop: 'static',
               keyboard: false
           })
@@ -720,8 +727,8 @@
                 gerarMensagemErro("gmi",retPhp[0].erro,{cabec:"Aviso"});
               } else {  
 
-                tblAmi.retiraChecked()
-              
+                tblAmi.retiraChecked();
+                $('#confirmRemonte').modal('hide');
               };
           });  
         }catch(e){
@@ -737,17 +744,18 @@
               keyboard: false
           })
           .on('click', '#retornarAuto', function(e) {
-              alert('teste retorno')
               // Preparando para enviar ao Php
               chkds=objAmi.gerarJson("n").gerar();          
               msg         = "ok";
               clsJs       = jsString("lote");
               chkds.forEach(function(reg){
-                if( reg.PE != "EST" )
-                  throw "AUTO DEVE ESTA EM ESTOQUE PARA CONFIGURAÇÃO!";  
+                if( reg.PE != "EST" ){
+                  alert("AUTO DEVE ESTA EM ESTOQUE PARA CONFIGURAÇÃO!");
+                  throw "AUTO DEVE ESTA EM ESTOQUE PARA CONFIGURAÇÃO!";
+                  }  
                 clsJs.add("rotina"      , "retornar"            );              
                 clsJs.add("login"       , jsPub[0].usr_login  );                        
-                clsJs.add("gmp_codigo"  , reg.TRAC            );                        
+                clsJs.add("gmp_codaut"  , reg.TRAC            );                        
               });
               //////////////////////
               // Enviando para o Php
@@ -759,17 +767,8 @@
               if( retPhp[0].retorno != "OK" ){
                 gerarMensagemErro("gmi",retPhp[0].erro,{cabec:"Aviso"});
               } else {  
-                tblAmi.getElementsByTagName("tbody")[0].querySelectorAll("tr").forEach(function (row,indexTr) {
-                  chkds.forEach(function(reg){                
-                    if( jsNmrs(row.cells[objCol.TRAC].innerHTML).inteiro().ret()  == jsNmrs(reg.TRAC).inteiro().ret() ){
-                      row.cells[objCol.CONFIGURADO].innerHTML = "";
-                      row.cells[objCol.PE].innerHTML          = "SUC";
-                      row.cells[objCol.PE].classList.add("corFonteAlterado");  
-                    };  
-                  });
-                });
-                tblAmi.retiraChecked()
-              
+                tblAmi.retiraChecked();
+                $('#confirmRetorno').modal('hide');       
               }; 
            } ); 
         }catch(e){
@@ -819,6 +818,15 @@
       function horFecharClick(){
         window.close();
       };
+      function cleanModal(){
+         document.getElementById("edtEqpOld").value = '';
+         document.getElementById("edtNomeOld").value = '';
+         document.getElementById("edtTipoOld").value = '';
+
+         document.getElementById("edtEqpNew").value = '';
+         document.getElementById("edtNomeNew").value = '';
+         document.getElementById("edtTipoNew").value = '';
+      }
     </script>
   </head>
   <body style="background-color: #ecf0f5;">
@@ -1093,15 +1101,6 @@
           $doc("edtDtConfigura").value=jsDatas(0).retDDMMYYYY();
         };
       },false);
-      function cleanModal(){
-         document.getElementById("edtEqpOld").value = '';
-         document.getElementById("edtNomeOld").value = '';
-         document.getElementById("edtTipoOld").value = '';
-
-         document.getElementById("edtEqpNew").value = '';
-         document.getElementById("edtNomeNew").value = '';
-         document.getElementById("edtTipoNew").value = '';
-      }
     </script>
   </body>
 </html>

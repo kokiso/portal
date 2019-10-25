@@ -429,8 +429,8 @@
                       <i class="fa fa-angle-left pull-right"></i>
                     </span>
                   </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#" onclick="ifAbrir('Trac_Oportunidade.php'      ,'jsPub[0].usr_d41','CRM &nbsp&nbsp > &nbsp&nbsp Oportunidade');"><i class="fa fa-circle-o"></i> Oportunidade</a></li>                                                     
+                   <ul class="treeview-menu">
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Oportunidade</a></li>                                                     
                   </ul>
                 </li>
 
@@ -448,6 +448,7 @@
                     <li><a href="#" onclick="ifAbrir('Trac_GrupoProduto.php'      ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Grupo');"><i class="fa fa-circle-o"></i> Grupo de produto</a></li>                                      
                     <li><a href="#" onclick="ifAbrir('Trac_Fabricante.php'        ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Fabricante');"><i class="fa fa-circle-o"></i> Fabricante</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_Operadora.php'         ,'jsPub[0].usr_d33','Estoque &nbsp&nbsp > &nbsp&nbsp Operadora');"><i class="fa fa-circle-o"></i> Operadora</a></li>
+                    <li><a href="Trac_EnvioRetornoEquip.php"><i class="fa fa-circle-o"></i> Envio/Retorno</a></li>  
                     <li><a href="Trac_EstoqueVirtual.php"><i class="fa fa-circle-o"></i> Estoque Virtual</a></li>    
                     <li><a href="#" onclick="ifAbrir('Trac_GrupoModelo.php'       ,'jsPub[0].usr_d35','Estoque &nbsp&nbsp > &nbsp&nbsp Modelos');"><i class="fa fa-circle-o"></i> Modelo/Estoque</a></li>                    
                   </ul>

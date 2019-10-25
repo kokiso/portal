@@ -1,0 +1,21 @@
+<?php
+$serverName = "localhost";
+$connectionInfo = array( "Database"=>"a2", "UID"=>"sa", "PWD"=>"@A1111111");
+$conn = sqlsrv_connect( $serverName, $connectionInfo );
+if( $conn === false ) {
+    die( print_r( sqlsrv_errors(), true));
+}
+
+$sql = "SELECT A.GMP_CODIGO AS COD_TRAC ,GM.GM_NOME AS MODELO ,A.GMP_CODGP AS GRP ,A.GMP_CODPE ,A.GMP_CODCNTT AS CONTRATO ,COALESCE(FVR.FVR_APELIDO,'...') AS RESPONSAVEL ,A.GMP_NUMSERIE AS SERIE ,CONVERT(VARCHAR(10),A.GMP_DTCONFIGURADO,127) AS CONFIGURADO ,A.GMP_PLACACHASSI AS PLACA_CHASSI ,A.GMP_COMPOSICAO AS QTOS ,A.GMP_CODGML AS LOTE ,CASE WHEN A.GMP_STATUS = 1 THEN 'ESTOQUE' WHEN A.GMP_STATUS = 2 THEN 'EM USO' WHEN A.GMP_STATUS = 3 THEN 'MANUTENCAO' END AS STATUS ,US.US_APELIDO FROM GRUPOMODELOPRODUTO A LEFT OUTER JOIN GRUPOMODELO GM ON A.GMP_CODGM=GM.GM_CODIGO LEFT OUTER JOIN FAVORECIDO FVR ON A.GMP_CODPEI=FVR.FVR_CODIGO LEFT OUTER JOIN GRUPOMODELOLOTE GML ON A.GMP_CODGML=GML.GML_CODIGO LEFT OUTER JOIN USUARIOSISTEMA US ON A.GMP_CODUSR=US.US_CODIGO WHERE (A.GMP_CODGM='0137') AND (GML.GML_DATA>='18/04/2019')";
+//$sql = "SELECT * FROM USUARIO";
+$stmt = sqlsrv_query( $conn, $sql );
+if( $stmt === false) {
+    die( print_r( sqlsrv_errors(), true) );
+}
+
+while( $row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC) ) {
+      var_dump($row);
+}
+
+sqlsrv_free_stmt( $stmt);
+?>
