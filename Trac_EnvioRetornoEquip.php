@@ -241,6 +241,13 @@ tr.shown td.details-control {
     </div>
   </div>
 </div>
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+    </div>
+  </div>
+</div>
 <script type="text/javascript">
 var objAmi;                     // Obrigatório para instanciar o JS Semestral
 objAmi=new clsTable2017("objAmi");
@@ -292,43 +299,6 @@ $(document).ready(function() {
 	});
 });
 
-function equipCadClick(flag){ 
-chkds=objAmi.gerarJson("n").gerar();         
-	if(flag == 'old'){
-	  fEquipamentoF10(0,"nsa","null",100
-	  ,{ codaut:parseInt(chkds[0].TRAC)
-	    ,codgp:"A.GMP_CODGP <> 'AUT'"
-	    ,divWidth:"76em"
-	    ,tblWidth:"74em"
-	  });
-	}
-	else{		
-	  fEquipamentoF10(0,"nsa","null",100
-	  ,{codpe:"EST"
-	    ,codgp:"A.GMP_CODGP <> 'AUT'"
-	    ,codaut:0
-	    ,tbl:'tblEquip2'
-	    ,tipo:$doc("edtTipoOld").value 
-	    ,divWidth:"76em"
-	    ,tblWidth:"74em"
-	  });
-	}
-};
-            
-function RetF10tblEquip(arr){
-	$doc("edtEqpOld").value      = arr[0].NOME;
-	$doc("edtNomeOld").value      = arr[0].SERIE;        
-	$doc("edtTipoOld").value      = arr[0].TIPO;                
-	$doc("edtEqpOld").setAttribute("data-id",arr[0].CODIGO);
-
-};
-function RetF10tblEquip2(arr){
-	$doc("edtEqpNew").value      = arr[0].NOME;
-	$doc("edtNomeNew").value      = arr[0].SERIE; 
-	$doc("edtTipoNew").value      = arr[0].TIPO;                           
-	$doc("edtEqpNew").setAttribute("data-id",arr[0].CODIGO);
-
-};
 </script>
 
 <!-- <script type="text/javascript">
