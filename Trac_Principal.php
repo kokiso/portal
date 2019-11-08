@@ -152,7 +152,7 @@
                   <a class="dropdown-item" onclick="abreContrato();" href="#">Contrato</a>
                   <a class="dropdown-item" onclick="abreOrdemServico();" href="#">OS</a>
                   <a class="dropdown-item" onclick="abreOrdemServicoAvulso();" href="#">OS Avulsa</a>
-                  <a class="dropdown-item" onclick="teste();" href="#">teste</a>
+                  <!-- <a class="dropdown-item" onclick="teste();" href="#">teste</a> -->
                 </div>
               </li>
           </ul>

@@ -233,7 +233,7 @@
           $sql.="       ,CASE WHEN A.CNB_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS CNB_ATIVO";          
           $sql.="       ,A.CNB_LANCTOINI";
           $sql.="       ,A.CNB_LANCTOFIM";
-          $sql.="  FROM CNAB A";
+          $sql.="  FROM CNAB A";  
           $sql.="  LEFT OUTER JOIN BANCO BNC ON A.CNB_CODBNC=BNC.BNC_CODIGO";
           $sql.=" WHERE (A.CNB_CODBNC=".$lote[0]->codbnc.")";                    
           $sql.="   AND (A.CNB_ATIVO='S')";  
@@ -766,7 +766,7 @@
       //////////////////////////////////////
       // Adicionando titulos ao arquivo CNAB
       //////////////////////////////////////
-      function horDelCnabClick(){
+      function horDelCnabClick(){'    '
         try{
           if( parseInt($doc("cbBanco").getAttribute("data-codcnab"))<=0 )
             throw "CODIGO DO CNAB INVALIDO PARA ADICIONAR TITULOS FINANCEIROS!";
@@ -894,6 +894,28 @@
         }catch(e){
           gerarMensagemErro('catch',e.message,{cabec:"Erro"});
         };
+      };
+      function gerarRemessa(){
+        try{          
+          clsJs   = jsString("lote");  
+          clsJs.add("login"   , jsPub[0].usr_login          );
+          clsJs.add("banco"   , jsConverte("#cbBanco").inteiro() );
+          clsJs.add("lista"   , jsConverte("#codigo").inteiro() );
+          fd = new FormData();
+          if (jsConverte("#cbBanco").inteiro() == 13 ){
+              fd.append("cnab237"    , clsJs.fim());
+              msg     = requestPedido('Cnab237.php',fd);
+          }
+          if (jsConverte("#cbBanco").inteiro() == 9 ){
+              fd.append("cnab237"    , clsJs.fim());
+              msg     = requestPedido('Cnab237.php',fd);
+          }
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){     
+          };
+        }catch(e){
+          gerarMensagemErro('catch',e.message,{cabec:"Erro"});
+        };
       };  
     </script>
   </head>
@@ -921,6 +943,13 @@
                               data-toggle="popover" 
                               data-placement="right" 
                               data-content="Alterar empresa."><i class="indFa fa-spinner"></i>
+          </div>
+          <div id="divBlRota" class="divBarraLateral" 
+                              onClick="gerarRemessa();"
+                              data-title="Ajuda"                               
+                              data-toggle="popover" 
+                              data-placement="right" 
+                              data-content="Gera Remessa."><i class="indFa fa-plus"></i>
           </div>
         </section>
       </aside>
@@ -997,6 +1026,8 @@
           <span class="btn-group">
             <!--<a class="btn btn-default disabled">Deste contrato</a>-->
             <button id="abreDel" class="btn btn-primary" 
+                                
+
                                 data-toggle="collapse" 
                                 data-target="#evtAbreDel" 
                                 aria-expanded="true" 
