@@ -127,7 +127,8 @@
     <script src="tabelaTrac/f10/tabelaBancoF10.js"></script>    
     <script src="tabelaTrac/f10/tabelaNaturezaOperacaoF10.js"></script>
     <script src="tabelaTrac/f10/tabelaProdutoF10.js"></script>    
-    <script src="tabelaTrac/f10/tabelaTransportadoraF10.js"></script>        
+    <script src="tabelaTrac/f10/tabelaTransportadoraF10.js"></script>  ,
+    <script src="tabelaTrac/f10/tabelaTipoDocumentoF10.js"></script>        
     <script>      
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
@@ -308,7 +309,8 @@
       var objPrdF10;                  // Obrigatório para instanciar o JS ProdutoF10      
       var objNoF10;                   // Obrigatório para instanciar o JS NaturezaOperacaoF10
       var objBncF10;                  // Obrigatório para instanciar o JS BancoF10            
-      var objTrnF10;                  // Obrigatório para instanciar o JS TransportadoraF10                  
+      var objTrnF10;                  // Obrigatório para instanciar o JS TransportadoraF10       
+      var objTdF10;                  // Obrigatório para instanciar o JS            
       var objIte;                     // Obrigatório para instanciar o JS ITEM
       var jsIte;                      // Obj principal da classe clsTable2017
       var iteID=1;                    // Devido exclusao na table de item
@@ -767,6 +769,32 @@
           document.getElementById(obj.id).value       = ( ret.length == 0 ? "5.102"  : ret[0].CODIGO             );
           document.getElementById("edtDesCfo").value  = ( ret.length == 0 ? "VENDA DE MERC.ADQ.DE TERC.DENTRO ESTADO"      : ret[0].DESCRICAO  );
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "5.102" : ret[0].CODIGO )  );
+        };
+      };
+      ////////////////////////////////////
+      //     AJUDA PARA TRANSPORTADORA  //
+      ////////////////////////////////////
+      function tdFocus(obj){ 
+        $doc(obj.id).setAttribute("data-oldvalue",$doc(obj.id).value); 
+      };
+      function tdF10Click(obj){ 
+        fTdF10(0,obj.id,"edtCodFc",100,{ativo:"S" } ); 
+      };
+      function RetF10tblTd(arr){
+        $doc("edtCodTd").value  = arr[0].CODIGO;
+        $doc("edtDesTd").value  = arr[0].DESCRICAO;
+        $doc("edtCodTd").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function codTdBlur(obj){
+        let elOld = $doc(obj.id).getAttribute("data-oldvalue");
+        let elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          let arr = fTdF10(1,obj.id,"edtCodFc",100,
+            {ativo  : "S"} 
+          ); 
+          $doc(obj.id).value       = arr[0].CODIGO;   
+          $doc("edtDesTd").value  = arr[0].DESCRICAO;
+          $doc(obj.id).setAttribute("data-oldvalue",arr[0].CODIGO);
         };
       };
       ////////////////////////////////////////////////////////

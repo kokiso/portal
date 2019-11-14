@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////
 function fNaturezaOperacaoF10(opc,codNo,foco,topo,objeto){
   let clsStr = new concatStr();
-  clsStr.concat("SELECT A.NCM_CODIGO AS CODIGO,A.NCM_NOME AS DESCRICAO"         );
+  clsStr.concat("SELECT A.NO_CODIGO AS CODIGO,A.NO_NOME AS DESCRICAO"         );
   clsStr.concat("       ,PT.PT_CODCC AS CODCC"                                  );  
   clsStr.concat("  FROM NATUREZAOPERACAO A"                                     );
   clsStr.concat("  LEFT OUTER JOIN PADRAOTITULO PT ON A.NO_CODPT=PT.PT_CODIGO"  );  
@@ -30,7 +30,10 @@ function fNaturezaOperacaoF10(opc,codNo,foco,topo,objeto){
       };  
     };  
   };
+    console.log(clsStr);
+
   sql=clsStr.fim();
+
   //            
   if( opc == 0 ){            
     //////////////////////////////////////////////////////////////////////////////

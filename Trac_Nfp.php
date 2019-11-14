@@ -582,7 +582,6 @@
           </div>
         </section>
       </aside>
-
       <div id="indDivInforme" class="indTopoInicio indTopoInicio100">
         <div class="indTopoInicio_logo"></div>
         <div class="colMd12" style="float:left;margin-bottom:0px;height:50px;">

@@ -97,6 +97,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
           $sql.="  LEFT OUTER JOIN CONTRATOPRODUTO CNTP ON A.CNTC_CODCNTT=CNTP.CNTP_CODCNTT AND A.CNTC_CODGM=CNTP.CNTP_CODGM";
           $sql.="  LEFT OUTER JOIN GRUPOMODELOPRODUTO GMP ON CNTP.CNTP_CODGMP=GMP.GMP_CODIGO";
           $sql.="  WHERE CNTP.CNTP_DTATIVACAO IS NOT NULL";
+          //$sql.="  AND A.CIS NOT NULL";
           //$sql.="  WHERE A.CNTC_CODCNTT IN(15,69,82)";
           //$sql.="  WHERE A.CNTC_CODCNTT IN(125,126)";
           $sql.=" ORDER BY CNTP.CNTP_CODGMP,A.CNTC_CODSRV";
@@ -169,7 +170,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
                     $tblCabec[ $lin ]["cntc_vlrmensal"]+=$vlrMensal;
                     $tblCabec[ $lin ]["cntc_vlrcobrado"]+=$vlrCobrado;
                     
-                    
+                      
                     if( $ite["CNTC_PGTO"]=="M" )
                       $tblCabec[ $lin ]["cntt_qtdautograde"]+=1;
                     
@@ -489,15 +490,6 @@ $sql ="SELECT A.CNTC_CODCNTT";
                       ,"tamImp"         : "10"
                       ,"excel"   				: "S"
                       ,"popoverTitle"   : "Total de autos na grade inferior de lançamentos"                          
-                      ,"popoverLabelCol": "Ajuda"                      
-                      ,"padrao":0}
-            ,{"id":23 ,"labelCol"       : "CHECK"
-											,"fieldType"      : "str"
-                      ,"tamGrd"         : "4em"
-                      ,"tamImp"         : "10"
-                      ,"excel"          : "S"
-                      ,"funcCor"        : "switch (objCell.innerHTML) { case 'erro':objCell.classList.add('corAviso');break; case 'alerta':objCell.classList.add('corAzul');break;};" 
-                      ,"popoverTitle"   : "Informa se existe algum erro ou alerta nas duas grades de consulta"                          
                       ,"popoverLabelCol": "Ajuda"                      
                       ,"padrao":0}
                       
