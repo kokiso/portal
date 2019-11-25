@@ -130,8 +130,8 @@ session_start();
 		      	$nossonumero = str_pad($aux->NOSSONUMERO, 8, '0',STR_PAD_LEFT);
 
 	  	      	$sql = 'update BANCO set ban_seqboleto=(cast(ban_seqboleto as integer)+1) where BNC_CODIGO='.$row->MOV_BANCOFLUXO;
-	  	      	$sql .= ""
-	  	      	$sql .= "update PAGAR set mov_nossonumero='".$nossonumero."' where mov_id=".$row->MOV_ID
+	  	      	$sql .= "";
+	  	      	$sql .= "update PAGAR set mov_nossonumero='".$nossonumero."' where mov_id=".$row->MOV_ID;
   	      		array_push($arrUpdt,$sql);            
        		 	$atuBd = true;
 		        if( $atuBd ){

@@ -288,7 +288,7 @@ $sql ="SELECT A.CNTC_CODCNTT";
       ///////////////////////////////////////////////////////////////////
       // Atualizando o banco de dados se opcao de insert/updade/delete //
       ///////////////////////////////////////////////////////////////////
-      if( $atuBd ){
+      if( $atuBd ){ 
         if( count($arrUpdt) >0 ){
           $retCls=$classe->cmd($arrUpdt);
           if( $retCls['retorno']=="OK" ){
@@ -1138,8 +1138,5 @@ $sql ="SELECT A.CNTC_CODCNTT";
           abreIte.hide();
       },false);
     </script>
-    
-    
-    
   </body>
 </html>

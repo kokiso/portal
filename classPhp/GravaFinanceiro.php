@@ -831,6 +831,7 @@
             };
             $contador++;  
           };
+
           if( $erro == "ok" ){
             $atuBd=true;  
           } else {
