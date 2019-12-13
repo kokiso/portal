@@ -322,7 +322,7 @@
             // Passando um JSON para o PHP //
             /////////////////////////////////
             clsArq=jsString("lote");
-            clsArq.add("login"    , "a2"                                      );
+            clsArq.add("login"    , "TRAC"                                      );
             clsArq.add("empresa"  , document.getElementById("edtEmpresa").value );
             clsArq.add("usuario"  , document.getElementById("edtUsuario").value );
             clsArq.add("senha"    , document.getElementById("edtSenha").value   );
@@ -340,6 +340,7 @@
               gerarMensagemErro("COB",retPhp[0].erro,"Erro");                
             };
           }catch(e){
+            console.log(mo.msg);            
             gerarMensagemErro("catch",e.message,"Erro");
           };
         };

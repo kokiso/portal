@@ -6,7 +6,6 @@
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/validaCampo.class.php");      
-      //require("classPhp/dataCompetencia.class.php");      
 
       //$clsCompet  = new dataCompetencia();    
       $vldr       = new validaJson();          
@@ -75,7 +74,7 @@
           ///////////////////////////////////////////////////////////////////////////
           // Variavel where
           ///////////////////////////////////////////////////////////////////////////
-          $where= " WHERE (A.PGR_DATAPAGA IS NULL)";
+          $where =" WHERE (A.PGR_DATAPAGA IS NULL)";
           $where.="   AND (A.PGR_VENCTO<='".$lote[0]->dtfim."')";
           $where.="   AND (A.PGR_CODEMP=".$lote[0]->codemp.")";
           $where.="   AND (BNC.BNC_ENTRAFLUXO='S')";
