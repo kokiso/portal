@@ -147,12 +147,6 @@
           $sql.="       ,CNTT_QTDOS"; 
           $sql.="       ,CNTT_QTDPLACA";
           $sql.="       ,CNTT_QTDATIVADO";
-          //$sql.="       ,CNTT_EMAIL";
-          //$sql.="       ,CNTT_LANCTOINI";
-          //$sql.="       ,CNTT_LANCTOFIM";
-          //$sql.="       ,CNTT_CODBNC";
-          //$sql.="       ,CNTT_CODFC";
-          //$sql.="       ,CNTT_CODUSR";
           $sql.="       ,CASE WHEN A.CNTT_ATIVO='S' THEN 'ATIVO' ELSE 'INATIVO' END AS CNTT_ATIVO";          
           $sql.="       ,CNTT_FIDELIDADE";
           $sql.="       ,CNTT_INSTPROPRIA";
@@ -216,16 +210,6 @@
           // 1-DO VENDEDOR //
           // 2-TODOS       //
           ///////////////////
-          /*
-          if( $lote[0]->coddir == 1 ){
-            $sql.=" AND (A.PDD_EMAIL='".$lote[0]->email."')";
-          };  
-          */
-          /*
-          if( $lote[0]->status <> 0 ){
-            $sql.=" AND (A.CNTT_STATUS=".$lote[0]->status.")";  
-          }; 
-          */
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls["qtos"]==0 ){
@@ -333,8 +317,6 @@
                       ,"fieldType"      : "int"
                       ,"obj"            : "edtCnttCodFvr" 
                       ,"insUpDel"       : ["N","N","N"] 
-                      //,"formato"        : ["i2"] 
-                      //,"align"          : "center"    
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "0"
                       ,"excel"          : "N"
@@ -397,7 +379,6 @@
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtEmpenho"
                       ,"insUpDel"       : ["N","N","N"] 
-                      //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "0"
@@ -408,7 +389,6 @@
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtVEnv"
                       ,"insUpDel"       : ["N","N","N"] 
-                      //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "0"
@@ -421,7 +401,6 @@
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtAgenda"
                       ,"insUpDel"       : ["N","N","N"] 
-                      //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "0"
@@ -444,7 +423,6 @@
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtVPlacas"
                       ,"insUpDel"       : ["N","N","N"] 
-                      //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "0"
@@ -455,7 +433,6 @@
                       ,"fieldType"      : "int"
                       ,"obj"            :"edtVAtivacao"
                       ,"insUpDel"       : ["N","N","N"] 
-                      //,"formato"        : ["i2"] 
                       ,"align"          : "center"    
                       ,"tamGrd"         : "4em"
                       ,"tamImp"         : "0"
@@ -544,10 +521,10 @@
           ]
           , 
           "botoesH":[
-             //{"texto":"Alterar"         ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"   }
-            //,{"texto":"Excluir"         ,"name":"horExcluir"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-minus"             
-                                        // ,"popover":{title:"Excluir",texto:"Esta opção exclui o contrato do sistema em definitivo.<hr>Não existe maneira de recuperar o registro",aviso:"warning"}} 
-            {"texto":"Empenho"         ,"name":"horEmpenho"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
+            {"texto":"Faturar"          ,"name":"conFatura"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
+                                        ,"popover":{title:"Faturamento",texto:"Faturamento de contratos na grade (para o mes vigente)<hr>"
+                                                                          +"Serão gerados notas e CNAB dos contratos selecionados"}} 
+            ,{"texto":"Empenho"         ,"name":"horEmpenho"    ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-eye-slash"      
                                         ,"popover":{title:"Empenho",texto:"Opção para empenhar individualmente cada auto pelo seu número de serie<hr>"
                                                                           +"O auto obrigatoriamente deve estar em estoque"}} 
             ,{"texto":"Agenda"          ,"name":"horAgenda"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-calendar"
@@ -658,6 +635,70 @@
       /////////////////////////////////////////////
       // Chamando o formulario de itens do contrato
       /////////////////////////////////////////////
+      function conFaturaClick(){
+        var table     = document.getElementById('tblCntt').tBodies[0];
+        var nl        = table.rows.length;
+        if( nl==0 )
+          gerarMensagemErro("IMP","NENHUM REGISTRO PARA SER IMPRESSO",{cabec:"Erro"});  
+        else { 
+          try { 
+            var qts       = 0;
+            var os        = null; 
+            var linha     = null;
+            var codigo    = "";
+            var mensal    = 0;
+            var pontual   = 0;
+            var autos     = 0;
+            var placas    = 0;
+            var ativacao  = 0;
+            var cliente   = 0;
+            var dados     = '[{"titulos":[';
+            var sep       = '';
+            
+            // buscando os registros ativos em tela
+            debugger;
+            for(var i=0;i<nl;i++){
+              linha = table.rows[i];
+              if(linha.style.display=="none")
+                continue;
+
+              // dados para montagem do faturamento
+              codigo    = linha.cells[1].innerHTML;
+              cliente   = linha.cells[5].innerHTML;
+              mensal    = linha.cells[7].innerHTML;
+              pontual   = linha.cells[8].innerHTML;
+              autos     = linha.cells[10].innerHTML;
+              placas    = linha.cells[11].innerHTML;
+              ativacao  = linha.cells[12].innerHTML;
+
+              // agregando os dados no json para montar o faturamento
+              dados += sep;
+              dados += '{';
+              dados += '"codigo":'    + parseInt(codigo)            +'';
+              dados += ',"cliente":'  + cliente                     +'';
+              dados += ',"mensal":'   + mensal.replace(",",".")     +'';
+              dados += ',"pontual":'  + pontual.replace(",",".")    +'';
+              dados += ',"autos":'    + autos.replace(",",".")      +'';
+              dados += ',"placas":'   + placas.replace(",",".")     +'';
+              dados += ',"ativacao":' + ativacao.replace(",",".")   +'';
+              dados += '}';
+              sep = ',';
+            }
+            dados += ']}]';
+            clsJs   = jsString("lote");  
+            clsJs.add("login"       , jsPub[0].usr_login  );
+            clsJs.add("codemp"      , jsPub[0].emp_codigo );
+            fd = new FormData();
+            fd.append("faturamento" , clsJs.fim());
+            fd.append("dados"       , dados);
+            msg = requestPedido("Trac_Faturar.php",fd); 
+            alert( msg );
+          }catch(e){
+            console.log(msg);
+            gerarMensagemErro("catch",e,{cabec:"Aviso"});  
+          };
+        }
+      };  
       function horEmpenhoClick(){
         qualRotina("EMPENHO",false);
       };  
@@ -682,7 +723,6 @@
               if( parseInt(chkds[0].EMPENHO)==0 )
                 throw "Pedido "+chkds[0].CODIGO+" deve ter empenho para informação de placa!";
             break;      
-            
           };  
           let objEnvio;          
           clsJs=jsString("lote");
