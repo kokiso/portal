@@ -26,7 +26,7 @@
       $this->msgErro="NENHUM REGISTRO LOCALIZADO PARA ESTA OPÇÃO!";
       array_push($this->vetor,
         array("CONECTA"  =>  array(
-          ["login"=>"TRAC"  , "path"=>"localhost" , "cnpj"=>"00000000001","user"=>"sa","pass"=>"P0rt@ltr@c"]   //Bd oficial
+          ["login"=>"TRAC"  , "path"=>"192.168.0.17" , "cnpj"=>"00000000001","user"=>"sa","pass"=>"P0rt@ltr@c"]   //Bd oficial
          )
         )
       );    
